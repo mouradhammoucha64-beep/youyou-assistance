@@ -70,7 +70,7 @@ function renderLanding() {
             <h1>
               Your website should
               <span>never stop selling.</span>
-            </h1>
+            </h1
 
             <p class="hero-text">
               YOUYOU is your AI customer agent that talks to visitors,
@@ -829,61 +829,188 @@ function renderDashboard() {
       </div>
     `;
   }
+else if (state.section === "ai") {
+  body = `
+    <div class="dashboard-card ai-control-center">
 
-  else if (state.section === "ai") {
-    body = `
-      <div class="dashboard-card">
+      <div class="ai-header">
+        <div>
+          <small>AI CONTROL CENTER</small>
+          <h1>Configure your AI agent</h1>
+          <p>
+            Control how YOUYOU talks to customers, captures leads
+            and represents your business.
+          </p>
+        </div>
 
-        <small>AI CONTROL CENTER</small>
+        <div class="ai-status">
+          <span>●</span> AI READY
+        </div>
+      </div>
 
-        <h1>Agent configuration</h1>
+      <div class="settings-grid">
 
-        <div class="settings-grid">
+        <label>
+          Agent name
+          <input
+            id="agent-name"
+            value="YOUYOU AI"
+            placeholder="e.g. YOUYOU AI"
+          />
+        </label>
 
-          <label>
-            Agent name
-            <input value="YOUYOU AI" />
+        <label>
+          Tone
+          <select id="agent-tone">
+            <option>Professional</option>
+            <option>Friendly</option>
+            <option>Concise</option>
+            <option>Warm</option>
+          </select>
+        </label>
+
+        <label>
+          Language
+          <select id="agent-language">
+            <option>English</option>
+            <option>French</option>
+            <option>Arabic</option>
+          </select>
+        </label>
+
+        <label>
+          Lead capture
+          <select id="lead-capture">
+            <option>Enabled</option>
+            <option>Disabled</option>
+          </select>
+        </label>
+
+      </div>
+
+      <div class="ai-section">
+
+        <div class="ai-section-title">
+          <small>AI BEHAVIOR</small>
+          <h2>Agent instructions</h2>
+        </div>
+
+        <p class="setting-description">
+          Tell YOUYOU how your AI agent should behave when talking
+          with your customers.
+        </p>
+
+        <textarea
+          id="agent-instructions"
+          rows="8"
+          placeholder="Describe how your AI agent should behave..."
+        >You are YOUYOU, an AI customer service agent.
+
+Answer customers professionally, clearly and accurately.
+
+Use the company's knowledge base whenever possible.
+
+Never invent information. If you do not know the answer,
+clearly say so and guide the customer to contact the company.
+
+Help visitors understand products and services, answer questions,
+and identify qualified leads.</textarea>
+
+      </div>
+
+      <div class="ai-section">
+
+        <div class="ai-section-title">
+          <small>RESPONSE STYLE</small>
+          <h2>How should YOUYOU respond?</h2>
+        </div>
+
+        <div class="response-options">
+
+          <label class="response-option">
+            <input
+              type="radio"
+              name="response-style"
+              value="Concise"
+            />
+            <div>
+              <strong>Concise</strong>
+              <span>Short and direct answers.</span>
+            </div>
           </label>
 
-          <label>
-            Tone
-            <select>
-              <option>Professional</option>
-              <option>Friendly</option>
-              <option>Concise</option>
-            </select>
+          <label class="response-option">
+            <input
+              type="radio"
+              name="response-style"
+              value="Balanced"
+              checked
+            />
+            <div>
+              <strong>Balanced</strong>
+              <span>Helpful answers with the right amount of detail.</span>
+            </div>
           </label>
 
-          <label>
-            Language
-            <select>
-              <option>English</option>
-              <option>French</option>
-              <option>Arabic</option>
-            </select>
-          </label>
-
-          <label>
-            Lead capture
-            <select>
-              <option>Enabled</option>
-              <option>Disabled</option>
-            </select>
+          <label class="response-option">
+            <input
+              type="radio"
+              name="response-style"
+              value="Detailed"
+            />
+            <div>
+              <strong>Detailed</strong>
+              <span>More context and explanation when needed.</span>
+            </div>
           </label>
 
         </div>
 
-        <button
-          class="primary"
-          onclick="alert('Configuration saved.')">
-          Save configuration
+      </div>
+
+      <div class="ai-section">
+
+        <div class="ai-section-title">
+          <small>LEAD QUALIFICATION</small>
+          <h2>Capture potential customers</h2>
+        </div>
+
+        <p class="setting-description">
+          When enabled, YOUYOU can identify visitors who may be
+          interested in your products or services.
+        </p>
+
+        <label class="toggle-row">
+          <input
+            id="lead-enabled"
+            type="checkbox"
+            checked
+          />
+          <span>Enable AI lead capture</span>
+        </label>
+
+      </div>
+
+      <div class="ai-footer">
+
+        <div>
+          <small>STATUS</small>
+          <strong>Configuration ready</strong>
+        </div>
+
+        <button id="save-ai-config" class="primary">
+          Save configuration →
         </button>
 
       </div>
-    `;
-  }
 
-  else if (state.section === "settings") {
+    </div>
+  `;
+}
+
+else if (state.section === "settings") {
+
+
     body = `
       <div class="dashboard-card">
 
