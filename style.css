@@ -1442,3 +1442,43 @@ select:focus {
     padding: 70px 20px;
   }
 }
+/* =========================================
+   YOUYOU AI CONTROL CENTER - DARK TEXTAREA
+   ========================================= */
+
+.ai-control-center textarea#agent-instructions {
+  width: 100%;
+  min-height: 220px;
+  box-sizing: border-box;
+
+  background: #111827;
+  color: #f8fafc;
+
+  border: 1px solid #2d3748;
+  border-radius: 14px;
+
+  padding: 18px 20px;
+
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.7;
+
+  resize: vertical;
+  outline: none;
+
+  display: block;
+}
+
+.ai-control-center textarea#agent-instructions::placeholder {
+  color: #64748b;
+}
+
+.ai-control-center textarea#agent-instructions:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+.ai-control-center .setting-description {
+  color: #94a3b8;
+  margin-bottom: 14px;
+}
