@@ -16,9 +16,46 @@
 
   button.setAttribute("aria-label", "Open YOUYOU AI");
 
-  button.innerHTML = `
-    <span class="youyou-button-glow"></span>
-    <span class="youyou-button-logo">Y</span>
+ button.innerHTML = `
+  <span style="
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:29px;
+    background:#06130a;
+    border-radius:10px;
+  ">
+    <span style="
+      color:#22c55e;
+      font-size:15px;
+      font-weight:900;
+      font-family:Arial,sans-serif;
+    ">Y</span>
+
+    <span style="
+      position:absolute;
+      left:4px;
+      bottom:-5px;
+      width:9px;
+      height:9px;
+      background:#06130a;
+      clip-path:polygon(0 0,100% 0,0 100%);
+    "></span>
+
+    <span style="
+      position:absolute;
+      right:-5px;
+      top:-5px;
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:#22c55e;
+      border:2px solid #06130a;
+    "></span>
+  </span>
+`;
   `;
 
   Object.assign(button.style, {
