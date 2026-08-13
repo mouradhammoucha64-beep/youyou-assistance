@@ -86,7 +86,66 @@
     button.style.boxShadow =
       "0 12px 35px rgba(34,197,94,.28), 0 8px 25px rgba(0,0,0,.35)";
   });
+const animationStyle = document.createElement("style");
 
+animationStyle.textContent = `
+  @keyframes youyouPulse {
+    0%, 100% {
+      box-shadow:
+        0 10px 30px rgba(34,197,94,.25),
+        0 8px 25px rgba(0,0,0,.35);
+      transform: scale(1);
+    }
+
+    50% {
+      box-shadow:
+        0 10px 38px rgba(34,197,94,.48),
+        0 0 0 8px rgba(34,197,94,.07),
+        0 8px 25px rgba(0,0,0,.35);
+      transform: scale(1.035);
+    }
+  }
+
+  @keyframes youyouChatFloat {
+    0%, 100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-3px);
+    }
+  }
+
+  @keyframes youyouOnlinePulse {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(34,197,94,.55);
+    }
+
+    50% {
+      box-shadow: 0 0 0 5px rgba(34,197,94,0);
+    }
+  }
+
+  .youyou-chat-icon {
+    animation: youyouChatFloat 2.5s ease-in-out infinite;
+  }
+
+  .youyou-online-dot {
+    animation: youyouOnlinePulse 1.8s ease-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .youyou-chat-icon,
+    .youyou-online-dot {
+      animation: none !important;
+    }
+  }
+`;
+
+document.head.appendChild(animationStyle);
+
+button.style.animation =
+  "youyouPulse 2.8s ease-in-out infinite";
   /* =========================
      CHAT PANEL
   ========================= */
