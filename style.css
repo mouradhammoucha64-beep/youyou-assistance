@@ -1697,3 +1697,20 @@ input[type="checkbox"]:focus-visible {
   box-shadow:
     0 0 0 4px rgba(34, 197, 94, 0.14);
 }
+/* Better spacing between AI Control Center sections */
+
+.ai-control-center .settings-grid {
+  gap: 20px;
+}
+
+.ai-control-center .response-options {
+  gap: 18px;
+}
+
+.ai-control-center .toggle-row {
+  margin-top: 8px;
+}
+
+.ai-control-center .toggle-row + * {
+  margin-top: 18px;
+}
