@@ -1482,3 +1482,93 @@ select:focus {
   color: #94a3b8;
   margin-bottom: 14px;
 }
+/* =========================================
+   YOUYOU RESPONSE OPTIONS
+   ========================================= */
+
+.ai-control-center .response-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.ai-control-center .response-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  min-height: 78px;
+  padding: 16px 18px;
+
+  background: #111827;
+  border: 1px solid #2d3748;
+  border-radius: 14px;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-control-center .response-option:hover {
+  border-color: #22c55e;
+  background: #151f2e;
+}
+
+.ai-control-center .response-option input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 22px;
+  height: 22px;
+
+  min-width: 22px;
+  min-height: 22px;
+
+  margin: 0;
+
+  border: 2px solid #64748b;
+  border-radius: 50%;
+
+  background: #0b1220;
+
+  position: relative;
+  cursor: pointer;
+}
+
+.ai-control-center .response-option input[type="radio"]:checked {
+  border-color: #22c55e;
+}
+
+.ai-control-center .response-option input[type="radio"]:checked::after {
+  content: "";
+
+  position: absolute;
+
+  width: 10px;
+  height: 10px;
+
+  top: 4px;
+  left: 4px;
+
+  background: #22c55e;
+  border-radius: 50%;
+}
+
+.ai-control-center .response-option div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ai-control-center .response-option strong {
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ai-control-center .response-option span {
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.5;
+}
