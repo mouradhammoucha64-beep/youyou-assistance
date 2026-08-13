@@ -1714,3 +1714,20 @@ input[type="checkbox"]:focus-visible {
 .ai-control-center .toggle-row + * {
   margin-top: 18px;
 }
+/* Better spacing between AI Control Center sections */
+
+.ai-control-center .settings-grid {
+  gap: 20px;
+}
+
+.ai-control-center .response-options {
+  gap: 18px;
+}
+
+.ai-control-center .toggle-row {
+  margin-top: 8px;
+}
+
+.ai-control-center .toggle-row + * {
+  margin-top: 18px;
+}
