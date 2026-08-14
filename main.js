@@ -1225,7 +1225,12 @@ async function loadOverviewStats() {
       .select("id", { count: "exact", head: true })
       .eq("company_id", companyId)
   ]);
-
+console.log("OVERVIEW STATS", {
+  companyId,
+  conversations: conversationsResult,
+  leads: leadsResult,
+  knowledge: knowledgeResult
+});
   const conversationsEl =
     document.querySelector("#stat-conversations");
 
