@@ -1205,32 +1205,21 @@ async function loadOverviewStats() {
 
   const companyId = state.company.id;
 
-  const [
-    conversationsResult,
-    leadsResult,
-    knowledgeResult
-  ] = await Promise.all([
-    supabase
-      .from("conversations")
-      .select("id", { count: "exact", head: true })
-      .eq("company_id", companyId),
+  const conversationsResult = await supabase
+    .from("conversations")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId);
 
-    supabase
-      .from("leads")
-      .select("id", { count: "exact", head: true })
-      .eq("company_id", companyId),
+  const leadsResult = await supabase
+    .from("leads")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId);
 
-    supabase
-      .from("knowledge")
-      .select("id", { count: "exact", head: true })
-      .eq("company_id", companyId)
-  ]);
-console.log("OVERVIEW STATS", {
-  companyId,
-  conversations: conversationsResult,
-  leads: leadsResult,
-  knowledge: knowledgeResult
-});
+  const knowledgeResult = await supabase
+    .from("knowledge")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId);
+
   const conversationsEl =
     document.querySelector("#stat-conversations");
 
@@ -1240,17 +1229,26 @@ console.log("OVERVIEW STATS", {
   const knowledgeEl =
     document.querySelector("#stat-knowledge");
 
-  if (conversationsEl) {
+  if (conversationsResult.error) {
+    conversationsEl.textContent = "!";
+    console.error(conversationsResult.error);
+  } else {
     conversationsEl.textContent =
       conversationsResult.count ?? 0;
   }
 
-  if (leadsEl) {
+  if (leadsResult.error) {
+    leadsEl.textContent = "!";
+    console.error(leadsResult.error);
+  } else {
     leadsEl.textContent =
       leadsResult.count ?? 0;
   }
 
-  if (knowledgeEl) {
+  if (knowledgeResult.error) {
+    knowledgeEl.textContent = "!";
+    console.error(knowledgeResult.error);
+  } else {
     knowledgeEl.textContent =
       knowledgeResult.count ?? 0;
   }
