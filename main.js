@@ -1194,6 +1194,9 @@ else if (state.section === "settings") {
 
   if (state.section === "knowledge") {
     loadKnowledge();
+    if (state.section === "overview") {
+  loadOverviewStats();
+}
   }
 }
 
