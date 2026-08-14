@@ -1197,7 +1197,56 @@ else if (state.section === "settings") {
   }
 }
 
+async function loadOverviewStats() {
+  if (!state.company) return;
 
+  const companyId = state.company.id;
+
+  const [
+    conversationsResult,
+    leadsResult,
+    knowledgeResult
+  ] = await Promise.all([
+    supabase
+      .from("conversations")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", companyId),
+
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", companyId),
+
+    supabase
+      .from("knowledge")
+      .select("id", { count: "exact", head: true })
+      .eq("company_id", companyId)
+  ]);
+
+  const conversationsEl =
+    document.querySelector("#stat-conversations");
+
+  const leadsEl =
+    document.querySelector("#stat-leads");
+
+  const knowledgeEl =
+    document.querySelector("#stat-knowledge");
+
+  if (conversationsEl) {
+    conversationsEl.textContent =
+      conversationsResult.count ?? 0;
+  }
+
+  if (leadsEl) {
+    leadsEl.textContent =
+      leadsResult.count ?? 0;
+  }
+
+  if (knowledgeEl) {
+    knowledgeEl.textContent =
+      knowledgeResult.count ?? 0;
+  }
+}
 async function loadKnowledge() {
   const list =
     document.querySelector("#knowledge-list");
