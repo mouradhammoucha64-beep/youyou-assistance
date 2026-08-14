@@ -1262,6 +1262,67 @@ async function loadOverviewStats() {
       knowledgeResult.count ?? 0;
   }
 }
+async function loadConversations() {
+  const list =
+    document.querySelector("#conversations-list");
+
+  if (!list || !state.company) return;
+
+  const { data, error } =
+    await supabase
+      .from("conversations")
+      .select(
+        "id, visitor_name, visitor_email, status, created_at, updated_at"
+      )
+      .eq("company_id", state.company.id)
+      .order("updated_at", {
+        ascending: false,
+      });
+
+  if (error) {
+    list.textContent = error.message;
+    return;
+  }
+
+  if (!data?.length) {
+    list.innerHTML = `
+      <div class="knowledge-empty">
+        No conversations yet.
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = data
+    .map(
+      (conversation) => `
+        <article class="knowledge-item">
+          <strong>
+            ${escapeHtml(
+              conversation.visitor_name || "Anonymous visitor"
+            )}
+          </strong>
+
+          <p>
+            ${escapeHtml(
+              conversation.visitor_email || "No email provided"
+            )}
+          </p>
+
+          <small>
+            Status: ${escapeHtml(conversation.status)}
+          </small>
+
+          <small>
+            ${new Date(
+              conversation.updated_at
+            ).toLocaleString()}
+          </small>
+        </article>
+      `
+    )
+    .join("");
+}
 async function loadKnowledge() {
   const list =
     document.querySelector("#knowledge-list");
