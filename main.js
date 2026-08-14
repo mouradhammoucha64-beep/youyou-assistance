@@ -1047,22 +1047,27 @@ else if (state.section === "settings") {
   }
 
   else if (state.section === "conversations") {
-    body = `
-      <div class="dashboard-card empty-state">
+  body = `
+    <div class="dashboard-card">
 
-        <div class="empty-icon">◌</div>
+      <div class="card-header">
+        <div>
+          <small>INBOX</small>
+          <h1>Conversations</h1>
+        </div>
 
-        <h1>Conversations</h1>
-
-        <p>
-          Your customer conversations will appear here
-          when YOUYOU starts receiving messages.
-        </p>
-
+        <span class="ai-status">
+          ● LIVE
+        </span>
       </div>
-    `;
-  }
 
+      <div id="conversations-list">
+        Loading conversations...
+      </div>
+
+    </div>
+  `;
+}
   else if (state.section === "leads") {
     body = `
       <div class="dashboard-card empty-state">
