@@ -12,26 +12,28 @@
      FLOATING BUTTON
   ========================= */
 
-  const button = document.createElement("button");
+ const button = document.createElement("button");
 
-  button.setAttribute("aria-label", "Open YOUYOU AI");
+button.setAttribute("aria-label", "Open YOUYOU AI chat");
 
- button.innerHTML = `
+button.innerHTML = `
   <span style="
     position:relative;
+    width:34px;
+    height:28px;
     display:flex;
     align-items:center;
     justify-content:center;
-    width:34px;
-    height:29px;
     background:#06130a;
     border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,.25);
   ">
     <span style="
       color:#22c55e;
+      font-family:Arial,sans-serif;
       font-size:15px;
       font-weight:900;
-      font-family:Arial,sans-serif;
+      line-height:1;
     ">Y</span>
 
     <span style="
@@ -56,125 +58,55 @@
     "></span>
   </span>
 `;
-  `;
 
-  Object.assign(button.style, {
-    position: "fixed",
-    right: "24px",
-    bottom: "24px",
-    width: "62px",
-    height: "62px",
-    borderRadius: "20px",
-    border: "1px solid rgba(34,197,94,.45)",
-    background:
-      "linear-gradient(145deg,#22c55e,#16a34a)",
-    color: "#03130a",
-    cursor: "pointer",
-    zIndex: "999999",
-    boxShadow:
-      "0 12px 35px rgba(34,197,94,.28), 0 8px 25px rgba(0,0,0,.35)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition:
-      "transform .2s ease, box-shadow .2s ease",
-    padding: "0"
-  });
+Object.assign(button.style, {
+  position: "fixed",
+  right: "24px",
+  bottom: "24px",
+  width: "62px",
+  height: "62px",
+  borderRadius: "50%",
+  border: "1px solid rgba(34,197,94,.45)",
+  background: "linear-gradient(145deg,#22c55e,#16a34a)",
+  color: "#03130a",
+  cursor: "pointer",
+  zIndex: "999999",
+  boxShadow:
+    "0 12px 35px rgba(34,197,94,.28), 0 8px 25px rgba(0,0,0,.35)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: "0",
+  transition: "transform .2s ease, box-shadow .2s ease"
+});
 
-  const buttonLogo = button.querySelector(
-    ".youyou-button-logo"
-  );
+button.addEventListener("mouseenter", () => {
+  button.style.transform = "translateY(-3px) scale(1.05)";
+  button.style.boxShadow =
+    "0 16px 42px rgba(34,197,94,.42), 0 10px 30px rgba(0,0,0,.4)";
+});
 
-  Object.assign(buttonLogo.style, {
-    position: "relative",
-    zIndex: "2",
-    fontFamily:
-      "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
-    fontSize: "25px",
-    fontWeight: "900",
-    letterSpacing: "-1px"
-  });
+button.addEventListener("mouseleave", () => {
+  button.style.transform = "translateY(0) scale(1)";
+  button.style.boxShadow =
+    "0 12px 35px rgba(34,197,94,.28), 0 8px 25px rgba(0,0,0,.35)";
+});
 
-  const buttonGlow = button.querySelector(
-    ".youyou-button-glow"
-  );
-
-  Object.assign(buttonGlow.style, {
-    position: "absolute",
-    inset: "0",
-    borderRadius: "20px",
-    background:
-      "radial-gradient(circle at 30% 20%,rgba(255,255,255,.35),transparent 35%)",
-    pointerEvents: "none"
-  });
-
-  button.addEventListener("mouseenter", () => {
-    button.style.transform =
-      "translateY(-3px) scale(1.03)";
-
-    button.style.boxShadow =
-      "0 16px 42px rgba(34,197,94,.38), 0 10px 30px rgba(0,0,0,.4)";
-  });
-
-  button.addEventListener("mouseleave", () => {
-    button.style.transform =
-      "translateY(0) scale(1)";
-
-    button.style.boxShadow =
-      "0 12px 35px rgba(34,197,94,.28), 0 8px 25px rgba(0,0,0,.35)";
-  });
 const animationStyle = document.createElement("style");
 
 animationStyle.textContent = `
   @keyframes youyouPulse {
     0%, 100% {
       box-shadow:
-        0 10px 30px rgba(34,197,94,.25),
+        0 12px 35px rgba(34,197,94,.28),
         0 8px 25px rgba(0,0,0,.35);
-      transform: scale(1);
     }
 
     50% {
       box-shadow:
-        0 10px 38px rgba(34,197,94,.48),
-        0 0 0 8px rgba(34,197,94,.07),
+        0 12px 40px rgba(34,197,94,.48),
+        0 0 0 7px rgba(34,197,94,.07),
         0 8px 25px rgba(0,0,0,.35);
-      transform: scale(1.035);
-    }
-  }
-
-  @keyframes youyouChatFloat {
-    0%, 100% {
-      transform: translateY(0);
-    }
-
-    50% {
-      transform: translateY(-3px);
-    }
-  }
-
-  @keyframes youyouOnlinePulse {
-    0%, 100% {
-      box-shadow: 0 0 0 0 rgba(34,197,94,.55);
-    }
-
-    50% {
-      box-shadow: 0 0 0 5px rgba(34,197,94,0);
-    }
-  }
-
-  .youyou-chat-icon {
-    animation: youyouChatFloat 2.5s ease-in-out infinite;
-  }
-
-  .youyou-online-dot {
-    animation: youyouOnlinePulse 1.8s ease-out infinite;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .youyou-chat-icon,
-    .youyou-online-dot {
-      animation: none !important;
     }
   }
 `;
