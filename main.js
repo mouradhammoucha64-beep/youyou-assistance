@@ -1107,20 +1107,20 @@ else if (state.section === "settings") {
       <div class="dashboard-stats">
 
         <div>
-          <small>CONVERSATIONS</small>
-          <strong>0</strong>
-          <span>Ready for your first visitor</span>
-        </div>
+  <small>CONVERSATIONS</small>
+  <strong id="stat-conversations">—</strong>
+  <span>Customer conversations</span>
+</div>
 
-        <div>
-          <small>LEADS</small>
-          <strong>0</strong>
-          <span>AI-qualified opportunities</span>
-        </div>
+<div>
+  <small>LEADS</small>
+  <strong id="stat-leads">—</strong>
+  <span>AI-qualified opportunities</span>
+</div>
 
-        <div>
-          <small>KNOWLEDGE</small>
-          <strong>0</strong>
+<div>
+  <small>KNOWLEDGE</small>
+  <strong id="stat-knowledge">—</strong>
           <span>Sources connected</span>
         </div>
 
