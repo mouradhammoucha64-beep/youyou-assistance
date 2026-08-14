@@ -1192,12 +1192,13 @@ else if (state.section === "settings") {
     saveSettings
   );
 
-  if (state.section === "knowledge") {
-    loadKnowledge();
-    if (state.section === "overview") {
+if (state.section === "knowledge") {
+  loadKnowledge();
+}
+
+if (state.section === "overview") {
   loadOverviewStats();
 }
-  }
 }
 
 async function loadOverviewStats() {
