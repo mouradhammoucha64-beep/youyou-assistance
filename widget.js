@@ -7,6 +7,8 @@
 
   const companyId =
     script?.getAttribute("data-company") || "";
+  const SUPABASE_URL = "https://zprvmydgjxsifuhjplll.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_emmyZ-bcTdUcaVWi_tWONw_1zDbGSSK";
 
   const button = document.createElement("button");
 
@@ -186,6 +188,42 @@
     const text = input.value.trim();
 
     if (!text) return;
+    const response = await fetch(
+  `${SUPABASE_URL}/rest/v1/conversations`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+      "Prefer": "return=representation"
+    },
+    body: JSON.stringify({
+      company_id: companyId,
+      visitor_name: "Website visitor",
+      status: "open"
+    })
+  }
+);
+
+if (!response.ok) {
+  console.error(
+    "Failed to create conversation:",
+    await response.text()
+  );
+  return;
+}
+
+const conversationData = await response.json();
+
+const conversationId =
+  conversationData[0]?.id;
+
+if (!conversationId) {
+  console.error("No conversation ID returned.");
+  return;
+}
+    
 
     if (!companyId) {
       alert("YOUYOU configuration error: company ID missing.");
