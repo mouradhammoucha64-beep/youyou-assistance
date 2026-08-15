@@ -172,60 +172,77 @@
       panel.style.display = "none";
     });
 
-  panel
-    .querySelector("#youyou-form")
-    .addEventListener("submit", function (event) {
-      event.preventDefault();
+ panel
+  .querySelector("#youyou-form")
+  .addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-      const input =
-        panel.querySelector("#youyou-input");
+    const input =
+      panel.querySelector("#youyou-input");
 
-      const messages =
-        panel.querySelector("#youyou-messages");
+    const messages =
+      panel.querySelector("#youyou-messages");
 
-      const text = input.value.trim();
+    const text = input.value.trim();
 
-      if (!text) return;
+    if (!text) return;
 
-      const customerMessage =
-        document.createElement("div");
+    if (!companyId) {
+      alert("YOUYOU configuration error: company ID missing.");
+      return;
+    }
 
-      Object.assign(customerMessage.style, {
-        background: "#22c55e",
-        color: "#06130a",
-        borderRadius: "14px",
-        padding: "10px 14px",
-        marginBottom: "12px",
-        marginLeft: "35px",
-        fontSize: "14px",
-        lineHeight: "1.5"
-      });
+    const customerMessage =
+      document.createElement("div");
 
-      customerMessage.textContent = text;
+    Object.assign(customerMessage.style, {
+      background: "#22c55e",
+      color: "#06130a",
+      borderRadius: "14px",
+      padding: "10px 14px",
+      marginBottom: "12px",
+      marginLeft: "35px",
+      fontSize: "14px",
+      lineHeight: "1.5"
+    });
 
-      messages.appendChild(customerMessage);
+    customerMessage.textContent = text;
 
-      input.value = "";
+    messages.appendChild(customerMessage);
 
-      const reply =
-        document.createElement("div");
+    input.value = "";
 
-      Object.assign(reply.style, {
-        background: "#111827",
-        border: "1px solid #263244",
-        color: "#fff",
-        borderRadius: "14px",
-        padding: "10px 14px",
-        marginBottom: "12px",
-        marginRight: "35px",
-        fontSize: "14px",
-        lineHeight: "1.5"
-      });
+    messages.scrollTop =
+      messages.scrollHeight;
 
-      reply.textContent =
-        "Thanks for your message. Our AI agent will be connected here.";
+    const reply =
+      document.createElement("div");
 
-      messages.appendChild(reply);
+    Object.assign(reply.style, {
+      background: "#111827",
+      border: "1px solid #263244",
+      color: "#fff",
+      borderRadius: "14px",
+      padding: "10px 14px",
+      marginBottom: "12px",
+      marginRight: "35px",
+      fontSize: "14px",
+      lineHeight: "1.5"
+    });
+
+    reply.textContent =
+      "Thanks for your message. Our AI agent will be connected here.";
+
+    messages.appendChild(reply);
+
+    messages.scrollTop =
+      messages.scrollHeight;
+
+    console.log("Message received:", {
+      companyId,
+      message: text
+    });
+  });
 
       messages.scrollTop = messages.scrollHeight;
     });
