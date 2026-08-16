@@ -188,6 +188,10 @@ const SUPABASE_ANON_KEY = "sb_publishable_emmyZ-bcTdUcaVWi_tWONw_1zDbGSSK";
     const text = input.value.trim();
 
     if (!text) return;
+    if (!companyId) {
+  alert("YOUYOU configuration error: company ID missing.");
+  return;
+}
     const response = await fetch(
   `${SUPABASE_URL}/rest/v1/conversations`,
   {
