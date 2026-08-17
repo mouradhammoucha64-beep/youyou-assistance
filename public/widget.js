@@ -495,7 +495,36 @@
                 "YOUYOU conversation created:",
                 conversationId
               );
+if (conversationId) {
+  const messageResponse = await fetch(
+    `${SUPABASE_URL}/rest/v1/messages`,
+    {
+      method: "POST",
 
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+        "Prefer": "return=minimal"
+      },
+
+      body: JSON.stringify({
+        conversation_id: conversationId,
+        sender: "visitor",
+        content: text
+      })
+    }
+  );
+
+  if (!messageResponse.ok) {
+    console.error(
+      "Failed to save message:",
+      await messageResponse.text()
+    );
+  } else {
+    console.log("YOUYOU message saved");
+  }
+}
             }
 
           } catch (error) {
