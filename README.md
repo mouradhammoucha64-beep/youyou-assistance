@@ -59,3 +59,7 @@ Detects email and phone from conversation text, shows captured contact details, 
 
 ## V3.3 Smart Contact Capture
 Adds a zero-cost local buying-intent detector inside the website widget. When intent reaches the Hot threshold, YOUYOU asks the visitor for an email address or phone number. Contact details are then captured through the existing conversation message flow and become available to the Leads dashboard. No paid AI or WhatsApp integration is used in this version.
+
+
+## V3.3.1 Premium UI Layout Fix
+Polishes the landing hero mockup and fixes clipping/overflow in the Website Widget preview. No business logic, Supabase, scoring, or contact-capture behavior changed.
