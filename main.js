@@ -152,15 +152,6 @@ function renderLanding() {
 
             </div>
 
-            <div class="floating-card leads-card">
-              <div class="floating-icon">✦</div>
-              <div>
-                <small>NEW LEAD</small>
-                <strong>Sarah Johnson</strong>
-              </div>
-              <span class="check">✓</span>
-            </div>
-
             <div class="floating-card live-card">
               <span class="live-dot"></span>
               <div>

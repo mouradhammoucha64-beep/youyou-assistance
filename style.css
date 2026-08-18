@@ -2154,11 +2154,6 @@ input[type="checkbox"]:focus-visible {
   backdrop-filter: blur(15px);
 }
 
-.hero-visual .leads-card {
-  left: -16px;
-  bottom: 84px;
-}
-
 .hero-visual .live-card {
   right: -10px;
   top: 88px;
@@ -2417,10 +2412,6 @@ input[type="checkbox"]:focus-visible {
     width: min(460px, calc(100% - 56px));
   }
 
-  .hero-visual .leads-card {
-    left: 0;
-  }
-
   .hero-visual .live-card {
     right: 0;
   }
@@ -2453,11 +2444,6 @@ input[type="checkbox"]:focus-visible {
     padding: 10px 11px;
   }
 
-  .hero-visual .leads-card {
-    left: 8px;
-    bottom: 52px;
-  }
-
   .hero-visual .live-card {
     right: 8px;
     top: 50px;
@@ -2469,5 +2455,25 @@ input[type="checkbox"]:focus-visible {
 
   .widget-device {
     max-width: 100%;
+  }
+}
+
+
+/* V3.4.4 — Landing cleanup */
+.hero-visual .live-card {
+  right: 8px;
+  top: 96px;
+}
+
+@media (max-width: 950px) {
+  .hero-visual .live-card {
+    right: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-visual .live-card {
+    right: 8px;
+    top: 56px;
   }
 }

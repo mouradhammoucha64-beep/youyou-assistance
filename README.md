@@ -79,3 +79,7 @@ Keeps the approved landing design while constraining the live assistant demo to 
 
 ## V3.4.3 Clean Hero Rebuild
 Removed the accumulated conflicting hero patches and rebuilt the landing hero using the actual markup selectors (`hero-section`, `hero-visual`, `ai-window`, and `floating-card`). The approved Lux Website Widget preview is preserved.
+
+
+## V3.4.4 Landing Cleanup
+Removed the Sarah Johnson floating lead card from the landing hero entirely. The AI chat mockup and compact Working 24/7 status card remain.
