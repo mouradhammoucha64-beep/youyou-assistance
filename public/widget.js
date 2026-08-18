@@ -28,33 +28,31 @@
   };
 
   async function ensureConversation() {
-    if (conversationId) return conversationId;
-    if (!companyId) return "";
+  if (conversationId) return conversationId;
+  if (!companyId) return "";
 
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
-      method: "POST",
-      headers: { ...restHeaders, Prefer: "return=representation" },
-      body: JSON.stringify({
-        company_id: companyId,
-        visitor_name: "Website visitor",
-        status: "open"
-      })
-    });
+  const newConversationId = crypto.randomUUID();
 
-    if (!response.ok) {
-      throw new Error(`Conversation creation failed: ${await response.text()}`);
-    }
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
+    method: "POST",
+    headers: { ...restHeaders, Prefer: "return=minimal" },
+    body: JSON.stringify({
+      id: newConversationId,
+      company_id: companyId,
+      visitor_name: "Website visitor",
+      status: "open"
+    })
+  });
 
-    const data = await response.json();
-    conversationId = data[0]?.id || "";
-
-    if (conversationId) {
-      sessionStorage.setItem(SESSION_KEY, conversationId);
-    }
-
-    return conversationId;
+  if (!response.ok) {
+    throw new Error(`Conversation creation failed: ${await response.text()}`);
   }
 
+  conversationId = newConversationId;
+  sessionStorage.setItem(SESSION_KEY, conversationId);
+
+  return conversationId;
+}
   async function saveVisitorMessage(content) {
     const id = await ensureConversation();
     if (!id) return;
