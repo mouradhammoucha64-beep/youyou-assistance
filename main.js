@@ -70,7 +70,7 @@ function renderLanding() {
             <h1>
               Your website should
               <span>never stop selling.</span>
-            </h1
+            </h1>
 
             <p class="hero-text">
               YOUYOU is your AI customer agent that talks to visitors,
@@ -749,6 +749,13 @@ function dashboardShell(content) {
 }
 
 
+function getWidgetInstallCode() {
+  const origin = window.location.origin;
+  const companyId = state.company?.id || "YOUR_COMPANY_ID";
+  return `<script src="${origin}/widget.js" data-company="${companyId}" defer></script>`;
+}
+
+
 function renderDashboard() {
   const company =
     state.company?.name || "Your workspace";
@@ -795,9 +802,7 @@ function renderDashboard() {
             Add YOUYOU to your website with one simple script.
           </p>
 
-          <pre>
-&lt;script src="https://YOUR-DOMAIN/widget.js"&gt;&lt;/script&gt;
-          </pre>
+          <pre id="widget-code">${escapeHtml(getWidgetInstallCode())}</pre>
 
           <button id="copy-widget" class="primary">
             Copy install code
@@ -1178,12 +1183,14 @@ else if (state.section === "settings") {
   document.querySelector("#copy-widget")?.addEventListener(
     "click",
     async () => {
-      const code =
-        '<script src="https://YOUR-DOMAIN/widget.js"></script>';
+      const code = getWidgetInstallCode();
 
-      await navigator.clipboard?.writeText(code);
-
-      alert("Install code copied.");
+      try {
+        await navigator.clipboard.writeText(code);
+        alert("Install code copied.");
+      } catch {
+        prompt("Copy this install code:", code);
+      }
     }
   );
 

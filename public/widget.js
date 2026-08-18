@@ -16,6 +16,65 @@
   const SUPABASE_ANON_KEY =
     "sb_publishable_emmyZ-bcTdUcaVWi_tWONw_1zDbGSSK";
 
+  const SESSION_KEY = companyId
+    ? `youyou_conversation_${companyId}`
+    : "youyou_conversation";
+
+  let conversationId = sessionStorage.getItem(SESSION_KEY) || "";
+
+  const restHeaders = {
+    "Content-Type": "application/json",
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+  };
+
+  async function ensureConversation() {
+    if (conversationId) return conversationId;
+    if (!companyId) return "";
+
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
+      method: "POST",
+      headers: { ...restHeaders, Prefer: "return=representation" },
+      body: JSON.stringify({
+        company_id: companyId,
+        visitor_name: "Website visitor",
+        status: "open"
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Conversation creation failed: ${await response.text()}`);
+    }
+
+    const data = await response.json();
+    conversationId = data[0]?.id || "";
+
+    if (conversationId) {
+      sessionStorage.setItem(SESSION_KEY, conversationId);
+    }
+
+    return conversationId;
+  }
+
+  async function saveVisitorMessage(content) {
+    const id = await ensureConversation();
+    if (!id) return;
+
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
+      method: "POST",
+      headers: { ...restHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify({
+        conversation_id: id,
+        sender: "visitor",
+        content
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Message save failed: ${await response.text()}`);
+    }
+  }
+
   /* =========================
      FLOATING BUTTON
   ========================= */
@@ -434,108 +493,15 @@
         ========================= */
 
         if (!companyId) {
-
           console.warn(
             "YOUYOU: company ID missing. Message displayed locally only."
           );
-
         } else {
-
           try {
-
-            const response =
-              await fetch(
-                `${SUPABASE_URL}/rest/v1/conversations`,
-                {
-                  method: "POST",
-
-                  headers: {
-                    "Content-Type":
-                      "application/json",
-
-                    "apikey":
-                      SUPABASE_ANON_KEY,
-
-                    "Authorization":
-                      `Bearer ${SUPABASE_ANON_KEY}`,
-
-                    "Prefer":
-                      "return=representation"
-                  },
-
-                  body: JSON.stringify({
-                    company_id:
-                      companyId,
-
-                    visitor_name:
-                      "Website visitor",
-
-                    status:
-                      "open"
-                  })
-                }
-              );
-
-            if (!response.ok) {
-
-              console.error(
-                "Failed to create conversation:",
-                await response.text()
-              );
-
-            } else {
-
-              const conversationData =
-                await response.json();
-
-              const conversationId =
-                conversationData[0]?.id;
-
-              console.log(
-                "YOUYOU conversation created:",
-                conversationId
-              );
-if (conversationId) {
-  const messageResponse = await fetch(
-    `${SUPABASE_URL}/rest/v1/messages`,
-    {
-      method: "POST",
-
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-        "Prefer": "return=minimal"
-      },
-
-      body: JSON.stringify({
-        conversation_id: conversationId,
-        sender: "visitor",
-        content: text
-      })
-    }
-  );
-
-  if (!messageResponse.ok) {
-    console.error(
-      "Failed to save message:",
-      await messageResponse.text()
-    );
-  } else {
-    console.log("YOUYOU message saved");
-  }
-}
-            }
-
+            await saveVisitorMessage(text);
           } catch (error) {
-
-            console.error(
-              "YOUYOU Supabase error:",
-              error
-            );
-
+            console.error("YOUYOU Supabase error:", error);
           }
-
         }
 
         /* =========================

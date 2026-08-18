@@ -1,6 +1,33 @@
-# YOUYOU PRO SaaS — Fixed
-Upload the whole project to GitHub. Do not upload only index.html.
-Vercel environment variables supported:
-- NEXT_PUBLIC_SUPABASE_URL
-- NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
-The browser must never contain a Supabase service-role/secret key.
+# YOUYOU — Clean V1
+
+YOUYOU is an AI customer-agent SaaS foundation built with Vite + Supabase.
+
+## What is already included
+- Landing page, login/signup, dashboard and responsive UI
+- Supabase auth/workspace integration
+- Conversations, leads, knowledge and overview sections
+- Website widget
+- Stable per-session conversation persistence in the widget
+- Company-specific install snippet generated automatically in the dashboard
+- Safe public Supabase configuration fallback for the browser
+
+## Deploy to Vercel
+1. Upload this entire project to GitHub (not individual files).
+2. Import the repository in Vercel.
+3. Framework preset: Vite.
+4. Build command: `npm run build`.
+5. Output directory: `dist`.
+
+The app can use these Vercel environment variables when present:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- legacy `NEXT_PUBLIC_SUPABASE_URL`
+- legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+The included fallback is only the browser-safe Supabase URL + publishable key.
+
+## Security rule
+Never commit any Supabase service-role key, OpenAI API key, Stripe secret key, or webhook secret to this repository. Those belong in server-side environment variables only.
+
+## Next product stage
+Before connecting a paid AI API, finish/verify Supabase RLS, conversation/message policies, lead capture, AI settings persistence, and production QA. Then connect the AI engine to company knowledge + conversations.
