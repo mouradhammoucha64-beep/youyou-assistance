@@ -1052,27 +1052,38 @@ else if (state.section === "settings") {
   }
 
   else if (state.section === "conversations") {
-  body = `
-    <div class="dashboard-card">
+    body = `
+      <div class="dashboard-card conversations-card">
 
-      <div class="card-header">
-        <div>
-          <small>INBOX</small>
-          <h1>Conversations</h1>
+        <div class="card-header">
+          <div>
+            <small>INBOX</small>
+            <h1>Conversations</h1>
+            <p class="conversation-subtitle">Read every website conversation in one place.</p>
+          </div>
+
+          <span class="ai-status">
+            ● LIVE
+          </span>
         </div>
 
-        <span class="ai-status">
-          ● LIVE
-        </span>
-      </div>
+        <div class="conversation-layout">
+          <div id="conversations-list" class="conversation-list">
+            <div class="conversation-loading">Loading conversations...</div>
+          </div>
 
-      <div id="conversations-list">
-        Loading conversations...
-      </div>
+          <div id="conversation-detail" class="conversation-detail">
+            <div class="conversation-empty-detail">
+              <div class="empty-icon">◌</div>
+              <h2>Select a conversation</h2>
+              <p>Choose a visitor from the inbox to read the full message history.</p>
+            </div>
+          </div>
+        </div>
 
-    </div>
-  `;
-}
+      </div>
+    `;
+  }
   else if (state.section === "leads") {
     body = `
       <div class="dashboard-card empty-state">
@@ -1270,66 +1281,121 @@ async function loadOverviewStats() {
   }
 }
 async function loadConversations() {
-  const list =
-    document.querySelector("#conversations-list");
+  const list = document.querySelector("#conversations-list");
 
   if (!list || !state.company) return;
 
-  const { data, error } =
-    await supabase
-      .from("conversations")
-      .select(
-        "id, visitor_name, visitor_email, status, created_at, updated_at"
-      )
-      .eq("company_id", state.company.id)
-      .order("updated_at", {
-        ascending: false,
-      });
+  const { data, error } = await supabase
+    .from("conversations")
+    .select(
+      "id, visitor_name, visitor_email, status, created_at, updated_at"
+    )
+    .eq("company_id", state.company.id)
+    .order("updated_at", { ascending: false });
 
   if (error) {
-    list.textContent = error.message;
+    list.innerHTML = `<div class="conversation-error">${escapeHtml(error.message)}</div>`;
     return;
   }
 
   if (!data?.length) {
     list.innerHTML = `
       <div class="knowledge-empty">
-        No conversations yet.
+        No conversations yet. Open the website widget and send a test message.
       </div>
     `;
     return;
   }
 
   list.innerHTML = data
-    .map(
-      (conversation) => `
-        <article class="knowledge-item">
-          <strong>
-            ${escapeHtml(
-              conversation.visitor_name || "Anonymous visitor"
-            )}
-          </strong>
+    .map((conversation, index) => {
+      const name = conversation.visitor_name || "Website visitor";
+      const timeValue = conversation.updated_at || conversation.created_at;
+      const time = timeValue ? new Date(timeValue).toLocaleString() : "";
+      const status = conversation.status || "open";
 
-          <p>
-            ${escapeHtml(
-              conversation.visitor_email || "No email provided"
-            )}
-          </p>
-
-          <small>
-            Status: ${escapeHtml(conversation.status)}
-          </small>
-
-          <small>
-            ${new Date(
-              conversation.updated_at
-            ).toLocaleString()}
-          </small>
-        </article>
-      `
-    )
+      return `
+        <button class="conversation-row ${index === 0 ? "selected" : ""}" data-conversation-id="${escapeHtml(conversation.id)}">
+          <div class="conversation-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</div>
+          <div class="conversation-row-copy">
+            <div class="conversation-row-top">
+              <strong>${escapeHtml(name)}</strong>
+              <span>${escapeHtml(time)}</span>
+            </div>
+            <p>${escapeHtml(conversation.visitor_email || "Anonymous website visitor")}</p>
+            <small class="conversation-status ${escapeHtml(status.toLowerCase())}">${escapeHtml(status)}</small>
+          </div>
+        </button>
+      `;
+    })
     .join("");
+
+  document.querySelectorAll("[data-conversation-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-conversation-id]").forEach((row) => row.classList.remove("selected"));
+      button.classList.add("selected");
+      const conversation = data.find((item) => item.id === button.dataset.conversationId);
+      if (conversation) loadConversationMessages(conversation);
+    });
+  });
+
+  loadConversationMessages(data[0]);
 }
+
+async function loadConversationMessages(conversation) {
+  const detail = document.querySelector("#conversation-detail");
+  if (!detail || !conversation) return;
+
+  detail.innerHTML = `
+    <div class="conversation-detail-head">
+      <div>
+        <small>VISITOR</small>
+        <h2>${escapeHtml(conversation.visitor_name || "Website visitor")}</h2>
+        <p>${escapeHtml(conversation.visitor_email || "No email captured")}</p>
+      </div>
+      <span class="conversation-status ${escapeHtml((conversation.status || "open").toLowerCase())}">${escapeHtml(conversation.status || "open")}</span>
+    </div>
+    <div class="conversation-messages conversation-loading">Loading messages...</div>
+  `;
+
+  const { data, error } = await supabase
+    .from("messages")
+    .select("id, sender, content, created_at")
+    .eq("conversation_id", conversation.id)
+    .order("created_at", { ascending: true });
+
+  const messages = detail.querySelector(".conversation-messages");
+  if (!messages) return;
+
+  if (error) {
+    messages.innerHTML = `<div class="conversation-error">${escapeHtml(error.message)}</div>`;
+    return;
+  }
+
+  if (!data?.length) {
+    messages.innerHTML = `<div class="conversation-empty-messages">No messages in this conversation yet.</div>`;
+    return;
+  }
+
+  messages.classList.remove("conversation-loading");
+  messages.innerHTML = data.map((message) => {
+    const sender = String(message.sender || "visitor").toLowerCase();
+    const isVisitor = sender === "visitor" || sender === "user" || sender === "customer";
+    const time = message.created_at ? new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+
+    return `
+      <div class="conversation-message ${isVisitor ? "visitor" : "agent"}">
+        <div class="conversation-bubble">
+          ${escapeHtml(message.content || "")}
+        </div>
+        <small>${isVisitor ? "Visitor" : "YOUYOU"}${time ? ` · ${escapeHtml(time)}` : ""}</small>
+      </div>
+    `;
+  }).join("");
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
 async function loadKnowledge() {
   const list =
     document.querySelector("#knowledge-list");
