@@ -24,35 +24,35 @@
 
   const restHeaders = {
     "Content-Type": "application/json",
-    apikey: SUPABASE_ANON_KEY,
+    apikey: SUPABASE_ANON_KEY
   };
 
   async function ensureConversation() {
-  if (conversationId) return conversationId;
-  if (!companyId) return "";
+    if (conversationId) return conversationId;
+    if (!companyId) return "";
 
-  const newConversationId = crypto.randomUUID();
+    const newConversationId = crypto.randomUUID();
 
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
-    method: "POST",
-    headers: { ...restHeaders, Prefer: "return=minimal" },
-    body: JSON.stringify({
-      id: newConversationId,
-      company_id: companyId,
-      visitor_name: "Website visitor",
-      status: "open"
-    })
-  });
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
+      method: "POST",
+      headers: { ...restHeaders, Prefer: "return=minimal" },
+      body: JSON.stringify({
+        id: newConversationId,
+        company_id: companyId,
+        visitor_name: "Website visitor",
+        status: "open"
+      })
+    });
 
-  if (!response.ok) {
-    throw new Error(`Conversation creation failed: ${await response.text()}`);
+    if (!response.ok) {
+      throw new Error(`Conversation creation failed: ${await response.text()}`);
+    }
+
+    conversationId = newConversationId;
+    sessionStorage.setItem(SESSION_KEY, conversationId);
+    return conversationId;
   }
 
-  conversationId = newConversationId;
-  sessionStorage.setItem(SESSION_KEY, conversationId);
-
-  return conversationId;
-}
   async function saveVisitorMessage(content) {
     const id = await ensureConversation();
     if (!id) return;

@@ -31,3 +31,7 @@ Never commit any Supabase service-role key, OpenAI API key, Stripe secret key, o
 
 ## Next product stage
 Before connecting a paid AI API, finish/verify Supabase RLS, conversation/message policies, lead capture, AI settings persistence, and production QA. Then connect the AI engine to company knowledge + conversations.
+
+
+## V3 Smart Inbox
+Adds local pre-AI lead scoring, HOT/WARM/COLD badges, last-message previews, and smart summaries. External AI/WhatsApp integrations remain intentionally deferred.

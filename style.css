@@ -1855,3 +1855,17 @@ input[type="checkbox"]:focus-visible {
   .conversation-messages { max-height: 440px; }
   .conversation-message { max-width: 88%; }
 }
+
+/* Smart Inbox / lead scoring */
+.lead-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.lead-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.04em;border:1px solid rgba(148,163,184,.16)}
+.lead-badge.hot{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.28)}
+.lead-badge.warm{background:rgba(245,158,11,.10);border-color:rgba(245,158,11,.28)}
+.lead-badge.cold{background:rgba(148,163,184,.08)}
+.lead-badge.large{font-size:11px;padding:7px 10px}
+.lead-summary{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin:16px 18px 0;padding:14px 16px;border:1px solid rgba(34,197,94,.18);background:rgba(34,197,94,.05);border-radius:14px}
+.lead-summary div{display:grid;gap:5px}
+.lead-summary small{font-size:9px;letter-spacing:.12em;opacity:.65}
+.lead-summary strong{font-size:12px;line-height:1.5;font-weight:650}
+.lead-summary>span{font-size:9px;opacity:.45;white-space:nowrap}
+@media(max-width:760px){.lead-summary{flex-direction:column}.lead-summary>span{white-space:normal}}

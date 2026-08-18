@@ -1280,16 +1280,46 @@ async function loadOverviewStats() {
       knowledgeResult.count ?? 0;
   }
 }
+function scoreLeadFromMessages(messages = []) {
+  const text = messages.map((m) => m.content || "").join(" ").toLowerCase();
+  let score = 10;
+  const strong = ["buy", "purchase", "book", "booking", "demo", "quote", "price", "pricing", "cost", "call me", "contact me", "ready", "today", "this week"];
+  const medium = ["interested", "need", "want", "available", "availability", "service", "help"];
+  strong.forEach((word) => { if (text.includes(word)) score += 12; });
+  medium.forEach((word) => { if (text.includes(word)) score += 5; });
+  if (/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(text)) score += 20;
+  if (/\+?\d[\d\s().-]{7,}\d/.test(text)) score += 20;
+  if (messages.length >= 3) score += 8;
+  return Math.min(100, score);
+}
+
+function leadMeta(score) {
+  if (score >= 70) return { label: "HOT", icon: "🔥", cls: "hot" };
+  if (score >= 40) return { label: "WARM", icon: "●", cls: "warm" };
+  return { label: "COLD", icon: "○", cls: "cold" };
+}
+
+function summarizeLead(messages = []) {
+  if (!messages.length) return "No visitor message captured yet.";
+  const last = messages[messages.length - 1]?.content || "";
+  const text = messages.map((m) => m.content || "").join(" ").toLowerCase();
+  const intents = [];
+  if (/(price|pricing|cost|quote)/.test(text)) intents.push("pricing");
+  if (/(book|booking|appointment|demo)/.test(text)) intents.push("booking/demo");
+  if (/(buy|purchase|ready)/.test(text)) intents.push("buying");
+  if (/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(text) || /\+?\d[\d\s().-]{7,}\d/.test(text)) intents.push("contact shared");
+  return intents.length
+    ? `Interest signals: ${intents.join(", ")}. Latest: "${last.slice(0, 90)}${last.length > 90 ? "…" : ""}"`
+    : `Latest: "${last.slice(0, 110)}${last.length > 110 ? "…" : ""}"`;
+}
+
 async function loadConversations() {
   const list = document.querySelector("#conversations-list");
-
   if (!list || !state.company) return;
 
   const { data, error } = await supabase
     .from("conversations")
-    .select(
-      "id, visitor_name, visitor_email, status, created_at, updated_at"
-    )
+    .select("id, visitor_name, visitor_email, status, created_at, updated_at, messages(id, sender, content, created_at)")
     .eq("company_id", state.company.id)
     .order("updated_at", { ascending: false });
 
@@ -1297,54 +1327,58 @@ async function loadConversations() {
     list.innerHTML = `<div class="conversation-error">${escapeHtml(error.message)}</div>`;
     return;
   }
-
   if (!data?.length) {
-    list.innerHTML = `
-      <div class="knowledge-empty">
-        No conversations yet. Open the website widget and send a test message.
-      </div>
-    `;
+    list.innerHTML = `<div class="knowledge-empty">No conversations yet. Open the website widget and send a test message.</div>`;
     return;
   }
 
-  list.innerHTML = data
-    .map((conversation, index) => {
-      const name = conversation.visitor_name || "Website visitor";
-      const timeValue = conversation.updated_at || conversation.created_at;
-      const time = timeValue ? new Date(timeValue).toLocaleString() : "";
-      const status = conversation.status || "open";
+  data.forEach((c) => c.messages?.sort((a,b) => new Date(a.created_at) - new Date(b.created_at)));
 
-      return `
-        <button class="conversation-row ${index === 0 ? "selected" : ""}" data-conversation-id="${escapeHtml(conversation.id)}">
-          <div class="conversation-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</div>
-          <div class="conversation-row-copy">
-            <div class="conversation-row-top">
-              <strong>${escapeHtml(name)}</strong>
-              <span>${escapeHtml(time)}</span>
-            </div>
-            <p>${escapeHtml(conversation.visitor_email || "Anonymous website visitor")}</p>
+  list.innerHTML = data.map((conversation, index) => {
+    const name = conversation.visitor_name || "Website visitor";
+    const timeValue = conversation.updated_at || conversation.created_at;
+    const time = timeValue ? new Date(timeValue).toLocaleString() : "";
+    const status = conversation.status || "open";
+    const score = scoreLeadFromMessages(conversation.messages || []);
+    const meta = leadMeta(score);
+    const last = conversation.messages?.at(-1)?.content || "No message preview";
+
+    return `
+      <button class="conversation-row ${index === 0 ? "selected" : ""}" data-conversation-id="${escapeHtml(conversation.id)}">
+        <div class="conversation-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</div>
+        <div class="conversation-row-copy">
+          <div class="conversation-row-top">
+            <strong>${escapeHtml(name)}</strong>
+            <span>${escapeHtml(time)}</span>
+          </div>
+          <p>${escapeHtml(last.slice(0, 72))}</p>
+          <div class="lead-row">
+            <small class="lead-badge ${meta.cls}">${meta.icon} ${meta.label} · ${score}/100</small>
             <small class="conversation-status ${escapeHtml(status.toLowerCase())}">${escapeHtml(status)}</small>
           </div>
-        </button>
-      `;
-    })
-    .join("");
+        </div>
+      </button>`;
+  }).join("");
 
   document.querySelectorAll("[data-conversation-id]").forEach((button) => {
     button.addEventListener("click", () => {
       document.querySelectorAll("[data-conversation-id]").forEach((row) => row.classList.remove("selected"));
       button.classList.add("selected");
       const conversation = data.find((item) => item.id === button.dataset.conversationId);
-      if (conversation) loadConversationMessages(conversation);
+      if (conversation) renderConversationDetail(conversation);
     });
   });
 
-  loadConversationMessages(data[0]);
+  renderConversationDetail(data[0]);
 }
 
-async function loadConversationMessages(conversation) {
+function renderConversationDetail(conversation) {
   const detail = document.querySelector("#conversation-detail");
   if (!detail || !conversation) return;
+  const data = conversation.messages || [];
+  const score = scoreLeadFromMessages(data);
+  const meta = leadMeta(score);
+  const summary = summarizeLead(data);
 
   detail.innerHTML = `
     <div class="conversation-detail-head">
@@ -1353,47 +1387,24 @@ async function loadConversationMessages(conversation) {
         <h2>${escapeHtml(conversation.visitor_name || "Website visitor")}</h2>
         <p>${escapeHtml(conversation.visitor_email || "No email captured")}</p>
       </div>
-      <span class="conversation-status ${escapeHtml((conversation.status || "open").toLowerCase())}">${escapeHtml(conversation.status || "open")}</span>
+      <span class="lead-badge large ${meta.cls}">${meta.icon} ${meta.label} · ${score}/100</span>
     </div>
-    <div class="conversation-messages conversation-loading">Loading messages...</div>
-  `;
-
-  const { data, error } = await supabase
-    .from("messages")
-    .select("id, sender, content, created_at")
-    .eq("conversation_id", conversation.id)
-    .order("created_at", { ascending: true });
-
-  const messages = detail.querySelector(".conversation-messages");
-  if (!messages) return;
-
-  if (error) {
-    messages.innerHTML = `<div class="conversation-error">${escapeHtml(error.message)}</div>`;
-    return;
-  }
-
-  if (!data?.length) {
-    messages.innerHTML = `<div class="conversation-empty-messages">No messages in this conversation yet.</div>`;
-    return;
-  }
-
-  messages.classList.remove("conversation-loading");
-  messages.innerHTML = data.map((message) => {
-    const sender = String(message.sender || "visitor").toLowerCase();
-    const isVisitor = sender === "visitor" || sender === "user" || sender === "customer";
-    const time = message.created_at ? new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
-
-    return `
-      <div class="conversation-message ${isVisitor ? "visitor" : "agent"}">
-        <div class="conversation-bubble">
-          ${escapeHtml(message.content || "")}
-        </div>
-        <small>${isVisitor ? "Visitor" : "YOUYOU"}${time ? ` · ${escapeHtml(time)}` : ""}</small>
-      </div>
-    `;
-  }).join("");
-
-  messages.scrollTop = messages.scrollHeight;
+    <div class="lead-summary">
+      <div><small>SMART SUMMARY</small><strong>${escapeHtml(summary)}</strong></div>
+      <span>Local scoring preview</span>
+    </div>
+    <div class="conversation-messages">
+      ${!data.length ? `<div class="conversation-empty-messages">No messages in this conversation yet.</div>` :
+        data.map((message) => {
+          const sender = String(message.sender || "visitor").toLowerCase();
+          const isVisitor = sender === "visitor" || sender === "user" || sender === "customer";
+          const time = message.created_at ? new Date(message.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+          return `<div class="conversation-message ${isVisitor ? "visitor" : "agent"}">
+            <div class="conversation-bubble">${escapeHtml(message.content || "")}</div>
+            <small>${isVisitor ? "Visitor" : "YOUYOU"}${time ? ` · ${escapeHtml(time)}` : ""}</small>
+          </div>`;
+        }).join("")}
+    </div>`;
 }
 
 async function loadKnowledge() {
