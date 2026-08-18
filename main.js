@@ -817,23 +817,43 @@ function renderDashboard() {
           </button>
         </div>
 
-        <div class="dashboard-card">
+        <div class="dashboard-card widget-preview-card">
 
-          <small>PREVIEW</small>
-          <h1>Live assistant</h1>
+          <div class="widget-preview-top">
+            <div>
+              <small>PREVIEW</small>
+              <h1>Live assistant</h1>
+            </div>
+            <span class="widget-online">● Online</span>
+          </div>
 
-          <div class="preview-chat">
-            <div class="preview-message">
-              Hi! I'm your YOUYOU AI agent. 👋
+          <div class="widget-device">
+            <div class="widget-device-head">
+              <div class="widget-agent-avatar">Y</div>
+              <div>
+                <strong>YOUYOU AI</strong>
+                <span>AI Customer Agent</span>
+              </div>
+              <span class="widget-device-status">●</span>
             </div>
 
-            <div class="preview-message user">
-              How can you help me?
+            <div class="preview-chat premium-preview-chat">
+              <div class="preview-message">
+                Hi! 👋 I'm your YOUYOU AI agent. How can I help you today?
+              </div>
+
+              <div class="preview-message user">
+                I need pricing and a demo.
+              </div>
+
+              <div class="preview-message">
+                Absolutely. I can help with that and connect you with the team.
+              </div>
             </div>
 
-            <div class="preview-message">
-              I can answer questions, capture leads
-              and help your customers 24/7.
+            <div class="widget-device-input">
+              <span>Ask YOUYOU anything...</span>
+              <button type="button">↑</button>
             </div>
           </div>
 

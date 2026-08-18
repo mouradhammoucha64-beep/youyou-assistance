@@ -63,3 +63,7 @@ Adds a zero-cost local buying-intent detector inside the website widget. When in
 
 ## V3.3.1 Premium UI Layout Fix
 Polishes the landing hero mockup and fixes clipping/overflow in the Website Widget preview. No business logic, Supabase, scoring, or contact-capture behavior changed.
+
+
+## V3.4 Lux UI Overhaul
+A stronger visual redesign for the landing hero and Website Widget preview, with premium spacing, glass panels, refined gradients, a realistic chat device preview, and better visual hierarchy. Core application logic remains unchanged.
