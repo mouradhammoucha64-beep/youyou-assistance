@@ -1896,3 +1896,54 @@ input[type="checkbox"]:focus-visible {
 .leads-empty{text-align:center;padding:70px 20px;color:#94a3b8}
 .leads-empty h2{color:#fff}
 @media(max-width:900px){.lead-card{grid-template-columns:1fr}.lead-card-side{border-left:0;border-top:1px solid rgba(148,163,184,.12)}}
+
+
+/* V3.1.2 Sidebar click-layer fix */
+.dashboard {
+  position: relative;
+}
+
+.sidebar {
+  position: relative;
+  z-index: 50;
+  pointer-events: auto;
+}
+
+.dashboard-nav,
+.dashboard-nav button,
+.side-logo,
+.side-label,
+.side-bottom {
+  position: relative;
+  z-index: 51;
+  pointer-events: auto;
+}
+
+.dashboard-main {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.conversations-card,
+.conversation-layout,
+.conversation-list,
+.conversation-detail {
+  position: relative;
+  z-index: 1;
+}
+
+.conversation-row {
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 901px) {
+  .sidebar {
+    isolation: isolate;
+  }
+
+  .dashboard-main {
+    overflow: hidden;
+  }
+}

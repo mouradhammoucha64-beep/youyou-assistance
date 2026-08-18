@@ -43,3 +43,7 @@ Qualified leads are generated from conversation intent scores (40+), with Hot/Wa
 
 ## V3.1.1 Navigation Fix
 Uses delegated sidebar navigation and explicit button types to make section switching reliable.
+
+
+## V3.1.2 Sidebar Layer Fix
+Ensures the sidebar remains above conversation layers and fully clickable.
