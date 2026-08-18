@@ -55,3 +55,7 @@ Pins the sidebar and offsets dashboard content so conversation layers can never 
 
 ## V3.2 Lead Contact Actions
 Detects email and phone from conversation text, shows captured contact details, and exposes Email / Call / Open conversation actions. WhatsApp remains integration-ready but inactive.
+
+
+## V3.3 Smart Contact Capture
+Adds a zero-cost local buying-intent detector inside the website widget. When intent reaches the Hot threshold, YOUYOU asks the visitor for an email address or phone number. Contact details are then captured through the existing conversation message flow and become available to the Leads dashboard. No paid AI or WhatsApp integration is used in this version.

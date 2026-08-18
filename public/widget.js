@@ -426,6 +426,93 @@
     );
 
   /* =========================
+     LOCAL LEAD + CONTACT CAPTURE
+     No paid AI/API required
+  ========================= */
+
+  let localLeadScore = 10;
+  let contactPromptShown = false;
+  let capturedContact = false;
+
+  function scoreLocalIntent(value) {
+    const text = String(value || "").toLowerCase();
+    let points = 0;
+
+    const strong = [
+      "buy", "purchase", "book", "booking", "demo",
+      "quote", "price", "pricing", "cost",
+      "call me", "contact me", "ready", "this week", "today"
+    ];
+
+    const medium = [
+      "interested", "need", "want", "available",
+      "availability", "service", "help"
+    ];
+
+    strong.forEach((word) => {
+      if (text.includes(word)) points += 12;
+    });
+
+    medium.forEach((word) => {
+      if (text.includes(word)) points += 5;
+    });
+
+    if (/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(text)) {
+      points += 20;
+      capturedContact = true;
+    }
+
+    if (/\+?\d[\d\s().-]{7,}\d/.test(text)) {
+      points += 20;
+      capturedContact = true;
+    }
+
+    localLeadScore = Math.min(100, localLeadScore + points);
+    return localLeadScore;
+  }
+
+  function appendAgentBubble(html) {
+    const reply = document.createElement("div");
+
+    Object.assign(reply.style, {
+      display: "flex",
+      gap: "9px",
+      alignItems: "flex-start",
+      marginBottom: "16px"
+    });
+
+    reply.innerHTML = `
+      <div style="
+        width:30px;
+        height:30px;
+        border-radius:10px;
+        background:#22c55e;
+        color:#03130a;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:13px;
+        font-weight:900;
+        flex:0 0 auto;
+      ">Y</div>
+
+      <div style="
+        max-width:82%;
+        padding:11px 14px;
+        background:#111827;
+        border:1px solid rgba(148,163,184,.12);
+        border-radius:5px 15px 15px 15px;
+        color:#cbd5e1;
+        font-size:13px;
+        line-height:1.5;
+      ">${html}</div>
+    `;
+
+    messages.appendChild(reply);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  /* =========================
      MESSAGE FORM
   ========================= */
 
@@ -502,57 +589,27 @@
         }
 
         /* =========================
-           TEMPORARY AI REPLY
+           LOCAL SMART REPLY
+           AI integration intentionally deferred
         ========================= */
 
-        const reply =
-          document.createElement("div");
+        const score = scoreLocalIntent(text);
 
-        Object.assign(
-          reply.style,
-          {
-            display: "flex",
-            gap: "9px",
-            alignItems: "flex-start",
-            marginBottom: "16px"
-          }
-        );
+        if (capturedContact) {
+          appendAgentBubble(
+            "Thank you — I’ve captured your contact details. A member of the team can follow up with you."
+          );
+        } else if (score >= 70 && !contactPromptShown) {
+          contactPromptShown = true;
 
-        reply.innerHTML = `
-          <div style="
-            width:30px;
-            height:30px;
-            border-radius:10px;
-            background:#22c55e;
-            color:#03130a;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:13px;
-            font-weight:900;
-          ">
-            Y
-          </div>
-
-          <div style="
-            max-width:82%;
-            padding:11px 14px;
-            background:#111827;
-            border:1px solid rgba(148,163,184,.12);
-            border-radius:5px 15px 15px 15px;
-            color:#cbd5e1;
-            font-size:13px;
-            line-height:1.5;
-          ">
-            Thanks for your message.
-            Our AI agent will be connected here.
-          </div>
-        `;
-
-        messages.appendChild(reply);
-
-        messages.scrollTop =
-          messages.scrollHeight;
+          appendAgentBubble(
+            "It looks like you’re seriously interested. Would you like the team to contact you? Please share your <strong>email address or phone number</strong>."
+          );
+        } else {
+          appendAgentBubble(
+            "Thanks for your message. I’m currently collecting your request for the team. Full AI responses will be activated soon."
+          );
+        }
 
       }
     );
