@@ -2616,3 +2616,89 @@ input[type="checkbox"]:focus-visible {
     max-width: 700px !important;
   }
 }
+
+
+/* =========================================================
+   V3.4.2 — HERO RIGHT-SIDE CLIPPING FINAL FIX
+   Preserve the current approved visual design.
+========================================================= */
+
+@media (min-width: 901px) {
+  /* Give the whole hero a safe viewport width */
+  .hero-inner {
+    box-sizing: border-box !important;
+    max-width: 1540px !important;
+    width: calc(100vw - 72px) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(480px, 590px) !important;
+    gap: clamp(32px, 3.5vw, 58px) !important;
+    overflow: visible !important;
+  }
+
+  .hero-copy {
+    min-width: 0 !important;
+  }
+
+  .hero-visual {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 590px !important;
+    margin: 0 !important;
+    justify-self: end !important;
+    overflow: visible !important;
+  }
+
+  /* Keep the actual product mockup inside its column */
+  .hero-visual > div {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 590px !important;
+  }
+
+  /* Messages should wrap normally inside the demo, never force overflow */
+  .hero-visual [class*="message"] {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 78% !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+  }
+
+  /* Floating UI remains inside the visual's safe area */
+  .hero-visual [class*="lead"],
+  .hero-visual [class*="notification"],
+  .hero-visual [class*="floating"] {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    max-width: 230px !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1250px) {
+  .hero-inner {
+    width: calc(100vw - 48px) !important;
+    grid-template-columns: minmax(0, 1fr) minmax(430px, 500px) !important;
+    gap: 28px !important;
+  }
+
+  .hero-visual,
+  .hero-visual > div {
+    max-width: 500px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-inner {
+    width: calc(100% - 32px) !important;
+    overflow: hidden !important;
+  }
+
+  .hero-visual,
+  .hero-visual > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 680px !important;
+    margin-inline: auto !important;
+  }
+}
