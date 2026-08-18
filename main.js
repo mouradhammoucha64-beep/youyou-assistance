@@ -650,6 +650,7 @@ async function loadUser(user) {
 function navItem(id, icon, label) {
   return `
     <button
+      type="button"
       data-nav="${id}"
       class="${state.section === id ? "active" : ""}">
       <span>${icon}</span>
@@ -726,14 +727,21 @@ function dashboardShell(content) {
     </div>
   `;
 
-  document
-    .querySelectorAll("[data-nav]")
-    .forEach((button) => {
-      button.onclick = () => {
-        state.section = button.dataset.nav;
-        renderDashboard();
-      };
+  const sidebarNav = document.querySelector(".dashboard-nav");
+
+  if (sidebarNav) {
+    sidebarNav.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-nav]");
+      if (!button) return;
+
+      event.preventDefault();
+      const nextSection = button.dataset.nav;
+      if (!nextSection) return;
+
+      state.section = nextSection;
+      renderDashboard();
     });
+  }
 
   document.querySelector("#logout").onclick =
     async () => {

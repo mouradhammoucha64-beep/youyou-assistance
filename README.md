@@ -39,3 +39,7 @@ Adds local pre-AI lead scoring, HOT/WARM/COLD badges, last-message previews, and
 
 ## V3.1 Real Leads Dashboard
 Qualified leads are generated from conversation intent scores (40+), with Hot/Warm filters, intent signals, smart summaries, last activity, and a placeholder state for future WhatsApp alerts.
+
+
+## V3.1.1 Navigation Fix
+Uses delegated sidebar navigation and explicit button types to make section switching reliable.
