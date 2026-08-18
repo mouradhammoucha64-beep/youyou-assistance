@@ -1086,17 +1086,28 @@ else if (state.section === "settings") {
   }
   else if (state.section === "leads") {
     body = `
-      <div class="dashboard-card empty-state">
+      <div class="dashboard-card leads-card">
+        <div class="card-header">
+          <div>
+            <small>SALES PIPELINE</small>
+            <h1>Qualified Leads</h1>
+            <p>Focus on visitors showing the strongest buying intent.</p>
+          </div>
+          <div class="leads-header-badges">
+            <span class="lead-badge hot">🔥 HOT ≥ 70</span>
+            <span id="lead-count" class="lead-count">— leads</span>
+          </div>
+        </div>
 
-        <div class="empty-icon">✦</div>
+        <div class="lead-filter-bar">
+          <button class="lead-filter active" data-lead-filter="all">All qualified</button>
+          <button class="lead-filter" data-lead-filter="hot">🔥 Hot</button>
+          <button class="lead-filter" data-lead-filter="warm">● Warm</button>
+        </div>
 
-        <h1>Lead Inbox</h1>
-
-        <p>
-          Qualified leads captured by YOUYOU
-          will appear here.
-        </p>
-
+        <div id="leads-list" class="leads-list">
+          <div class="conversation-loading">Analyzing conversations...</div>
+        </div>
       </div>
     `;
   }
@@ -1220,6 +1231,10 @@ if (state.section === "knowledge") {
 }
   if (state.section === "conversations") {
   loadConversations();
+}
+
+if (state.section === "leads") {
+  loadLeads();
 }
 
 if (state.section === "overview") {
@@ -1405,6 +1420,131 @@ function renderConversationDetail(conversation) {
           </div>`;
         }).join("")}
     </div>`;
+}
+
+
+async function loadLeads() {
+  const list = document.querySelector("#leads-list");
+  const count = document.querySelector("#lead-count");
+  if (!list || !state.company) return;
+
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("id, visitor_name, visitor_email, status, created_at, updated_at, messages(id, sender, content, created_at)")
+    .eq("company_id", state.company.id)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    list.innerHTML = `<div class="conversation-error">${escapeHtml(error.message)}</div>`;
+    return;
+  }
+
+  const analyzed = (data || []).map((conversation) => {
+    const messages = (conversation.messages || [])
+      .slice()
+      .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    const score = scoreLeadFromMessages(messages);
+    const meta = leadMeta(score);
+    return {
+      ...conversation,
+      messages,
+      score,
+      meta,
+      summary: summarizeLead(messages),
+      lastMessage: messages.at(-1)?.content || "No message captured"
+    };
+  }).filter((lead) => lead.score >= 40);
+
+  let activeFilter = "all";
+
+  function paint() {
+    const visible = analyzed.filter((lead) => {
+      if (activeFilter === "hot") return lead.score >= 70;
+      if (activeFilter === "warm") return lead.score >= 40 && lead.score < 70;
+      return true;
+    });
+
+    if (count) count.textContent = `${analyzed.length} lead${analyzed.length === 1 ? "" : "s"}`;
+
+    if (!visible.length) {
+      list.innerHTML = `
+        <div class="leads-empty">
+          <div class="empty-icon">✦</div>
+          <h2>No qualified leads in this view</h2>
+          <p>YOUYOU will surface visitors here when their buying-intent score reaches 40/100.</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = visible.map((lead) => {
+      const name = lead.visitor_name || "Website visitor";
+      const when = lead.updated_at || lead.created_at;
+      const time = when ? new Date(when).toLocaleString() : "";
+      const signals = [];
+      const text = lead.messages.map(m => m.content || "").join(" ").toLowerCase();
+      if (/(price|pricing|cost|quote)/.test(text)) signals.push("Pricing");
+      if (/(book|booking|appointment|demo)/.test(text)) signals.push("Booking / demo");
+      if (/(buy|purchase|ready)/.test(text)) signals.push("Buying intent");
+      if (/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(text) || /\+?\d[\d\s().-]{7,}\d/.test(text)) signals.push("Contact shared");
+
+      return `
+        <article class="lead-card">
+          <div class="lead-card-main">
+            <div class="lead-card-top">
+              <div class="lead-identity">
+                <div class="conversation-avatar">${escapeHtml(name.charAt(0).toUpperCase())}</div>
+                <div>
+                  <small>QUALIFIED VISITOR</small>
+                  <h2>${escapeHtml(name)}</h2>
+                  <p>${escapeHtml(lead.visitor_email || "No email captured")}</p>
+                </div>
+              </div>
+              <span class="lead-badge large ${lead.meta.cls}">${lead.meta.icon} ${lead.meta.label} · ${lead.score}/100</span>
+            </div>
+
+            <div class="lead-signal-list">
+              ${(signals.length ? signals : ["Engaged visitor"]).map(s => `<span>${escapeHtml(s)}</span>`).join("")}
+            </div>
+
+            <div class="lead-card-summary">
+              <small>SMART SUMMARY</small>
+              <strong>${escapeHtml(lead.summary)}</strong>
+            </div>
+          </div>
+
+          <div class="lead-card-side">
+            <small>LAST ACTIVITY</small>
+            <strong>${escapeHtml(time)}</strong>
+            <p>${escapeHtml(lead.lastMessage.slice(0, 120))}</p>
+            <button class="secondary open-lead-conversation" data-open-conversation="${escapeHtml(lead.id)}">
+              Open conversation →
+            </button>
+            ${lead.score >= 70 ? `<div class="whatsapp-ready">WhatsApp alert ready <span>Integration pending</span></div>` : ""}
+          </div>
+        </article>`;
+    }).join("");
+
+    document.querySelectorAll("[data-open-conversation]").forEach((button) => {
+      button.onclick = () => {
+        state.section = "conversations";
+        renderDashboard();
+        setTimeout(() => {
+          document.querySelector(`[data-conversation-id="${CSS.escape(button.dataset.openConversation)}"]`)?.click();
+        }, 250);
+      };
+    });
+  }
+
+  document.querySelectorAll("[data-lead-filter]").forEach((button) => {
+    button.onclick = () => {
+      activeFilter = button.dataset.leadFilter;
+      document.querySelectorAll("[data-lead-filter]").forEach((b) => b.classList.remove("active"));
+      button.classList.add("active");
+      paint();
+    };
+  });
+
+  paint();
 }
 
 async function loadKnowledge() {
