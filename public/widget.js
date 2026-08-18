@@ -25,7 +25,6 @@
   const restHeaders = {
     "Content-Type": "application/json",
     apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`
   };
 
   async function ensureConversation() {
