@@ -47,3 +47,11 @@ Uses delegated sidebar navigation and explicit button types to make section swit
 
 ## V3.1.2 Sidebar Layer Fix
 Ensures the sidebar remains above conversation layers and fully clickable.
+
+
+## V3.1.3 Hard Sidebar Layout Fix
+Pins the sidebar and offsets dashboard content so conversation layers can never overlap navigation.
+
+
+## V3.2 Lead Contact Actions
+Detects email and phone from conversation text, shows captured contact details, and exposes Email / Call / Open conversation actions. WhatsApp remains integration-ready but inactive.

@@ -1336,6 +1336,17 @@ function summarizeLead(messages = []) {
     : `Latest: "${last.slice(0, 110)}${last.length > 110 ? "…" : ""}"`;
 }
 
+function extractLeadContact(conversation, messages = []) {
+  const joined = messages.map((m) => m.content || "").join(" ");
+  const emailMatch = joined.match(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i);
+  const phoneMatch = joined.match(/(?:\+?\d[\d\s().-]{7,}\d)/);
+
+  const email = conversation?.visitor_email || emailMatch?.[0] || "";
+  const phone = phoneMatch?.[0]?.trim() || "";
+
+  return { email, phone };
+}
+
 async function loadConversations() {
   const list = document.querySelector("#conversations-list");
   if (!list || !state.company) return;
@@ -1459,6 +1470,7 @@ async function loadLeads() {
       score,
       meta,
       summary: summarizeLead(messages),
+      contact: extractLeadContact(conversation, messages),
       lastMessage: messages.at(-1)?.content || "No message captured"
     };
   }).filter((lead) => lead.score >= 40);
@@ -1504,7 +1516,7 @@ async function loadLeads() {
                 <div>
                   <small>QUALIFIED VISITOR</small>
                   <h2>${escapeHtml(name)}</h2>
-                  <p>${escapeHtml(lead.visitor_email || "No email captured")}</p>
+                  <p>${escapeHtml(lead.contact.email || lead.contact.phone || "No contact captured yet")}</p>
                 </div>
               </div>
               <span class="lead-badge large ${lead.meta.cls}">${lead.meta.icon} ${lead.meta.label} · ${lead.score}/100</span>
@@ -1524,9 +1536,14 @@ async function loadLeads() {
             <small>LAST ACTIVITY</small>
             <strong>${escapeHtml(time)}</strong>
             <p>${escapeHtml(lead.lastMessage.slice(0, 120))}</p>
-            <button class="secondary open-lead-conversation" data-open-conversation="${escapeHtml(lead.id)}">
-              Open conversation →
-            </button>
+            <div class="lead-actions">
+              ${lead.contact.email ? `<a class="secondary lead-action-link" href="mailto:${escapeHtml(lead.contact.email)}">Email</a>` : ""}
+              ${lead.contact.phone ? `<a class="secondary lead-action-link" href="tel:${escapeHtml(lead.contact.phone)}">Call</a>` : ""}
+              <button class="secondary open-lead-conversation" data-open-conversation="${escapeHtml(lead.id)}">
+                Open conversation →
+              </button>
+            </div>
+            ${!lead.contact.email && !lead.contact.phone ? `<div class="contact-needed">Contact not captured yet <span>YOUYOU will ask for it when lead capture is activated.</span></div>` : ""}
             ${lead.score >= 70 ? `<div class="whatsapp-ready">WhatsApp alert ready <span>Integration pending</span></div>` : ""}
           </div>
         </article>`;
