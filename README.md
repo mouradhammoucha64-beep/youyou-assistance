@@ -67,3 +67,7 @@ Polishes the landing hero mockup and fixes clipping/overflow in the Website Widg
 
 ## V3.4 Lux UI Overhaul
 A stronger visual redesign for the landing hero and Website Widget preview, with premium spacing, glass panels, refined gradients, a realistic chat device preview, and better visual hierarchy. Core application logic remains unchanged.
+
+
+## V3.4.1 Landing Hero Final Fix
+Fixes the desktop hero mockup squeezing issue while preserving the V3.4 Website Widget page and application logic.

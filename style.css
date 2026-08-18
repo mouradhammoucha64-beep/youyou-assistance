@@ -2506,3 +2506,113 @@ input[type="checkbox"]:focus-visible {
     max-width:100%;
   }
 }
+
+
+/* =========================================================
+   V3.4.1 — LANDING HERO FINAL FIX
+   Keep the dashboard/widget design unchanged.
+========================================================= */
+
+@media (min-width: 901px) {
+  .hero-inner {
+    grid-template-columns: minmax(520px, .92fr) minmax(680px, 1.08fr) !important;
+    gap: clamp(36px, 4vw, 68px) !important;
+    max-width: 1580px !important;
+    width: calc(100% - 64px) !important;
+    margin-inline: auto !important;
+  }
+
+  .hero-copy {
+    min-width: 0 !important;
+    max-width: 760px !important;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(62px, 5.2vw, 94px) !important;
+  }
+
+  .hero-visual {
+    width: 100% !important;
+    max-width: 760px !important;
+    min-width: 620px !important;
+    min-height: 610px !important;
+    margin-left: auto !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+
+  /* Protect the actual demo from being squeezed by generic flex/grid rules */
+  .hero-visual > div {
+    width: min(100%, 720px) !important;
+    min-width: 620px !important;
+    max-width: 720px !important;
+  }
+
+  .hero-visual [class*="chat"],
+  .hero-visual [class*="demo"],
+  .hero-visual [class*="browser"] {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .hero-visual [class*="message"] {
+    width: auto !important;
+    min-width: 190px !important;
+    max-width: 72% !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+
+  /* Floating lead/status cards should remain compact */
+  .hero-visual [class*="lead"],
+  .hero-visual [class*="notification"],
+  .hero-visual [class*="floating"] {
+    width: auto !important;
+    min-width: 190px !important;
+    max-width: 270px !important;
+    height: auto !important;
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1280px) {
+  .hero-inner {
+    grid-template-columns: minmax(440px, .85fr) minmax(560px, 1.15fr) !important;
+    width: calc(100% - 40px) !important;
+    gap: 30px !important;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(58px, 5.8vw, 78px) !important;
+  }
+
+  .hero-visual {
+    min-width: 540px !important;
+  }
+
+  .hero-visual > div {
+    min-width: 540px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-inner {
+    grid-template-columns: 1fr !important;
+    width: calc(100% - 36px) !important;
+    margin-inline: auto !important;
+  }
+
+  .hero-visual {
+    width: 100% !important;
+    max-width: 700px !important;
+    min-width: 0 !important;
+    margin-inline: auto !important;
+    overflow: hidden !important;
+  }
+
+  .hero-visual > div {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 700px !important;
+  }
+}
