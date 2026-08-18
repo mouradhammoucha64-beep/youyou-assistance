@@ -2001,69 +2001,193 @@ input[type="checkbox"]:focus-visible {
 .contact-needed{padding:10px;border-radius:11px;border:1px dashed rgba(148,163,184,.2);font-size:10px;font-weight:800;color:#cbd5e1}
 .contact-needed span{display:block;margin-top:3px;font-weight:500;color:#64748b;line-height:1.4}
 
-
 /* =========================================================
-   V3.3.1 — PREMIUM UI LAYOUT FIX
-   Landing hero + Website Widget preview
+   V3.4.3 — CLEAN LANDING HERO + LUX WIDGET
+   Replaces accumulated hero patches with selectors that
+   match the real markup: hero-section / hero-visual / ai-window.
 ========================================================= */
 
-/* Landing hero: keep mockup fully visible and balanced */
-.hero,
-.hero-inner,
+/* ---------- LANDING HERO ---------- */
+
+.hero-section {
+  position: relative;
+  width: min(1320px, calc(100% - 48px));
+  margin: 0 auto;
+  min-height: 720px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(440px, 0.92fr);
+  align-items: center;
+  gap: clamp(42px, 5vw, 76px);
+  padding: 76px 0 88px;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 6% 0 auto 10%;
+  height: 520px;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at 18% 45%, rgba(124, 92, 255, 0.14), transparent 38%),
+    radial-gradient(circle at 82% 42%, rgba(124, 92, 255, 0.12), transparent 34%);
+  filter: blur(6px);
+}
+
 .hero-copy,
 .hero-visual {
+  position: relative;
+  z-index: 1;
   min-width: 0;
 }
 
-.hero {
-  overflow: visible !important;
+.hero-copy {
+  max-width: 720px;
 }
 
-.hero-inner {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1.05fr) minmax(420px, .95fr) !important;
-  align-items: center !important;
-  gap: clamp(42px, 6vw, 92px) !important;
+.hero-copy h1 {
+  margin: 18px 0 25px;
+  max-width: 720px;
+  font-size: clamp(58px, 5.5vw, 84px);
+  line-height: 0.98;
+  letter-spacing: -0.065em;
 }
 
+.hero-text {
+  max-width: 650px;
+  font-size: 18px;
+  line-height: 1.75;
+}
+
+/* Right-side product mockup. Only the AI window gets a fixed width. */
 .hero-visual {
-  position: relative !important;
-  width: 100% !important;
-  max-width: 720px !important;
-  margin-left: auto !important;
-  overflow: visible !important;
+  width: 100%;
+  min-height: 560px;
+  display: grid;
+  place-items: center;
+  overflow: visible;
   isolation: isolate;
 }
 
-.hero-visual .mockup,
-.hero-visual .browser-card,
-.hero-visual .chat-demo,
-.hero-visual .hero-card {
-  max-width: 100% !important;
+.hero-visual .ai-window {
+  position: relative;
+  z-index: 2;
+  width: min(460px, 100%);
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(15,16,25,.96), rgba(9,10,16,.96));
+  box-shadow:
+    0 34px 90px rgba(0,0,0,.48),
+    0 0 80px rgba(109,93,252,.12);
+  backdrop-filter: blur(20px);
 }
 
-.hero-visual [class*="lead"],
-.hero-visual [class*="floating"],
-.hero-visual [class*="notification"] {
-  z-index: 3;
+.hero-visual .chat-area {
+  min-height: 350px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
 }
 
-/* Prevent decorative/mockup content from invading the text column */
-@media (min-width: 981px) {
-  .hero-copy {
-    position: relative;
-    z-index: 4;
-  }
-
-  .hero-visual {
-    transform: translateX(0) !important;
-  }
+.hero-visual .message {
+  width: auto;
+  min-width: 0;
+  max-width: 82%;
+  padding: 12px 14px;
+  border-radius: 15px;
+  font-size: 13px;
+  line-height: 1.55;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
-/* Website Widget page: prevent preview card clipping */
+.hero-visual .message.customer {
+  align-self: flex-end;
+}
+
+.hero-visual .message.ai {
+  align-self: flex-start;
+}
+
+/* Decorative glows remain decorative, never inherit card sizing. */
+.hero-visual .glow {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-visual .glow-one {
+  width: 320px;
+  height: 320px;
+  top: 64px;
+  left: 20px;
+}
+
+.hero-visual .glow-two {
+  width: 230px;
+  height: 230px;
+  right: 12px;
+  bottom: 54px;
+}
+
+/* Floating cards get their own compact sizing. */
+.hero-visual .floating-card {
+  position: absolute;
+  z-index: 4;
+  width: max-content;
+  min-width: 0;
+  max-width: 230px;
+  height: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 15px;
+  background: rgba(15,15,22,.9);
+  box-shadow: 0 20px 50px rgba(0,0,0,.45);
+  backdrop-filter: blur(15px);
+}
+
+.hero-visual .leads-card {
+  left: -16px;
+  bottom: 84px;
+}
+
+.hero-visual .live-card {
+  right: -10px;
+  top: 88px;
+}
+
+.hero-visual .floating-card strong {
+  white-space: nowrap;
+}
+
+/* ---------- APPROVED LUX WEBSITE-WIDGET PAGE ---------- */
+
+:root {
+  --lux-border: rgba(255,255,255,.08);
+  --lux-purple: #7c5cff;
+  --lux-green: #22c55e;
+}
+
+.dashboard-main {
+  background:
+    radial-gradient(circle at 85% 8%, rgba(124,92,255,.06), transparent 30%),
+    #090a0f !important;
+  overflow-x: hidden !important;
+}
+
 .dashboard-grid {
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr) !important;
+  gap: 22px !important;
   align-items: stretch !important;
+  width: 100%;
 }
 
 .dashboard-grid > * {
@@ -2071,634 +2195,279 @@ input[type="checkbox"]:focus-visible {
 }
 
 .dashboard-card {
-  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(17,18,27,.92), rgba(11,12,18,.94)) !important;
+  border: 1px solid var(--lux-border) !important;
+  border-radius: 24px !important;
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.025);
 }
 
-.preview-chat {
-  min-width: 0;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-wrap: anywhere;
-}
-
-.preview-message {
-  max-width: 88% !important;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-/* The widget install code should wrap instead of pushing layout off-screen */
 #widget-code {
   white-space: pre-wrap !important;
   overflow-wrap: anywhere !important;
   word-break: break-word !important;
   max-width: 100% !important;
   box-sizing: border-box;
+  padding: 18px !important;
+  line-height: 1.7 !important;
+  color: #c9bcff !important;
+  background: #090a10 !important;
+  border: 1px solid rgba(124,92,255,.18) !important;
+  border-radius: 14px !important;
 }
 
-/* Give dashboard breathing room on desktop */
-.dashboard-main {
-  overflow-x: hidden !important;
+#copy-widget {
+  box-shadow: 0 12px 28px rgba(124,92,255,.24) !important;
 }
 
-.dashboard-main .dashboard-grid {
+.widget-preview-card {
+  position: relative;
+  overflow: hidden !important;
+  min-height: 560px;
+}
+
+.widget-preview-card::before {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  right: -80px;
+  top: -80px;
+  border-radius: 50%;
+  background: rgba(124,92,255,.12);
+  filter: blur(45px);
+  pointer-events: none;
+}
+
+.widget-preview-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.widget-preview-top h1 {
+  margin-bottom: 0;
+}
+
+.widget-online {
+  position: relative;
+  z-index: 1;
+  padding: 7px 10px;
+  border: 1px solid rgba(34,197,94,.2);
+  background: rgba(34,197,94,.06);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #b6f7c8;
+}
+
+.widget-device {
   width: 100%;
-  box-sizing: border-box;
+  max-width: 390px;
+  margin: 8px auto 0;
+  border: 1px solid rgba(255,255,255,.095);
+  background: linear-gradient(180deg,#111522,#0a0d15);
+  border-radius: 26px;
+  box-shadow:
+    0 28px 75px rgba(0,0,0,.42),
+    0 0 0 1px rgba(124,92,255,.035) inset;
+  overflow: hidden;
 }
 
-/* Tablet */
-@media (max-width: 1120px) {
-  .hero-inner {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 34px !important;
-  }
+.widget-device-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
 
+.widget-agent-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  font-weight: 900;
+  background: linear-gradient(145deg,#8b6dff,#6849f5);
+  box-shadow: 0 8px 22px rgba(124,92,255,.28);
+}
+
+.widget-device-head > div:nth-child(2) {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.widget-device-head strong {
+  font-size: 13px;
+}
+
+.widget-device-head span {
+  color: #7f879d;
+  font-size: 10px;
+}
+
+.widget-device-status {
+  color: #22c55e !important;
+}
+
+.premium-preview-chat {
+  min-height: 310px;
+  padding: 18px !important;
+  background: radial-gradient(circle at 50% 0, rgba(124,92,255,.06), transparent 45%);
+}
+
+.premium-preview-chat .preview-message {
+  width: fit-content;
+  max-width: 82% !important;
+  padding: 12px 14px !important;
+  border-radius: 15px 15px 15px 5px !important;
+  background: #151a27 !important;
+  border: 1px solid rgba(255,255,255,.065) !important;
+  color: #d7dbea !important;
+  font-size: 12px !important;
+  line-height: 1.55 !important;
+  overflow-wrap: break-word;
+}
+
+.premium-preview-chat .preview-message.user {
+  margin-left: auto !important;
+  border-radius: 15px 15px 5px 15px !important;
+  background: linear-gradient(145deg,#6f4ff2,#7d5dff) !important;
+  color: #fff !important;
+}
+
+.widget-device-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-top: 1px solid rgba(255,255,255,.07);
+}
+
+.widget-device-input span {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  border: 1px solid rgba(255,255,255,.07);
+  background: #090c13;
+  border-radius: 13px;
+  display: flex;
+  align-items: center;
+  padding: 0 13px;
+  color: #657087;
+  font-size: 11px;
+}
+
+.widget-device-input button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(145deg,#7d5dff,#6547ee);
+  color: white;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 1120px) {
   .dashboard-grid {
     grid-template-columns: 1fr !important;
   }
 
-  .preview-chat {
-    max-width: 620px;
+  .widget-device {
+    max-width: 430px;
   }
 }
 
-/* Mobile / narrow windows */
-@media (max-width: 820px) {
-  .hero {
-    overflow: hidden !important;
-  }
-
-  .hero-inner {
-    grid-template-columns: 1fr !important;
-    gap: 42px !important;
-  }
-
-  .hero-visual {
-    max-width: 620px !important;
-    margin: 0 auto !important;
+@media (max-width: 950px) {
+  .hero-section {
+    width: min(760px, calc(100% - 32px));
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 60px 0 76px;
   }
 
   .hero-copy {
-    max-width: 100% !important;
+    text-align: center;
+    margin: 0 auto;
   }
-}
 
-@media (max-width: 560px) {
+  .hero-buttons,
+  .trust {
+    justify-content: center;
+  }
+
   .hero-visual {
-    transform: scale(.94);
-    transform-origin: top center;
+    width: min(620px, 100%);
+    min-height: 540px;
+    margin: 0 auto;
   }
 
-  .dashboard-card {
-    padding-left: 18px !important;
-    padding-right: 18px !important;
+  .hero-visual .ai-window {
+    width: min(460px, calc(100% - 56px));
   }
 
-  #widget-code {
-    font-size: 11px !important;
+  .hero-visual .leads-card {
+    left: 0;
   }
-}
 
-
-/* =========================================================
-   V3.4 — LUX UI OVERHAUL
-========================================================= */
-
-:root{
-  --lux-border: rgba(255,255,255,.08);
-  --lux-border-strong: rgba(124,92,255,.28);
-  --lux-panel: rgba(11,12,20,.78);
-  --lux-panel-2: rgba(16,18,30,.86);
-  --lux-text-soft: #a8aec2;
-  --lux-purple: #7c5cff;
-  --lux-purple-2: #9b7cff;
-  --lux-green: #22c55e;
-}
-
-/* ===== LANDING ===== */
-
-.hero{
-  position:relative;
-  min-height:760px;
-  padding-top:90px;
-  background:
-    radial-gradient(circle at 15% 30%, rgba(124,92,255,.16), transparent 36%),
-    radial-gradient(circle at 86% 38%, rgba(124,92,255,.13), transparent 34%),
-    linear-gradient(180deg,#090913 0%,#0b0b17 100%);
-}
-
-.hero::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-  opacity:.28;
-  background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.025) 1px, transparent 1px);
-  background-size:42px 42px;
-  mask-image:linear-gradient(to bottom,rgba(0,0,0,.75),transparent 85%);
-}
-
-.hero-inner{
-  position:relative;
-  z-index:1;
-  grid-template-columns:minmax(0,1fr) minmax(520px,.92fr)!important;
-  gap:70px!important;
-}
-
-.hero-copy{
-  padding:40px 0 50px;
-}
-
-.hero-copy h1{
-  max-width:780px;
-  letter-spacing:-.055em!important;
-  line-height:.96!important;
-  font-size:clamp(64px,6vw,104px)!important;
-}
-
-.hero-copy p{
-  max-width:720px;
-  font-size:clamp(18px,1.55vw,24px)!important;
-  line-height:1.65!important;
-  color:#aeb4c8!important;
-}
-
-.hero-copy .eyebrow,
-.hero-copy small{
-  letter-spacing:.18em!important;
-}
-
-.hero-visual{
-  min-height:610px;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  padding:40px 0;
-}
-
-.hero-visual::before{
-  content:"";
-  position:absolute;
-  width:520px;
-  height:520px;
-  border-radius:50%;
-  background:radial-gradient(circle,rgba(124,92,255,.24),rgba(124,92,255,.05) 45%,transparent 72%);
-  filter:blur(8px);
-  z-index:0;
-}
-
-.hero-visual > *{
-  position:relative;
-  z-index:1;
-}
-
-/* Existing demo shell becomes glass/premium */
-.hero-visual .demo-window,
-.hero-visual .browser-card,
-.hero-visual .chat-demo,
-.hero-visual .hero-card,
-.hero-visual > div{
-  border-color:rgba(255,255,255,.09)!important;
-}
-
-/* floating lead card: keep it elegant, not blocking copy */
-.hero-visual [class*="lead"]{
-  backdrop-filter:blur(18px);
-  box-shadow:0 20px 55px rgba(0,0,0,.38);
-}
-
-/* ===== DASHBOARD ===== */
-
-.dashboard-main{
-  background:
-    radial-gradient(circle at 85% 8%,rgba(124,92,255,.06),transparent 30%),
-    #090a0f!important;
-}
-
-.dashboard-card{
-  background:
-    linear-gradient(180deg,rgba(17,18,27,.92),rgba(11,12,18,.94))!important;
-  border:1px solid var(--lux-border)!important;
-  border-radius:24px!important;
-  box-shadow:
-    0 24px 70px rgba(0,0,0,.24),
-    inset 0 1px 0 rgba(255,255,255,.025);
-}
-
-.dashboard-grid{
-  gap:22px!important;
-}
-
-#widget-code{
-  background:#090a10!important;
-  border:1px solid rgba(124,92,255,.18)!important;
-  border-radius:14px!important;
-  color:#c9bcff!important;
-  padding:18px!important;
-  line-height:1.7!important;
-  box-shadow:inset 0 0 28px rgba(124,92,255,.025);
-}
-
-#copy-widget{
-  box-shadow:0 12px 28px rgba(124,92,255,.24)!important;
-}
-
-/* ===== LUX WIDGET PREVIEW ===== */
-
-.widget-preview-card{
-  position:relative;
-  overflow:hidden!important;
-  min-height:560px;
-}
-
-.widget-preview-card::before{
-  content:"";
-  position:absolute;
-  width:260px;
-  height:260px;
-  right:-80px;
-  top:-80px;
-  border-radius:50%;
-  background:rgba(124,92,255,.12);
-  filter:blur(45px);
-  pointer-events:none;
-}
-
-.widget-preview-top{
-  display:flex;
-  justify-content:space-between;
-  gap:16px;
-  align-items:flex-start;
-  margin-bottom:24px;
-}
-
-.widget-preview-top h1{
-  margin-bottom:0;
-}
-
-.widget-online{
-  position:relative;
-  z-index:1;
-  padding:7px 10px;
-  border:1px solid rgba(34,197,94,.2);
-  background:rgba(34,197,94,.06);
-  border-radius:999px;
-  font-size:10px;
-  font-weight:800;
-  color:#b6f7c8;
-}
-
-.widget-device{
-  width:100%;
-  max-width:390px;
-  margin:8px auto 0;
-  border:1px solid rgba(255,255,255,.095);
-  background:
-    linear-gradient(180deg,#111522,#0a0d15);
-  border-radius:26px;
-  box-shadow:
-    0 28px 75px rgba(0,0,0,.42),
-    0 0 0 1px rgba(124,92,255,.035) inset;
-  overflow:hidden;
-}
-
-.widget-device-head{
-  display:flex;
-  align-items:center;
-  gap:11px;
-  padding:16px;
-  border-bottom:1px solid rgba(255,255,255,.07);
-  background:rgba(255,255,255,.015);
-}
-
-.widget-agent-avatar{
-  width:38px;
-  height:38px;
-  border-radius:13px;
-  display:grid;
-  place-items:center;
-  font-weight:900;
-  background:linear-gradient(145deg,#8b6dff,#6849f5);
-  box-shadow:0 8px 22px rgba(124,92,255,.28);
-}
-
-.widget-device-head>div:nth-child(2){
-  display:grid;
-  gap:3px;
-  min-width:0;
-  flex:1;
-}
-
-.widget-device-head strong{
-  font-size:13px;
-}
-
-.widget-device-head span{
-  color:#7f879d;
-  font-size:10px;
-}
-
-.widget-device-status{
-  color:#22c55e!important;
-}
-
-.premium-preview-chat{
-  min-height:310px;
-  padding:18px!important;
-  background:
-    radial-gradient(circle at 50% 0,rgba(124,92,255,.06),transparent 45%);
-}
-
-.premium-preview-chat .preview-message{
-  width:fit-content;
-  max-width:82%!important;
-  padding:12px 14px!important;
-  border-radius:15px 15px 15px 5px!important;
-  background:#151a27!important;
-  border:1px solid rgba(255,255,255,.065)!important;
-  color:#d7dbea!important;
-  font-size:12px!important;
-  line-height:1.55!important;
-  box-shadow:0 8px 24px rgba(0,0,0,.12);
-}
-
-.premium-preview-chat .preview-message.user{
-  margin-left:auto!important;
-  border-radius:15px 15px 5px 15px!important;
-  background:linear-gradient(145deg,#6f4ff2,#7d5dff)!important;
-  color:#fff!important;
-  border-color:rgba(255,255,255,.08)!important;
-}
-
-.widget-device-input{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:12px;
-  border-top:1px solid rgba(255,255,255,.07);
-}
-
-.widget-device-input span{
-  flex:1;
-  min-width:0;
-  height:44px;
-  border:1px solid rgba(255,255,255,.07);
-  background:#090c13;
-  border-radius:13px;
-  display:flex;
-  align-items:center;
-  padding:0 13px;
-  color:#657087;
-  font-size:11px;
-}
-
-.widget-device-input button{
-  width:44px;
-  height:44px;
-  border:0;
-  border-radius:13px;
-  background:linear-gradient(145deg,#7d5dff,#6547ee);
-  color:white;
-  font-size:18px;
-  font-weight:900;
-  box-shadow:0 10px 24px rgba(124,92,255,.24);
-}
-
-/* ===== RESPONSIVE ===== */
-
-@media(max-width:1180px){
-  .hero-inner{
-    grid-template-columns:1fr 1fr!important;
-    gap:42px!important;
-  }
-  .hero-copy h1{
-    font-size:clamp(58px,7vw,86px)!important;
+  .hero-visual .live-card {
+    right: 0;
   }
 }
 
-@media(max-width:900px){
-  .hero-inner{
-    grid-template-columns:1fr!important;
-  }
-  .hero-copy{
-    padding-bottom:0;
-  }
-  .hero-visual{
-    min-height:auto;
-    padding-top:10px;
-  }
-  .widget-preview-card{
-    min-height:auto;
-  }
-}
-
-@media(max-width:560px){
-  .hero{
-    min-height:auto;
-    padding-top:52px;
-  }
-  .hero-copy h1{
-    font-size:clamp(52px,15vw,72px)!important;
-  }
-  .widget-device{
-    max-width:100%;
-  }
-}
-
-
-/* =========================================================
-   V3.4.1 — LANDING HERO FINAL FIX
-   Keep the dashboard/widget design unchanged.
-========================================================= */
-
-@media (min-width: 901px) {
-  .hero-inner {
-    grid-template-columns: minmax(520px, .92fr) minmax(680px, 1.08fr) !important;
-    gap: clamp(36px, 4vw, 68px) !important;
-    max-width: 1580px !important;
-    width: calc(100% - 64px) !important;
-    margin-inline: auto !important;
-  }
-
-  .hero-copy {
-    min-width: 0 !important;
-    max-width: 760px !important;
+@media (max-width: 600px) {
+  .hero-section {
+    width: calc(100% - 28px);
+    padding-top: 52px;
   }
 
   .hero-copy h1 {
-    font-size: clamp(62px, 5.2vw, 94px) !important;
+    font-size: clamp(48px, 14vw, 64px);
+  }
+
+  .hero-text {
+    font-size: 15px;
   }
 
   .hero-visual {
-    width: 100% !important;
-    max-width: 760px !important;
-    min-width: 620px !important;
-    min-height: 610px !important;
-    margin-left: auto !important;
-    overflow: visible !important;
-    transform: none !important;
+    min-height: 500px;
   }
 
-  /* Protect the actual demo from being squeezed by generic flex/grid rules */
-  .hero-visual > div {
-    width: min(100%, 720px) !important;
-    min-width: 620px !important;
-    max-width: 720px !important;
+  .hero-visual .ai-window {
+    width: 100%;
   }
 
-  .hero-visual [class*="chat"],
-  .hero-visual [class*="demo"],
-  .hero-visual [class*="browser"] {
-    min-width: 0 !important;
-    width: 100% !important;
+  .hero-visual .floating-card {
+    max-width: 185px;
+    padding: 10px 11px;
   }
 
-  .hero-visual [class*="message"] {
-    width: auto !important;
-    min-width: 190px !important;
-    max-width: 72% !important;
-    white-space: normal !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
+  .hero-visual .leads-card {
+    left: 8px;
+    bottom: 52px;
   }
 
-  /* Floating lead/status cards should remain compact */
-  .hero-visual [class*="lead"],
-  .hero-visual [class*="notification"],
-  .hero-visual [class*="floating"] {
-    width: auto !important;
-    min-width: 190px !important;
-    max-width: 270px !important;
-    height: auto !important;
-  }
-}
-
-@media (min-width: 901px) and (max-width: 1280px) {
-  .hero-inner {
-    grid-template-columns: minmax(440px, .85fr) minmax(560px, 1.15fr) !important;
-    width: calc(100% - 40px) !important;
-    gap: 30px !important;
+  .hero-visual .live-card {
+    right: 8px;
+    top: 50px;
   }
 
-  .hero-copy h1 {
-    font-size: clamp(58px, 5.8vw, 78px) !important;
+  .widget-preview-card {
+    min-height: auto;
   }
 
-  .hero-visual {
-    min-width: 540px !important;
-  }
-
-  .hero-visual > div {
-    min-width: 540px !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .hero-inner {
-    grid-template-columns: 1fr !important;
-    width: calc(100% - 36px) !important;
-    margin-inline: auto !important;
-  }
-
-  .hero-visual {
-    width: 100% !important;
-    max-width: 700px !important;
-    min-width: 0 !important;
-    margin-inline: auto !important;
-    overflow: hidden !important;
-  }
-
-  .hero-visual > div {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 700px !important;
-  }
-}
-
-
-/* =========================================================
-   V3.4.2 — HERO RIGHT-SIDE CLIPPING FINAL FIX
-   Preserve the current approved visual design.
-========================================================= */
-
-@media (min-width: 901px) {
-  /* Give the whole hero a safe viewport width */
-  .hero-inner {
-    box-sizing: border-box !important;
-    max-width: 1540px !important;
-    width: calc(100vw - 72px) !important;
-    grid-template-columns: minmax(0, 1fr) minmax(480px, 590px) !important;
-    gap: clamp(32px, 3.5vw, 58px) !important;
-    overflow: visible !important;
-  }
-
-  .hero-copy {
-    min-width: 0 !important;
-  }
-
-  .hero-visual {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 590px !important;
-    margin: 0 !important;
-    justify-self: end !important;
-    overflow: visible !important;
-  }
-
-  /* Keep the actual product mockup inside its column */
-  .hero-visual > div {
-    box-sizing: border-box !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 590px !important;
-  }
-
-  /* Messages should wrap normally inside the demo, never force overflow */
-  .hero-visual [class*="message"] {
-    box-sizing: border-box !important;
-    min-width: 0 !important;
-    max-width: 78% !important;
-    overflow-wrap: break-word !important;
-    word-break: normal !important;
-  }
-
-  /* Floating UI remains inside the visual's safe area */
-  .hero-visual [class*="lead"],
-  .hero-visual [class*="notification"],
-  .hero-visual [class*="floating"] {
-    box-sizing: border-box !important;
-    min-width: 0 !important;
-    max-width: 230px !important;
-  }
-}
-
-@media (min-width: 901px) and (max-width: 1250px) {
-  .hero-inner {
-    width: calc(100vw - 48px) !important;
-    grid-template-columns: minmax(0, 1fr) minmax(430px, 500px) !important;
-    gap: 28px !important;
-  }
-
-  .hero-visual,
-  .hero-visual > div {
-    max-width: 500px !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .hero-inner {
-    width: calc(100% - 32px) !important;
-    overflow: hidden !important;
-  }
-
-  .hero-visual,
-  .hero-visual > div {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 680px !important;
-    margin-inline: auto !important;
+  .widget-device {
+    max-width: 100%;
   }
 }

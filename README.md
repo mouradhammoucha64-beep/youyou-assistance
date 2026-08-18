@@ -75,3 +75,7 @@ Fixes the desktop hero mockup squeezing issue while preserving the V3.4 Website 
 
 ## V3.4.2 Hero Right-Side Clipping Final Fix
 Keeps the approved landing design while constraining the live assistant demo to the viewport and preventing right-side clipping.
+
+
+## V3.4.3 Clean Hero Rebuild
+Removed the accumulated conflicting hero patches and rebuilt the landing hero using the actual markup selectors (`hero-section`, `hero-visual`, `ai-window`, and `floating-card`). The approved Lux Website Widget preview is preserved.
