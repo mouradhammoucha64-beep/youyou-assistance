@@ -1344,6 +1344,7 @@ else if (state.section === "settings") {
               Lead alert mode
               <select id="lead-alert-mode">
                 ${settingsOption("Hot leads only", c.lead_alert_mode || "Hot leads only")}
+                ${settingsOption("Warm + Hot", c.lead_alert_mode || "Hot leads only")}
                 ${settingsOption("All qualified leads", c.lead_alert_mode || "Hot leads only")}
                 ${settingsOption("Off", c.lead_alert_mode || "Hot leads only")}
               </select>

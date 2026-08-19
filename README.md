@@ -115,3 +115,7 @@ Run `supabase-v3.7-business-settings.sql` once before testing Save.
 
 ## V3.7.1
 Fixed Business Settings save error `Cannot coerce the result to a single JSON object` by removing the post-update `.select().single()` requirement. The update now saves directly and keeps the current workspace state in sync locally.
+
+
+## V3.7.2
+Added `Warm + Hot` as a Lead alert mode option. No SQL changes required.
