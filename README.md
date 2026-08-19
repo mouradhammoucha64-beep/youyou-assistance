@@ -90,3 +90,11 @@ Replaces the old prompt-based knowledge entry flow with a professional Business 
 
 ## V3.6 AI Control Persistence
 AI Control Center is now functional and persists one configuration per company in Supabase. The duplicate Lead Capture select was removed; the lower green lead-capture toggle is the single source of truth. Agent name, tone, language, instructions, response style, and lead capture are loaded and saved from `public.ai_settings`. Run `supabase-ai-settings.sql` once in Supabase before testing Save configuration.
+
+
+## V3.6.1
+Fixed native dropdown option visibility for Tone and Language on dark UI.
+
+
+## V3.6.2
+Fixed Tone/Language native dropdown option text visibility on Windows/Edge by using dark option text on the OS white dropdown background.

@@ -2876,3 +2876,18 @@ input[type="checkbox"]:focus-visible {
   opacity: .65;
   cursor: wait;
 }
+
+
+/* =========================================
+   V3.6.2 — Windows / Edge dropdown text fix
+   Keep the select itself dark, but make native
+   dropdown options readable on the white OS menu.
+   ========================================= */
+select {
+  color: #f8fafc;
+}
+
+select option {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
