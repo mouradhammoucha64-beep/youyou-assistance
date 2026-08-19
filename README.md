@@ -132,3 +132,20 @@ Adds company-specific widget configuration:
 - Public widget loads saved configuration automatically
 
 Run `supabase-v3.8-widget-customization.sql` once before testing.
+
+
+## V3.9 — QA & Dashboard Polish
+
+This release applies the QA fixes found during the page-by-page dashboard review:
+
+- Overview Leads counter now uses the same qualified-intent logic as the Leads page.
+- Overview wording no longer says setup is incomplete after setup is complete.
+- Conversation detail now shows an email extracted from visitor messages when `visitor_email` is empty.
+- Dashboard / Leads / Knowledge dates are formatted consistently in English.
+- "Local scoring preview" renamed to "Intent scoring preview".
+- AI Control Center says "Configuration Ready" until the paid AI API is connected.
+- Knowledge cards say "Ready for AI" instead of implying live AI is already connected.
+- Real floating website launcher is hidden inside the admin dashboard to prevent overlap; the dedicated widget preview remains.
+- Dark scrollbar polish for admin text areas.
+
+No SQL migration is required for V3.9.

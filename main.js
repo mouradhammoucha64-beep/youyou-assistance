@@ -1034,7 +1034,7 @@ else if (state.section === "ai") {
         </div>
 
         <div class="ai-status">
-          <span>●</span> AI READY
+          <span>●</span> CONFIGURATION READY
         </div>
       </div>
 
@@ -1565,7 +1565,7 @@ else if (state.section === "settings") {
         </div>
 
         <button id="launch-agent" class="primary">
-          Launch agent →
+          Open Website Widget →
         </button>
 
       </section>
@@ -1581,7 +1581,7 @@ else if (state.section === "settings") {
 <div>
   <small>LEADS</small>
   <strong id="stat-leads">—</strong>
-  <span>AI-qualified opportunities</span>
+  <span>Qualified opportunities</span>
 </div>
 
 <div>
@@ -1597,13 +1597,13 @@ else if (state.section === "settings") {
         <div class="dashboard-card">
 
           <h2>
-            Agent status
-            <em>● LIVE</em>
+            Workspace status
+            <em>● READY</em>
           </h2>
 
           <p>
-            Your workspace is connected to Supabase.
-            Add knowledge and install the widget to start.
+            Your workspace is configured and ready for customer conversations.
+            Knowledge and widget settings are connected.
           </p>
 
         </div>
@@ -2065,12 +2065,7 @@ async function loadOverviewStats() {
 
   const conversationsResult = await supabase
     .from("conversations")
-    .select("id", { count: "exact", head: true })
-    .eq("company_id", companyId);
-
-  const leadsResult = await supabase
-    .from("leads")
-    .select("id", { count: "exact", head: true })
+    .select("id, messages(content)")
     .eq("company_id", companyId);
 
   const knowledgeResult = await supabase
@@ -2088,29 +2083,59 @@ async function loadOverviewStats() {
     document.querySelector("#stat-knowledge");
 
   if (conversationsResult.error) {
-    conversationsEl.textContent = "!";
+    if (conversationsEl) conversationsEl.textContent = "!";
+    if (leadsEl) leadsEl.textContent = "!";
     console.error(conversationsResult.error);
   } else {
-    conversationsEl.textContent =
-      conversationsResult.count ?? 0;
-  }
+    const conversations = conversationsResult.data || [];
+    const qualifiedCount = conversations.filter((conversation) =>
+      scoreLeadFromMessages(conversation.messages || []) >= 40
+    ).length;
 
-  if (leadsResult.error) {
-    leadsEl.textContent = "!";
-    console.error(leadsResult.error);
-  } else {
-    leadsEl.textContent =
-      leadsResult.count ?? 0;
+    if (conversationsEl) {
+      conversationsEl.textContent = String(conversations.length);
+    }
+
+    if (leadsEl) {
+      leadsEl.textContent = String(qualifiedCount);
+    }
   }
 
   if (knowledgeResult.error) {
-    knowledgeEl.textContent = "!";
+    if (knowledgeEl) knowledgeEl.textContent = "!";
     console.error(knowledgeResult.error);
-  } else {
+  } else if (knowledgeEl) {
     knowledgeEl.textContent =
       knowledgeResult.count ?? 0;
   }
 }
+
+function formatDashboardDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
+function formatDashboardDate(value) {
+  if (!value) return "Saved";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Saved";
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(date);
+}
+
 function scoreLeadFromMessages(messages = []) {
   const text = messages.map((m) => m.content || "").join(" ").toLowerCase();
   let score = 10;
@@ -2179,7 +2204,7 @@ async function loadConversations() {
   list.innerHTML = data.map((conversation, index) => {
     const name = conversation.visitor_name || "Website visitor";
     const timeValue = conversation.updated_at || conversation.created_at;
-    const time = timeValue ? new Date(timeValue).toLocaleString() : "";
+    const time = formatDashboardDateTime(timeValue);
     const status = conversation.status || "open";
     const score = scoreLeadFromMessages(conversation.messages || []);
     const meta = leadMeta(score);
@@ -2221,19 +2246,20 @@ function renderConversationDetail(conversation) {
   const score = scoreLeadFromMessages(data);
   const meta = leadMeta(score);
   const summary = summarizeLead(data);
+  const contact = extractLeadContact(conversation, data);
 
   detail.innerHTML = `
     <div class="conversation-detail-head">
       <div>
         <small>VISITOR</small>
         <h2>${escapeHtml(conversation.visitor_name || "Website visitor")}</h2>
-        <p>${escapeHtml(conversation.visitor_email || "No email captured")}</p>
+        <p>${escapeHtml(contact.email || "No email captured")}</p>
       </div>
       <span class="lead-badge large ${meta.cls}">${meta.icon} ${meta.label} · ${score}/100</span>
     </div>
     <div class="lead-summary">
       <div><small>SMART SUMMARY</small><strong>${escapeHtml(summary)}</strong></div>
-      <span>Local scoring preview</span>
+      <span>Intent scoring preview</span>
     </div>
     <div class="conversation-messages">
       ${!data.length ? `<div class="conversation-empty-messages">No messages in this conversation yet.</div>` :
@@ -2307,7 +2333,7 @@ async function loadLeads() {
     list.innerHTML = visible.map((lead) => {
       const name = lead.visitor_name || "Website visitor";
       const when = lead.updated_at || lead.created_at;
-      const time = when ? new Date(when).toLocaleString() : "";
+      const time = formatDashboardDateTime(when);
       const signals = [];
       const text = lead.messages.map(m => m.content || "").join(" ").toLowerCase();
       if (/(price|pricing|cost|quote)/.test(text)) signals.push("Pricing");
@@ -2480,13 +2506,7 @@ function renderKnowledgeList(query = "") {
     .map((item) => {
       const content = String(item.content || "");
       const preview = content.length > 360 ? `${content.slice(0, 360)}…` : content;
-      const created = item.created_at
-        ? new Date(item.created_at).toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric"
-          })
-        : "Saved";
+      const created = formatDashboardDate(item.created_at);
 
       return `
         <article class="knowledge-item knowledge-item-pro">
@@ -2495,7 +2515,7 @@ function renderKnowledgeList(query = "") {
               <span class="knowledge-source">MANUAL</span>
               <strong>${escapeHtml(item.title || "Untitled knowledge")}</strong>
             </div>
-            <span class="knowledge-ai-ready">● AI READY</span>
+            <span class="knowledge-ai-ready">● READY FOR AI</span>
           </div>
           <p>${escapeHtml(preview)}</p>
           <div class="knowledge-item-footer">

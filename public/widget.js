@@ -150,6 +150,7 @@
   ========================= */
 
   const button = document.createElement("button");
+  button.id = "youyou-public-widget-launcher";
 
   button.setAttribute(
     "aria-label",
@@ -241,6 +242,7 @@
   ========================= */
 
   const panel = document.createElement("div");
+  panel.id = "youyou-public-widget-panel";
 
   Object.assign(panel.style, {
     position: "fixed",
@@ -469,6 +471,27 @@
 
   document.body.appendChild(button);
   document.body.appendChild(panel);
+
+
+  function syncWidgetAdminVisibility() {
+    const adminDashboard = document.querySelector(".dashboard");
+
+    if (adminDashboard) {
+      button.style.display = "none";
+      panel.style.display = "none";
+      return;
+    }
+
+    button.style.display = "flex";
+  }
+
+  const dashboardObserver = new MutationObserver(syncWidgetAdminVisibility);
+  dashboardObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  syncWidgetAdminVisibility();
 
   /* =========================
      OPEN / CLOSE

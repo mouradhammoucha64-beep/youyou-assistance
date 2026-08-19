@@ -3314,3 +3314,65 @@ select option {
     width: 100%;
   }
 }
+
+
+/* =========================================
+   V3.9 — QA & DASHBOARD POLISH
+   ========================================= */
+
+/* Cleaner dark scrollbars for admin text areas / long panels */
+.ai-control-center textarea,
+.pro-settings textarea,
+.widget-customizer-v38 textarea,
+.knowledge-form textarea {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(130, 138, 158, .55) rgba(255,255,255,.025);
+}
+
+.ai-control-center textarea::-webkit-scrollbar,
+.pro-settings textarea::-webkit-scrollbar,
+.widget-customizer-v38 textarea::-webkit-scrollbar,
+.knowledge-form textarea::-webkit-scrollbar {
+  width: 9px;
+}
+
+.ai-control-center textarea::-webkit-scrollbar-track,
+.pro-settings textarea::-webkit-scrollbar-track,
+.widget-customizer-v38 textarea::-webkit-scrollbar-track,
+.knowledge-form textarea::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.025);
+  border-radius: 999px;
+}
+
+.ai-control-center textarea::-webkit-scrollbar-thumb,
+.pro-settings textarea::-webkit-scrollbar-thumb,
+.widget-customizer-v38 textarea::-webkit-scrollbar-thumb,
+.knowledge-form textarea::-webkit-scrollbar-thumb {
+  background: rgba(130, 138, 158, .48);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Status chips should not overstate paid AI availability before integration. */
+.ai-status {
+  letter-spacing: .02em;
+}
+
+/* Slightly cleaner timestamps in cards. */
+.conversation-row-top span,
+.lead-card-side > strong,
+.knowledge-item-footer {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keep dashboard content comfortably clear at the bottom. */
+.dashboard-main {
+  padding-bottom: 72px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-main {
+    padding-bottom: 96px;
+  }
+}
