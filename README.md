@@ -203,3 +203,8 @@ Adds a premium landing-page section that sells the new Business Knowledge Import
 ## V4.4 — Landing FAQ
 
 Adds a compact seven-question accordion FAQ, a FAQ navigation link, SEO Growth Center positioning, and a final signup CTA. No SQL migration required.
+
+
+## V4.4.1 — FAQ Separate Page
+
+Moves the full FAQ off the landing page to `/faq` so the landing stays shorter and more conversion-focused. No SQL required.

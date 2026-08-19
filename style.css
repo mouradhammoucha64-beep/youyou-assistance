@@ -4229,3 +4229,10 @@ select option {
     width: 100%;
   }
 }
+
+
+/* V4.4.1 — Separate FAQ page */
+.faq-page-main { padding-top: 72px; min-height: calc(100vh - 220px); }
+.faq-page .landing-faq-section { margin-bottom: 72px; }
+.landing-links a.is-active { color: #fff; }
+@media (max-width: 680px) { .faq-page-main { padding-top: 42px; } }

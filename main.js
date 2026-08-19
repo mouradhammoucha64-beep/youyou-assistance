@@ -91,7 +91,7 @@ function renderLanding() {
           <a href="/" data-scroll-section="features">Features</a>
           <a href="/" data-scroll-section="how">How it works</a>
           <a href="/" data-scroll-section="pricing">Pricing</a>
-          <a href="/" data-scroll-section="faq">FAQ</a>
+          <a href="/faq">FAQ</a>
         </nav>
 
         <div class="nav-actions">
@@ -571,9 +571,110 @@ function renderLanding() {
 
       </main>
 
+      <footer>
+
+        <div class="footer-brand">
+          <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
+            <span class="brand-wordmark" aria-label="YOUYOU">
+            <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
+          </span>
+          </a>
+
+          <p>
+            AI Customer Agent for modern businesses.
+          </p>
+        </div>
+
+        <div class="footer-links">
+          <a href="/" data-scroll-section="features">Features</a>
+          <a href="/" data-scroll-section="how">How it works</a>
+          <a href="/" data-scroll-section="pricing">Pricing</a>
+          <button id="footer-login">Login</button>
+        </div>
+
+        <div class="copyright">
+          © 2026 YOUYOU. All rights reserved.
+        </div>
+
+      </footer>
+
+    </div>
+  `;
+
+  document.querySelector("#nav-login").onclick = showLogin;
+  document.querySelector("#nav-start").onclick = showSignup;
+  document.querySelector("#hero-start").onclick = showSignup;
+  document.querySelector("#hero-login").onclick = showLogin;
+  document.querySelector("#knowledge-start")?.addEventListener("click", showSignup);
+  document.querySelector("#pricing-start").onclick = showSignup;
+  document.querySelector("#final-start").onclick = showSignup;
+
+  document.querySelector("#footer-login").onclick = showLogin;
+
+  document.querySelectorAll("[data-scroll-section]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const sectionId = link.dataset.scrollSection;
+      const target = document.querySelector(`#${sectionId}`);
+
+      if (window.location.pathname !== "/" || window.location.hash) {
+        window.history.replaceState({}, "", "/");
+      }
+
+      target?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  });
+
+  document.querySelectorAll(".brand-home-link").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      if (window.location.pathname !== "/" || window.location.hash) {
+        window.history.replaceState({}, "", "/");
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    });
+  });
+}
 
 
-      <section id="faq" class="landing-faq-section">
+
+
+/* =========================
+   FAQ
+========================= */
+
+function renderFaqPage() {
+  app.innerHTML = `
+    <div class="landing faq-page">
+      <header class="landing-nav">
+        <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
+          <span class="brand-wordmark" aria-label="YOUYOU">
+            <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
+          </span>
+        </a>
+        <nav class="landing-links">
+          <a href="/">Home</a>
+          <a href="/#features">Features</a>
+          <a href="/#pricing">Pricing</a>
+          <a class="is-active" href="/faq">FAQ</a>
+        </nav>
+        <div class="nav-actions">
+          <button id="faq-nav-login" class="nav-login">Log in</button>
+          <button id="faq-nav-start" class="primary small">Start free</button>
+        </div>
+      </header>
+
+      <main class="faq-page-main">
+        <section id="faq" class="landing-faq-section">
         <div class="landing-faq-shell">
           <div class="landing-faq-head">
             <div class="eyebrow">FREQUENTLY ASKED QUESTIONS</div>
@@ -655,58 +756,35 @@ function renderLanding() {
           </div>
         </div>
       </section>
+      </main>
 
       <footer>
-
         <div class="footer-brand">
-          <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
+          <a class="logo" href="/">
             <span class="brand-wordmark" aria-label="YOUYOU">
-            <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
-          </span>
+              <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
+            </span>
           </a>
-
-          <p>
-            AI Customer Agent for modern businesses.
-          </p>
+          <p>AI customer agent for modern businesses.</p>
         </div>
-
-        <div class="footer-links">
-          <a href="/" data-scroll-section="features">Features</a>
-          <a href="/" data-scroll-section="how">How it works</a>
-          <a href="/" data-scroll-section="pricing">Pricing</a>
-          <button id="footer-login">Login</button>
-        </div>
-
-        <div class="copyright">
-          © 2026 YOUYOU. All rights reserved.
-        </div>
-
       </footer>
-
     </div>
   `;
 
-  document.querySelector("#nav-login").onclick = showLogin;
-  document.querySelector("#nav-start").onclick = showSignup;
-  document.querySelector("#hero-start").onclick = showSignup;
-  document.querySelector("#hero-login").onclick = showLogin;
-  document.querySelector("#knowledge-start")?.addEventListener("click", showSignup);
-  document.querySelector("#pricing-start").onclick = showSignup;
-  document.querySelector("#final-start").onclick = showSignup;
+  document.querySelector("#faq-nav-login")?.addEventListener("click", showLogin);
+  document.querySelector("#faq-nav-start")?.addEventListener("click", showSignup);
   document.querySelector("#faq-start")?.addEventListener("click", showSignup);
 
   document.querySelectorAll(".landing-faq-question").forEach((button) => {
     button.addEventListener("click", () => {
       const item = button.closest(".landing-faq-item");
       const isOpen = item?.classList.contains("is-open");
-
       document.querySelectorAll(".landing-faq-item").forEach((faqItem) => {
         faqItem.classList.remove("is-open");
         faqItem.querySelector(".landing-faq-question")?.setAttribute("aria-expanded", "false");
         const faqToggle = faqItem.querySelector(".faq-toggle");
         if (faqToggle) faqToggle.textContent = "+";
       });
-
       if (!isOpen && item) {
         item.classList.add("is-open");
         button.setAttribute("aria-expanded", "true");
@@ -715,43 +793,7 @@ function renderLanding() {
       }
     });
   });
-
-  document.querySelector("#footer-login").onclick = showLogin;
-
-  document.querySelectorAll("[data-scroll-section]").forEach((link) => {
-    link.addEventListener("click", (event) => {
-      event.preventDefault();
-
-      const sectionId = link.dataset.scrollSection;
-      const target = document.querySelector(`#${sectionId}`);
-
-      if (window.location.pathname !== "/" || window.location.hash) {
-        window.history.replaceState({}, "", "/");
-      }
-
-      target?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    });
-  });
-
-  document.querySelectorAll(".brand-home-link").forEach((link) => {
-    link.addEventListener("click", (event) => {
-      event.preventDefault();
-
-      if (window.location.pathname !== "/" || window.location.hash) {
-        window.history.replaceState({}, "", "/");
-      }
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    });
-  });
 }
-
 
 /* =========================
    AUTH
@@ -3399,6 +3441,8 @@ async function saveSettings() {
 function render() {
   if (state.page === "landing") {
     renderLanding();
+  } else if (state.page === "faq") {
+    renderFaqPage();
   } else if (state.page === "auth") {
     renderAuth();
   } else {
@@ -3420,9 +3464,13 @@ async function boot() {
   const { data } =
     await supabase.auth.getSession();
 
-  if (data.session) {
+  if (window.location.pathname === "/faq") {
+    state.page = "faq";
+    renderFaqPage();
+  } else if (data.session) {
     await loadUser(data.session.user);
   } else {
+    state.page = "landing";
     renderLanding();
   }
 
@@ -3443,6 +3491,18 @@ async function boot() {
 
 
 window.addEventListener("popstate", () => {
+  if (window.location.pathname === "/faq") {
+    state.page = "faq";
+    renderFaqPage();
+    return;
+  }
+
+  if (state.page === "faq" && window.location.pathname === "/") {
+    state.page = "landing";
+    renderLanding();
+    return;
+  }
+
   if (state.page !== "dashboard" || !state.user) return;
 
   const nextSection = sectionFromPath();
