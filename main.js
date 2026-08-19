@@ -1,5 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
+import * as mammoth from "mammoth/mammoth.browser";
+import * as XLSX from "xlsx";
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 import "./style.css";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -20,6 +26,42 @@ let state = {
   section: "overview",
   message: "",
 };
+
+
+const DASHBOARD_ROUTES = {
+  overview: "/dashboard/overview",
+  conversations: "/dashboard/conversations",
+  leads: "/dashboard/leads",
+  knowledge: "/dashboard/knowledge",
+  widget: "/dashboard/widget",
+  ai: "/dashboard/ai-control",
+  settings: "/dashboard/settings",
+};
+
+function sectionFromPath(pathname = window.location.pathname) {
+  const match = Object.entries(DASHBOARD_ROUTES)
+    .find(([, path]) => path === pathname);
+
+  return match?.[0] || "overview";
+}
+
+function dashboardPath(section) {
+  return DASHBOARD_ROUTES[section] || DASHBOARD_ROUTES.overview;
+}
+
+function navigateDashboard(section, { replace = false, renderPage = true } = {}) {
+  const nextSection = DASHBOARD_ROUTES[section] ? section : "overview";
+  const nextPath = dashboardPath(nextSection);
+
+  state.section = nextSection;
+
+  if (window.location.pathname !== nextPath) {
+    const method = replace ? "replaceState" : "pushState";
+    window.history[method]({ section: nextSection }, "", nextPath);
+  }
+
+  if (renderPage) renderDashboard();
+}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -634,6 +676,19 @@ async function loadUser(user) {
   state.company = data?.companies || null;
   state.page = "dashboard";
 
+  const requestedSection = sectionFromPath();
+  const isDashboardPath = window.location.pathname.startsWith("/dashboard/");
+
+  state.section = requestedSection;
+
+  if (!isDashboardPath) {
+    window.history.replaceState(
+      { section: state.section },
+      "",
+      dashboardPath(state.section)
+    );
+  }
+
   renderDashboard();
 }
 
@@ -735,8 +790,7 @@ function dashboardShell(content) {
       const nextSection = button.dataset.nav;
       if (!nextSection) return;
 
-      state.section = nextSection;
-      renderDashboard();
+      navigateDashboard(nextSection);
     });
   }
 
@@ -748,6 +802,8 @@ function dashboardShell(content) {
       state.profile = null;
       state.company = null;
       state.page = "landing";
+      state.section = "overview";
+      window.history.replaceState({}, "", "/");
 
       render();
     };
@@ -800,6 +856,64 @@ function renderDashboard() {
             <span>STATUS</span>
             <strong class="knowledge-ready">● READY</strong>
             <small>Workspace connected</small>
+          </div>
+        </div>
+
+        <div class="knowledge-upload-card dashboard-card">
+          <div class="knowledge-card-heading">
+            <div>
+              <small>UPLOAD KNOWLEDGE</small>
+              <h2>Import business files</h2>
+              <p>
+                Upload an existing document and turn it into knowledge for this workspace.
+              </p>
+            </div>
+            <span class="knowledge-upload-badge">PDF · DOCX · TXT · CSV · XLSX</span>
+          </div>
+
+          <div id="knowledge-dropzone" class="knowledge-dropzone" tabindex="0" role="button">
+            <input
+              id="knowledge-file-input"
+              type="file"
+              accept=".pdf,.docx,.txt,.csv,.xlsx,.xls"
+              hidden
+            />
+            <div class="knowledge-drop-icon">⇧</div>
+            <strong>Drop a file here or choose a file</strong>
+            <span>Maximum 10 MB. The file is parsed in your browser; only extracted text is saved.</span>
+            <button id="choose-knowledge-file" class="knowledge-secondary" type="button">
+              Choose file
+            </button>
+          </div>
+
+          <div id="knowledge-file-result" class="knowledge-file-result" hidden>
+            <div class="knowledge-file-meta">
+              <div>
+                <small>SELECTED FILE</small>
+                <strong id="knowledge-file-name">—</strong>
+                <span id="knowledge-file-info">—</span>
+              </div>
+              <button id="clear-knowledge-file" class="knowledge-secondary" type="button">
+                Remove
+              </button>
+            </div>
+
+            <label class="knowledge-field">
+              <span>Extracted knowledge preview</span>
+              <textarea
+                id="knowledge-file-preview"
+                rows="10"
+                maxlength="30000"
+                placeholder="Extracted text will appear here..."
+              ></textarea>
+            </label>
+
+            <div class="knowledge-file-actions">
+              <span id="knowledge-file-status" class="knowledge-form-status" aria-live="polite"></span>
+              <button id="import-knowledge-file" class="primary" type="button">
+                Import to Knowledge Base →
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1631,8 +1745,7 @@ else if (state.section === "settings") {
   document.querySelector("#launch-agent")?.addEventListener(
     "click",
     () => {
-      state.section = "widget";
-      renderDashboard();
+      navigateDashboard("widget");
     }
   );
 
@@ -1709,6 +1822,63 @@ else if (state.section === "settings") {
     button.addEventListener("click", () => {
       applyKnowledgeTemplate(button.dataset.knowledgeTemplate);
     });
+  });
+
+
+  document.querySelector("#choose-knowledge-file")?.addEventListener(
+    "click",
+    () => document.querySelector("#knowledge-file-input")?.click()
+  );
+
+  document.querySelector("#knowledge-file-input")?.addEventListener(
+    "change",
+    (event) => {
+      const file = event.target.files?.[0];
+      if (file) handleKnowledgeFile(file);
+    }
+  );
+
+  document.querySelector("#clear-knowledge-file")?.addEventListener(
+    "click",
+    resetKnowledgeFileUpload
+  );
+
+  document.querySelector("#import-knowledge-file")?.addEventListener(
+    "click",
+    importKnowledgeFile
+  );
+
+  const knowledgeDropzone = document.querySelector("#knowledge-dropzone");
+
+  knowledgeDropzone?.addEventListener("click", (event) => {
+    if (event.target.closest("button")) return;
+    document.querySelector("#knowledge-file-input")?.click();
+  });
+
+  knowledgeDropzone?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      document.querySelector("#knowledge-file-input")?.click();
+    }
+  });
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    knowledgeDropzone?.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      knowledgeDropzone.classList.add("is-dragging");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    knowledgeDropzone?.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      knowledgeDropzone.classList.remove("is-dragging");
+    });
+  });
+
+  knowledgeDropzone?.addEventListener("drop", (event) => {
+    const file = event.dataTransfer?.files?.[0];
+    if (file) handleKnowledgeFile(file);
   });
 
   document.querySelector("#save-settings")?.addEventListener(
@@ -2385,8 +2555,7 @@ async function loadLeads() {
 
     document.querySelectorAll("[data-open-conversation]").forEach((button) => {
       button.onclick = () => {
-        state.section = "conversations";
-        renderDashboard();
+        navigateDashboard("conversations");
         setTimeout(() => {
           document.querySelector(`[data-conversation-id="${CSS.escape(button.dataset.openConversation)}"]`)?.click();
         }, 250);
@@ -2404,6 +2573,266 @@ async function loadLeads() {
   });
 
   paint();
+}
+
+
+let pendingKnowledgeFile = null;
+
+function setKnowledgeFileStatus(message = "", type = "") {
+  const el = document.querySelector("#knowledge-file-status");
+  if (!el) return;
+  el.textContent = message;
+  el.className = `knowledge-form-status ${type}`.trim();
+}
+
+function readableFileSize(bytes = 0) {
+  const size = Number(bytes) || 0;
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function normalizeExtractedKnowledge(text = "") {
+  return String(text)
+    .replace(/\r\n/g, "\n")
+    .replace(/\u0000/g, "")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{4,}/g, "\n\n\n")
+    .trim();
+}
+
+async function extractPdfText(file) {
+  const buffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+  const pages = [];
+
+  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const lines = content.items
+      .map((item) => String(item.str || "").trim())
+      .filter(Boolean)
+      .join(" ");
+
+    if (lines) pages.push(`Page ${pageNumber}\n${lines}`);
+  }
+
+  return pages.join("\n\n");
+}
+
+async function extractDocxText(file) {
+  const buffer = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+  return result.value || "";
+}
+
+async function extractSpreadsheetText(file) {
+  const buffer = await file.arrayBuffer();
+  const workbook = XLSX.read(buffer, { type: "array" });
+  const sections = [];
+
+  workbook.SheetNames.forEach((sheetName) => {
+    const sheet = workbook.Sheets[sheetName];
+    const csv = XLSX.utils.sheet_to_csv(sheet, { blankrows: false });
+    if (csv.trim()) {
+      sections.push(`Sheet: ${sheetName}\n${csv.trim()}`);
+    }
+  });
+
+  return sections.join("\n\n");
+}
+
+async function extractKnowledgeFileText(file) {
+  const extension = file.name.split(".").pop()?.toLowerCase() || "";
+
+  if (extension === "txt" || extension === "csv") {
+    return await file.text();
+  }
+
+  if (extension === "pdf") {
+    return await extractPdfText(file);
+  }
+
+  if (extension === "docx") {
+    return await extractDocxText(file);
+  }
+
+  if (extension === "xlsx" || extension === "xls") {
+    return await extractSpreadsheetText(file);
+  }
+
+  throw new Error("Unsupported file type. Use PDF, DOCX, TXT, CSV, XLSX or XLS.");
+}
+
+function resetKnowledgeFileUpload() {
+  pendingKnowledgeFile = null;
+
+  const input = document.querySelector("#knowledge-file-input");
+  const result = document.querySelector("#knowledge-file-result");
+  const preview = document.querySelector("#knowledge-file-preview");
+
+  if (input) input.value = "";
+  if (preview) preview.value = "";
+  if (result) result.hidden = true;
+
+  setKnowledgeFileStatus();
+}
+
+async function handleKnowledgeFile(file) {
+  if (!file) return;
+
+  const maxBytes = 10 * 1024 * 1024;
+
+  if (file.size > maxBytes) {
+    setKnowledgeFileStatus("File is too large. Maximum size is 10 MB.", "error");
+    return;
+  }
+
+  const allowed = ["pdf", "docx", "txt", "csv", "xlsx", "xls"];
+  const extension = file.name.split(".").pop()?.toLowerCase() || "";
+
+  if (!allowed.includes(extension)) {
+    setKnowledgeFileStatus("Unsupported file type.", "error");
+    return;
+  }
+
+  const result = document.querySelector("#knowledge-file-result");
+  const name = document.querySelector("#knowledge-file-name");
+  const info = document.querySelector("#knowledge-file-info");
+  const preview = document.querySelector("#knowledge-file-preview");
+  const importButton = document.querySelector("#import-knowledge-file");
+
+  if (result) result.hidden = false;
+  if (name) name.textContent = file.name;
+  if (info) info.textContent = `${extension.toUpperCase()} · ${readableFileSize(file.size)}`;
+  if (preview) preview.value = "";
+
+  importButton?.setAttribute("disabled", "disabled");
+  setKnowledgeFileStatus("Reading file...", "info");
+
+  try {
+    const rawText = await extractKnowledgeFileText(file);
+    const text = normalizeExtractedKnowledge(rawText);
+
+    if (!text) {
+      throw new Error("No readable text was found in this file.");
+    }
+
+    pendingKnowledgeFile = {
+      file,
+      text
+    };
+
+    if (preview) preview.value = text.slice(0, 30000);
+
+    setKnowledgeFileStatus(
+      `${text.length.toLocaleString()} characters extracted. Review the text, then import it.`,
+      "success"
+    );
+  } catch (error) {
+    console.error("Knowledge file extraction error:", error);
+    pendingKnowledgeFile = null;
+    setKnowledgeFileStatus(error.message || "Could not read this file.", "error");
+  } finally {
+    importButton?.removeAttribute("disabled");
+  }
+}
+
+function chunkKnowledgeText(text, maxLength = 5500) {
+  const normalized = normalizeExtractedKnowledge(text);
+  if (!normalized) return [];
+
+  const paragraphs = normalized.split(/\n{2,}/).filter(Boolean);
+  const chunks = [];
+  let current = "";
+
+  const pushCurrent = () => {
+    const value = current.trim();
+    if (value) chunks.push(value);
+    current = "";
+  };
+
+  paragraphs.forEach((paragraph) => {
+    const clean = paragraph.trim();
+    if (!clean) return;
+
+    if (clean.length > maxLength) {
+      pushCurrent();
+
+      for (let i = 0; i < clean.length; i += maxLength) {
+        chunks.push(clean.slice(i, i + maxLength).trim());
+      }
+      return;
+    }
+
+    const candidate = current ? `${current}\n\n${clean}` : clean;
+
+    if (candidate.length > maxLength) {
+      pushCurrent();
+      current = clean;
+    } else {
+      current = candidate;
+    }
+  });
+
+  pushCurrent();
+  return chunks;
+}
+
+async function importKnowledgeFile() {
+  if (!state.company) return;
+
+  const preview = document.querySelector("#knowledge-file-preview");
+  const button = document.querySelector("#import-knowledge-file");
+
+  const text = normalizeExtractedKnowledge(
+    preview?.value || pendingKnowledgeFile?.text || ""
+  );
+
+  if (!pendingKnowledgeFile?.file || !text) {
+    setKnowledgeFileStatus("Choose and read a file first.", "error");
+    return;
+  }
+
+  const chunks = chunkKnowledgeText(text);
+
+  if (!chunks.length) {
+    setKnowledgeFileStatus("No knowledge content to import.", "error");
+    return;
+  }
+
+  button?.setAttribute("disabled", "disabled");
+  if (button) button.textContent = "Importing...";
+  setKnowledgeFileStatus(`Saving ${chunks.length} knowledge entr${chunks.length === 1 ? "y" : "ies"}...`, "info");
+
+  const baseTitle = pendingKnowledgeFile.file.name.replace(/\.[^.]+$/, "");
+  const rows = chunks.map((content, index) => ({
+    company_id: state.company.id,
+    title: chunks.length === 1
+      ? `File: ${baseTitle}`
+      : `File: ${baseTitle} — Part ${index + 1}`,
+    content
+  }));
+
+  const { error } = await supabase
+    .from("knowledge")
+    .insert(rows);
+
+  button?.removeAttribute("disabled");
+  if (button) button.textContent = "Import to Knowledge Base →";
+
+  if (error) {
+    console.error("Knowledge file import error:", error);
+    setKnowledgeFileStatus(error.message, "error");
+    return;
+  }
+
+  setKnowledgeFileStatus(
+    `${rows.length} knowledge entr${rows.length === 1 ? "y" : "ies"} imported successfully.`,
+    "success"
+  );
+
+  await loadKnowledge();
 }
 
 let knowledgeCache = [];
@@ -2710,11 +3139,21 @@ async function boot() {
         state.profile = null;
         state.company = null;
         state.page = "landing";
+        state.section = "overview";
+        window.history.replaceState({}, "", "/");
         render();
       }
     }
   );
 }
 
+
+window.addEventListener("popstate", () => {
+  if (state.page !== "dashboard" || !state.user) return;
+
+  const nextSection = sectionFromPath();
+  state.section = nextSection;
+  renderDashboard();
+});
 
 boot();

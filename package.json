@@ -1,5 +1,18 @@
 {
-  "name":"youyou-pro-saas","private":true,"version":"1.0.0","type":"module",
-  "scripts":{"dev":"vite","build":"vite build","preview":"vite preview"},
-  "dependencies":{"@supabase/supabase-js":"^2.57.0","vite":"^7.1.3"}
+  "name": "youyou-pro-saas",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.0",
+    "vite": "^7.1.3",
+    "mammoth": "^1.10.0",
+    "pdfjs-dist": "^5.4.54",
+    "xlsx": "^0.18.5"
+  }
 }

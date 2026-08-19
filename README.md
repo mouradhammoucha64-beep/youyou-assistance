@@ -149,3 +149,37 @@ This release applies the QA fixes found during the page-by-page dashboard review
 - Dark scrollbar polish for admin text areas.
 
 No SQL migration is required for V3.9.
+
+
+## V4.0 — Knowledge File Upload
+
+Adds browser-side knowledge import for:
+- PDF
+- DOCX
+- TXT
+- CSV
+- XLSX / XLS
+
+Workflow:
+1. Choose or drop a file.
+2. YOUYOU extracts readable text locally in the browser.
+3. Review/edit the extracted text.
+4. Import it to the current company's Knowledge Base.
+5. Long documents are automatically split into safe knowledge entries.
+
+No new Supabase SQL is required. Only extracted text is saved to the existing `knowledge` table.
+
+
+## V4.1 — Dashboard Routing
+
+Each dashboard section now has its own URL:
+- `/dashboard/overview`
+- `/dashboard/conversations`
+- `/dashboard/leads`
+- `/dashboard/knowledge`
+- `/dashboard/widget`
+- `/dashboard/ai-control`
+- `/dashboard/settings`
+
+Browser Back/Forward and refresh on a dashboard route are supported through `vercel.json`.
+No SQL migration is required.
