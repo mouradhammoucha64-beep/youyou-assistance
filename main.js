@@ -81,15 +81,16 @@ function renderLanding() {
     <div class="landing">
 
       <header class="landing-nav">
-        <a class="logo" href="#">
-          <span class="logo-mark">Y</span>
-          <span>YOUYOU</span>
+        <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
+          <span class="brand-wordmark" aria-label="YOUYOU">
+            <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
+          </span>
         </a>
 
         <nav class="landing-links">
-          <a href="#features">Features</a>
-          <a href="#how">How it works</a>
-          <a href="#pricing">Pricing</a>
+          <a href="/" data-scroll-section="features">Features</a>
+          <a href="/" data-scroll-section="how">How it works</a>
+          <a href="/" data-scroll-section="pricing">Pricing</a>
         </nav>
 
         <div class="nav-actions">
@@ -573,9 +574,10 @@ function renderLanding() {
       <footer>
 
         <div class="footer-brand">
-          <a class="logo" href="#">
-            <span class="logo-mark">Y</span>
-            <span>YOUYOU</span>
+          <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
+            <span class="brand-wordmark" aria-label="YOUYOU">
+            <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
+          </span>
           </a>
 
           <p>
@@ -584,9 +586,9 @@ function renderLanding() {
         </div>
 
         <div class="footer-links">
-          <a href="#features">Features</a>
-          <a href="#how">How it works</a>
-          <a href="#pricing">Pricing</a>
+          <a href="/" data-scroll-section="features">Features</a>
+          <a href="/" data-scroll-section="how">How it works</a>
+          <a href="/" data-scroll-section="pricing">Pricing</a>
           <button id="footer-login">Login</button>
         </div>
 
@@ -607,6 +609,39 @@ function renderLanding() {
   document.querySelector("#pricing-start").onclick = showSignup;
   document.querySelector("#final-start").onclick = showSignup;
   document.querySelector("#footer-login").onclick = showLogin;
+
+  document.querySelectorAll("[data-scroll-section]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const sectionId = link.dataset.scrollSection;
+      const target = document.querySelector(`#${sectionId}`);
+
+      if (window.location.pathname !== "/" || window.location.hash) {
+        window.history.replaceState({}, "", "/");
+      }
+
+      target?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  });
+
+  document.querySelectorAll(".brand-home-link").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      if (window.location.pathname !== "/" || window.location.hash) {
+        window.history.replaceState({}, "", "/");
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+    });
+  });
 }
 
 
@@ -625,8 +660,9 @@ function renderAuth() {
       <div class="auth-card">
 
         <div class="auth-logo">
-          <span class="logo-mark">Y</span>
-          <strong>YOUYOU</strong>
+          <span class="brand-wordmark" aria-label="YOUYOU">
+            <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
+          </span>
         </div>
 
         <div class="eyebrow">
@@ -711,6 +747,7 @@ function renderAuth() {
   document.querySelector("#back-home").onclick = () => {
     state.page = "landing";
     state.message = "";
+    window.history.replaceState({}, "", "/");
     render();
   };
 
@@ -876,8 +913,9 @@ function dashboardShell(content) {
 
         <div>
           <div class="side-logo">
-            <span class="logo-mark">Y</span>
-            <strong>YOUYOU</strong>
+            <span class="brand-wordmark" aria-label="YOUYOU">
+            <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
+          </span>
           </div>
 
           <div class="side-label">

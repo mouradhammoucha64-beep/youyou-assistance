@@ -188,3 +188,13 @@ No SQL migration is required.
 ## V4.2 — Landing Knowledge Import Showcase
 
 Adds a premium landing-page section that sells the new Business Knowledge Import capability using an interactive-style mockup, file-format badges, progress state, benefits, and a signup CTA. No SQL migration required.
+
+
+## V4.3 — Brand + Clean URLs
+
+- Replaces the square `Y` navigation mark with a custom YOUYOU text wordmark.
+- Adds a custom `YY` favicon so browsers no longer show the generic globe.
+- Removes the trailing `/#` behavior from the YOUYOU home logo.
+- Landing navigation scrolls smoothly without adding `#features`, `#how`, or `#pricing` to the URL.
+- Auth back-home action restores the clean root URL.
+- No SQL migration required.
