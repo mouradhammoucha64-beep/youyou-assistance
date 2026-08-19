@@ -255,3 +255,7 @@ Keeps the V4.7 visual design while shortening the SEO page:
 - Hero and card spacing reduced slightly
 - Disclaimer compressed into a small inline note
 - No SQL migration required
+
+
+## V4.7.2 — Dark Scrollbars
+Replaces the bright/white scrollbar tracks with thin dark scrollbars across the dashboard and public pages. No SQL required.

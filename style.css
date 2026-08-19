@@ -5527,3 +5527,69 @@ select option {
     flex-direction: column;
   }
 }
+
+
+/* =========================================
+   V4.7.2 — DARK SCROLLBARS
+   ========================================= */
+
+/* Firefox */
+html,
+body,
+.dashboard,
+.dashboard-sidebar,
+.dashboard-main,
+.dashboard-content,
+.faq-page,
+.landing {
+  scrollbar-width: thin;
+  scrollbar-color: #3a3f4d #0b0c12;
+}
+
+/* Chromium / Edge / Chrome */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.dashboard::-webkit-scrollbar,
+.dashboard-sidebar::-webkit-scrollbar,
+.dashboard-main::-webkit-scrollbar,
+.dashboard-content::-webkit-scrollbar,
+.faq-page::-webkit-scrollbar,
+.landing::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.dashboard::-webkit-scrollbar-track,
+.dashboard-sidebar::-webkit-scrollbar-track,
+.dashboard-main::-webkit-scrollbar-track,
+.dashboard-content::-webkit-scrollbar-track,
+.faq-page::-webkit-scrollbar-track,
+.landing::-webkit-scrollbar-track {
+  background: #0b0c12;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.dashboard::-webkit-scrollbar-thumb,
+.dashboard-sidebar::-webkit-scrollbar-thumb,
+.dashboard-main::-webkit-scrollbar-thumb,
+.dashboard-content::-webkit-scrollbar-thumb,
+.faq-page::-webkit-scrollbar-thumb,
+.landing::-webkit-scrollbar-thumb {
+  background: #343947;
+  border: 2px solid #0b0c12;
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.dashboard::-webkit-scrollbar-thumb:hover,
+.dashboard-sidebar::-webkit-scrollbar-thumb:hover,
+.dashboard-main::-webkit-scrollbar-thumb:hover,
+.dashboard-content::-webkit-scrollbar-thumb:hover,
+.faq-page::-webkit-scrollbar-thumb:hover,
+.landing::-webkit-scrollbar-thumb:hover {
+  background: #4a5061;
+}
