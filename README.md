@@ -183,3 +183,8 @@ Each dashboard section now has its own URL:
 
 Browser Back/Forward and refresh on a dashboard route are supported through `vercel.json`.
 No SQL migration is required.
+
+
+## V4.2 — Landing Knowledge Import Showcase
+
+Adds a premium landing-page section that sells the new Business Knowledge Import capability using an interactive-style mockup, file-format badges, progress state, benefits, and a signup CTA. No SQL migration required.

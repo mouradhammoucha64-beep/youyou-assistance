@@ -348,6 +348,153 @@ function renderLanding() {
         </section>
 
 
+
+        <section class="landing-knowledge-section">
+
+          <div class="landing-knowledge-shell">
+
+            <div class="landing-knowledge-copy">
+              <div class="eyebrow knowledge-eyebrow">
+                <span class="knowledge-new-dot"></span>
+                BUSINESS KNOWLEDGE IMPORT
+              </div>
+
+              <h2>
+                Train your AI in
+                <span>minutes, not weeks.</span>
+              </h2>
+
+              <p>
+                Drop in the documents your business already uses. YOUYOU extracts
+                the useful information and turns it into knowledge your AI can use
+                when speaking with customers.
+              </p>
+
+              <div class="knowledge-format-row">
+                <span>PDF</span>
+                <span>DOCX</span>
+                <span>XLSX</span>
+                <span>CSV</span>
+                <span>TXT</span>
+              </div>
+
+              <div class="knowledge-benefits">
+                <div>
+                  <span class="knowledge-check">✓</span>
+                  <div>
+                    <strong>Use the files you already have</strong>
+                    <small>Pricing, services, FAQs, policies and internal business info.</small>
+                  </div>
+                </div>
+
+                <div>
+                  <span class="knowledge-check">✓</span>
+                  <div>
+                    <strong>Review before you save</strong>
+                    <small>Extracted content stays editable before it enters your Knowledge Base.</small>
+                  </div>
+                </div>
+
+                <div>
+                  <span class="knowledge-check">✓</span>
+                  <div>
+                    <strong>Built for real businesses</strong>
+                    <small>Long documents can be split into clean knowledge entries automatically.</small>
+                  </div>
+                </div>
+              </div>
+
+              <button id="knowledge-start" class="primary hero-btn knowledge-cta">
+                Train my AI →
+              </button>
+            </div>
+
+            <div class="knowledge-demo-card" aria-label="Business knowledge import demo">
+
+              <div class="knowledge-demo-top">
+                <div>
+                  <small>YOUYOU BUSINESS BRAIN</small>
+                  <strong>Knowledge import</strong>
+                </div>
+                <span class="knowledge-demo-live">● READY</span>
+              </div>
+
+              <div class="knowledge-drop-demo">
+                <div class="knowledge-drop-demo-icon">⇧</div>
+                <strong>Drop your business files here</strong>
+                <span>YOUYOU reads the useful content for you.</span>
+              </div>
+
+              <div class="knowledge-demo-files">
+                <div class="knowledge-demo-file file-one">
+                  <span class="file-type pdf">PDF</span>
+                  <div>
+                    <strong>pricing-guide.pdf</strong>
+                    <small>Pricing & packages</small>
+                  </div>
+                  <span class="file-state">✓</span>
+                </div>
+
+                <div class="knowledge-demo-file file-two">
+                  <span class="file-type xlsx">XLS</span>
+                  <div>
+                    <strong>services.xlsx</strong>
+                    <small>Services & details</small>
+                  </div>
+                  <span class="file-state">✓</span>
+                </div>
+
+                <div class="knowledge-demo-file file-three">
+                  <span class="file-type docx">DOC</span>
+                  <div>
+                    <strong>customer-faq.docx</strong>
+                    <small>Questions & answers</small>
+                  </div>
+                  <span class="file-state">✓</span>
+                </div>
+              </div>
+
+              <div class="knowledge-processing">
+                <div class="knowledge-processing-head">
+                  <span>Building business knowledge</span>
+                  <strong>100%</strong>
+                </div>
+                <div class="knowledge-progress-track">
+                  <span></span>
+                </div>
+              </div>
+
+              <div class="knowledge-result-grid">
+                <div>
+                  <small>CHARACTERS</small>
+                  <strong>12,480</strong>
+                </div>
+                <div>
+                  <small>FILES READ</small>
+                  <strong>3</strong>
+                </div>
+                <div>
+                  <small>STATUS</small>
+                  <strong class="knowledge-ready-text">READY</strong>
+                </div>
+              </div>
+
+              <div class="knowledge-ai-ready-row">
+                <div class="knowledge-ai-pulse">Y</div>
+                <div>
+                  <small>BUSINESS KNOWLEDGE READY</small>
+                  <strong>Your AI now has context to work with.</strong>
+                </div>
+                <span>✦</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
         <section id="pricing" class="pricing-section">
 
           <div class="section-heading">
@@ -456,6 +603,7 @@ function renderLanding() {
   document.querySelector("#nav-start").onclick = showSignup;
   document.querySelector("#hero-start").onclick = showSignup;
   document.querySelector("#hero-login").onclick = showLogin;
+  document.querySelector("#knowledge-start")?.addEventListener("click", showSignup);
   document.querySelector("#pricing-start").onclick = showSignup;
   document.querySelector("#final-start").onclick = showSignup;
   document.querySelector("#footer-login").onclick = showLogin;
