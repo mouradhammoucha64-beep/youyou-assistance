@@ -5352,3 +5352,178 @@ select option {
     flex-direction: column;
   }
 }
+
+
+/* =========================================
+   V4.7.1 — SEO COMPACT POLISH
+   ========================================= */
+
+.seo-growth-page { gap: 14px; }
+
+.seo-hero {
+  padding: 26px 30px;
+  gap: 26px;
+}
+
+.seo-hero h1 {
+  margin: 10px 0;
+  font-size: clamp(32px, 4vw, 56px);
+}
+
+.seo-hero-copy > p { line-height: 1.6; }
+.seo-hero-actions { margin-top: 20px; }
+.seo-input-strip { padding: 16px 18px; }
+
+.seo-metric-card {
+  min-height: 82px;
+  padding: 14px 15px;
+}
+
+.seo-opportunity-card,
+.seo-search-preview,
+.seo-page-ideas-card,
+.seo-brief-card,
+.seo-checklist-card,
+.seo-console-card {
+  padding: 20px;
+}
+
+.seo-card-head { margin-bottom: 14px; }
+
+.seo-quickwins,
+.seo-page-ideas,
+.seo-checklist { gap: 7px; }
+
+.seo-quickwin-item,
+.seo-page-idea,
+.seo-check-row {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.seo-checklist.is-compact .seo-check-row:nth-child(n+5) {
+  display: none;
+}
+
+.seo-checklist-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.seo-mini-btn {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 9px;
+  background: rgba(255,255,255,.025);
+  color: #aeb5c5;
+  font: inherit;
+  font-size: 8px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.seo-mini-btn:hover {
+  border-color: rgba(126,91,255,.28);
+  color: #fff;
+}
+
+.seo-console-card-compact {
+  min-height: 0 !important;
+  justify-content: flex-start;
+  padding: 20px !important;
+}
+
+.seo-console-compact-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.seo-console-compact-top > div:last-child {
+  display: grid;
+  gap: 3px;
+}
+
+.seo-console-card-compact .seo-console-icon {
+  width: 42px;
+  height: 42px;
+  margin: 0;
+  flex: 0 0 42px;
+}
+
+.seo-console-card-compact h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.seo-console-card-compact > p {
+  margin-top: 14px;
+}
+
+.seo-console-card-compact .seo-console-points {
+  margin-top: 14px;
+}
+
+.seo-console-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255,255,255,.055);
+}
+
+.seo-console-status-row span {
+  color: #6f7789;
+  font-size: 8px;
+}
+
+.seo-console-status-row strong {
+  color: #8e96a7;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.seo-console-card-compact .seo-console-orbit {
+  width: 150px;
+  height: 150px;
+  right: -40px;
+  top: -55px;
+}
+
+.seo-disclaimer-compact {
+  padding: 9px 12px;
+  border-radius: 10px;
+}
+
+.seo-disclaimer-compact > span {
+  width: 22px;
+  height: 22px;
+  font-size: 9px;
+}
+
+.seo-disclaimer-compact p {
+  font-size: 7.5px;
+}
+
+.seo-content-brief { padding: 14px; }
+.seo-google-card { padding: 16px; }
+.seo-bottom-grid { align-items: start; }
+
+@media (max-width: 680px) {
+  .seo-hero { padding: 20px 16px; }
+  .seo-hero h1 { font-size: 36px; }
+
+  .seo-checklist-head-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .seo-console-status-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

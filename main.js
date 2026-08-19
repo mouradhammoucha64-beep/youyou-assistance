@@ -1967,26 +1967,31 @@ else if (state.section === "seo") {
               <p>Build the foundation before chasing rankings.</p>
             </div>
 
-            <strong id="seo-checklist-progress" class="seo-checklist-progress">—</strong>
+            <div class="seo-checklist-head-actions">
+              <strong id="seo-checklist-progress" class="seo-checklist-progress">—</strong>
+              <button id="seo-toggle-checklist" class="seo-mini-btn" type="button">View all</button>
+            </div>
           </div>
 
-          <div id="seo-checklist" class="seo-checklist">
+          <div id="seo-checklist" class="seo-checklist is-compact">
             <div class="seo-loading-row">Checking setup...</div>
           </div>
         </article>
 
 
-        <article class="seo-console-card dashboard-card">
+        <article class="seo-console-card seo-console-card-compact dashboard-card">
           <div class="seo-console-orbit"></div>
 
-          <div class="seo-console-icon">G</div>
-
-          <small>SEARCH PERFORMANCE</small>
-          <h2>Google Search Console</h2>
+          <div class="seo-console-compact-top">
+            <div class="seo-console-icon">G</div>
+            <div>
+              <small>SEARCH PERFORMANCE</small>
+              <h2>Google Search Console</h2>
+            </div>
+          </div>
 
           <p>
-            Later, connect real Search Console data to track queries, clicks,
-            impressions and pages that are gaining or losing visibility.
+            Connect real queries, clicks, impressions and page performance later.
           </p>
 
           <div class="seo-console-points">
@@ -1995,20 +2000,19 @@ else if (state.section === "seo") {
             <span>Real impressions</span>
           </div>
 
-          <button class="seo-secondary-btn seo-full-btn" type="button" disabled>
-            Search Console connection — Coming later
-          </button>
+          <div class="seo-console-status-row">
+            <span>Free Google tool</span>
+            <strong>Connection coming later</strong>
+          </div>
         </article>
 
       </div>
 
 
-      <div class="seo-disclaimer">
+      <div class="seo-disclaimer seo-disclaimer-compact">
         <span>i</span>
         <p>
-          SEO Growth Center V1 analyzes your YOUYOU workspace and creates practical
-          recommendations. It does not claim live Google rankings, keyword volume
-          or guaranteed positions until real search-data integrations are connected.
+          Recommendations use your YOUYOU workspace. Live rankings and Search Console data appear only after real integrations are connected.
         </p>
       </div>
 
@@ -3519,6 +3523,14 @@ function initSeoGrowthCenter() {
     ].join("\n");
 
     seoCopyText(briefText, "Content brief copied");
+  });
+
+  document.querySelector("#seo-toggle-checklist")?.addEventListener("click", (event) => {
+    const checklist = document.querySelector("#seo-checklist");
+    if (!checklist) return;
+
+    const isCompact = checklist.classList.toggle("is-compact");
+    event.currentTarget.textContent = isCompact ? "View all" : "Show less";
   });
 
   analyzeSeoWorkspace();

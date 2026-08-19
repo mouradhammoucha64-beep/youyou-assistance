@@ -244,3 +244,14 @@ No keyword volume, live rankings or Search Console metrics are invented.
 Google Search Console is displayed as a future real-data integration.
 
 No SQL migration required.
+
+
+## V4.7.1 — SEO Compact Polish
+
+Keeps the V4.7 visual design while shortening the SEO page:
+- Optimization Checklist shows 4 items by default with View all / Show less
+- Google Search Console stays visible but becomes a compact card
+- Search Console is marked as a free Google tool and future connection
+- Hero and card spacing reduced slightly
+- Disclaimer compressed into a small inline note
+- No SQL migration required
