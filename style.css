@@ -2854,3 +2854,25 @@ input[type="checkbox"]:focus-visible {
     gap: 4px;
   }
 }
+
+
+/* =========================================
+   V3.6 — AI CONFIGURATION PERSISTENCE
+   ========================================= */
+.ai-control-center #ai-config-status[data-status="success"],
+.ai-control-center #ai-config-status[data-status="ready"] {
+  color: #34d399;
+}
+
+.ai-control-center #ai-config-status[data-status="loading"] {
+  color: #c4b5fd;
+}
+
+.ai-control-center #ai-config-status[data-status="error"] {
+  color: #fb7185;
+}
+
+.ai-control-center #save-ai-config:disabled {
+  opacity: .65;
+  cursor: wait;
+}

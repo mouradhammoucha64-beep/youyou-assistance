@@ -987,14 +987,6 @@ else if (state.section === "ai") {
           </select>
         </label>
 
-        <label>
-          Lead capture
-          <select id="lead-capture">
-            <option>Enabled</option>
-            <option>Disabled</option>
-          </select>
-        </label>
-
       </div>
 
       <div class="ai-section">
@@ -1104,7 +1096,7 @@ and identify qualified leads.</textarea>
 
         <div>
           <small>STATUS</small>
-          <strong>Configuration ready</strong>
+          <strong id="ai-config-status">Configuration ready</strong>
         </div>
 
         <button id="save-ai-config" class="primary">
@@ -1356,6 +1348,11 @@ else if (state.section === "settings") {
     saveSettings
   );
 
+  document.querySelector("#save-ai-config")?.addEventListener(
+    "click",
+    saveAiConfiguration
+  );
+
 if (state.section === "knowledge") {
   loadKnowledge();
 }
@@ -1370,6 +1367,132 @@ if (state.section === "leads") {
 if (state.section === "overview") {
   loadOverviewStats();
 }
+
+if (state.section === "ai") {
+  loadAiConfiguration();
+}
+}
+
+const DEFAULT_AI_INSTRUCTIONS = `You are YOUYOU, an AI customer service agent.
+
+Answer customers professionally, clearly and accurately.
+
+Use the company's knowledge base whenever possible.
+
+Never invent information. If you do not know the answer,
+clearly say so and guide the customer to contact the company.
+
+Help visitors understand products and services, answer questions,
+and identify qualified leads.`;
+
+function setAiConfigStatus(message, type = "") {
+  const status = document.querySelector("#ai-config-status");
+  if (!status) return;
+  status.textContent = message;
+  status.dataset.status = type;
+}
+
+function applyAiConfiguration(config = {}) {
+  const agentName = document.querySelector("#agent-name");
+  const tone = document.querySelector("#agent-tone");
+  const language = document.querySelector("#agent-language");
+  const instructions = document.querySelector("#agent-instructions");
+  const leadEnabled = document.querySelector("#lead-enabled");
+
+  if (agentName) agentName.value = config.agent_name || "YOUYOU AI";
+  if (tone) tone.value = config.tone || "Professional";
+  if (language) language.value = config.language || "English";
+  if (instructions) instructions.value = config.instructions || DEFAULT_AI_INSTRUCTIONS;
+  if (leadEnabled) leadEnabled.checked = config.lead_capture ?? true;
+
+  const responseStyle = config.response_style || "Balanced";
+  document.querySelectorAll('input[name="response-style"]').forEach((input) => {
+    input.checked = input.value === responseStyle;
+  });
+}
+
+async function loadAiConfiguration() {
+  if (!supabase || !state.company) return;
+
+  setAiConfigStatus("Loading configuration...", "loading");
+
+  const { data, error } = await supabase
+    .from("ai_settings")
+    .select("agent_name, tone, language, instructions, response_style, lead_capture, updated_at")
+    .eq("company_id", state.company.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("AI configuration load error:", error);
+    setAiConfigStatus("Database setup required", "error");
+    return;
+  }
+
+  if (!data) {
+    applyAiConfiguration({});
+    setAiConfigStatus("Default configuration ready", "ready");
+    return;
+  }
+
+  applyAiConfiguration(data);
+  setAiConfigStatus("Saved configuration loaded", "success");
+}
+
+async function saveAiConfiguration() {
+  if (!supabase || !state.company) return;
+
+  const button = document.querySelector("#save-ai-config");
+  const agentName = document.querySelector("#agent-name")?.value.trim() || "";
+  const tone = document.querySelector("#agent-tone")?.value || "Professional";
+  const language = document.querySelector("#agent-language")?.value || "English";
+  const instructions = document.querySelector("#agent-instructions")?.value.trim() || "";
+  const responseStyle = document.querySelector('input[name="response-style"]:checked')?.value || "Balanced";
+  const leadCapture = document.querySelector("#lead-enabled")?.checked ?? true;
+
+  if (!agentName) {
+    setAiConfigStatus("Agent name is required", "error");
+    document.querySelector("#agent-name")?.focus();
+    return;
+  }
+
+  if (!instructions) {
+    setAiConfigStatus("Agent instructions are required", "error");
+    document.querySelector("#agent-instructions")?.focus();
+    return;
+  }
+
+  button?.setAttribute("disabled", "disabled");
+  if (button) button.textContent = "Saving...";
+  setAiConfigStatus("Saving configuration...", "loading");
+
+  const { error } = await supabase
+    .from("ai_settings")
+    .upsert({
+      company_id: state.company.id,
+      agent_name: agentName,
+      tone,
+      language,
+      instructions,
+      response_style: responseStyle,
+      lead_capture: leadCapture,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "company_id" });
+
+  button?.removeAttribute("disabled");
+
+  if (error) {
+    console.error("AI configuration save error:", error);
+    if (button) button.textContent = "Save configuration →";
+    setAiConfigStatus(error.message || "Could not save configuration", "error");
+    return;
+  }
+
+  setAiConfigStatus("Saved successfully", "success");
+  if (button) button.textContent = "Saved ✓";
+
+  window.setTimeout(() => {
+    if (button?.isConnected) button.textContent = "Save configuration →";
+  }, 1600);
 }
 
 async function loadOverviewStats() {

@@ -86,3 +86,7 @@ Removed the Sarah Johnson floating lead card from the landing hero entirely. The
 
 ## V3.5 Professional Knowledge Base
 Replaces the old prompt-based knowledge entry flow with a professional Business Brain workspace. Includes a real form, quick-start templates, character counting, live search, saved-entry stats, polished knowledge cards, and responsive layout. This version keeps the existing Supabase `knowledge` table schema (`company_id`, `title`, `content`) and does not require a database migration or paid AI integration.
+
+
+## V3.6 AI Control Persistence
+AI Control Center is now functional and persists one configuration per company in Supabase. The duplicate Lead Capture select was removed; the lower green lead-capture toggle is the single source of truth. Agent name, tone, language, instructions, response style, and lead capture are loaded and saved from `public.ai_settings`. Run `supabase-ai-settings.sql` once in Supabase before testing Save configuration.
