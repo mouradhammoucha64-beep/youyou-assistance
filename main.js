@@ -2326,15 +2326,13 @@ async function saveSettings() {
   if (button) button.textContent = "Saving...";
   setSettingsSaveStatus("Saving business settings...", "loading");
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("companies")
     .update({
       ...values,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", state.company.id)
-    .select("*")
-    .single();
+    .eq("id", state.company.id);
 
   button?.removeAttribute("disabled");
   if (button) button.textContent = "Save business settings →";
@@ -2345,7 +2343,7 @@ async function saveSettings() {
     return;
   }
 
-  state.company = data || { ...state.company, ...values };
+  state.company = { ...state.company, ...values };
   setSettingsSaveStatus("Saved successfully", "success");
 }
 
