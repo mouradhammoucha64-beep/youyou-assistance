@@ -208,3 +208,14 @@ Adds a compact seven-question accordion FAQ, a FAQ navigation link, SEO Growth C
 ## V4.4.1 — FAQ Separate Page
 
 Moves the full FAQ off the landing page to `/faq` so the landing stays shorter and more conversion-focused. No SQL required.
+
+
+## V4.5 — Monthly Pricing
+
+Replaces the old single $19 plan with three monthly tiers:
+- Starter — $29/month
+- Growth — $59/month
+- Pro — $99/month
+
+Growth is highlighted as Most Popular. Annual billing is intentionally not shown yet.
+No SQL migration required.

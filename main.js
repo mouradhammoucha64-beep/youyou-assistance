@@ -496,52 +496,124 @@ function renderLanding() {
 
         </section>
 
+        <section id="pricing" class="pricing-section pricing-v45">
 
-        <section id="pricing" class="pricing-section">
-
-          <div class="section-heading">
-            <div class="eyebrow">PRICING</div>
+          <div class="section-heading pricing-heading">
+            <div class="eyebrow">SIMPLE MONTHLY PRICING</div>
 
             <h2>
-              Start simple.
-              <span>Grow when you're ready.</span>
+              Start with AI.
+              <span>Upgrade when growth matters.</span>
             </h2>
 
             <p>
-              Everything you need to start building an AI-powered
-              customer experience.
+              Three clear plans. No annual commitment. Start free and choose the
+              level that fits your business when you're ready.
             </p>
           </div>
 
-          <div class="pricing-card">
+          <div class="pricing-grid">
 
-            <div>
-              <div class="pricing-label">YOUYOU PRO</div>
+            <article class="pricing-plan pricing-starter">
+              <div class="pricing-plan-top">
+                <div class="pricing-plan-name">STARTER</div>
+                <p class="pricing-plan-tagline">AI customer support for your website.</p>
 
-              <h3>
-                $19
-                <span>/ month</span>
-              </h3>
+                <div class="pricing-price">
+                  <span class="pricing-currency">$</span>
+                  <strong>29</strong>
+                  <span class="pricing-period">/month</span>
+                </div>
+              </div>
 
-              <p>
-                Everything you need to launch your AI customer agent.
-              </p>
-            </div>
+              <div class="pricing-divider"></div>
 
-            <ul>
-              <li>✓ AI customer conversations</li>
-              <li>✓ Knowledge base</li>
-              <li>✓ Lead capture</li>
-              <li>✓ Website widget</li>
-              <li>✓ AI control center</li>
-              <li>✓ 24/7 availability</li>
-            </ul>
+              <ul class="pricing-feature-list">
+                <li><span>✓</span> AI Customer Agent</li>
+                <li><span>✓</span> Website Widget</li>
+                <li><span>✓</span> Knowledge Base</li>
+                <li><span>✓</span> PDF, Word & Excel import</li>
+                <li><span>✓</span> Conversations Inbox</li>
+                <li><span>✓</span> Basic lead capture</li>
+              </ul>
 
-            <button id="pricing-start" class="primary">
-              Start free
-              <span>→</span>
-            </button>
+              <button id="pricing-starter" class="pricing-plan-btn pricing-plan-btn-ghost" type="button">
+                Start free →
+              </button>
 
+              <small class="pricing-plan-note">No credit card required</small>
+            </article>
+
+
+            <article class="pricing-plan pricing-growth">
+              <div class="pricing-popular-badge">MOST POPULAR</div>
+
+              <div class="pricing-plan-top">
+                <div class="pricing-plan-name">GROWTH</div>
+                <p class="pricing-plan-tagline">AI plus smarter lead conversion.</p>
+
+                <div class="pricing-price">
+                  <span class="pricing-currency">$</span>
+                  <strong>59</strong>
+                  <span class="pricing-period">/month</span>
+                </div>
+              </div>
+
+              <div class="pricing-divider"></div>
+
+              <ul class="pricing-feature-list">
+                <li><span>✓</span> Everything in Starter</li>
+                <li><span>✓</span> Lead qualification</li>
+                <li><span>✓</span> Intent scoring</li>
+                <li><span>✓</span> Revenue Rescue</li>
+                <li><span>✓</span> Follow-up workflows</li>
+                <li><span>✓</span> Growth analytics</li>
+              </ul>
+
+              <button id="pricing-growth" class="pricing-plan-btn pricing-plan-btn-primary" type="button">
+                Start free →
+              </button>
+
+              <small class="pricing-plan-note">Best for growing businesses</small>
+            </article>
+
+
+            <article class="pricing-plan pricing-pro">
+              <div class="pricing-plan-top">
+                <div class="pricing-plan-name">PRO</div>
+                <p class="pricing-plan-tagline">AI, lead recovery and SEO growth.</p>
+
+                <div class="pricing-price">
+                  <span class="pricing-currency">$</span>
+                  <strong>99</strong>
+                  <span class="pricing-period">/month</span>
+                </div>
+              </div>
+
+              <div class="pricing-divider"></div>
+
+              <ul class="pricing-feature-list">
+                <li><span>✓</span> Everything in Growth</li>
+                <li><span>✓</span> SEO Growth Center</li>
+                <li><span>✓</span> SEO opportunity insights</li>
+                <li><span>✓</span> Service & local page ideas</li>
+                <li><span>✓</span> Advanced AI controls</li>
+                <li><span>✓</span> Higher usage limits</li>
+              </ul>
+
+              <button id="pricing-pro" class="pricing-plan-btn pricing-plan-btn-ghost" type="button">
+                Start free →
+              </button>
+
+              <small class="pricing-plan-note">Built for serious growth</small>
+            </article>
+
+          </div>
+
+          <div class="pricing-bottom-note">
+            <span>✓ Start free</span>
+            <span>✓ No credit card required</span>
+            <span>✓ Cancel anytime</span>
           </div>
 
         </section>
@@ -606,7 +678,9 @@ function renderLanding() {
   document.querySelector("#hero-start").onclick = showSignup;
   document.querySelector("#hero-login").onclick = showLogin;
   document.querySelector("#knowledge-start")?.addEventListener("click", showSignup);
-  document.querySelector("#pricing-start").onclick = showSignup;
+  ["#pricing-starter", "#pricing-growth", "#pricing-pro"].forEach((selector) => {
+    document.querySelector(selector)?.addEventListener("click", showSignup);
+  });
   document.querySelector("#final-start").onclick = showSignup;
 
   document.querySelector("#footer-login").onclick = showLogin;
