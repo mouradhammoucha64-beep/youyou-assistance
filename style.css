@@ -2891,3 +2891,13 @@ select option {
   background: #ffffff !important;
   color: #111827 !important;
 }
+
+
+/* V3.6.3 — International AI language selector */
+.ai-field-hint {
+  display: block;
+  margin-top: 7px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(226, 232, 240, 0.62);
+}

@@ -981,10 +981,13 @@ else if (state.section === "ai") {
         <label>
           Language
           <select id="agent-language">
-            <option>English</option>
-            <option>French</option>
-            <option>Arabic</option>
+            <option value="Auto-detect">Auto-detect (Recommended)</option>
+            <option value="English">English</option>
+            <option value="Spanish">Spanish</option>
+            <option value="French">French</option>
+            <option value="Arabic">Arabic</option>
           </select>
+          <span class="ai-field-hint">Automatically reply in the customer's language.</span>
         </label>
 
       </div>
@@ -1401,7 +1404,7 @@ function applyAiConfiguration(config = {}) {
 
   if (agentName) agentName.value = config.agent_name || "YOUYOU AI";
   if (tone) tone.value = config.tone || "Professional";
-  if (language) language.value = config.language || "English";
+  if (language) language.value = config.language || "Auto-detect";
   if (instructions) instructions.value = config.instructions || DEFAULT_AI_INSTRUCTIONS;
   if (leadEnabled) leadEnabled.checked = config.lead_capture ?? true;
 
@@ -1444,7 +1447,7 @@ async function saveAiConfiguration() {
   const button = document.querySelector("#save-ai-config");
   const agentName = document.querySelector("#agent-name")?.value.trim() || "";
   const tone = document.querySelector("#agent-tone")?.value || "Professional";
-  const language = document.querySelector("#agent-language")?.value || "English";
+  const language = document.querySelector("#agent-language")?.value || "Auto-detect";
   const instructions = document.querySelector("#agent-instructions")?.value.trim() || "";
   const responseStyle = document.querySelector('input[name="response-style"]:checked')?.value || "Balanced";
   const leadCapture = document.querySelector("#lead-enabled")?.checked ?? true;

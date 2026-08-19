@@ -98,3 +98,7 @@ Fixed native dropdown option visibility for Tone and Language on dark UI.
 
 ## V3.6.2
 Fixed Tone/Language native dropdown option text visibility on Windows/Edge by using dark option text on the OS white dropdown background.
+
+
+## V3.6.3 — International Language Mode
+Added Auto-detect (recommended) and Spanish to the AI agent language selector. Auto-detect is the default for new configurations and is intended for international customer conversations. No database migration is required because the existing language field already stores text values.
