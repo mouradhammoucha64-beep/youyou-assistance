@@ -83,3 +83,6 @@ Removed the accumulated conflicting hero patches and rebuilt the landing hero us
 
 ## V3.4.4 Landing Cleanup
 Removed the Sarah Johnson floating lead card from the landing hero entirely. The AI chat mockup and compact Working 24/7 status card remain.
+
+## V3.5 Professional Knowledge Base
+Replaces the old prompt-based knowledge entry flow with a professional Business Brain workspace. Includes a real form, quick-start templates, character counting, live search, saved-entry stats, polished knowledge cards, and responsive layout. This version keeps the existing Supabase `knowledge` table schema (`company_id`, `title`, `content`) and does not require a database migration or paid AI integration.

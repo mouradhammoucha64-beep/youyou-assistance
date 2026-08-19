@@ -763,29 +763,114 @@ function renderDashboard() {
 
   if (state.section === "knowledge") {
     body = `
-      <div class="dashboard-card">
-
-        <div class="card-header">
+      <section class="knowledge-workspace">
+        <div class="knowledge-hero dashboard-card">
           <div>
-            <small>TRAINING</small>
+            <small>BUSINESS BRAIN</small>
             <h1>Knowledge Base</h1>
+            <p>
+              Teach YOUYOU about your business now, so your AI agent can use
+              accurate company information when full AI replies are activated.
+            </p>
           </div>
 
-          <button id="add-knowledge" class="primary">
-            + Add knowledge
+          <button id="add-knowledge" class="primary knowledge-new-btn">
+            + New entry
           </button>
         </div>
 
-        <p>
-          Give YOUYOU the information it needs to answer
-          your customers accurately.
-        </p>
-
-        <div id="knowledge-list">
-          Loading...
+        <div class="knowledge-stats">
+          <div class="knowledge-stat">
+            <span>ENTRIES</span>
+            <strong id="knowledge-count">—</strong>
+            <small>Saved business facts</small>
+          </div>
+          <div class="knowledge-stat">
+            <span>CONTENT</span>
+            <strong id="knowledge-char-total">—</strong>
+            <small>Total characters</small>
+          </div>
+          <div class="knowledge-stat">
+            <span>STATUS</span>
+            <strong class="knowledge-ready">● READY</strong>
+            <small>Workspace connected</small>
+          </div>
         </div>
 
-      </div>
+        <div class="knowledge-layout">
+          <div class="dashboard-card knowledge-composer">
+            <div class="knowledge-card-heading">
+              <div>
+                <small>ADD KNOWLEDGE</small>
+                <h2>Business information</h2>
+              </div>
+              <span class="knowledge-manual-badge">Manual</span>
+            </div>
+
+            <label class="knowledge-field">
+              <span>Title</span>
+              <input
+                id="knowledge-title"
+                maxlength="100"
+                placeholder="e.g. Services & pricing"
+              />
+            </label>
+
+            <label class="knowledge-field">
+              <span>Information</span>
+              <textarea
+                id="knowledge-content"
+                rows="9"
+                maxlength="6000"
+                placeholder="Example: We offer website support Monday to Friday from 9 AM to 6 PM. Our starter plan costs..."
+              ></textarea>
+            </label>
+
+            <div class="knowledge-form-meta">
+              <span id="knowledge-char-count">0 / 6000</span>
+              <span>Keep each entry focused on one topic.</span>
+            </div>
+
+            <div class="knowledge-template-wrap">
+              <span class="knowledge-template-label">QUICK START</span>
+              <div class="knowledge-templates">
+                <button type="button" data-knowledge-template="services">Services & pricing</button>
+                <button type="button" data-knowledge-template="hours">Hours & contact</button>
+                <button type="button" data-knowledge-template="faq">Common FAQ</button>
+                <button type="button" data-knowledge-template="policies">Policies</button>
+              </div>
+            </div>
+
+            <div class="knowledge-form-actions">
+              <button id="clear-knowledge" class="knowledge-secondary" type="button">
+                Clear
+              </button>
+              <button id="save-knowledge" class="primary" type="button">
+                Save to Knowledge Base
+              </button>
+            </div>
+
+            <div id="knowledge-form-status" class="knowledge-form-status" aria-live="polite"></div>
+          </div>
+
+          <div class="dashboard-card knowledge-library">
+            <div class="knowledge-library-head">
+              <div>
+                <small>YOUR LIBRARY</small>
+                <h2>Saved knowledge</h2>
+              </div>
+              <div class="knowledge-search-wrap">
+                <span>⌕</span>
+                <input id="knowledge-search" placeholder="Search knowledge..." />
+              </div>
+            </div>
+
+            <div id="knowledge-list" class="knowledge-list">
+              Loading...
+            </div>
+          </div>
+        </div>
+      </section>
     `;
   }
 
@@ -1237,8 +1322,34 @@ else if (state.section === "settings") {
 
   document.querySelector("#add-knowledge")?.addEventListener(
     "click",
+    resetKnowledgeForm
+  );
+
+  document.querySelector("#save-knowledge")?.addEventListener(
+    "click",
     addKnowledge
   );
+
+  document.querySelector("#clear-knowledge")?.addEventListener(
+    "click",
+    resetKnowledgeForm
+  );
+
+  document.querySelector("#knowledge-content")?.addEventListener(
+    "input",
+    updateKnowledgeCharacterCount
+  );
+
+  document.querySelector("#knowledge-search")?.addEventListener(
+    "input",
+    (event) => renderKnowledgeList(event.target.value)
+  );
+
+  document.querySelectorAll("[data-knowledge-template]").forEach((button) => {
+    button.addEventListener("click", () => {
+      applyKnowledgeTemplate(button.dataset.knowledgeTemplate);
+    });
+  });
 
   document.querySelector("#save-settings")?.addEventListener(
     "click",
@@ -1583,76 +1694,203 @@ async function loadLeads() {
   paint();
 }
 
-async function loadKnowledge() {
-  const list =
-    document.querySelector("#knowledge-list");
+let knowledgeCache = [];
 
-  if (!list || !state.company) return;
-
-  const { data, error } =
-    await supabase
-      .from("knowledge")
-      .select("*")
-      .eq("company_id", state.company.id)
-      .order("created_at", {
-        ascending: false,
-      });
-
-  if (error) {
-    list.textContent = error.message;
-    return;
+const knowledgeTemplates = {
+  services: {
+    title: "Services & pricing",
+    content: "Services we offer:\n- Service 1: description and price\n- Service 2: description and price\n\nImportant pricing notes:\n- Add-ons or extra fees:\n- Discounts or packages:\n- How customers can request a quote:"
+  },
+  hours: {
+    title: "Business hours & contact",
+    content: "Business hours:\n- Monday to Friday:\n- Saturday:\n- Sunday:\n\nContact information:\n- Phone:\n- Email:\n- Service area / location:\n\nAfter-hours instructions:"
+  },
+  faq: {
+    title: "Common customer questions",
+    content: "Q: What do customers ask most often?\nA: \n\nQ: How quickly do we respond?\nA: \n\nQ: How does booking or ordering work?\nA: \n\nQ: What should a customer prepare before contacting us?\nA:"
+  },
+  policies: {
+    title: "Business policies",
+    content: "Cancellation policy:\n\nRefund policy:\n\nPayment terms:\n\nRescheduling policy:\n\nOther important customer rules:"
   }
+};
 
-  if (!data?.length) {
+function updateKnowledgeCharacterCount() {
+  const content = document.querySelector("#knowledge-content");
+  const counter = document.querySelector("#knowledge-char-count");
+  if (!content || !counter) return;
+  counter.textContent = `${content.value.length} / 6000`;
+}
+
+function setKnowledgeFormStatus(message = "", type = "") {
+  const status = document.querySelector("#knowledge-form-status");
+  if (!status) return;
+  status.textContent = message;
+  status.className = `knowledge-form-status ${type}`.trim();
+}
+
+function resetKnowledgeForm() {
+  const title = document.querySelector("#knowledge-title");
+  const content = document.querySelector("#knowledge-content");
+  if (title) title.value = "";
+  if (content) content.value = "";
+  updateKnowledgeCharacterCount();
+  setKnowledgeFormStatus();
+  title?.focus();
+}
+
+function applyKnowledgeTemplate(templateKey) {
+  const template = knowledgeTemplates[templateKey];
+  if (!template) return;
+
+  const title = document.querySelector("#knowledge-title");
+  const content = document.querySelector("#knowledge-content");
+  if (!title || !content) return;
+
+  title.value = template.title;
+  content.value = template.content;
+  updateKnowledgeCharacterCount();
+  setKnowledgeFormStatus("Template loaded. Replace the examples with your real business information.", "info");
+  content.focus();
+}
+
+function updateKnowledgeStats() {
+  const count = document.querySelector("#knowledge-count");
+  const total = document.querySelector("#knowledge-char-total");
+  if (count) count.textContent = String(knowledgeCache.length);
+
+  const characters = knowledgeCache.reduce(
+    (sum, item) => sum + String(item.title || "").length + String(item.content || "").length,
+    0
+  );
+  if (total) total.textContent = characters.toLocaleString();
+}
+
+function renderKnowledgeList(query = "") {
+  const list = document.querySelector("#knowledge-list");
+  if (!list) return;
+
+  const normalized = String(query || "").trim().toLowerCase();
+  const items = normalized
+    ? knowledgeCache.filter((item) =>
+        `${item.title || ""} ${item.content || ""}`.toLowerCase().includes(normalized)
+      )
+    : knowledgeCache;
+
+  if (!items.length) {
     list.innerHTML = `
-      <div class="knowledge-empty">
-        No knowledge added yet.
+      <div class="knowledge-empty knowledge-empty-pro">
+        <div class="knowledge-empty-icon">✦</div>
+        <strong>${normalized ? "No matching knowledge" : "Your business brain is empty"}</strong>
+        <p>${normalized
+          ? "Try a different search term."
+          : "Add services, pricing, policies, FAQs or business hours to start building your knowledge base."}</p>
       </div>
     `;
     return;
   }
 
-  list.innerHTML = data
-    .map(
-      (item) => `
-        <article class="knowledge-item">
-          <strong>${escapeHtml(item.title)}</strong>
-          <p>${escapeHtml(item.content)}</p>
+  list.innerHTML = items
+    .map((item) => {
+      const content = String(item.content || "");
+      const preview = content.length > 360 ? `${content.slice(0, 360)}…` : content;
+      const created = item.created_at
+        ? new Date(item.created_at).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+          })
+        : "Saved";
+
+      return `
+        <article class="knowledge-item knowledge-item-pro">
+          <div class="knowledge-item-top">
+            <div>
+              <span class="knowledge-source">MANUAL</span>
+              <strong>${escapeHtml(item.title || "Untitled knowledge")}</strong>
+            </div>
+            <span class="knowledge-ai-ready">● AI READY</span>
+          </div>
+          <p>${escapeHtml(preview)}</p>
+          <div class="knowledge-item-footer">
+            <span>${escapeHtml(created)}</span>
+            <span>${content.length.toLocaleString()} characters</span>
+          </div>
         </article>
-      `
-    )
+      `;
+    })
     .join("");
 }
 
+async function loadKnowledge() {
+  const list = document.querySelector("#knowledge-list");
+
+  if (!list || !state.company) return;
+
+  const { data, error } = await supabase
+    .from("knowledge")
+    .select("*")
+    .eq("company_id", state.company.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    list.innerHTML = `<div class="knowledge-empty">${escapeHtml(error.message)}</div>`;
+    return;
+  }
+
+  knowledgeCache = data || [];
+  updateKnowledgeStats();
+  renderKnowledgeList(document.querySelector("#knowledge-search")?.value || "");
+  updateKnowledgeCharacterCount();
+}
 
 async function addKnowledge() {
   if (!state.company) return;
 
-  const title =
-    prompt("Knowledge title:");
+  const titleInput = document.querySelector("#knowledge-title");
+  const contentInput = document.querySelector("#knowledge-content");
+  const saveButton = document.querySelector("#save-knowledge");
 
-  if (!title) return;
+  const title = titleInput?.value.trim() || "";
+  const content = contentInput?.value.trim() || "";
 
-  const content =
-    prompt("Business information:");
-
-  if (!content) return;
-
-  const { error } =
-    await supabase
-      .from("knowledge")
-      .insert({
-        company_id: state.company.id,
-        title,
-        content,
-      });
-
-  if (error) {
-    alert(error.message);
+  if (!title) {
+    setKnowledgeFormStatus("Add a clear title first.", "error");
+    titleInput?.focus();
     return;
   }
 
-  loadKnowledge();
+  if (!content) {
+    setKnowledgeFormStatus("Add the business information you want YOUYOU to know.", "error");
+    contentInput?.focus();
+    return;
+  }
+
+  saveButton?.setAttribute("disabled", "disabled");
+  if (saveButton) saveButton.textContent = "Saving...";
+  setKnowledgeFormStatus("Saving to your workspace...", "info");
+
+  const { error } = await supabase
+    .from("knowledge")
+    .insert({
+      company_id: state.company.id,
+      title,
+      content,
+    });
+
+  saveButton?.removeAttribute("disabled");
+  if (saveButton) saveButton.textContent = "Save to Knowledge Base";
+
+  if (error) {
+    setKnowledgeFormStatus(error.message, "error");
+    return;
+  }
+
+  if (titleInput) titleInput.value = "";
+  if (contentInput) contentInput.value = "";
+  updateKnowledgeCharacterCount();
+  setKnowledgeFormStatus("Saved successfully. YOUYOU can use this when AI knowledge replies are activated.", "success");
+  await loadKnowledge();
 }
 
 
