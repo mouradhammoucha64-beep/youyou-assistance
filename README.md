@@ -223,3 +223,24 @@ No SQL migration required.
 
 ## V4.6 — Public Landing + Plans & Billing
 Logged-in users can visit the public landing without logout. Dashboard adds View public website, Plans & Billing, and /dashboard/billing. Stripe checkout remains intentionally non-charging until the Stripe integration step. No SQL required.
+
+
+## V4.7 — SEO Growth Center V1
+
+Adds a new PRO dashboard route: `/dashboard/seo-growth`.
+
+V1 uses real YOUYOU workspace data only:
+- Business profile completeness
+- Knowledge Base depth
+- Local SEO foundation
+- Prioritized quick wins
+- Search snippet draft
+- Service/local/FAQ page opportunities
+- Practical content brief
+- SEO foundation checklist
+
+The score is explicitly an SEO readiness score, not a Google ranking score.
+No keyword volume, live rankings or Search Console metrics are invented.
+Google Search Console is displayed as a future real-data integration.
+
+No SQL migration required.

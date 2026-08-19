@@ -36,6 +36,7 @@ const DASHBOARD_ROUTES = {
   knowledge: "/dashboard/knowledge",
   widget: "/dashboard/widget",
   ai: "/dashboard/ai-control",
+  seo: "/dashboard/seo-growth",
   settings: "/dashboard/settings",
   billing: "/dashboard/billing",
 };
@@ -1159,6 +1160,7 @@ function dashboardShell(content) {
             ${navItem("knowledge", "▤", "Knowledge")}
             ${navItem("widget", "◇", "Website Widget")}
             ${navItem("ai", "✧", "AI Control Center")}
+            ${navItem("seo", "↗", "SEO Growth")}
             ${navItem("settings", "⚙", "Settings")}
             ${navItem("billing", "◈", "Plans & Billing")}
           </nav>
@@ -1728,6 +1730,289 @@ and identify qualified leads.</textarea>
       </div>
 
     </div>
+  `;
+}
+
+
+else if (state.section === "seo") {
+  const c = state.company || {};
+
+  body = `
+    <section class="seo-growth-page">
+
+      <div class="seo-hero dashboard-card">
+        <div class="seo-hero-copy">
+          <div class="seo-kicker-row">
+            <span class="seo-kicker">SEO GROWTH CENTER</span>
+            <span class="seo-pro-pill">PRO</span>
+          </div>
+
+          <h1>Turn business knowledge into search growth.</h1>
+
+          <p>
+            Find SEO opportunities from your business profile and Knowledge Base,
+            then turn them into stronger pages, FAQs and local search content.
+          </p>
+
+          <div class="seo-hero-actions">
+            <button id="seo-refresh" class="primary" type="button">
+              Analyze workspace →
+            </button>
+
+            <span id="seo-analysis-status" class="seo-analysis-status">
+              Ready to analyze
+            </span>
+          </div>
+        </div>
+
+        <div class="seo-score-panel">
+          <div class="seo-score-ring" id="seo-score-ring">
+            <div class="seo-score-inner">
+              <strong id="seo-score">—</strong>
+              <span>/100</span>
+            </div>
+          </div>
+
+          <div>
+            <small>SEO READINESS</small>
+            <strong id="seo-score-label">Analyzing...</strong>
+            <span id="seo-score-subtext">
+              Based on your workspace setup, not Google ranking data.
+            </span>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="seo-input-strip dashboard-card">
+        <div class="seo-input-strip-copy">
+          <small>FOCUS MARKET</small>
+          <strong>Shape the recommendations around one service and location.</strong>
+          <span>No keyword-volume or ranking data is invented.</span>
+        </div>
+
+        <label>
+          Target service
+          <input
+            id="seo-target-service"
+            value="${escapeHtml(c.industry || "")}"
+            placeholder="e.g. Emergency plumbing"
+          />
+        </label>
+
+        <label>
+          Target city
+          <input
+            id="seo-target-city"
+            value="${escapeHtml(c.city || "")}"
+            placeholder="e.g. Miami"
+          />
+        </label>
+
+        <button id="seo-update-focus" class="seo-secondary-btn" type="button">
+          Refresh ideas
+        </button>
+      </div>
+
+
+      <div class="seo-metric-grid">
+        <article class="seo-metric-card">
+          <div class="seo-metric-icon">◎</div>
+          <div>
+            <small>BUSINESS PROFILE</small>
+            <strong id="seo-profile-score">—</strong>
+            <span id="seo-profile-note">Checking business details...</span>
+          </div>
+        </article>
+
+        <article class="seo-metric-card">
+          <div class="seo-metric-icon">▤</div>
+          <div>
+            <small>KNOWLEDGE DEPTH</small>
+            <strong id="seo-knowledge-count">—</strong>
+            <span id="seo-knowledge-note">Checking saved knowledge...</span>
+          </div>
+        </article>
+
+        <article class="seo-metric-card">
+          <div class="seo-metric-icon">⌖</div>
+          <div>
+            <small>LOCAL SEO</small>
+            <strong id="seo-local-status">—</strong>
+            <span id="seo-local-note">Checking location signals...</span>
+          </div>
+        </article>
+
+        <article class="seo-metric-card">
+          <div class="seo-metric-icon">✦</div>
+          <div>
+            <small>QUICK WINS</small>
+            <strong id="seo-quickwin-count">—</strong>
+            <span>Prioritized workspace opportunities</span>
+          </div>
+        </article>
+      </div>
+
+
+      <div class="seo-main-grid">
+
+        <article class="seo-opportunity-card dashboard-card">
+          <div class="seo-card-head">
+            <div>
+              <small>QUICK WINS</small>
+              <h2>Highest-priority opportunities</h2>
+              <p>Start with the improvements that are easiest to act on.</p>
+            </div>
+
+            <span class="seo-live-badge">WORKSPACE ANALYSIS</span>
+          </div>
+
+          <div id="seo-quickwins" class="seo-quickwins">
+            <div class="seo-loading-row">Analyzing your workspace...</div>
+          </div>
+        </article>
+
+
+        <article class="seo-search-preview dashboard-card">
+          <div class="seo-card-head">
+            <div>
+              <small>SEARCH APPEARANCE</small>
+              <h2>Google snippet preview</h2>
+              <p>A draft preview based on your current business information.</p>
+            </div>
+          </div>
+
+          <div class="seo-google-card">
+            <div class="seo-google-domain" id="seo-preview-domain">
+              yourwebsite.com
+            </div>
+
+            <div class="seo-google-title" id="seo-preview-title">
+              Your business | Services
+            </div>
+
+            <div class="seo-google-description" id="seo-preview-description">
+              Add your business description and services to generate a stronger
+              search snippet preview.
+            </div>
+          </div>
+
+          <div class="seo-preview-meta">
+            <div>
+              <small>TITLE LENGTH</small>
+              <strong id="seo-title-length">—</strong>
+            </div>
+
+            <div>
+              <small>DESCRIPTION LENGTH</small>
+              <strong id="seo-description-length">—</strong>
+            </div>
+          </div>
+
+          <button id="seo-copy-snippet" class="seo-secondary-btn seo-full-btn" type="button">
+            Copy title + description
+          </button>
+        </article>
+
+      </div>
+
+
+      <div class="seo-secondary-grid">
+
+        <article class="seo-page-ideas-card dashboard-card">
+          <div class="seo-card-head">
+            <div>
+              <small>CONTENT OPPORTUNITIES</small>
+              <h2>Pages worth creating</h2>
+              <p>Ideas are generated from your workspace information, not search-volume estimates.</p>
+            </div>
+          </div>
+
+          <div id="seo-page-ideas" class="seo-page-ideas">
+            <div class="seo-loading-row">Preparing page ideas...</div>
+          </div>
+        </article>
+
+
+        <article class="seo-brief-card dashboard-card">
+          <div class="seo-card-head">
+            <div>
+              <small>CONTENT BRIEF</small>
+              <h2>Draft the next useful page</h2>
+              <p>A practical outline you can hand to a writer or use later with AI generation.</p>
+            </div>
+
+            <span class="seo-preview-pill">PREVIEW</span>
+          </div>
+
+          <div id="seo-content-brief" class="seo-content-brief">
+            <div class="seo-loading-row">Choose a focus and analyze the workspace.</div>
+          </div>
+
+          <button id="seo-copy-brief" class="seo-secondary-btn seo-full-btn" type="button">
+            Copy content brief
+          </button>
+        </article>
+
+      </div>
+
+
+      <div class="seo-bottom-grid">
+
+        <article class="seo-checklist-card dashboard-card">
+          <div class="seo-card-head">
+            <div>
+              <small>SEO FOUNDATION</small>
+              <h2>Optimization checklist</h2>
+              <p>Build the foundation before chasing rankings.</p>
+            </div>
+
+            <strong id="seo-checklist-progress" class="seo-checklist-progress">—</strong>
+          </div>
+
+          <div id="seo-checklist" class="seo-checklist">
+            <div class="seo-loading-row">Checking setup...</div>
+          </div>
+        </article>
+
+
+        <article class="seo-console-card dashboard-card">
+          <div class="seo-console-orbit"></div>
+
+          <div class="seo-console-icon">G</div>
+
+          <small>SEARCH PERFORMANCE</small>
+          <h2>Google Search Console</h2>
+
+          <p>
+            Later, connect real Search Console data to track queries, clicks,
+            impressions and pages that are gaining or losing visibility.
+          </p>
+
+          <div class="seo-console-points">
+            <span>Real queries</span>
+            <span>Real clicks</span>
+            <span>Real impressions</span>
+          </div>
+
+          <button class="seo-secondary-btn seo-full-btn" type="button" disabled>
+            Search Console connection — Coming later
+          </button>
+        </article>
+
+      </div>
+
+
+      <div class="seo-disclaimer">
+        <span>i</span>
+        <p>
+          SEO Growth Center V1 analyzes your YOUYOU workspace and creates practical
+          recommendations. It does not claim live Google rankings, keyword volume
+          or guaranteed positions until real search-data integrations are connected.
+        </p>
+      </div>
+
+    </section>
   `;
 }
 
@@ -2386,6 +2671,10 @@ if (state.section === "ai") {
   loadAiConfiguration();
 }
 
+if (state.section === "seo") {
+  initSeoGrowthCenter();
+}
+
 if (state.section === "billing") {
   document.querySelectorAll("[data-billing-plan]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -2711,6 +3000,530 @@ async function saveWidgetConfiguration() {
   previewWidgetConfiguration();
   setWidgetConfigStatus("Saved successfully", "success");
 }
+
+function seoCleanText(value = "") {
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function seoDomainFromUrl(url = "") {
+  const raw = seoCleanText(url);
+
+  if (!raw) return "yourwebsite.com";
+
+  try {
+    const parsed = new URL(raw.startsWith("http") ? raw : `https://${raw}`);
+    return parsed.hostname.replace(/^www\./, "");
+  } catch {
+    return raw
+      .replace(/^https?:\/\//i, "")
+      .replace(/^www\./i, "")
+      .split("/")[0] || "yourwebsite.com";
+  }
+}
+
+function seoTitleCase(value = "") {
+  return seoCleanText(value)
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function seoClip(value = "", max = 155) {
+  const text = seoCleanText(value);
+
+  if (text.length <= max) return text;
+
+  return `${text.slice(0, Math.max(0, max - 1)).trimEnd()}…`;
+}
+
+function seoProfileSignals(company = {}, knowledge = []) {
+  const checks = [
+    {
+      id: "website",
+      label: "Website URL added",
+      done: Boolean(seoCleanText(company.website_url)),
+      why: "Add your website URL so SEO recommendations can reflect the real domain.",
+    },
+    {
+      id: "description",
+      label: "Business description added",
+      done: seoCleanText(company.business_description).length >= 80,
+      why: "A richer business description helps define services, audience and positioning.",
+    },
+    {
+      id: "industry",
+      label: "Industry or core service defined",
+      done: Boolean(seoCleanText(company.industry)),
+      why: "Define the industry or primary service you want customers to find.",
+    },
+    {
+      id: "city",
+      label: "Primary city added",
+      done: Boolean(seoCleanText(company.city)),
+      why: "Add a city to unlock stronger local SEO page ideas.",
+    },
+    {
+      id: "address",
+      label: "Business address added",
+      done: Boolean(seoCleanText(company.business_address)),
+      why: "A consistent physical location strengthens local-business information.",
+    },
+    {
+      id: "contact",
+      label: "Public contact information added",
+      done: Boolean(
+        seoCleanText(company.business_phone) ||
+        seoCleanText(company.business_email)
+      ),
+      why: "Add a public phone or email so customers and local listings have consistent details.",
+    },
+    {
+      id: "hours",
+      label: "Business hours added",
+      done: Boolean(seoCleanText(company.business_hours)),
+      why: "Opening hours are useful for visitors and local-business information.",
+    },
+    {
+      id: "knowledge",
+      label: "Knowledge Base has useful depth",
+      done: knowledge.length >= 4,
+      why: "Add services, FAQs, pricing and policies so YOUYOU can discover more content opportunities.",
+    },
+  ];
+
+  return checks;
+}
+
+function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
+  const checks = seoProfileSignals(company, knowledge);
+  const completed = checks.filter((item) => item.done).length;
+  const score = Math.round((completed / checks.length) * 100);
+
+  const companyName = seoCleanText(company.name) || "Your Business";
+  const service =
+    seoCleanText(focus.service) ||
+    seoCleanText(company.industry) ||
+    "Professional Services";
+
+  const city =
+    seoCleanText(focus.city) ||
+    seoCleanText(company.city);
+
+  const country =
+    seoCleanText(company.country);
+
+  const location = [city, country].filter(Boolean).join(", ");
+
+  const domain = seoDomainFromUrl(company.website_url);
+
+  const titleBase = city
+    ? `${seoTitleCase(service)} in ${seoTitleCase(city)} | ${companyName}`
+    : `${seoTitleCase(service)} | ${companyName}`;
+
+  const title = seoClip(titleBase, 60);
+
+  const businessDescription = seoCleanText(company.business_description);
+
+  const descriptionSeed = businessDescription
+    ? `${businessDescription}${city ? ` Serving customers in ${city}.` : ""}`
+    : `${companyName} provides ${service.toLowerCase()}${city ? ` in ${city}` : ""}. Explore services, answers to common questions and ways to get in touch.`;
+
+  const description = seoClip(descriptionSeed, 155);
+
+  const quickWins = checks
+    .filter((item) => !item.done)
+    .slice(0, 5)
+    .map((item, index) => ({
+      priority: index < 2 ? "HIGH" : index < 4 ? "MEDIUM" : "FOUNDATION",
+      title: item.label,
+      text: item.why,
+    }));
+
+  if (quickWins.length < 3) {
+    quickWins.push(
+      {
+        priority: "CONTENT",
+        title: "Create a focused service page",
+        text: city
+          ? `Build one useful page around ${service} in ${city}, with real service details, proof and customer questions.`
+          : `Build one useful page around ${service}, with real service details, proof and customer questions.`,
+      },
+      {
+        priority: "FAQ",
+        title: "Turn real customer questions into useful content",
+        text: "Review your saved Knowledge Base and answer the questions customers ask before buying.",
+      }
+    );
+  }
+
+  const knowledgeTitles = knowledge
+    .map((item) => seoCleanText(item.title))
+    .filter(Boolean)
+    .slice(0, 5);
+
+  const pageIdeas = [
+    {
+      type: "SERVICE PAGE",
+      title: city
+        ? `${seoTitleCase(service)} in ${seoTitleCase(city)}`
+        : `${seoTitleCase(service)} Services`,
+      reason: "A focused commercial page that clearly explains the offer and who it is for.",
+    },
+    {
+      type: "LOCAL PAGE",
+      title: city
+        ? `${companyName} — ${seoTitleCase(city)}`
+        : `${companyName} — Local Service Area`,
+      reason: city
+        ? `Make your ${city} service area, contact details and local proof easy to understand.`
+        : "Add your primary city first, then create a useful local service page.",
+    },
+    {
+      type: "FAQ PAGE",
+      title: `Questions customers ask about ${seoTitleCase(service)}`,
+      reason: "Use real pre-sale questions to create genuinely helpful search content.",
+    },
+    {
+      type: "TRUST PAGE",
+      title: `Why choose ${companyName}`,
+      reason: "Explain process, differentiators, guarantees, proof and what customers should expect.",
+    },
+  ];
+
+  if (knowledgeTitles.length) {
+    pageIdeas.push({
+      type: "KNOWLEDGE IDEA",
+      title: knowledgeTitles[0],
+      reason: "This topic already exists in your Knowledge Base and may be worth turning into a customer-facing page.",
+    });
+  }
+
+  const brief = {
+    title: city
+      ? `${seoTitleCase(service)} in ${seoTitleCase(city)}`
+      : `${seoTitleCase(service)} Services`,
+    intent: "Help a potential customer understand the service, trust the business and take the next step.",
+    sections: [
+      `What ${seoTitleCase(service)} includes`,
+      city ? `Who we help in ${seoTitleCase(city)}` : "Who this service is for",
+      "How the process works",
+      "Pricing or what affects the cost",
+      "Frequently asked questions",
+      "Clear next step / contact CTA",
+    ],
+  };
+
+  let scoreLabel = "Needs foundation";
+  if (score >= 85) scoreLabel = "Strong foundation";
+  else if (score >= 65) scoreLabel = "Good foundation";
+  else if (score >= 45) scoreLabel = "Building momentum";
+
+  return {
+    score,
+    scoreLabel,
+    checks,
+    completed,
+    companyName,
+    service,
+    city,
+    location,
+    domain,
+    title,
+    description,
+    quickWins,
+    pageIdeas,
+    brief,
+    knowledgeCount: knowledge.length,
+  };
+}
+
+function renderSeoAnalysis(analysis) {
+  const scoreEl = document.querySelector("#seo-score");
+  const ring = document.querySelector("#seo-score-ring");
+  const label = document.querySelector("#seo-score-label");
+  const subtext = document.querySelector("#seo-score-subtext");
+
+  if (scoreEl) scoreEl.textContent = analysis.score;
+  if (label) label.textContent = analysis.scoreLabel;
+  if (subtext) {
+    subtext.textContent =
+      `${analysis.completed}/${analysis.checks.length} foundation signals are ready.`;
+  }
+
+  if (ring) {
+    ring.style.setProperty("--seo-score", `${analysis.score * 3.6}deg`);
+  }
+
+  const profileDone = analysis.checks
+    .filter((item) => item.id !== "knowledge")
+    .filter((item) => item.done).length;
+
+  const profileTotal = analysis.checks.filter((item) => item.id !== "knowledge").length;
+
+  const profileScore = document.querySelector("#seo-profile-score");
+  const profileNote = document.querySelector("#seo-profile-note");
+
+  if (profileScore) profileScore.textContent = `${profileDone}/${profileTotal}`;
+  if (profileNote) {
+    profileNote.textContent =
+      profileDone === profileTotal
+        ? "Core business details are complete."
+        : `${profileTotal - profileDone} profile signal${profileTotal - profileDone === 1 ? "" : "s"} still missing.`;
+  }
+
+  const knowledgeCount = document.querySelector("#seo-knowledge-count");
+  const knowledgeNote = document.querySelector("#seo-knowledge-note");
+
+  if (knowledgeCount) knowledgeCount.textContent = analysis.knowledgeCount;
+  if (knowledgeNote) {
+    knowledgeNote.textContent =
+      analysis.knowledgeCount >= 4
+        ? "Enough material for richer content ideas."
+        : "Add more services, FAQs, pricing or policies.";
+  }
+
+  const cityReady = analysis.checks.find((item) => item.id === "city")?.done;
+  const addressReady = analysis.checks.find((item) => item.id === "address")?.done;
+
+  const localStatus = document.querySelector("#seo-local-status");
+  const localNote = document.querySelector("#seo-local-note");
+
+  if (localStatus) {
+    localStatus.textContent =
+      cityReady && addressReady ? "READY" : cityReady ? "PARTIAL" : "SETUP";
+  }
+
+  if (localNote) {
+    localNote.textContent =
+      cityReady && addressReady
+        ? "City and address signals are available."
+        : cityReady
+          ? "Add a business address for a stronger local foundation."
+          : "Add your primary city to unlock local ideas.";
+  }
+
+  const quickWinCount = document.querySelector("#seo-quickwin-count");
+  if (quickWinCount) quickWinCount.textContent = analysis.quickWins.length;
+
+  const quickWins = document.querySelector("#seo-quickwins");
+  if (quickWins) {
+    quickWins.innerHTML = analysis.quickWins
+      .map(
+        (item, index) => `
+          <div class="seo-quickwin-item">
+            <div class="seo-quickwin-number">${String(index + 1).padStart(2, "0")}</div>
+            <div class="seo-quickwin-copy">
+              <div class="seo-quickwin-title-row">
+                <strong>${escapeHtml(item.title)}</strong>
+                <span class="seo-priority seo-priority-${item.priority.toLowerCase()}">
+                  ${escapeHtml(item.priority)}
+                </span>
+              </div>
+              <p>${escapeHtml(item.text)}</p>
+            </div>
+          </div>
+        `
+      )
+      .join("");
+  }
+
+  const previewDomain = document.querySelector("#seo-preview-domain");
+  const previewTitle = document.querySelector("#seo-preview-title");
+  const previewDescription = document.querySelector("#seo-preview-description");
+  const titleLength = document.querySelector("#seo-title-length");
+  const descriptionLength = document.querySelector("#seo-description-length");
+
+  if (previewDomain) previewDomain.textContent = analysis.domain;
+  if (previewTitle) previewTitle.textContent = analysis.title;
+  if (previewDescription) previewDescription.textContent = analysis.description;
+  if (titleLength) titleLength.textContent = `${analysis.title.length}/60`;
+  if (descriptionLength) descriptionLength.textContent = `${analysis.description.length}/155`;
+
+  const pageIdeas = document.querySelector("#seo-page-ideas");
+  if (pageIdeas) {
+    pageIdeas.innerHTML = analysis.pageIdeas
+      .slice(0, 5)
+      .map(
+        (idea) => `
+          <div class="seo-page-idea">
+            <div>
+              <span>${escapeHtml(idea.type)}</span>
+              <strong>${escapeHtml(idea.title)}</strong>
+              <p>${escapeHtml(idea.reason)}</p>
+            </div>
+            <div class="seo-page-arrow">↗</div>
+          </div>
+        `
+      )
+      .join("");
+  }
+
+  const brief = document.querySelector("#seo-content-brief");
+  if (brief) {
+    brief.innerHTML = `
+      <div class="seo-brief-title">
+        <span>SUGGESTED PAGE</span>
+        <strong>${escapeHtml(analysis.brief.title)}</strong>
+      </div>
+
+      <div class="seo-brief-intent">
+        <small>SEARCH / CUSTOMER INTENT</small>
+        <p>${escapeHtml(analysis.brief.intent)}</p>
+      </div>
+
+      <div class="seo-brief-sections">
+        ${analysis.brief.sections
+          .map(
+            (section, index) => `
+              <div>
+                <span>${String(index + 1).padStart(2, "0")}</span>
+                <p>${escapeHtml(section)}</p>
+              </div>
+            `
+          )
+          .join("")}
+      </div>
+    `;
+  }
+
+  const checklist = document.querySelector("#seo-checklist");
+  const checklistProgress = document.querySelector("#seo-checklist-progress");
+
+  if (checklistProgress) {
+    checklistProgress.textContent = `${analysis.completed}/${analysis.checks.length}`;
+  }
+
+  if (checklist) {
+    checklist.innerHTML = analysis.checks
+      .map(
+        (item) => `
+          <div class="seo-check-row ${item.done ? "is-done" : ""}">
+            <span class="seo-check-icon">${item.done ? "✓" : "○"}</span>
+            <div>
+              <strong>${escapeHtml(item.label)}</strong>
+              <small>${escapeHtml(item.done ? "Ready in your workspace." : item.why)}</small>
+            </div>
+          </div>
+        `
+      )
+      .join("");
+  }
+
+  const status = document.querySelector("#seo-analysis-status");
+  if (status) {
+    status.textContent = `Analyzed ${analysis.knowledgeCount} knowledge entr${analysis.knowledgeCount === 1 ? "y" : "ies"}`;
+    status.classList.add("is-ready");
+  }
+}
+
+async function analyzeSeoWorkspace() {
+  if (!state.company || !supabase) return;
+
+  const status = document.querySelector("#seo-analysis-status");
+  const refresh = document.querySelector("#seo-refresh");
+
+  if (status) {
+    status.textContent = "Analyzing workspace...";
+    status.classList.remove("is-ready");
+  }
+
+  if (refresh) {
+    refresh.disabled = true;
+    refresh.textContent = "Analyzing...";
+  }
+
+  const { data, error } = await supabase
+    .from("knowledge")
+    .select("id,title,content,created_at")
+    .eq("company_id", state.company.id)
+    .order("created_at", { ascending: false });
+
+  if (refresh) {
+    refresh.disabled = false;
+    refresh.textContent = "Analyze workspace →";
+  }
+
+  if (error) {
+    console.error("SEO knowledge load error:", error);
+    if (status) status.textContent = "Could not load Knowledge Base";
+    return;
+  }
+
+  const focus = {
+    service: document.querySelector("#seo-target-service")?.value || "",
+    city: document.querySelector("#seo-target-city")?.value || "",
+  };
+
+  const analysis = buildSeoWorkspaceAnalysis(
+    state.company,
+    data || [],
+    focus
+  );
+
+  window.__youyouSeoAnalysis = analysis;
+  renderSeoAnalysis(analysis);
+}
+
+function seoCopyText(text, successMessage) {
+  if (!text) return;
+
+  navigator.clipboard
+    ?.writeText(text)
+    .then(() => {
+      const status = document.querySelector("#seo-analysis-status");
+      if (status) {
+        status.textContent = successMessage;
+        status.classList.add("is-ready");
+      }
+    })
+    .catch(() => {});
+}
+
+function initSeoGrowthCenter() {
+  document.querySelector("#seo-refresh")?.addEventListener(
+    "click",
+    analyzeSeoWorkspace
+  );
+
+  document.querySelector("#seo-update-focus")?.addEventListener(
+    "click",
+    analyzeSeoWorkspace
+  );
+
+  document.querySelector("#seo-copy-snippet")?.addEventListener("click", () => {
+    const analysis = window.__youyouSeoAnalysis;
+    if (!analysis) return;
+
+    seoCopyText(
+      `${analysis.title}\n${analysis.description}`,
+      "Search snippet copied"
+    );
+  });
+
+  document.querySelector("#seo-copy-brief")?.addEventListener("click", () => {
+    const analysis = window.__youyouSeoAnalysis;
+    if (!analysis) return;
+
+    const briefText = [
+      `Suggested page: ${analysis.brief.title}`,
+      "",
+      `Intent: ${analysis.brief.intent}`,
+      "",
+      "Recommended sections:",
+      ...analysis.brief.sections.map(
+        (section, index) => `${index + 1}. ${section}`
+      ),
+    ].join("\n");
+
+    seoCopyText(briefText, "Content brief copied");
+  });
+
+  analyzeSeoWorkspace();
+}
+
 
 async function loadOverviewStats() {
   if (!state.company) return;
