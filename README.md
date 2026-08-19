@@ -102,3 +102,12 @@ Fixed Tone/Language native dropdown option text visibility on Windows/Edge by us
 
 ## V3.6.3 — International Language Mode
 Added Auto-detect (recommended) and Spanish to the AI agent language selector. Auto-detect is the default for new configurations and is intended for international customer conversations. No database migration is required because the existing language field already stores text values.
+
+
+## V3.7 — PRO Business Settings
+
+Professional business settings with persisted company profile, contact details,
+country/timezone, business hours, widget controls, lead alert preferences,
+workspace identity, and launch-stage billing placeholders.
+
+Run `supabase-v3.7-business-settings.sql` once before testing Save.

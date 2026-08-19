@@ -651,6 +651,12 @@ function navItem(id, icon, label) {
 }
 
 
+function settingsOption(value, currentValue = "") {
+  const selected = String(currentValue || "") === String(value) ? "selected" : "";
+  return `<option value="${escapeHtml(value)}" ${selected}>${escapeHtml(value)}</option>`;
+}
+
+
 function dashboardShell(content) {
   const company =
     state.company?.name || "Your workspace";
@@ -1113,38 +1119,291 @@ and identify qualified leads.</textarea>
 }
 
 else if (state.section === "settings") {
-
+    const c = state.company || {};
 
     body = `
-      <div class="dashboard-card">
+      <div class="settings-page pro-settings">
 
-        <small>WORKSPACE</small>
+        <div class="settings-page-header">
+          <div>
+            <small>WORKSPACE SETTINGS</small>
+            <h1>Business settings</h1>
+            <p>
+              Keep the business details YOUYOU will use across your workspace,
+              customer experience and future automations.
+            </p>
+          </div>
 
-        <h1>Settings</h1>
-
-        <div class="settings-grid">
-
-          <label>
-            Company name
-            <input
-              id="company-name"
-              value="${escapeHtml(company)}"
-            />
-          </label>
-
-          <label>
-            Email
-            <input
-              disabled
-              value="${escapeHtml(state.user.email)}"
-            />
-          </label>
-
+          <div class="settings-health">
+            <span class="settings-health-dot"></span>
+            Workspace connected
+          </div>
         </div>
 
-        <button id="save-settings" class="primary">
-          Save changes
-        </button>
+        <section class="settings-section-card">
+          <div class="settings-section-head">
+            <div class="settings-section-icon">01</div>
+            <div>
+              <small>BUSINESS PROFILE</small>
+              <h2>Your company</h2>
+              <p>Core information used to identify and understand the business.</p>
+            </div>
+          </div>
+
+          <div class="pro-settings-grid">
+            <label>
+              Company name
+              <input
+                id="company-name"
+                value="${escapeHtml(c.name || company)}"
+                placeholder="e.g. Acme Home Services"
+              />
+            </label>
+
+            <label>
+              Industry
+              <input
+                id="company-industry"
+                value="${escapeHtml(c.industry || "")}"
+                placeholder="e.g. HVAC, Roofing, Med Spa"
+              />
+            </label>
+
+            <label>
+              Website
+              <input
+                id="company-website"
+                type="url"
+                value="${escapeHtml(c.website_url || "")}"
+                placeholder="https://yourcompany.com"
+              />
+            </label>
+
+            <label>
+              Country
+              <select id="company-country">
+                ${settingsOption("United States", c.country)}
+                ${settingsOption("France", c.country)}
+                ${settingsOption("Spain", c.country)}
+                ${settingsOption("Morocco", c.country)}
+                ${settingsOption("United Arab Emirates", c.country)}
+                ${settingsOption("Saudi Arabia", c.country)}
+                ${settingsOption("United Kingdom", c.country)}
+                ${settingsOption("Canada", c.country)}
+                ${settingsOption("Other", c.country)}
+              </select>
+            </label>
+
+            <label class="settings-span-2">
+              Short business description
+              <textarea
+                id="company-description"
+                rows="4"
+                placeholder="What does your company do, who do you serve, and what makes the business different?"
+              >${escapeHtml(c.business_description || "")}</textarea>
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-section-card">
+          <div class="settings-section-head">
+            <div class="settings-section-icon">02</div>
+            <div>
+              <small>CONTACT & LOCATION</small>
+              <h2>Customer contact details</h2>
+              <p>Official details YOUYOU can reference when customers need to reach the business.</p>
+            </div>
+          </div>
+
+          <div class="pro-settings-grid">
+            <label>
+              Business email
+              <input
+                id="business-email"
+                type="email"
+                value="${escapeHtml(c.business_email || "")}"
+                placeholder="hello@yourcompany.com"
+              />
+            </label>
+
+            <label>
+              Business phone
+              <input
+                id="business-phone"
+                value="${escapeHtml(c.business_phone || "")}"
+                placeholder="+1 555 000 0000"
+              />
+            </label>
+
+            <label>
+              WhatsApp number
+              <input
+                id="whatsapp-number"
+                value="${escapeHtml(c.whatsapp_number || "")}"
+                placeholder="+1 555 000 0000"
+              />
+            </label>
+
+            <label>
+              City / State
+              <input
+                id="business-city"
+                value="${escapeHtml(c.city || "")}"
+                placeholder="Miami, FL"
+              />
+            </label>
+
+            <label class="settings-span-2">
+              Business address
+              <input
+                id="business-address"
+                value="${escapeHtml(c.business_address || "")}"
+                placeholder="Street address"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-section-card">
+          <div class="settings-section-head">
+            <div class="settings-section-icon">03</div>
+            <div>
+              <small>OPERATIONS</small>
+              <h2>Availability & customer experience</h2>
+              <p>Useful context for replies, handoffs and future automations.</p>
+            </div>
+          </div>
+
+          <div class="pro-settings-grid">
+            <label>
+              Timezone
+              <select id="company-timezone">
+                ${settingsOption("America/New_York", c.timezone)}
+                ${settingsOption("America/Chicago", c.timezone)}
+                ${settingsOption("America/Denver", c.timezone)}
+                ${settingsOption("America/Los_Angeles", c.timezone)}
+                ${settingsOption("Europe/Paris", c.timezone)}
+                ${settingsOption("Europe/Madrid", c.timezone)}
+                ${settingsOption("Africa/Casablanca", c.timezone)}
+                ${settingsOption("Asia/Dubai", c.timezone)}
+                ${settingsOption("Asia/Riyadh", c.timezone)}
+                ${settingsOption("UTC", c.timezone)}
+              </select>
+            </label>
+
+            <label>
+              Widget status
+              <select id="widget-status">
+                ${settingsOption("Enabled", c.widget_status || "Enabled")}
+                ${settingsOption("Disabled", c.widget_status || "Enabled")}
+              </select>
+            </label>
+
+            <label class="settings-span-2">
+              Business hours
+              <textarea
+                id="business-hours"
+                rows="4"
+                placeholder="Mon–Fri: 9:00 AM–6:00 PM&#10;Sat: 10:00 AM–2:00 PM&#10;Sun: Closed"
+              >${escapeHtml(c.business_hours || "")}</textarea>
+            </label>
+
+            <label class="settings-span-2">
+              Widget welcome message
+              <input
+                id="widget-welcome"
+                value="${escapeHtml(c.widget_welcome_message || "")}"
+                placeholder="Hi! How can we help you today?"
+              />
+            </label>
+          </div>
+        </section>
+
+        <section class="settings-section-card">
+          <div class="settings-section-head">
+            <div class="settings-section-icon">04</div>
+            <div>
+              <small>LEAD NOTIFICATIONS</small>
+              <h2>Who should get alerted?</h2>
+              <p>Prepare the workspace for email, WhatsApp and SMS alerts when integrations are connected.</p>
+            </div>
+          </div>
+
+          <div class="pro-settings-grid">
+            <label>
+              Notification email
+              <input
+                id="notification-email"
+                type="email"
+                value="${escapeHtml(c.notification_email || "")}"
+                placeholder="sales@yourcompany.com"
+              />
+            </label>
+
+            <label>
+              Lead alert mode
+              <select id="lead-alert-mode">
+                ${settingsOption("Hot leads only", c.lead_alert_mode || "Hot leads only")}
+                ${settingsOption("All qualified leads", c.lead_alert_mode || "Hot leads only")}
+                ${settingsOption("Off", c.lead_alert_mode || "Hot leads only")}
+              </select>
+            </label>
+
+            <div class="integration-ready settings-span-2">
+              <div>
+                <strong>WhatsApp / SMS alerts</strong>
+                <span>Ready for the final integrations stage.</span>
+              </div>
+              <span class="coming-soon-pill">COMING LATER</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="settings-section-card account-settings-card">
+          <div class="settings-section-head">
+            <div class="settings-section-icon">05</div>
+            <div>
+              <small>ACCOUNT</small>
+              <h2>Workspace & subscription</h2>
+              <p>Account identity and billing status for this workspace.</p>
+            </div>
+          </div>
+
+          <div class="pro-settings-grid">
+            <label>
+              Account email
+              <input disabled value="${escapeHtml(state.user.email)}" />
+            </label>
+
+            <label>
+              Workspace ID
+              <input disabled value="${escapeHtml(c.id || "")}" />
+            </label>
+
+            <div class="account-plan-box settings-span-2">
+              <div>
+                <small>CURRENT PLAN</small>
+                <strong>Development access</strong>
+              </div>
+              <div>
+                <small>BILLING</small>
+                <strong>Not connected yet</strong>
+              </div>
+              <span>Stripe subscription controls will be activated during the final launch stage.</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="settings-save-bar">
+          <div>
+            <small>STATUS</small>
+            <strong id="settings-save-status">Ready to save</strong>
+          </div>
+
+          <button id="save-settings" class="primary">
+            Save business settings →
+          </button>
+        </div>
 
       </div>
     `;
@@ -2020,32 +2279,74 @@ async function addKnowledge() {
 }
 
 
+function setSettingsSaveStatus(message, type = "") {
+  const status = document.querySelector("#settings-save-status");
+  if (!status) return;
+  status.textContent = message;
+  status.dataset.status = type;
+}
+
 async function saveSettings() {
-  const input =
-    document.querySelector("#company-name");
+  if (!state.company || !supabase) return;
 
-  if (!input || !state.company) return;
+  const button = document.querySelector("#save-settings");
 
-  const name = input.value.trim();
+  const values = {
+    name: document.querySelector("#company-name")?.value.trim() || "",
+    industry: document.querySelector("#company-industry")?.value.trim() || "",
+    website_url: document.querySelector("#company-website")?.value.trim() || "",
+    country: document.querySelector("#company-country")?.value || "",
+    business_description: document.querySelector("#company-description")?.value.trim() || "",
+    business_email: document.querySelector("#business-email")?.value.trim() || "",
+    business_phone: document.querySelector("#business-phone")?.value.trim() || "",
+    whatsapp_number: document.querySelector("#whatsapp-number")?.value.trim() || "",
+    city: document.querySelector("#business-city")?.value.trim() || "",
+    business_address: document.querySelector("#business-address")?.value.trim() || "",
+    timezone: document.querySelector("#company-timezone")?.value || "",
+    widget_status: document.querySelector("#widget-status")?.value || "Enabled",
+    business_hours: document.querySelector("#business-hours")?.value.trim() || "",
+    widget_welcome_message: document.querySelector("#widget-welcome")?.value.trim() || "",
+    notification_email: document.querySelector("#notification-email")?.value.trim() || "",
+    lead_alert_mode: document.querySelector("#lead-alert-mode")?.value || "Hot leads only",
+  };
 
-  if (!name) return;
-
-  const { error } =
-    await supabase
-      .from("companies")
-      .update({ name })
-      .eq("id", state.company.id);
-
-  if (error) {
-    alert(error.message);
+  if (!values.name) {
+    setSettingsSaveStatus("Company name is required", "error");
+    document.querySelector("#company-name")?.focus();
     return;
   }
 
-  state.company.name = name;
+  if (values.website_url && !/^https?:\/\//i.test(values.website_url)) {
+    setSettingsSaveStatus("Website must start with http:// or https://", "error");
+    document.querySelector("#company-website")?.focus();
+    return;
+  }
 
-  alert("Settings saved successfully.");
+  button?.setAttribute("disabled", "disabled");
+  if (button) button.textContent = "Saving...";
+  setSettingsSaveStatus("Saving business settings...", "loading");
 
-  renderDashboard();
+  const { data, error } = await supabase
+    .from("companies")
+    .update({
+      ...values,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", state.company.id)
+    .select("*")
+    .single();
+
+  button?.removeAttribute("disabled");
+  if (button) button.textContent = "Save business settings →";
+
+  if (error) {
+    console.error("Business settings save error:", error);
+    setSettingsSaveStatus(error.message, "error");
+    return;
+  }
+
+  state.company = data || { ...state.company, ...values };
+  setSettingsSaveStatus("Saved successfully", "success");
 }
 
 
