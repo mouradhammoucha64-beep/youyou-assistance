@@ -25,6 +25,7 @@ let state = {
   company: null,
   section: "overview",
   message: "",
+  pendingPlan: null,
 };
 
 
@@ -36,6 +37,7 @@ const DASHBOARD_ROUTES = {
   widget: "/dashboard/widget",
   ai: "/dashboard/ai-control",
   settings: "/dashboard/settings",
+  billing: "/dashboard/billing",
 };
 
 function sectionFromPath(pathname = window.location.pathname) {
@@ -95,8 +97,11 @@ function renderLanding() {
         </nav>
 
         <div class="nav-actions">
-          <button id="nav-login" class="nav-login">Log in</button>
-          <button id="nav-start" class="primary small">Start free</button>
+          ${state.user
+            ? `<button id="nav-dashboard" class="nav-login">Open dashboard</button>
+               <button id="nav-billing" class="primary small">Plans & billing</button>`
+            : `<button id="nav-login" class="nav-login">Log in</button>
+               <button id="nav-start" class="primary small">Start free</button>`}
         </div>
       </header>
 
@@ -123,14 +128,11 @@ function renderLanding() {
             </p>
 
             <div class="hero-buttons">
-              <button id="hero-start" class="primary hero-btn">
-                Start for free
-                <span>→</span>
-              </button>
-
-              <button id="hero-login" class="secondary hero-btn">
-                Log in
-              </button>
+              ${state.user
+                ? `<button id="hero-dashboard" class="primary hero-btn">Open dashboard <span>→</span></button>
+                   <button id="hero-pricing" class="secondary hero-btn">View plans</button>`
+                : `<button id="hero-start" class="primary hero-btn">Start for free <span>→</span></button>
+                   <button id="hero-login" class="secondary hero-btn">Log in</button>`}
             </div>
 
             <div class="trust">
@@ -673,13 +675,20 @@ function renderLanding() {
     </div>
   `;
 
-  document.querySelector("#nav-login").onclick = showLogin;
-  document.querySelector("#nav-start").onclick = showSignup;
-  document.querySelector("#hero-start").onclick = showSignup;
-  document.querySelector("#hero-login").onclick = showLogin;
+  document.querySelector("#nav-login")?.addEventListener("click", showLogin);
+  document.querySelector("#nav-start")?.addEventListener("click", showSignup);
+  document.querySelector("#hero-start")?.addEventListener("click", showSignup);
+  document.querySelector("#hero-login")?.addEventListener("click", showLogin);
+  document.querySelector("#nav-dashboard")?.addEventListener("click", () => navigateDashboard("overview"));
+  document.querySelector("#hero-dashboard")?.addEventListener("click", () => navigateDashboard("overview"));
+  document.querySelector("#nav-billing")?.addEventListener("click", () => navigateDashboard("billing"));
+  document.querySelector("#hero-pricing")?.addEventListener("click", () => document.querySelector("#pricing")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   document.querySelector("#knowledge-start")?.addEventListener("click", showSignup);
-  ["#pricing-starter", "#pricing-growth", "#pricing-pro"].forEach((selector) => {
-    document.querySelector(selector)?.addEventListener("click", showSignup);
+  [["#pricing-starter","starter"],["#pricing-growth","growth"],["#pricing-pro","pro"]].forEach(([selector,plan]) => {
+    document.querySelector(selector)?.addEventListener("click", () => {
+      state.pendingPlan = plan;
+      state.user ? navigateDashboard("billing") : showSignup();
+    });
   });
   document.querySelector("#final-start").onclick = showSignup;
 
@@ -1071,7 +1080,7 @@ async function handleAuth(event) {
    DASHBOARD
 ========================= */
 
-async function loadUser(user) {
+async function loadUser(user, options = {}) {
   state.user = user;
 
   const { data } =
@@ -1083,21 +1092,18 @@ async function loadUser(user) {
 
   state.profile = data || null;
   state.company = data?.companies || null;
-  state.page = "dashboard";
 
+  if (options.publicPage === "landing") { state.page = "landing"; renderLanding(); return; }
+  if (options.publicPage === "faq") { state.page = "faq"; renderFaqPage(); return; }
+
+  state.page = "dashboard";
   const requestedSection = sectionFromPath();
   const isDashboardPath = window.location.pathname.startsWith("/dashboard/");
-
   state.section = requestedSection;
 
   if (!isDashboardPath) {
-    window.history.replaceState(
-      { section: state.section },
-      "",
-      dashboardPath(state.section)
-    );
+    window.history.replaceState({ section: state.section }, "", dashboardPath(state.section));
   }
-
   renderDashboard();
 }
 
@@ -1154,15 +1160,14 @@ function dashboardShell(content) {
             ${navItem("widget", "◇", "Website Widget")}
             ${navItem("ai", "✧", "AI Control Center")}
             ${navItem("settings", "⚙", "Settings")}
+            ${navItem("billing", "◈", "Plans & Billing")}
           </nav>
         </div>
 
         <div class="side-bottom">
-          <div class="pro-badge">PRO</div>
-
-          <button id="logout" class="logout">
-            Log out
-          </button>
+          <div class="pro-badge">DEVELOPMENT ACCESS</div>
+          <button id="view-website" class="sidebar-site-link" type="button">↗ View public website</button>
+          <button id="logout" class="logout">Log out</button>
         </div>
 
       </aside>
@@ -1176,8 +1181,9 @@ function dashboardShell(content) {
             <h2>${escapeHtml(company)}</h2>
           </div>
 
-          <div class="user-name">
-            ${escapeHtml(name)}
+          <div class="dashboard-header-actions">
+            <button id="header-upgrade" class="dashboard-upgrade-btn" type="button">Plans</button>
+            <div class="user-name">${escapeHtml(name)}</div>
           </div>
 
         </header>
@@ -1203,6 +1209,14 @@ function dashboardShell(content) {
       navigateDashboard(nextSection);
     });
   }
+
+  document.querySelector("#view-website")?.addEventListener("click", () => {
+    state.page = "landing";
+    window.history.pushState({}, "", "/");
+    renderLanding();
+  });
+
+  document.querySelector("#header-upgrade")?.addEventListener("click", () => navigateDashboard("billing"));
 
   document.querySelector("#logout").onclick =
     async () => {
@@ -1715,6 +1729,53 @@ and identify qualified leads.</textarea>
 
     </div>
   `;
+}
+
+else if (state.section === "billing") {
+    const selectedPlan = state.pendingPlan || "growth";
+    body = `
+      <section class="billing-workspace">
+        <div class="billing-hero dashboard-card">
+          <div>
+            <small>PLANS & BILLING</small>
+            <h1>Choose the plan that fits your growth.</h1>
+            <p>Your workspace is currently on development access. Secure Stripe checkout will be connected in the billing integration step.</p>
+          </div>
+          <span class="billing-status-pill">DEVELOPMENT ACCESS</span>
+        </div>
+
+        <div class="billing-plan-grid">
+          <article class="billing-plan-card ${selectedPlan === "starter" ? "is-selected" : ""}">
+            <div class="billing-plan-label">STARTER</div>
+            <div class="billing-price"><strong>$29</strong><span>/month</span></div>
+            <p>AI customer support for your website.</p>
+            <ul><li>✓ AI Customer Agent</li><li>✓ Website Widget</li><li>✓ Knowledge Base + file import</li><li>✓ Conversations Inbox</li><li>✓ Basic lead capture</li></ul>
+            <button class="billing-select-btn" data-billing-plan="Starter" type="button">Choose Starter →</button>
+          </article>
+
+          <article class="billing-plan-card billing-plan-featured ${selectedPlan === "growth" ? "is-selected" : ""}">
+            <div class="billing-plan-popular">MOST POPULAR</div>
+            <div class="billing-plan-label">GROWTH</div>
+            <div class="billing-price"><strong>$59</strong><span>/month</span></div>
+            <p>AI plus smarter lead conversion.</p>
+            <ul><li>✓ Everything in Starter</li><li>✓ Lead qualification</li><li>✓ Intent scoring</li><li>✓ Revenue Rescue</li><li>✓ Follow-up workflows</li></ul>
+            <button class="billing-select-btn billing-select-primary" data-billing-plan="Growth" type="button">Choose Growth →</button>
+          </article>
+
+          <article class="billing-plan-card ${selectedPlan === "pro" ? "is-selected" : ""}">
+            <div class="billing-plan-label">PRO</div>
+            <div class="billing-price"><strong>$99</strong><span>/month</span></div>
+            <p>AI, lead recovery and SEO growth.</p>
+            <ul><li>✓ Everything in Growth</li><li>✓ SEO Growth Center</li><li>✓ SEO opportunity insights</li><li>✓ Advanced AI controls</li><li>✓ Higher usage limits</li></ul>
+            <button class="billing-select-btn" data-billing-plan="Pro" type="button">Choose Pro →</button>
+          </article>
+        </div>
+
+        <div id="billing-message" class="billing-message dashboard-card">
+          <div><small>CHECKOUT STATUS</small><strong>Stripe checkout is the next billing integration.</strong><p>No payment is taken yet. These buttons are ready to connect to secure checkout when Stripe is enabled.</p></div>
+        </div>
+      </section>
+    `;
 }
 
 else if (state.section === "settings") {
@@ -2323,6 +2384,19 @@ if (state.section === "overview") {
 
 if (state.section === "ai") {
   loadAiConfiguration();
+}
+
+if (state.section === "billing") {
+  document.querySelectorAll("[data-billing-plan]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const plan = button.dataset.billingPlan || "Selected plan";
+      const message = document.querySelector("#billing-message");
+      if (message) {
+        message.classList.add("is-attention");
+        message.innerHTML = `<div><small>${escapeHtml(plan.toUpperCase())} SELECTED</small><strong>${escapeHtml(plan)} is ready for secure checkout.</strong><p>Stripe is not connected yet, so no payment has been taken. When Stripe is connected, this button will open the real checkout.</p></div>`;
+      }
+    });
+  });
 }
 }
 
@@ -3538,11 +3612,15 @@ async function boot() {
   const { data } =
     await supabase.auth.getSession();
 
-  if (window.location.pathname === "/faq") {
+  if (data.session && window.location.pathname.startsWith("/dashboard/")) {
+    await loadUser(data.session.user);
+  } else if (data.session && window.location.pathname === "/faq") {
+    await loadUser(data.session.user, { publicPage: "faq" });
+  } else if (data.session) {
+    await loadUser(data.session.user, { publicPage: "landing" });
+  } else if (window.location.pathname === "/faq") {
     state.page = "faq";
     renderFaqPage();
-  } else if (data.session) {
-    await loadUser(data.session.user);
   } else {
     state.page = "landing";
     renderLanding();
@@ -3565,6 +3643,19 @@ async function boot() {
 
 
 window.addEventListener("popstate", () => {
+  if (state.user && window.location.pathname === "/") {
+    state.page = "landing";
+    renderLanding();
+    return;
+  }
+
+  if (state.user && window.location.pathname.startsWith("/dashboard/")) {
+    state.page = "dashboard";
+    state.section = sectionFromPath();
+    renderDashboard();
+    return;
+  }
+
   if (window.location.pathname === "/faq") {
     state.page = "faq";
     renderFaqPage();

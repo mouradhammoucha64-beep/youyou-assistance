@@ -219,3 +219,7 @@ Replaces the old single $19 plan with three monthly tiers:
 
 Growth is highlighted as Most Popular. Annual billing is intentionally not shown yet.
 No SQL migration required.
+
+
+## V4.6 — Public Landing + Plans & Billing
+Logged-in users can visit the public landing without logout. Dashboard adds View public website, Plans & Billing, and /dashboard/billing. Stripe checkout remains intentionally non-charging until the Stripe integration step. No SQL required.
