@@ -119,3 +119,16 @@ Fixed Business Settings save error `Cannot coerce the result to a single JSON ob
 
 ## V3.7.2
 Added `Warm + Hot` as a Lead alert mode option. No SQL changes required.
+
+
+## V3.8 — Website Widget Customization
+
+Adds company-specific widget configuration:
+- Enable / disable widget
+- Welcome message
+- Accent color
+- Bottom-left / bottom-right position
+- Live dashboard preview
+- Public widget loads saved configuration automatically
+
+Run `supabase-v3.8-widget-customization.sql` once before testing.

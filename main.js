@@ -881,69 +881,144 @@ function renderDashboard() {
   }
 
   else if (state.section === "widget") {
+    const savedWelcome =
+      state.company?.widget_welcome_message ||
+      "Hi! 👋 How can I help you today?";
+
+    const savedStatus =
+      state.company?.widget_status || "Enabled";
+
     body = `
-      <div class="dashboard-grid">
+      <section class="widget-page-v38">
 
-        <div class="dashboard-card">
-          <small>DEPLOYMENT</small>
-          <h1>Website Widget</h1>
+        <div class="dashboard-grid">
+          <div class="dashboard-card widget-deploy-card">
+            <small>DEPLOYMENT</small>
+            <h1>Website Widget</h1>
 
-          <p>
-            Add YOUYOU to your website with one simple script.
-          </p>
+            <p>
+              Install YOUYOU once. Your saved widget settings update automatically
+              without changing this code.
+            </p>
 
-          <pre id="widget-code">${escapeHtml(getWidgetInstallCode())}</pre>
+            <pre id="widget-code">${escapeHtml(getWidgetInstallCode())}</pre>
 
-          <button id="copy-widget" class="primary">
-            Copy install code
-          </button>
-        </div>
-
-        <div class="dashboard-card widget-preview-card">
-
-          <div class="widget-preview-top">
-            <div>
-              <small>PREVIEW</small>
-              <h1>Live assistant</h1>
-            </div>
-            <span class="widget-online">● Online</span>
+            <button id="copy-widget" class="primary">
+              Copy install code
+            </button>
           </div>
 
-          <div class="widget-device">
-            <div class="widget-device-head">
-              <div class="widget-agent-avatar">Y</div>
+          <div class="dashboard-card widget-preview-card">
+            <div class="widget-preview-top">
               <div>
-                <strong>YOUYOU AI</strong>
-                <span>AI Customer Agent</span>
+                <small>LIVE PREVIEW</small>
+                <h1>Your assistant</h1>
               </div>
-              <span class="widget-device-status">●</span>
+              <span id="widget-preview-online" class="widget-online">
+                ● ${savedStatus === "Disabled" ? "Disabled" : "Online"}
+              </span>
             </div>
 
-            <div class="preview-chat premium-preview-chat">
-              <div class="preview-message">
-                Hi! 👋 I'm your YOUYOU AI agent. How can I help you today?
+            <div id="widget-preview-device" class="widget-device">
+              <div class="widget-device-head">
+                <div id="widget-preview-avatar" class="widget-agent-avatar">Y</div>
+                <div>
+                  <strong>YOUYOU AI</strong>
+                  <span>AI Customer Agent</span>
+                </div>
+                <span id="widget-preview-dot" class="widget-device-status">●</span>
               </div>
 
-              <div class="preview-message user">
-                I need pricing and a demo.
+              <div class="preview-chat premium-preview-chat">
+                <div id="widget-preview-welcome" class="preview-message">
+                  ${escapeHtml(savedWelcome)}
+                </div>
+
+                <div id="widget-preview-user" class="preview-message user">
+                  I need pricing and a demo.
+                </div>
+
+                <div class="preview-message">
+                  Absolutely. I can help with that and connect you with the team.
+                </div>
               </div>
 
-              <div class="preview-message">
-                Absolutely. I can help with that and connect you with the team.
+              <div class="widget-device-input">
+                <span>Ask YOUYOU anything...</span>
+                <button id="widget-preview-send" type="button">↑</button>
               </div>
-            </div>
-
-            <div class="widget-device-input">
-              <span>Ask YOUYOU anything...</span>
-              <button type="button">↑</button>
             </div>
           </div>
-
         </div>
 
-      </div>
+        <div class="dashboard-card widget-customizer-v38">
+          <div class="card-header">
+            <div>
+              <small>CUSTOMIZATION</small>
+              <h1>Widget settings</h1>
+              <p>
+                These settings belong only to this company workspace.
+              </p>
+            </div>
+            <span id="widget-config-status" class="ai-status">Loading...</span>
+          </div>
+
+          <div class="widget-customizer-grid-v38">
+
+            <label>
+              Widget status
+              <select id="widget-config-enabled">
+                <option value="Enabled">Enabled</option>
+                <option value="Disabled">Disabled</option>
+              </select>
+              <span>Turn the widget off without removing the script.</span>
+            </label>
+
+            <label>
+              Position
+              <select id="widget-config-position">
+                <option value="Right">Bottom right</option>
+                <option value="Left">Bottom left</option>
+              </select>
+              <span>Choose where the launcher appears.</span>
+            </label>
+
+            <label>
+              Accent color
+              <div class="widget-color-row-v38">
+                <input id="widget-config-color" type="color" value="#22c55e" />
+                <input id="widget-config-color-text" value="#22c55e" maxlength="7" />
+              </div>
+              <span>Used for the launcher and customer message color.</span>
+            </label>
+
+            <label class="widget-wide-v38">
+              Welcome message
+              <textarea
+                id="widget-config-welcome"
+                rows="4"
+                maxlength="280"
+                placeholder="Hi! How can I help you today?"
+              >${escapeHtml(savedWelcome)}</textarea>
+              <span>First message visitors see when they open YOUYOU.</span>
+            </label>
+
+          </div>
+
+          <div class="widget-save-row-v38">
+            <span>
+              Settings are saved per company and loaded automatically by the installed widget.
+            </span>
+            <button id="save-widget-config" class="primary">
+              Save widget settings →
+            </button>
+          </div>
+        </div>
+
+      </section>
     `;
   }
+
 else if (state.section === "ai") {
   body = `
     <div class="dashboard-card ai-control-center">
@@ -1575,6 +1650,36 @@ else if (state.section === "settings") {
     }
   );
 
+
+  document.querySelector("#save-widget-config")?.addEventListener(
+    "click",
+    saveWidgetConfiguration
+  );
+
+  document.querySelector("#widget-config-color")?.addEventListener(
+    "input",
+    (event) => {
+      const text = document.querySelector("#widget-config-color-text");
+      if (text) text.value = event.target.value;
+      previewWidgetConfiguration();
+    }
+  );
+
+  document.querySelector("#widget-config-color-text")?.addEventListener(
+    "input",
+    previewWidgetConfiguration
+  );
+
+  document.querySelector("#widget-config-welcome")?.addEventListener(
+    "input",
+    previewWidgetConfiguration
+  );
+
+  document.querySelector("#widget-config-enabled")?.addEventListener(
+    "change",
+    previewWidgetConfiguration
+  );
+
   document.querySelector("#add-knowledge")?.addEventListener(
     "click",
     resetKnowledgeForm
@@ -1618,6 +1723,11 @@ else if (state.section === "settings") {
 
 if (state.section === "knowledge") {
   loadKnowledge();
+}
+
+
+if (state.section === "widget") {
+  loadWidgetConfiguration();
 }
   if (state.section === "conversations") {
   loadConversations();
@@ -1756,6 +1866,196 @@ async function saveAiConfiguration() {
   window.setTimeout(() => {
     if (button?.isConnected) button.textContent = "Save configuration →";
   }, 1600);
+}
+
+
+const DEFAULT_WIDGET_SETTINGS = {
+  enabled: true,
+  welcome_message: "Hi! 👋 How can I help you today?",
+  accent_color: "#22c55e",
+  position: "Right"
+};
+
+function validWidgetColor(value) {
+  return /^#[0-9a-fA-F]{6}$/.test(String(value || "").trim());
+}
+
+function setWidgetConfigStatus(message, type = "") {
+  const el = document.querySelector("#widget-config-status");
+  if (!el) return;
+  el.textContent = message;
+  el.dataset.status = type;
+}
+
+function previewWidgetConfiguration() {
+  const enabled =
+    document.querySelector("#widget-config-enabled")?.value !== "Disabled";
+
+  const welcome =
+    document.querySelector("#widget-config-welcome")?.value.trim() ||
+    DEFAULT_WIDGET_SETTINGS.welcome_message;
+
+  const colorText =
+    document.querySelector("#widget-config-color-text")?.value.trim() || "";
+
+  const colorPicker =
+    document.querySelector("#widget-config-color")?.value || "#22c55e";
+
+  const accent =
+    validWidgetColor(colorText) ? colorText : colorPicker;
+
+  const welcomeEl = document.querySelector("#widget-preview-welcome");
+  const avatar = document.querySelector("#widget-preview-avatar");
+  const dot = document.querySelector("#widget-preview-dot");
+  const online = document.querySelector("#widget-preview-online");
+  const user = document.querySelector("#widget-preview-user");
+  const send = document.querySelector("#widget-preview-send");
+  const device = document.querySelector("#widget-preview-device");
+
+  if (welcomeEl) welcomeEl.textContent = welcome;
+  if (avatar) avatar.style.background = accent;
+  if (dot) dot.style.color = accent;
+  if (user) {
+    user.style.background = accent;
+    user.style.color = "#06130a";
+  }
+  if (send) send.style.background = accent;
+
+  if (online) {
+    online.textContent = enabled ? "● Online" : "● Disabled";
+    online.classList.toggle("is-disabled", !enabled);
+  }
+
+  if (device) {
+    device.classList.toggle("widget-preview-disabled-v38", !enabled);
+  }
+}
+
+async function loadWidgetConfiguration() {
+  if (!supabase || !state.company) return;
+
+  setWidgetConfigStatus("Loading...", "loading");
+
+  const { data, error } = await supabase
+    .from("widget_configs")
+    .select("enabled, welcome_message, accent_color, position")
+    .eq("company_id", state.company.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Widget config load error:", error);
+    setWidgetConfigStatus("Setup required", "error");
+    return;
+  }
+
+  const config = data || {
+    ...DEFAULT_WIDGET_SETTINGS,
+    enabled: (state.company.widget_status || "Enabled") !== "Disabled",
+    welcome_message:
+      state.company.widget_welcome_message ||
+      DEFAULT_WIDGET_SETTINGS.welcome_message
+  };
+
+  const enabledSelect = document.querySelector("#widget-config-enabled");
+  const positionSelect = document.querySelector("#widget-config-position");
+  const colorPicker = document.querySelector("#widget-config-color");
+  const colorText = document.querySelector("#widget-config-color-text");
+  const welcome = document.querySelector("#widget-config-welcome");
+
+  if (enabledSelect) enabledSelect.value = config.enabled === false ? "Disabled" : "Enabled";
+  if (positionSelect) positionSelect.value = config.position || "Right";
+
+  const accent =
+    validWidgetColor(config.accent_color)
+      ? config.accent_color
+      : DEFAULT_WIDGET_SETTINGS.accent_color;
+
+  if (colorPicker) colorPicker.value = accent;
+  if (colorText) colorText.value = accent;
+  if (welcome) {
+    welcome.value =
+      config.welcome_message ||
+      DEFAULT_WIDGET_SETTINGS.welcome_message;
+  }
+
+  previewWidgetConfiguration();
+  setWidgetConfigStatus(data ? "Saved settings loaded" : "Default settings ready", "success");
+}
+
+async function saveWidgetConfiguration() {
+  if (!supabase || !state.company) return;
+
+  const button = document.querySelector("#save-widget-config");
+
+  const enabled =
+    document.querySelector("#widget-config-enabled")?.value !== "Disabled";
+
+  const position =
+    document.querySelector("#widget-config-position")?.value || "Right";
+
+  const welcome =
+    document.querySelector("#widget-config-welcome")?.value.trim() ||
+    DEFAULT_WIDGET_SETTINGS.welcome_message;
+
+  const colorText =
+    document.querySelector("#widget-config-color-text")?.value.trim() || "";
+
+  const accent =
+    validWidgetColor(colorText)
+      ? colorText
+      : document.querySelector("#widget-config-color")?.value;
+
+  if (!validWidgetColor(accent)) {
+    setWidgetConfigStatus("Invalid color", "error");
+    return;
+  }
+
+  button?.setAttribute("disabled", "disabled");
+  if (button) button.textContent = "Saving...";
+  setWidgetConfigStatus("Saving...", "loading");
+
+  const { error } = await supabase
+    .from("widget_configs")
+    .upsert({
+      company_id: state.company.id,
+      enabled,
+      welcome_message: welcome,
+      accent_color: accent,
+      position,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "company_id" });
+
+  if (error) {
+    console.error("Widget config save error:", error);
+    button?.removeAttribute("disabled");
+    if (button) button.textContent = "Save widget settings →";
+    setWidgetConfigStatus(error.message, "error");
+    return;
+  }
+
+  const { error: companyError } = await supabase
+    .from("companies")
+    .update({
+      widget_status: enabled ? "Enabled" : "Disabled",
+      widget_welcome_message: welcome,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", state.company.id);
+
+  button?.removeAttribute("disabled");
+  if (button) button.textContent = "Save widget settings →";
+
+  if (companyError) {
+    console.error("Company widget mirror error:", companyError);
+    setWidgetConfigStatus(companyError.message, "error");
+    return;
+  }
+
+  state.company.widget_status = enabled ? "Enabled" : "Disabled";
+  state.company.widget_welcome_message = welcome;
+
+  previewWidgetConfiguration();
+  setWidgetConfigStatus("Saved successfully", "success");
 }
 
 async function loadOverviewStats() {

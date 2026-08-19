@@ -1,4 +1,4 @@
-(function () {
+(async function () {
   "use strict";
 
   const script =
@@ -26,6 +26,79 @@
     "Content-Type": "application/json",
     apikey: SUPABASE_ANON_KEY
   };
+
+
+  const DEFAULT_PUBLIC_CONFIG = {
+    enabled: true,
+    welcome_message: "Hi! 👋 How can I help you today?",
+    accent_color: "#22c55e",
+    position: "Right"
+  };
+
+  function validHexColor(value) {
+    return /^#[0-9a-fA-F]{6}$/.test(String(value || "").trim());
+  }
+
+  function hexToRgba(hex, alpha) {
+    const safe = validHexColor(hex) ? hex.slice(1) : "22c55e";
+    const number = parseInt(safe, 16);
+    const r = (number >> 16) & 255;
+    const g = (number >> 8) & 255;
+    const b = number & 255;
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+
+  async function loadPublicWidgetConfig() {
+    if (!companyId) return { ...DEFAULT_PUBLIC_CONFIG };
+
+    try {
+      const url =
+        `${SUPABASE_URL}/rest/v1/widget_configs` +
+        `?company_id=eq.${encodeURIComponent(companyId)}` +
+        `&select=enabled,welcome_message,accent_color,position&limit=1`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { apikey: SUPABASE_ANON_KEY }
+      });
+
+      if (!response.ok) {
+        console.warn("YOUYOU widget config unavailable:", await response.text());
+        return { ...DEFAULT_PUBLIC_CONFIG };
+      }
+
+      const rows = await response.json();
+      const config = rows?.[0];
+
+      return config
+        ? { ...DEFAULT_PUBLIC_CONFIG, ...config, enabled: config.enabled !== false }
+        : { ...DEFAULT_PUBLIC_CONFIG };
+    } catch (error) {
+      console.warn("YOUYOU widget config load failed:", error);
+      return { ...DEFAULT_PUBLIC_CONFIG };
+    }
+  }
+
+  const publicConfig = await loadPublicWidgetConfig();
+
+  if (publicConfig.enabled === false) {
+    console.info("YOUYOU widget is disabled for this workspace.");
+    return;
+  }
+
+  const accentColor =
+    validHexColor(publicConfig.accent_color)
+      ? publicConfig.accent_color
+      : DEFAULT_PUBLIC_CONFIG.accent_color;
+
+  const accentShadow = hexToRgba(accentColor, .30);
+  const accentShadowStrong = hexToRgba(accentColor, .42);
+
+  const welcomeMessage =
+    String(publicConfig.welcome_message || DEFAULT_PUBLIC_CONFIG.welcome_message);
+
+  const widgetPosition =
+    publicConfig.position === "Left" ? "Left" : "Right";
 
   async function ensureConversation() {
     if (conversationId) return conversationId;
@@ -95,7 +168,7 @@
       border-radius:10px;
     ">
       <span style="
-        color:#22c55e;
+        color:${accentColor};
         font-size:15px;
         font-weight:900;
         font-family:Arial,sans-serif;
@@ -118,7 +191,7 @@
         width:10px;
         height:10px;
         border-radius:50%;
-        background:#22c55e;
+        background:${accentColor};
         border:2px solid #06130a;
       "></span>
     </span>
@@ -126,19 +199,19 @@
 
   Object.assign(button.style, {
     position: "fixed",
-    right: "24px",
+    right: widgetPosition === "Right" ? "24px" : "auto",
+    left: widgetPosition === "Left" ? "24px" : "auto",
     bottom: "24px",
     width: "62px",
     height: "62px",
     borderRadius: "20px",
     border: "1px solid rgba(34,197,94,.45)",
-    background:
-      "linear-gradient(145deg,#22c55e,#16a34a)",
+    background: accentColor,
     color: "#03130a",
     cursor: "pointer",
     zIndex: "999999",
     boxShadow:
-      "0 12px 35px rgba(34,197,94,.28), 0 8px 25px rgba(0,0,0,.35)",
+      `0 12px 35px ${accentShadow}, 0 8px 25px rgba(0,0,0,.35)`,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -152,7 +225,7 @@
       "translateY(-3px) scale(1.03)";
 
     button.style.boxShadow =
-      "0 16px 42px rgba(34,197,94,.38), 0 10px 30px rgba(0,0,0,.4)";
+      `0 16px 42px ${accentShadowStrong}, 0 10px 30px rgba(0,0,0,.4)`;
   });
 
   button.addEventListener("mouseleave", () => {
@@ -160,7 +233,7 @@
       "translateY(0) scale(1)";
 
     button.style.boxShadow =
-      "0 12px 35px rgba(34,197,94,.28), 0 8px 25px rgba(0,0,0,.35)";
+      `0 12px 35px ${accentShadow}, 0 8px 25px rgba(0,0,0,.35)`;
   });
 
   /* =========================
@@ -171,7 +244,8 @@
 
   Object.assign(panel.style, {
     position: "fixed",
-    right: "24px",
+    right: widgetPosition === "Right" ? "24px" : "auto",
+    left: widgetPosition === "Left" ? "24px" : "auto",
     bottom: "98px",
     width: "390px",
     maxWidth: "calc(100vw - 32px)",
@@ -218,7 +292,7 @@
           align-items:center;
           justify-content:center;
           background:
-            linear-gradient(145deg,#22c55e,#16a34a);
+            ${accentColor};
           color:#03130a;
           font-size:18px;
           font-weight:900;
@@ -246,7 +320,7 @@
               width:6px;
               height:6px;
               border-radius:50%;
-              background:#22c55e;
+              background:${accentColor};
             "></span>
             Online now
           </div>
@@ -306,7 +380,7 @@
           width:30px;
           height:30px;
           border-radius:10px;
-          background:#22c55e;
+          background:${accentColor};
           color:#03130a;
           display:flex;
           align-items:center;
@@ -327,9 +401,7 @@
           font-size:13px;
           line-height:1.55;
         ">
-          Hi! 👋 I'm your YOUYOU AI agent.
-          <br><br>
-          How can I help you today?
+          ${escapeHtml(welcomeMessage)}
         </div>
 
       </div>
@@ -382,7 +454,7 @@
           height:44px;
           border:none;
           border-radius:13px;
-          background:#22c55e;
+          background:${accentColor};
           color:#03130a;
           font-size:18px;
           font-weight:900;
@@ -486,7 +558,7 @@
         width:30px;
         height:30px;
         border-radius:10px;
-        background:#22c55e;
+        background:${accentColor};
         color:#03130a;
         display:flex;
         align-items:center;
@@ -553,7 +625,7 @@
           <div style="
             max-width:78%;
             padding:11px 14px;
-            background:#22c55e;
+            background:${accentColor};
             color:#03130a;
             border-radius:15px 5px 15px 15px;
             font-size:13px;
