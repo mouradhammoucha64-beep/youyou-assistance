@@ -198,3 +198,8 @@ Adds a premium landing-page section that sells the new Business Knowledge Import
 - Landing navigation scrolls smoothly without adding `#features`, `#how`, or `#pricing` to the URL.
 - Auth back-home action restores the clean root URL.
 - No SQL migration required.
+
+
+## V4.4 — Landing FAQ
+
+Adds a compact seven-question accordion FAQ, a FAQ navigation link, SEO Growth Center positioning, and a final signup CTA. No SQL migration required.

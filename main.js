@@ -91,6 +91,7 @@ function renderLanding() {
           <a href="/" data-scroll-section="features">Features</a>
           <a href="/" data-scroll-section="how">How it works</a>
           <a href="/" data-scroll-section="pricing">Pricing</a>
+          <a href="/" data-scroll-section="faq">FAQ</a>
         </nav>
 
         <div class="nav-actions">
@@ -571,6 +572,90 @@ function renderLanding() {
       </main>
 
 
+
+      <section id="faq" class="landing-faq-section">
+        <div class="landing-faq-shell">
+          <div class="landing-faq-head">
+            <div class="eyebrow">FREQUENTLY ASKED QUESTIONS</div>
+            <h2>Questions before you start?</h2>
+            <p>Everything you need to know before adding YOUYOU to your business.</p>
+          </div>
+
+          <div class="landing-faq-list">
+            <article class="landing-faq-item is-open">
+              <button class="landing-faq-question" type="button" aria-expanded="true">
+                <span>What is YOUYOU?</span><span class="faq-toggle">−</span>
+              </button>
+              <div class="landing-faq-answer">
+                <p>YOUYOU is an AI customer agent workspace designed to help businesses answer visitors, capture leads, qualify opportunities and manage customer conversations from one place.</p>
+              </div>
+            </article>
+
+            <article class="landing-faq-item">
+              <button class="landing-faq-question" type="button" aria-expanded="false">
+                <span>How quickly can I set it up?</span><span class="faq-toggle">+</span>
+              </button>
+              <div class="landing-faq-answer">
+                <p>You can create your workspace, add business knowledge, customize your website widget and start testing in just a few minutes.</p>
+              </div>
+            </article>
+
+            <article class="landing-faq-item">
+              <button class="landing-faq-question" type="button" aria-expanded="false">
+                <span>Can YOUYOU learn from my business files?</span><span class="faq-toggle">+</span>
+              </button>
+              <div class="landing-faq-answer">
+                <p>Yes. You can import PDF, Word, Excel, CSV and TXT files. YOUYOU extracts readable business information and adds it to your Knowledge Base so it can be used as context.</p>
+              </div>
+            </article>
+
+            <article class="landing-faq-item">
+              <button class="landing-faq-question" type="button" aria-expanded="false">
+                <span>Does YOUYOU work on any website?</span><span class="faq-toggle">+</span>
+              </button>
+              <div class="landing-faq-answer">
+                <p>YOUYOU is installed using a lightweight website widget linked to your own workspace and business settings.</p>
+              </div>
+            </article>
+
+            <article class="landing-faq-item">
+              <button class="landing-faq-question" type="button" aria-expanded="false">
+                <span>Can YOUYOU help identify serious leads?</span><span class="faq-toggle">+</span>
+              </button>
+              <div class="landing-faq-answer">
+                <p>Yes. YOUYOU uses customer intent signals to help separate stronger opportunities from casual visitors, so your team can focus on the conversations that matter most.</p>
+              </div>
+            </article>
+
+            <article class="landing-faq-item">
+              <button class="landing-faq-question" type="button" aria-expanded="false">
+                <span>Do I need a credit card to start?</span><span class="faq-toggle">+</span>
+              </button>
+              <div class="landing-faq-answer">
+                <p>No. You can start without a credit card and explore the workspace before choosing a paid plan.</p>
+              </div>
+            </article>
+
+            <article class="landing-faq-item landing-faq-seo">
+              <button class="landing-faq-question" type="button" aria-expanded="false">
+                <span>Can YOUYOU help my business rank higher on Google?</span><span class="faq-toggle">+</span>
+              </button>
+              <div class="landing-faq-answer">
+                <p>Yes. YOUYOU’s SEO Growth Center is designed to help identify search opportunities, improve FAQs and metadata, and create stronger service and local content based on your business knowledge and real customer questions. Search rankings still depend on your website, competition and Google’s ranking systems.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="landing-faq-cta">
+            <div>
+              <small>READY WHEN YOU ARE</small>
+              <strong>Start building your AI customer agent today.</strong>
+            </div>
+            <button id="faq-start" class="primary" type="button">Start for free →</button>
+          </div>
+        </div>
+      </section>
+
       <footer>
 
         <div class="footer-brand">
@@ -608,6 +693,29 @@ function renderLanding() {
   document.querySelector("#knowledge-start")?.addEventListener("click", showSignup);
   document.querySelector("#pricing-start").onclick = showSignup;
   document.querySelector("#final-start").onclick = showSignup;
+  document.querySelector("#faq-start")?.addEventListener("click", showSignup);
+
+  document.querySelectorAll(".landing-faq-question").forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = button.closest(".landing-faq-item");
+      const isOpen = item?.classList.contains("is-open");
+
+      document.querySelectorAll(".landing-faq-item").forEach((faqItem) => {
+        faqItem.classList.remove("is-open");
+        faqItem.querySelector(".landing-faq-question")?.setAttribute("aria-expanded", "false");
+        const faqToggle = faqItem.querySelector(".faq-toggle");
+        if (faqToggle) faqToggle.textContent = "+";
+      });
+
+      if (!isOpen && item) {
+        item.classList.add("is-open");
+        button.setAttribute("aria-expanded", "true");
+        const toggle = button.querySelector(".faq-toggle");
+        if (toggle) toggle.textContent = "−";
+      }
+    });
+  });
+
   document.querySelector("#footer-login").onclick = showLogin;
 
   document.querySelectorAll("[data-scroll-section]").forEach((link) => {
