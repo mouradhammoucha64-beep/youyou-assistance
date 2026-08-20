@@ -114,7 +114,7 @@ function renderLanding() {
 
             <div class="eyebrow">
               <span class="pulse"></span>
-              AI CUSTOMER AGENT
+              AI CUSTOMER SUPPORT & LEAD QUALIFICATION
             </div>
 
             <h1>
@@ -180,7 +180,7 @@ function renderLanding() {
 
                 <div class="message ai">
                   We have plans starting at
-                  <strong>$19/month</strong>.
+                  <strong>$29/month</strong>
                   I can also help you choose the right plan.
                 </div>
 
@@ -620,8 +620,250 @@ function renderLanding() {
           </div>
 
         </section>
+<section id="pricing" class="pricing-section">
+
+  <div class="section-heading">
+    <div class="eyebrow">SIMPLE PRICING</div>
+
+    <h2>
+      Choose the plan that
+      <span>fits your business.</span>
+    </h2>
+
+    <p>
+      AI-powered customer support and lead qualification
+      for businesses of every size.
+    </p>
+  </div>
+
+  <div class="pricing-grid">
+
+    <!-- STARTER -->
+    <article class="pricing-plan">
+
+      <div class="pricing-label">STARTER</div>
+
+      <h3 class="pricing-price">
+        $29
+        <span>/ month</span>
+      </h3>
+
+      <p class="pricing-description">
+        For small businesses ready to automate customer conversations.
+      </p>
+
+      <ul>
+        <li>✓ AI customer conversations</li>
+        <li>✓ Website chat widget</li>
+        <li>✓ Knowledge base</li>
+        <li>✓ Lead capture</li>
+        <li>✓ Conversation inbox</li>
+        <li>✓ 24/7 availability</li>
+      </ul>
+
+      <button
+        type="button"
+        class="primary pricing-start"
+        data-plan="starter"
+      >
+        Get Starter →
+      </button>
+
+    </article>
 
 
+    <!-- GROWTH -->
+    <article class="pricing-plan featured">
+
+      <div class="pricing-popular">MOST POPULAR</div>
+
+      <div class="pricing-label">GROWTH</div>
+
+      <h3 class="pricing-price">
+        $59
+        <span>/ month</span>
+      </h3>
+
+      <p class="pricing-description">
+        For growing businesses that want smarter lead qualification.
+      </p>
+
+      <ul>
+        <li>✓ Everything in Starter</li>
+        <li>✓ Advanced lead qualification</li>
+        <li>✓ Hot & warm lead detection</li>
+        <li>✓ Smart lead summaries</li>
+        <li>✓ Contact capture</li>
+        <li>✓ AI control center</li>
+      </ul>
+
+      <button
+        type="button"
+        class="primary pricing-start"
+        data-plan="growth"
+      >
+        Get Growth →
+      </button>
+
+    </article>
+
+
+    <!-- PRO -->
+    <article class="pricing-plan">
+
+      <div class="pricing-label">PRO</div>
+
+      <h3 class="pricing-price">
+        $99
+        <span>/ month</span>
+      </h3>
+
+      <p class="pricing-description">
+        For businesses ready to scale AI-powered customer engagement.
+      </p>
+
+      <ul>
+        <li>✓ Everything in Growth</li>
+        <li>✓ Higher usage capacity</li>
+        <li>✓ Priority support</li>
+        <li>✓ Advanced AI configuration</li>
+        <li>✓ Automation-ready integrations</li>
+        <li>✓ WhatsApp integration ready</li>
+      </ul>
+
+      <button
+        type="button"
+        class="primary pricing-start"
+        data-plan="pro"
+      >
+        Get Pro →
+      </button>
+
+    </article>
+
+  </div>
+
+  <p class="pricing-note">
+    Cancel anytime. Refunds are handled according to our Refund Policy.
+  </p>
+
+</section>
+<section id="pricing" class="pricing-section">
+
+  <div class="section-heading">
+    <div class="eyebrow">SIMPLE PRICING</div>
+
+    <h2>
+      Choose the plan that
+      <span>fits your business.</span>
+    </h2>
+
+    <p>
+      AI-powered customer support and lead qualification
+      for businesses of every size.
+    </p>
+  </div>
+
+  <div class="pricing-grid">
+
+    <article class="pricing-plan">
+      <div class="pricing-label">STARTER</div>
+
+      <h3 class="pricing-price">
+        $29 <span>/ month</span>
+      </h3>
+
+      <p class="pricing-description">
+        For small businesses ready to automate customer conversations.
+      </p>
+
+      <ul>
+        <li>✓ AI customer conversations</li>
+        <li>✓ Website chat widget</li>
+        <li>✓ Knowledge base</li>
+        <li>✓ Lead capture</li>
+        <li>✓ Conversation inbox</li>
+        <li>✓ 24/7 availability</li>
+      </ul>
+
+      <button
+        id="pricing-starter"
+        type="button"
+        class="primary pricing-start"
+      >
+        Get Starter →
+      </button>
+    </article>
+
+
+    <article class="pricing-plan featured">
+      <div class="pricing-popular">MOST POPULAR</div>
+
+      <div class="pricing-label">GROWTH</div>
+
+      <h3 class="pricing-price">
+        $59 <span>/ month</span>
+      </h3>
+
+      <p class="pricing-description">
+        For growing businesses that want smarter lead qualification.
+      </p>
+
+      <ul>
+        <li>✓ Everything in Starter</li>
+        <li>✓ Advanced lead qualification</li>
+        <li>✓ Hot & warm lead detection</li>
+        <li>✓ Smart lead summaries</li>
+        <li>✓ Contact capture</li>
+        <li>✓ AI control center</li>
+      </ul>
+
+      <button
+        id="pricing-growth"
+        type="button"
+        class="primary pricing-start"
+      >
+        Get Growth →
+      </button>
+    </article>
+
+
+    <article class="pricing-plan">
+      <div class="pricing-label">PRO</div>
+
+      <h3 class="pricing-price">
+        $99 <span>/ month</span>
+      </h3>
+
+      <p class="pricing-description">
+        For businesses ready to scale AI-powered customer engagement.
+      </p>
+
+      <ul>
+        <li>✓ Everything in Growth</li>
+        <li>✓ Higher usage capacity</li>
+        <li>✓ Priority support</li>
+        <li>✓ Advanced AI configuration</li>
+        <li>✓ Automation-ready integrations</li>
+        <li>✓ WhatsApp integration ready</li>
+      </ul>
+
+      <button
+        id="pricing-pro"
+        type="button"
+        class="primary pricing-start"
+      >
+        Get Pro →
+      </button>
+    </article>
+
+  </div>
+
+  <p class="pricing-note">
+    Cancel anytime. Refunds are handled according to our Refund Policy.
+  </p>
+
+</section>
         <section class="final-cta">
 
           <div class="cta-glow"></div>
