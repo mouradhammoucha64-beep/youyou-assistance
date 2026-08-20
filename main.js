@@ -118,15 +118,15 @@ function renderLanding() {
             </div>
 
             <h1>
-              Your website should
-              <span>never stop selling.</span>
-            </h1>
+  Turn website visitors into
+  <span>qualified customers.</span>
+</h1>
 
-            <p class="hero-text">
-              YOUYOU is your AI customer agent that talks to visitors,
-              answers questions, captures leads and helps turn conversations
-              into customers — 24/7.
-            </p>
+<p class="hero-text">
+  YOUYOU is an AI customer agent for businesses that answers
+  customer questions 24/7, qualifies leads, captures contact
+  details and helps turn website conversations into sales.
+</p>
 
             <div class="hero-buttons">
               ${state.user
