@@ -5593,3 +5593,182 @@ body::-webkit-scrollbar-thumb:hover,
 .landing::-webkit-scrollbar-thumb:hover {
   background: #4a5061;
 }
+/* =========================
+   YOUYOU 3-PLAN PRICING
+========================= */
+
+.pricing-section {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 110px 0;
+}
+
+.pricing-section .section-heading {
+  max-width: 760px;
+  margin: 0 auto 56px;
+  text-align: center;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+.pricing-plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 34px 30px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(139, 92, 246, 0.10),
+      transparent 38%
+    ),
+    rgba(255, 255, 255, 0.028);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.pricing-plan:hover {
+  transform: translateY(-6px);
+  border-color: rgba(139, 92, 246, 0.38);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
+}
+
+.pricing-plan.featured {
+  border-color: rgba(139, 92, 246, 0.65);
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(139, 92, 246, 0.2),
+      transparent 42%
+    ),
+    rgba(139, 92, 246, 0.055);
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, 0.32),
+    0 0 0 1px rgba(139, 92, 246, 0.09);
+}
+
+.pricing-popular {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 7px 14px;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  border-radius: 999px;
+  background: #161125;
+  color: #c4b5fd;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+.pricing-label {
+  color: #a78bfa;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.pricing-price {
+  margin: 18px 0 12px;
+  font-size: clamp(42px, 4vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.pricing-price span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.pricing-description {
+  min-height: 58px;
+  margin: 0 0 25px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.pricing-plan ul {
+  display: grid;
+  gap: 13px;
+  margin: 0 0 30px;
+  padding: 0;
+  list-style: none;
+  color: #c6c7d2;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.pricing-plan li {
+  white-space: normal;
+}
+
+.pricing-start {
+  width: 100%;
+  margin-top: auto;
+  justify-content: center;
+}
+
+.pricing-note {
+  margin: 28px auto 0;
+  color: var(--muted-2);
+  font-size: 11px;
+  text-align: center;
+}
+
+
+/* TABLET */
+
+@media (max-width: 950px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+
+  .pricing-plan {
+    min-height: auto;
+  }
+
+  .pricing-description {
+    min-height: auto;
+  }
+}
+
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .pricing-section {
+    width: calc(100% - 28px);
+    padding: 80px 0;
+  }
+
+  .pricing-section .section-heading {
+    margin-bottom: 42px;
+  }
+
+  .pricing-plan {
+    padding: 30px 22px 24px;
+    border-radius: 20px;
+  }
+
+  .pricing-price {
+    font-size: 45px;
+  }
+}
