@@ -114,19 +114,19 @@ function renderLanding() {
 
             <div class="eyebrow">
               <span class="pulse"></span>
-              AI CUSTOMER SUPPORT & LEAD QUALIFICATION
+              AI CUSTOMER AGENT
             </div>
 
             <h1>
-  Turn website visitors into
-  <span>qualified customers.</span>
-</h1>
+              Your website should
+              <span>never stop selling.</span>
+            </h1>
 
-<p class="hero-text">
-  YOUYOU is an AI customer agent for businesses that answers
-  customer questions 24/7, qualifies leads, captures contact
-  details and helps turn website conversations into sales.
-</p>
+            <p class="hero-text">
+              YOUYOU is your AI customer agent that talks to visitors,
+              answers questions, captures leads and helps turn conversations
+              into customers — 24/7.
+            </p>
 
             <div class="hero-buttons">
               ${state.user
@@ -180,7 +180,7 @@ function renderLanding() {
 
                 <div class="message ai">
                   We have plans starting at
-                  <strong>$29/month</strong>
+                  <strong>$19/month</strong>.
                   I can also help you choose the right plan.
                 </div>
 
@@ -620,250 +620,8 @@ function renderLanding() {
           </div>
 
         </section>
-<section id="pricing" class="pricing-section">
-
-  <div class="section-heading">
-    <div class="eyebrow">SIMPLE PRICING</div>
-
-    <h2>
-      Choose the plan that
-      <span>fits your business.</span>
-    </h2>
-
-    <p>
-      AI-powered customer support and lead qualification
-      for businesses of every size.
-    </p>
-  </div>
-
-  <div class="pricing-grid">
-
-    <!-- STARTER -->
-    <article class="pricing-plan">
-
-      <div class="pricing-label">STARTER</div>
-
-      <h3 class="pricing-price">
-        $29
-        <span>/ month</span>
-      </h3>
-
-      <p class="pricing-description">
-        For small businesses ready to automate customer conversations.
-      </p>
-
-      <ul>
-        <li>✓ AI customer conversations</li>
-        <li>✓ Website chat widget</li>
-        <li>✓ Knowledge base</li>
-        <li>✓ Lead capture</li>
-        <li>✓ Conversation inbox</li>
-        <li>✓ 24/7 availability</li>
-      </ul>
-
-      <button
-        type="button"
-        class="primary pricing-start"
-        data-plan="starter"
-      >
-        Get Starter →
-      </button>
-
-    </article>
 
 
-    <!-- GROWTH -->
-    <article class="pricing-plan featured">
-
-      <div class="pricing-popular">MOST POPULAR</div>
-
-      <div class="pricing-label">GROWTH</div>
-
-      <h3 class="pricing-price">
-        $59
-        <span>/ month</span>
-      </h3>
-
-      <p class="pricing-description">
-        For growing businesses that want smarter lead qualification.
-      </p>
-
-      <ul>
-        <li>✓ Everything in Starter</li>
-        <li>✓ Advanced lead qualification</li>
-        <li>✓ Hot & warm lead detection</li>
-        <li>✓ Smart lead summaries</li>
-        <li>✓ Contact capture</li>
-        <li>✓ AI control center</li>
-      </ul>
-
-      <button
-        type="button"
-        class="primary pricing-start"
-        data-plan="growth"
-      >
-        Get Growth →
-      </button>
-
-    </article>
-
-
-    <!-- PRO -->
-    <article class="pricing-plan">
-
-      <div class="pricing-label">PRO</div>
-
-      <h3 class="pricing-price">
-        $99
-        <span>/ month</span>
-      </h3>
-
-      <p class="pricing-description">
-        For businesses ready to scale AI-powered customer engagement.
-      </p>
-
-      <ul>
-        <li>✓ Everything in Growth</li>
-        <li>✓ Higher usage capacity</li>
-        <li>✓ Priority support</li>
-        <li>✓ Advanced AI configuration</li>
-        <li>✓ Automation-ready integrations</li>
-        <li>✓ WhatsApp integration ready</li>
-      </ul>
-
-      <button
-        type="button"
-        class="primary pricing-start"
-        data-plan="pro"
-      >
-        Get Pro →
-      </button>
-
-    </article>
-
-  </div>
-
-  <p class="pricing-note">
-    Cancel anytime. Refunds are handled according to our Refund Policy.
-  </p>
-
-</section>
-<section id="pricing" class="pricing-section">
-
-  <div class="section-heading">
-    <div class="eyebrow">SIMPLE PRICING</div>
-
-    <h2>
-      Choose the plan that
-      <span>fits your business.</span>
-    </h2>
-
-    <p>
-      AI-powered customer support and lead qualification
-      for businesses of every size.
-    </p>
-  </div>
-
-  <div class="pricing-grid">
-
-    <article class="pricing-plan">
-      <div class="pricing-label">STARTER</div>
-
-      <h3 class="pricing-price">
-        $29 <span>/ month</span>
-      </h3>
-
-      <p class="pricing-description">
-        For small businesses ready to automate customer conversations.
-      </p>
-
-      <ul>
-        <li>✓ AI customer conversations</li>
-        <li>✓ Website chat widget</li>
-        <li>✓ Knowledge base</li>
-        <li>✓ Lead capture</li>
-        <li>✓ Conversation inbox</li>
-        <li>✓ 24/7 availability</li>
-      </ul>
-
-      <button
-        id="pricing-starter"
-        type="button"
-        class="primary pricing-start"
-      >
-        Get Starter →
-      </button>
-    </article>
-
-
-    <article class="pricing-plan featured">
-      <div class="pricing-popular">MOST POPULAR</div>
-
-      <div class="pricing-label">GROWTH</div>
-
-      <h3 class="pricing-price">
-        $59 <span>/ month</span>
-      </h3>
-
-      <p class="pricing-description">
-        For growing businesses that want smarter lead qualification.
-      </p>
-
-      <ul>
-        <li>✓ Everything in Starter</li>
-        <li>✓ Advanced lead qualification</li>
-        <li>✓ Hot & warm lead detection</li>
-        <li>✓ Smart lead summaries</li>
-        <li>✓ Contact capture</li>
-        <li>✓ AI control center</li>
-      </ul>
-
-      <button
-        id="pricing-growth"
-        type="button"
-        class="primary pricing-start"
-      >
-        Get Growth →
-      </button>
-    </article>
-
-
-    <article class="pricing-plan">
-      <div class="pricing-label">PRO</div>
-
-      <h3 class="pricing-price">
-        $99 <span>/ month</span>
-      </h3>
-
-      <p class="pricing-description">
-        For businesses ready to scale AI-powered customer engagement.
-      </p>
-
-      <ul>
-        <li>✓ Everything in Growth</li>
-        <li>✓ Higher usage capacity</li>
-        <li>✓ Priority support</li>
-        <li>✓ Advanced AI configuration</li>
-        <li>✓ Automation-ready integrations</li>
-        <li>✓ WhatsApp integration ready</li>
-      </ul>
-
-      <button
-        id="pricing-pro"
-        type="button"
-        class="primary pricing-start"
-      >
-        Get Pro →
-      </button>
-    </article>
-
-  </div>
-
-  <p class="pricing-note">
-    Cancel anytime. Refunds are handled according to our Refund Policy.
-  </p>
-
-</section>
         <section class="final-cta">
 
           <div class="cta-glow"></div>
@@ -2057,6 +1815,37 @@ else if (state.section === "seo") {
       </div>
 
 
+
+      <div class="seo-analysis-summary dashboard-card">
+        <div class="seo-analysis-summary-head">
+          <div>
+            <small>ANALYSIS SUMMARY</small>
+            <strong>What YOUYOU found in your workspace</strong>
+          </div>
+          <span id="seo-summary-readiness">—</span>
+        </div>
+
+        <div class="seo-summary-grid">
+          <div>
+            <small>KEYWORD IDEAS</small>
+            <strong id="seo-summary-keywords">—</strong>
+          </div>
+          <div>
+            <small>PAGE IDEAS</small>
+            <strong id="seo-summary-pages">—</strong>
+          </div>
+          <div>
+            <small>QUICK WINS</small>
+            <strong id="seo-summary-wins">—</strong>
+          </div>
+          <div>
+            <small>SETUP GAPS</small>
+            <strong id="seo-summary-gaps">—</strong>
+          </div>
+        </div>
+      </div>
+
+
       <div class="seo-metric-grid">
         <article class="seo-metric-card">
           <div class="seo-metric-icon">◎</div>
@@ -2091,6 +1880,111 @@ else if (state.section === "seo") {
             <small>QUICK WINS</small>
             <strong id="seo-quickwin-count">—</strong>
             <span>Prioritized workspace opportunities</span>
+          </div>
+        </article>
+      </div>
+
+
+
+      <div class="seo-keyword-lab dashboard-card">
+        <div class="seo-card-head">
+          <div>
+            <small>KEYWORD OPPORTUNITIES</small>
+            <h2>Build a search strategy around what customers type.</h2>
+            <p>
+              YOUYOU creates practical keyword clusters from your service, city and
+              business knowledge. Live search volume and ranking difficulty will only
+              appear after real search-data integrations are connected.
+            </p>
+          </div>
+
+          <span class="seo-keyword-badge">KEYWORD ENGINE V1</span>
+        </div>
+
+        <div class="seo-keyword-layout">
+          <div class="seo-keyword-primary">
+            <small>PRIMARY KEYWORD</small>
+            <strong id="seo-primary-keyword">—</strong>
+            <span id="seo-primary-intent">Commercial intent</span>
+          </div>
+
+          <div class="seo-keyword-clusters">
+            <section>
+              <div class="seo-keyword-cluster-head">
+                <span>SECONDARY KEYWORDS</span>
+                <button id="seo-copy-secondary" class="seo-mini-btn" type="button">Copy</button>
+              </div>
+              <div id="seo-secondary-keywords" class="seo-keyword-chips"></div>
+            </section>
+
+            <section>
+              <div class="seo-keyword-cluster-head">
+                <span>LONG-TAIL QUESTIONS</span>
+                <button id="seo-copy-longtail" class="seo-mini-btn" type="button">Copy</button>
+              </div>
+              <div id="seo-longtail-keywords" class="seo-keyword-list"></div>
+            </section>
+          </div>
+        </div>
+
+        <div class="seo-keyword-note">
+          <span>i</span>
+          <p>
+            These are strategic keyword ideas generated from your workspace—not
+            claimed monthly search-volume data.
+          </p>
+        </div>
+      </div>
+
+
+      <div class="seo-onpage-grid">
+        <article class="seo-onpage-card dashboard-card">
+          <div class="seo-card-head">
+            <div>
+              <small>ON-PAGE SEO PACK</small>
+              <h2>Ready-to-use page optimization</h2>
+              <p>Use one clear topic per page and keep the content genuinely useful.</p>
+            </div>
+          </div>
+
+          <div class="seo-onpage-fields">
+            <div>
+              <small>SEO TITLE</small>
+              <strong id="seo-pack-title">—</strong>
+            </div>
+
+            <div>
+              <small>H1</small>
+              <strong id="seo-pack-h1">—</strong>
+            </div>
+
+            <div>
+              <small>URL SLUG</small>
+              <strong id="seo-pack-slug">—</strong>
+            </div>
+
+            <div>
+              <small>META DESCRIPTION</small>
+              <p id="seo-pack-description">—</p>
+            </div>
+          </div>
+
+          <button id="seo-copy-onpage" class="seo-secondary-btn seo-full-btn" type="button">
+            Copy complete SEO pack
+          </button>
+        </article>
+
+        <article class="seo-local-pack dashboard-card">
+          <div class="seo-card-head">
+            <div>
+              <small>LOCAL SEO</small>
+              <h2>Local visibility plan</h2>
+              <p>Turn your business location into clearer local search signals.</p>
+            </div>
+          </div>
+
+          <div id="seo-local-plan" class="seo-local-plan">
+            <div class="seo-loading-row">Preparing local recommendations...</div>
           </div>
         </article>
       </div>
@@ -2139,14 +2033,14 @@ else if (state.section === "seo") {
             </div>
           </div>
 
-          <div class="seo-preview-meta">
+          <div class="seo-preview-meta seo-preview-meta-static">
             <div>
-              <small>TITLE LENGTH</small>
+              <small>TITLE LENGTH · COUNTER</small>
               <strong id="seo-title-length">—</strong>
             </div>
 
             <div>
-              <small>DESCRIPTION LENGTH</small>
+              <small>DESCRIPTION LENGTH · COUNTER</small>
               <strong id="seo-description-length">—</strong>
             </div>
           </div>
@@ -2184,7 +2078,7 @@ else if (state.section === "seo") {
               <p>A practical outline you can hand to a writer or use later with AI generation.</p>
             </div>
 
-            <span class="seo-preview-pill">PREVIEW</span>
+            <span class="seo-preview-pill seo-preview-pill-static">CONTENT PLAN</span>
           </div>
 
           <div id="seo-content-brief" class="seo-content-brief">
@@ -3343,6 +3237,111 @@ function seoProfileSignals(company = {}, knowledge = []) {
   return checks;
 }
 
+
+function seoSlugify(value = "") {
+  return seoCleanText(value)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function seoUnique(values = []) {
+  return [...new Set(values.map((value) => seoCleanText(value)).filter(Boolean))];
+}
+
+function buildSeoKeywordEngine(company = {}, knowledge = [], focus = {}) {
+  const companyName = seoCleanText(company.name) || "Your Business";
+  const service = seoCleanText(focus.service) || seoCleanText(company.industry) || "professional services";
+  const city = seoCleanText(focus.city) || seoCleanText(company.city);
+  const serviceLower = service.toLowerCase();
+  const cityLower = city.toLowerCase();
+
+  const primary = city
+    ? `${serviceLower} in ${cityLower}`
+    : serviceLower;
+
+  const secondary = seoUnique([
+    city ? `best ${serviceLower} in ${cityLower}` : `best ${serviceLower}`,
+    city ? `${serviceLower} ${cityLower}` : `${serviceLower} services`,
+    city ? `${serviceLower} near ${cityLower}` : `${serviceLower} near me`,
+    city ? `local ${serviceLower} ${cityLower}` : `local ${serviceLower}`,
+    city ? `${serviceLower} services in ${cityLower}` : `${serviceLower} services`,
+    city ? `${companyName.toLowerCase()} ${cityLower}` : companyName.toLowerCase(),
+  ]).slice(0, 6);
+
+  const knowledgeTopics = knowledge
+    .map((item) => seoCleanText(item.title))
+    .filter(Boolean)
+    .slice(0, 4);
+
+  const longTail = seoUnique([
+    city ? `how much does ${serviceLower} cost in ${cityLower}` : `how much does ${serviceLower} cost`,
+    city ? `how to choose ${serviceLower} in ${cityLower}` : `how to choose ${serviceLower}`,
+    city ? `what is included in ${serviceLower} in ${cityLower}` : `what is included in ${serviceLower}`,
+    city ? `where to find ${serviceLower} in ${cityLower}` : `where to find ${serviceLower}`,
+    ...knowledgeTopics.map((topic) => `${topic} ${city ? `in ${cityLower}` : ""}`.trim()),
+  ]).slice(0, 8);
+
+  const h1 = city
+    ? `${seoTitleCase(service)} in ${seoTitleCase(city)}`
+    : `${seoTitleCase(service)} Services`;
+
+  const title = seoClip(
+    city
+      ? `${seoTitleCase(service)} in ${seoTitleCase(city)} | ${companyName}`
+      : `${seoTitleCase(service)} | ${companyName}`,
+    60
+  );
+
+  const slug = seoSlugify(
+    city ? `${service} ${city}` : service
+  );
+
+  const description = seoClip(
+    city
+      ? `${companyName} offers ${serviceLower} in ${city}. Explore services, pricing, customer questions and clear ways to book or get in touch.`
+      : `${companyName} offers ${serviceLower}. Explore services, pricing, customer questions and clear ways to book or get in touch.`,
+    155
+  );
+
+  const localPlan = [
+    {
+      title: "Use one clear local service page",
+      text: city
+        ? `Create a useful page focused on “${serviceLower} in ${city}” with real service details, trust signals and a clear CTA.`
+        : "Add a target city first, then build one useful service + city page.",
+    },
+    {
+      title: "Keep business details consistent",
+      text: "Use the same business name, address, phone, opening hours and website wherever your business is listed.",
+    },
+    {
+      title: "Add local proof",
+      text: city
+        ? `Include real customer proof, service-area details and examples that are genuinely relevant to ${city}.`
+        : "Add real customer proof and service-area details relevant to your market.",
+    },
+    {
+      title: "Prepare structured business data",
+      text: "Use valid LocalBusiness or Organization structured data where it accurately matches the business and page content.",
+    },
+  ];
+
+  return {
+    primary,
+    secondary,
+    longTail,
+    title,
+    h1,
+    slug,
+    description,
+    localPlan,
+  };
+}
+
 function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
   const checks = seoProfileSignals(company, knowledge);
   const completed = checks.filter((item) => item.done).length;
@@ -3375,7 +3374,7 @@ function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
 
   const descriptionSeed = businessDescription
     ? `${businessDescription}${city ? ` Serving customers in ${city}.` : ""}`
-    : `${companyName} provides ${service.toLowerCase()}${city ? ` in ${city}` : ""}. Explore services, answers to common questions and ways to get in touch.`;
+    : `${companyName} offers ${service.toLowerCase()}${city ? ` in ${city}` : ""}. Explore services, pricing, FAQs and clear ways to book or get in touch.`;
 
   const description = seoClip(descriptionSeed, 155);
 
@@ -3388,22 +3387,53 @@ function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
       text: item.why,
     }));
 
-  if (quickWins.length < 3) {
-    quickWins.push(
-      {
-        priority: "CONTENT",
-        title: "Create a focused service page",
-        text: city
-          ? `Build one useful page around ${service} in ${city}, with real service details, proof and customer questions.`
-          : `Build one useful page around ${service}, with real service details, proof and customer questions.`,
-      },
-      {
-        priority: "FAQ",
-        title: "Turn real customer questions into useful content",
-        text: "Review your saved Knowledge Base and answer the questions customers ask before buying.",
-      }
-    );
-  }
+  const targetTopic = city
+    ? `${service.toLowerCase()} in ${city.toLowerCase()}`
+    : service.toLowerCase();
+
+  const dynamicQuickWins = [
+    {
+      priority: "KEYWORD",
+      title: `Target "${targetTopic}" on one focused page`,
+      text: `Use this topic naturally in the SEO title, H1, intro copy and one clear CTA. Avoid repeating it unnaturally.`,
+    },
+    {
+      priority: "CONTENT",
+      title: city
+        ? `Create a dedicated ${service} page for ${city}`
+        : `Create a dedicated ${service} service page`,
+      text: city
+        ? `Explain the service, who it is for in ${city}, what it includes, pricing factors, FAQs and how to book.`
+        : `Explain the service, who it is for, what it includes, pricing factors, FAQs and how to book.`,
+    },
+    {
+      priority: "FAQ",
+      title: `Answer buying questions about ${service}`,
+      text: `Turn real customer questions into useful FAQ content around cost, process, timing, what is included and who the service is for.`,
+    },
+    {
+      priority: "LOCAL",
+      title: city
+        ? `Strengthen local signals for ${city}`
+        : "Add a target city for local SEO",
+      text: city
+        ? `Keep your business name, phone, address, hours and service area consistent, then add genuine local proof relevant to ${city}.`
+        : "Add your primary city in Business Settings to unlock stronger local page and search recommendations.",
+    },
+    {
+      priority: "LINKS",
+      title: "Connect service, FAQ and local pages",
+      text: `Add descriptive internal links so customers and search engines can move between related service, FAQ and location content.`,
+    },
+  ];
+
+  const existingTitles = new Set(quickWins.map((item) => item.title));
+
+  dynamicQuickWins.forEach((item) => {
+    if (!existingTitles.has(item.title)) quickWins.push(item);
+  });
+
+  quickWins.splice(6);
 
   const knowledgeTitles = knowledge
     .map((item) => seoCleanText(item.title))
@@ -3462,6 +3492,8 @@ function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
     ],
   };
 
+  const keywordEngine = buildSeoKeywordEngine(company, knowledge, focus);
+
   let scoreLabel = "Needs foundation";
   if (score >= 85) scoreLabel = "Strong foundation";
   else if (score >= 65) scoreLabel = "Good foundation";
@@ -3482,6 +3514,7 @@ function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
     quickWins,
     pageIdeas,
     brief,
+    keywordEngine,
     knowledgeCount: knowledge.length,
   };
 }
@@ -3502,6 +3535,26 @@ function renderSeoAnalysis(analysis) {
   if (ring) {
     ring.style.setProperty("--seo-score", `${analysis.score * 3.6}deg`);
   }
+
+
+  const seoSummaryReadiness = document.querySelector("#seo-summary-readiness");
+  const seoSummaryKeywords = document.querySelector("#seo-summary-keywords");
+  const seoSummaryPages = document.querySelector("#seo-summary-pages");
+  const seoSummaryWins = document.querySelector("#seo-summary-wins");
+  const seoSummaryGaps = document.querySelector("#seo-summary-gaps");
+
+  const keywordIdeaCount =
+    analysis.keywordEngine.secondary.length +
+    analysis.keywordEngine.longTail.length +
+    1;
+
+  const setupGapCount = analysis.checks.filter((item) => !item.done).length;
+
+  if (seoSummaryReadiness) seoSummaryReadiness.textContent = `${analysis.score}/100 readiness`;
+  if (seoSummaryKeywords) seoSummaryKeywords.textContent = keywordIdeaCount;
+  if (seoSummaryPages) seoSummaryPages.textContent = analysis.pageIdeas.length;
+  if (seoSummaryWins) seoSummaryWins.textContent = analysis.quickWins.length;
+  if (seoSummaryGaps) seoSummaryGaps.textContent = setupGapCount;
 
   const profileDone = analysis.checks
     .filter((item) => item.id !== "knowledge")
@@ -3554,6 +3607,63 @@ function renderSeoAnalysis(analysis) {
   const quickWinCount = document.querySelector("#seo-quickwin-count");
   if (quickWinCount) quickWinCount.textContent = analysis.quickWins.length;
 
+
+  const keywordEngine = analysis.keywordEngine;
+
+  const primaryKeyword = document.querySelector("#seo-primary-keyword");
+  const primaryIntent = document.querySelector("#seo-primary-intent");
+  const secondaryKeywords = document.querySelector("#seo-secondary-keywords");
+  const longtailKeywords = document.querySelector("#seo-longtail-keywords");
+
+  if (primaryKeyword) primaryKeyword.textContent = keywordEngine.primary;
+  if (primaryIntent) primaryIntent.textContent = "Commercial / local intent";
+
+  if (secondaryKeywords) {
+    secondaryKeywords.innerHTML = keywordEngine.secondary
+      .map((keyword) => `<span>${escapeHtml(keyword)}</span>`)
+      .join("");
+  }
+
+  if (longtailKeywords) {
+    longtailKeywords.innerHTML = keywordEngine.longTail
+      .map(
+        (keyword, index) => `
+          <div class="seo-keyword-row">
+            <span>${String(index + 1).padStart(2, "0")}</span>
+            <strong>${escapeHtml(keyword)}</strong>
+          </div>
+        `
+      )
+      .join("");
+  }
+
+  const packTitle = document.querySelector("#seo-pack-title");
+  const packH1 = document.querySelector("#seo-pack-h1");
+  const packSlug = document.querySelector("#seo-pack-slug");
+  const packDescription = document.querySelector("#seo-pack-description");
+
+  if (packTitle) packTitle.textContent = keywordEngine.title;
+  if (packH1) packH1.textContent = keywordEngine.h1;
+  if (packSlug) packSlug.textContent = `/${keywordEngine.slug}`;
+  if (packDescription) packDescription.textContent = keywordEngine.description;
+
+  const localPlan = document.querySelector("#seo-local-plan");
+  if (localPlan) {
+    localPlan.innerHTML = keywordEngine.localPlan
+      .map(
+        (item, index) => `
+          <div class="seo-local-plan-item">
+            <span>${String(index + 1).padStart(2, "0")}</span>
+            <div>
+              <strong>${escapeHtml(item.title)}</strong>
+              <p>${escapeHtml(item.text)}</p>
+            </div>
+          </div>
+        `
+      )
+      .join("");
+  }
+
   const quickWins = document.querySelector("#seo-quickwins");
   if (quickWins) {
     quickWins.innerHTML = analysis.quickWins
@@ -3600,7 +3710,7 @@ function renderSeoAnalysis(analysis) {
               <strong>${escapeHtml(idea.title)}</strong>
               <p>${escapeHtml(idea.reason)}</p>
             </div>
-            <div class="seo-page-arrow">↗</div>
+            <div class="seo-page-arrow" aria-hidden="true">IDEA</div>
           </div>
         `
       )
@@ -3660,7 +3770,19 @@ function renderSeoAnalysis(analysis) {
 
   const status = document.querySelector("#seo-analysis-status");
   if (status) {
-    status.textContent = `Analyzed ${analysis.knowledgeCount} knowledge entr${analysis.knowledgeCount === 1 ? "y" : "ies"}`;
+    const totalKeywordIdeas =
+      analysis.keywordEngine.secondary.length +
+      analysis.keywordEngine.longTail.length +
+      1;
+
+    const missingFoundation = analysis.checks.filter((item) => !item.done).length;
+
+    status.textContent =
+      `${totalKeywordIdeas} keyword ideas · ` +
+      `${analysis.pageIdeas.length} page ideas · ` +
+      `${analysis.quickWins.length} quick wins · ` +
+      `${analysis.knowledgeCount} knowledge entr${analysis.knowledgeCount === 1 ? "y" : "ies"} · ` +
+      `${missingFoundation} setup gap${missingFoundation === 1 ? "" : "s"}`;
     status.classList.add("is-ready");
   }
 }
@@ -3765,6 +3887,45 @@ function initSeoGrowthCenter() {
     ].join("\n");
 
     seoCopyText(briefText, "Content brief copied");
+  });
+
+
+  document.querySelector("#seo-copy-secondary")?.addEventListener("click", () => {
+    const analysis = window.__youyouSeoAnalysis;
+    if (!analysis) return;
+
+    seoCopyText(
+      analysis.keywordEngine.secondary.join("\n"),
+      "Secondary keywords copied"
+    );
+  });
+
+  document.querySelector("#seo-copy-longtail")?.addEventListener("click", () => {
+    const analysis = window.__youyouSeoAnalysis;
+    if (!analysis) return;
+
+    seoCopyText(
+      analysis.keywordEngine.longTail.join("\n"),
+      "Long-tail keyword ideas copied"
+    );
+  });
+
+  document.querySelector("#seo-copy-onpage")?.addEventListener("click", () => {
+    const analysis = window.__youyouSeoAnalysis;
+    if (!analysis) return;
+
+    const pack = analysis.keywordEngine;
+
+    seoCopyText(
+      [
+        `Primary keyword: ${pack.primary}`,
+        `SEO title: ${pack.title}`,
+        `H1: ${pack.h1}`,
+        `Slug: /${pack.slug}`,
+        `Meta description: ${pack.description}`,
+      ].join("\n"),
+      "Complete SEO pack copied"
+    );
   });
 
   document.querySelector("#seo-toggle-checklist")?.addEventListener("click", (event) => {

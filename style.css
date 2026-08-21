@@ -5593,182 +5593,386 @@ body::-webkit-scrollbar-thumb:hover,
 .landing::-webkit-scrollbar-thumb:hover {
   background: #4a5061;
 }
-/* =========================
-   YOUYOU 3-PLAN PRICING
-========================= */
 
-.pricing-section {
-  width: min(1180px, calc(100% - 40px));
-  margin: 0 auto;
-  padding: 110px 0;
+
+/* =========================================
+   V4.8 — SEO KEYWORD ENGINE
+   ========================================= */
+
+.seo-keyword-lab {
+  padding: 22px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(126,91,255,.10), transparent 32%),
+    radial-gradient(circle at 100% 100%, rgba(54,210,139,.07), transparent 30%),
+    rgba(255,255,255,.016);
 }
 
-.pricing-section .section-heading {
-  max-width: 760px;
-  margin: 0 auto 56px;
-  text-align: center;
+.seo-keyword-badge {
+  padding: 6px 8px;
+  border: 1px solid rgba(126,91,255,.22);
+  border-radius: 999px;
+  background: rgba(126,91,255,.06);
+  color: #ac9cff;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .08em;
 }
 
-.pricing-grid {
+.seo-keyword-layout {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
-  align-items: stretch;
+  grid-template-columns: minmax(230px,.72fr) minmax(0,1.28fr);
+  gap: 14px;
 }
 
-.pricing-plan {
-  position: relative;
+.seo-keyword-primary {
   display: flex;
   flex-direction: column;
-  min-height: 100%;
-  padding: 34px 30px 30px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 24px;
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(139, 92, 246, 0.10),
-      transparent 38%
-    ),
-    rgba(255, 255, 255, 0.028);
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease,
-    box-shadow 0.25s ease;
-}
-
-.pricing-plan:hover {
-  transform: translateY(-6px);
-  border-color: rgba(139, 92, 246, 0.38);
-  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.3);
-}
-
-.pricing-plan.featured {
-  border-color: rgba(139, 92, 246, 0.65);
-  background:
-    radial-gradient(
-      circle at 50% 0%,
-      rgba(139, 92, 246, 0.2),
-      transparent 42%
-    ),
-    rgba(139, 92, 246, 0.055);
-  box-shadow:
-    0 32px 100px rgba(0, 0, 0, 0.32),
-    0 0 0 1px rgba(139, 92, 246, 0.09);
-}
-
-.pricing-popular {
-  position: absolute;
-  top: -13px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 7px 14px;
-  border: 1px solid rgba(167, 139, 250, 0.45);
-  border-radius: 999px;
-  background: #161125;
-  color: #c4b5fd;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  white-space: nowrap;
-}
-
-.pricing-label {
-  color: #a78bfa;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-}
-
-.pricing-price {
-  margin: 18px 0 12px;
-  font-size: clamp(42px, 4vw, 56px);
-  line-height: 1;
-  letter-spacing: -0.06em;
-}
-
-.pricing-price span {
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-
-.pricing-description {
-  min-height: 58px;
-  margin: 0 0 25px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.7;
-}
-
-.pricing-plan ul {
-  display: grid;
-  gap: 13px;
-  margin: 0 0 30px;
-  padding: 0;
-  list-style: none;
-  color: #c6c7d2;
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.pricing-plan li {
-  white-space: normal;
-}
-
-.pricing-start {
-  width: 100%;
-  margin-top: auto;
   justify-content: center;
+  min-height: 172px;
+  padding: 20px;
+  border: 1px solid rgba(126,91,255,.18);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(126,91,255,.09), rgba(126,91,255,.025));
 }
 
-.pricing-note {
-  margin: 28px auto 0;
-  color: var(--muted-2);
+.seo-keyword-primary small,
+.seo-keyword-cluster-head span {
+  color: #8175c7;
+  font-size: 8px;
+  font-weight: 950;
+  letter-spacing: .1em;
+}
+
+.seo-keyword-primary strong {
+  margin: 10px 0 8px;
+  color: #f7f7fb;
+  font-size: 25px;
+  line-height: 1.1;
+  letter-spacing: -.03em;
+}
+
+.seo-keyword-primary > span {
+  color: #6ddfa3;
+  font-size: 9px;
+}
+
+.seo-keyword-clusters {
+  display: grid;
+  gap: 10px;
+}
+
+.seo-keyword-clusters > section {
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 14px;
+  background: rgba(255,255,255,.014);
+}
+
+.seo-keyword-cluster-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.seo-keyword-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.seo-keyword-chips span {
+  padding: 7px 9px;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 999px;
+  background: rgba(255,255,255,.018);
+  color: #b8becc;
+  font-size: 9px;
+}
+
+.seo-keyword-list {
+  display: grid;
+  gap: 6px;
+}
+
+.seo-keyword-row {
+  display: grid;
+  grid-template-columns: 25px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 8px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.012);
+}
+
+.seo-keyword-row > span {
+  color: #796ac9;
+  font-size: 7px;
+  font-weight: 900;
+}
+
+.seo-keyword-row strong {
+  color: #aeb5c5;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.seo-keyword-note {
+  display: grid;
+  grid-template-columns: 23px 1fr;
+  gap: 9px;
+  align-items: center;
+  margin-top: 12px;
+  color: #697183;
+}
+
+.seo-keyword-note > span {
+  display: grid;
+  place-items: center;
+  width: 23px;
+  height: 23px;
+  border-radius: 8px;
+  background: rgba(126,91,255,.055);
+  color: #8e7de2;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.seo-keyword-note p {
+  margin: 0;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.seo-onpage-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.08fr) minmax(330px,.92fr);
+  gap: 14px;
+}
+
+.seo-onpage-card,
+.seo-local-pack {
+  padding: 20px;
+}
+
+.seo-onpage-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.seo-onpage-fields > div {
+  display: grid;
+  gap: 4px;
+  padding: 11px 12px;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 11px;
+  background: rgba(255,255,255,.012);
+}
+
+.seo-onpage-fields small {
+  color: #747c8f;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+
+.seo-onpage-fields strong {
+  color: #c8cdd8;
   font-size: 11px;
-  text-align: center;
 }
 
+.seo-onpage-fields p {
+  margin: 0;
+  color: #9299aa;
+  font-size: 10px;
+  line-height: 1.5;
+}
 
-/* TABLET */
+.seo-local-plan {
+  display: grid;
+  gap: 8px;
+}
 
-@media (max-width: 950px) {
-  .pricing-grid {
+.seo-local-plan-item {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.05);
+  border-radius: 11px;
+  background: rgba(255,255,255,.012);
+}
+
+.seo-local-plan-item > span {
+  color: #68d99d;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.seo-local-plan-item > div {
+  display: grid;
+  gap: 4px;
+}
+
+.seo-local-plan-item strong {
+  font-size: 10px;
+}
+
+.seo-local-plan-item p {
+  margin: 0;
+  color: #747c8d;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.seo-priority-keyword,
+.seo-priority-links {
+  background: rgba(72,164,255,.07);
+  color: #7eacff;
+}
+
+@media (max-width: 1080px) {
+  .seo-keyword-layout,
+  .seo-onpage-grid {
     grid-template-columns: 1fr;
-    max-width: 620px;
-    margin: 0 auto;
   }
 
-  .pricing-plan {
-    min-height: auto;
+  .seo-keyword-primary {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .seo-keyword-lab,
+  .seo-onpage-card,
+  .seo-local-pack {
+    padding: 16px;
   }
 
-  .pricing-description {
-    min-height: auto;
+  .seo-keyword-primary strong {
+    font-size: 21px;
   }
 }
 
 
-/* MOBILE */
+/* =========================================
+   V4.8.1 — FUNCTIONAL SEO FIX
+   ========================================= */
 
-@media (max-width: 600px) {
-  .pricing-section {
-    width: calc(100% - 28px);
-    padding: 80px 0;
+.seo-analysis-summary {
+  display: grid;
+  gap: 14px;
+  padding: 17px 18px;
+}
+
+.seo-analysis-summary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.seo-analysis-summary-head > div {
+  display: grid;
+  gap: 4px;
+}
+
+.seo-analysis-summary-head small {
+  color: #737b8d;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .1em;
+}
+
+.seo-analysis-summary-head strong {
+  font-size: 12px;
+}
+
+.seo-analysis-summary-head > span {
+  padding: 6px 9px;
+  border: 1px solid rgba(126,91,255,.16);
+  border-radius: 999px;
+  background: rgba(126,91,255,.045);
+  color: #a99aff;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.seo-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 8px;
+}
+
+.seo-summary-grid > div {
+  display: grid;
+  gap: 3px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255,255,255,.045);
+  border-radius: 10px;
+  background: rgba(255,255,255,.012);
+}
+
+.seo-summary-grid small {
+  color: #70788a;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.seo-summary-grid strong {
+  font-size: 15px;
+}
+
+.seo-preview-meta-static > div {
+  cursor: default;
+  user-select: none;
+}
+
+.seo-preview-meta-static > div:hover {
+  border-color: rgba(255,255,255,.05);
+  background: rgba(255,255,255,.012);
+}
+
+.seo-preview-pill-static {
+  cursor: default;
+  user-select: none;
+}
+
+.seo-page-arrow {
+  min-width: 34px;
+  padding: 5px 6px;
+  border: 1px solid rgba(126,91,255,.10);
+  border-radius: 8px;
+  background: rgba(126,91,255,.035);
+  color: #8d7ee1;
+  text-align: center;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.seo-analysis-status.is-ready {
+  max-width: 760px;
+  line-height: 1.45;
+}
+
+@media (max-width: 800px) {
+  .seo-summary-grid {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .seo-analysis-summary-head {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
-  .pricing-section .section-heading {
-    margin-bottom: 42px;
-  }
-
-  .pricing-plan {
-    padding: 30px 22px 24px;
-    border-radius: 20px;
-  }
-
-  .pricing-price {
-    font-size: 45px;
+  .seo-summary-grid {
+    grid-template-columns: 1fr;
   }
 }

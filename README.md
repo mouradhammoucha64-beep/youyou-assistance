@@ -259,3 +259,51 @@ Keeps the V4.7 visual design while shortening the SEO page:
 
 ## V4.7.2 — Dark Scrollbars
 Replaces the bright/white scrollbar tracks with thin dark scrollbars across the dashboard and public pages. No SQL required.
+
+
+## V4.8 — SEO Keyword Engine
+
+Adds a practical keyword strategy layer to SEO Growth Center:
+- Primary keyword
+- Secondary keyword cluster
+- Long-tail question ideas
+- Dynamic keyword-aware Quick Wins
+- Complete On-Page SEO Pack: title, H1, slug, meta description
+- Local SEO plan
+- Copy keyword / SEO pack actions
+- Richer Analyze Workspace status
+- Content Brief badge clarified as `CONTENT PLAN`
+
+Important: keyword ideas are generated from the workspace and target market. V4.8 does not invent monthly search volume, keyword difficulty, live ranking position, or Search Console metrics. Those require real search-data integrations.
+
+No SQL migration required.
+
+
+## V4.8.1 — Functional SEO Fix
+
+Improves SEO Growth Center V2 without changing its core design:
+- More dynamic Quick Wins based on target service and city
+- Stronger generated meta descriptions
+- Analysis Summary with keyword ideas, page ideas, quick wins and setup gaps
+- Richer Analyze Workspace status
+- Length counters clearly marked as static counters
+- Content Plan badge clarified as non-interactive
+- Page idea indicator clarified as an idea label
+- No SQL migration required
+
+## V4.8.2 — Clean Stable Merge
+
+This package is the cleaned continuation of the latest V4.8.1 codebase.
+
+Verified before packaging:
+- One Pricing section only
+- One Starter / Growth / Pro pricing ID each
+- Correct `/main.js` module script in `index.html`
+- Latest SEO Keyword Engine present
+- Functional SEO Analysis Summary present
+- Dark scrollbar polish present
+- `/faq` and `/dashboard/:path*` Vercel rewrites present
+- `main.js` syntax check passed
+- `public/widget.js` syntax check passed
+
+No new SQL migration is required for V4.8.2.
