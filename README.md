@@ -312,3 +312,29 @@ Changes:
 
 Validation:
 - main.js syntax check passed
+
+
+## V4.9 — AI Growth Platform
+
+Product-wide connection pass built on V4.8.3.
+
+### Landing
+- Repositions YOUYOU as an AI Growth Platform
+- Adds connected 4-engine product visual: AI Conversations, SEO Growth, Revenue Rescue, WhatsApp AI
+- Adds dedicated Revenue Rescue showcase
+- Adds dedicated WhatsApp AI showcase
+- Updates hero, stats, pricing language and final CTA
+- Keeps the compact animated carousel and mobile behavior from V4.8.3
+
+### Dashboard
+- Adds `/dashboard/revenue-rescue`
+- Adds `/dashboard/whatsapp-ai`
+- Revenue Rescue analyzes existing conversation intent and inactivity, with no automatic sends
+- WhatsApp AI page uses the saved business WhatsApp number for a real handoff test link when available
+- WhatsApp Business API + AI API are clearly marked as pending production integrations
+- Overview now links directly to SEO Growth, Revenue Rescue and WhatsApp AI
+
+### Integration status
+- No new SQL required
+- No paid API required for this version
+- Paddle/AI/WhatsApp API integrations are still deliberately deferred until final production wiring

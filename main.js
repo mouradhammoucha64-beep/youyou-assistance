@@ -37,6 +37,8 @@ const DASHBOARD_ROUTES = {
   widget: "/dashboard/widget",
   ai: "/dashboard/ai-control",
   seo: "/dashboard/seo-growth",
+  rescue: "/dashboard/revenue-rescue",
+  whatsapp: "/dashboard/whatsapp-ai",
   settings: "/dashboard/settings",
   billing: "/dashboard/billing",
 };
@@ -114,18 +116,17 @@ function renderLanding() {
 
             <div class="eyebrow">
               <span class="pulse"></span>
-              AI CUSTOMER AGENT
+              AI GROWTH PLATFORM
             </div>
 
             <h1>
-              Your website should
-              <span>never stop selling.</span>
+              Turn more visitors into
+              <span>customers and growth.</span>
             </h1>
 
             <p class="hero-text">
-              YOUYOU is your AI customer agent that talks to visitors,
-              answers questions, captures leads and helps turn conversations
-              into customers — 24/7.
+              YOUYOU brings AI conversations, SEO growth, Revenue Rescue
+              and WhatsApp AI into one focused workspace for modern businesses.
             </p>
 
             <div class="hero-buttons">
@@ -180,7 +181,7 @@ function renderLanding() {
 
                 <div class="message ai">
                   We have plans starting at
-                  <strong>$19/month</strong>.
+                  <strong>$29/month</strong>.
                   I can also help you choose the right plan.
                 </div>
 
@@ -218,19 +219,70 @@ function renderLanding() {
             <span>Always available</span>
           </div>
           <div>
-            <strong>∞</strong>
-            <span>Conversations</span>
+            <strong>4</strong>
+            <span>Growth engines</span>
           </div>
           <div>
-            <strong>1 min</strong>
-            <span>Simple setup</span>
+            <strong>1</strong>
+            <span>Unified workspace</span>
           </div>
           <div>
             <strong>AI</strong>
-            <span>Powered support</span>
+            <span>Built for conversion</span>
           </div>
         </section>
 
+
+
+        <section class="growth-platform-section" id="growth-platform">
+          <div class="growth-platform-shell">
+            <div class="growth-platform-copy">
+              <div class="eyebrow"><span class="pulse"></span> YOUYOU SERVICES</div>
+              <h2>Four growth engines.<br><span>One connected platform.</span></h2>
+              <p>
+                YOUYOU is designed to help a business get discovered, answer instantly,
+                keep valuable leads moving and continue the conversation on WhatsApp.
+              </p>
+              <div class="growth-flow-line" aria-label="YOUYOU growth flow">
+                <span>GET FOUND</span><i>→</i><span>ANSWER</span><i>→</i><span>QUALIFY</span><i>→</i><span>RESCUE</span>
+              </div>
+            </div>
+
+            <div class="growth-engine-grid">
+              <article class="growth-engine-card engine-conversations">
+                <div class="growth-engine-icon">✦</div>
+                <small>01 · WEBSITE AI</small>
+                <h3>AI Conversations</h3>
+                <p>Answer visitors 24/7, capture buying intent and turn questions into qualified opportunities.</p>
+                <span class="engine-status">LIVE WORKFLOW</span>
+              </article>
+
+              <article class="growth-engine-card engine-seo">
+                <div class="growth-engine-icon">↗</div>
+                <small>02 · SEARCH GROWTH</small>
+                <h3>SEO Growth</h3>
+                <p>Find practical keyword, page and on-page opportunities without drowning in technical reports.</p>
+                <span class="engine-status">GROWTH CENTER</span>
+              </article>
+
+              <article class="growth-engine-card engine-rescue">
+                <div class="growth-engine-icon">↻</div>
+                <small>03 · LEAD RECOVERY</small>
+                <h3>Revenue Rescue</h3>
+                <p>Spot promising leads that went quiet and surface the next best follow-up before the opportunity disappears.</p>
+                <span class="engine-status">RECOVERY SIGNALS</span>
+              </article>
+
+              <article class="growth-engine-card engine-whatsapp">
+                <div class="growth-engine-icon">◉</div>
+                <small>04 · WHATSAPP AI</small>
+                <h3>WhatsApp AI</h3>
+                <p>Move customer conversations to WhatsApp and prepare the same business knowledge for AI-assisted replies.</p>
+                <span class="engine-status">API READY</span>
+              </article>
+            </div>
+          </div>
+        </section>
 
         <section id="features" class="section">
 
@@ -514,6 +566,69 @@ function renderLanding() {
 
         </section>
 
+
+        <section class="growth-showcase-section revenue-rescue-showcase">
+          <div class="growth-showcase-copy">
+            <div class="eyebrow">REVENUE RESCUE</div>
+            <h2>Good leads go quiet.<br><span>YOUYOU helps you catch them.</span></h2>
+            <p>
+              Instead of letting a high-intent conversation disappear in the inbox,
+              YOUYOU highlights stalled opportunities, contact availability and the next action to take.
+            </p>
+            <div class="showcase-points">
+              <span>✓ Intent scoring</span>
+              <span>✓ Stalled lead detection</span>
+              <span>✓ Suggested next action</span>
+            </div>
+          </div>
+
+          <div class="rescue-demo-card">
+            <div class="rescue-demo-top"><small>REVENUE RESCUE</small><span>● WATCHING</span></div>
+            <div class="rescue-lead-row">
+              <div><strong>Website visitor</strong><small>Asked for pricing + demo</small></div>
+              <b>86 HOT</b>
+            </div>
+            <div class="rescue-timeline">
+              <span class="done">Conversation</span><i></i><span class="done">Qualified</span><i></i><span class="stalled">Went quiet</span><i></i><span class="next">Follow up</span>
+            </div>
+            <div class="rescue-next-action">
+              <small>NEXT BEST ACTION</small>
+              <strong>Follow up while intent is still high.</strong>
+              <p>Contact details are available. Keep the conversation moving instead of losing the opportunity.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="growth-showcase-section whatsapp-showcase">
+          <div class="whatsapp-demo-stage">
+            <div class="whatsapp-phone">
+              <div class="whatsapp-phone-head"><span class="wa-avatar">Y</span><div><strong>YOUYOU AI</strong><small>WhatsApp · Online</small></div><span>•••</span></div>
+              <div class="wa-chat-body">
+                <div class="wa-bubble incoming">Hi — can you help me choose the right plan?</div>
+                <div class="wa-bubble outgoing">Absolutely. Tell me what you want to automate and I’ll guide you.</div>
+                <div class="wa-bubble incoming">I need website leads and follow-up.</div>
+                <div class="wa-bubble outgoing">Growth is a strong fit. I can also capture your details for the team.</div>
+              </div>
+              <div class="wa-compose"><span>Message</span><b>➤</b></div>
+            </div>
+            <div class="wa-bridge-pill">Website → WhatsApp → Dashboard</div>
+          </div>
+
+          <div class="growth-showcase-copy">
+            <div class="eyebrow whatsapp-eyebrow">WHATSAPP AI</div>
+            <h2>Don’t lose the customer<br><span>when they leave your website.</span></h2>
+            <p>
+              Prepare a smooth path from your website to WhatsApp. When the official WhatsApp Business API
+              is connected, YOUYOU can use the same business context to support conversations there too.
+            </p>
+            <div class="showcase-points">
+              <span>✓ Continue on WhatsApp</span>
+              <span>✓ Shared business context</span>
+              <span>✓ Human takeover ready</span>
+            </div>
+          </div>
+        </section>
+
         <section id="pricing" class="pricing-section pricing-v45">
 
           <div class="section-heading pricing-heading">
@@ -586,6 +701,7 @@ function renderLanding() {
                 <li><span>✓</span> Revenue Rescue</li>
                 <li><span>✓</span> Follow-up workflows</li>
                 <li><span>✓</span> Growth analytics</li>
+                <li><span>✓</span> WhatsApp handoff readiness</li>
               </ul>
 
               <button id="pricing-growth" class="pricing-plan-btn pricing-plan-btn-primary" type="button">
@@ -617,6 +733,7 @@ function renderLanding() {
                 <li><span>✓</span> Service & local page ideas</li>
                 <li><span>✓</span> Advanced AI controls</li>
                 <li><span>✓</span> Higher usage limits</li>
+                <li><span>✓</span> WhatsApp AI integration ready</li>
               </ul>
 
               <button id="pricing-pro" class="pricing-plan-btn pricing-plan-btn-ghost" type="button">
@@ -644,13 +761,13 @@ function renderLanding() {
           <div class="eyebrow">READY TO START?</div>
 
           <h2>
-            Let AI handle your
-            <span>next conversation.</span>
+            One workspace to
+            <span>answer, grow and recover.</span>
           </h2>
 
           <p>
-            Build your YOUYOU agent today and give every visitor
-            an instant answer.
+            Start with your website AI, then unlock SEO growth, Revenue Rescue
+            and WhatsApp AI as your business grows.
           </p>
 
           <button id="final-start" class="primary hero-btn">
@@ -671,7 +788,7 @@ function renderLanding() {
           </a>
 
           <p>
-            AI Customer Agent for modern businesses.
+            AI Growth Platform for modern businesses.
           </p>
         </div>
 
@@ -1167,7 +1284,7 @@ function dashboardShell(content) {
           </div>
 
           <div class="side-label">
-            AI CUSTOMER AGENT
+            AI GROWTH PLATFORM
           </div>
 
           <nav class="dashboard-nav">
@@ -1178,6 +1295,8 @@ function dashboardShell(content) {
             ${navItem("widget", "◇", "Website Widget")}
             ${navItem("ai", "✧", "AI Control Center")}
             ${navItem("seo", "↗", "SEO Growth")}
+            ${navItem("rescue", "↻", "Revenue Rescue")}
+            ${navItem("whatsapp", "◉", "WhatsApp AI")}
             ${navItem("settings", "⚙", "Settings")}
             ${navItem("billing", "◈", "Plans & Billing")}
           </nav>
@@ -1378,7 +1497,7 @@ function setupLandingMotion() {
   }
 
   const revealTargets = document.querySelectorAll(
-    ".stats-section, .section-heading, .feature-carousel-shell, .steps, .landing-knowledge-shell, .pricing-grid, .final-cta"
+    ".stats-section, .growth-platform-shell, .section-heading, .feature-carousel-shell, .steps, .landing-knowledge-shell, .growth-showcase-section, .pricing-grid, .final-cta"
   );
 
   if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -2307,6 +2426,91 @@ else if (state.section === "seo") {
   `;
 }
 
+
+else if (state.section === "rescue") {
+    body = `
+      <section class="rescue-workspace">
+        <div class="rescue-hero dashboard-card">
+          <div>
+            <small>REVENUE RESCUE</small>
+            <h1>Catch valuable leads before they disappear.</h1>
+            <p>YOUYOU reviews your existing conversations for buying intent, contact availability and inactivity so your team knows what deserves attention first.</p>
+          </div>
+          <div class="rescue-hero-status"><span>●</span> SIGNAL ENGINE READY</div>
+        </div>
+
+        <div class="rescue-metric-grid">
+          <div class="dashboard-card"><small>AT-RISK LEADS</small><strong id="rescue-at-risk">—</strong><span>Qualified + quiet</span></div>
+          <div class="dashboard-card"><small>HOT OPPORTUNITIES</small><strong id="rescue-hot">—</strong><span>Intent score 70+</span></div>
+          <div class="dashboard-card"><small>CONTACTABLE</small><strong id="rescue-contactable">—</strong><span>Email or phone captured</span></div>
+          <div class="dashboard-card"><small>FOLLOW-UP MODE</small><strong>MANUAL</strong><span>Automation activates with APIs</span></div>
+        </div>
+
+        <div class="rescue-control-card dashboard-card">
+          <div><small>OPPORTUNITY QUEUE</small><h2>Who should you follow up with next?</h2><p>Sorted by intent and inactivity. No message is sent automatically in this version.</p></div>
+          <span class="rescue-safe-badge">NO AUTO-SEND</span>
+        </div>
+
+        <div id="rescue-list" class="rescue-list">
+          <div class="conversation-loading">Analyzing lead recovery signals...</div>
+        </div>
+      </section>
+    `;
+  }
+
+  else if (state.section === "whatsapp") {
+    const whatsappNumber = String(state.company?.whatsapp_number || "").trim();
+    const normalizedWhatsApp = whatsappNumber.replace(/[^0-9]/g, "");
+    const whatsappLaunchUrl = normalizedWhatsApp
+      ? `https://wa.me/${normalizedWhatsApp}?text=${encodeURIComponent("Hi! I found you through your website and would like more information.")}`
+      : "";
+
+    body = `
+      <section class="whatsapp-workspace">
+        <div class="whatsapp-hero dashboard-card">
+          <div>
+            <small>WHATSAPP AI</small>
+            <h1>Carry the customer conversation beyond your website.</h1>
+            <p>Prepare your WhatsApp channel now. The direct handoff link works with a saved business number; AI replies require the official WhatsApp Business API and your AI API connection.</p>
+          </div>
+          <span class="whatsapp-api-status">API CONNECTION PENDING</span>
+        </div>
+
+        <div class="whatsapp-layout">
+          <div class="dashboard-card whatsapp-setup-card">
+            <div class="whatsapp-section-head"><div><small>CHANNEL SETUP</small><h2>WhatsApp readiness</h2></div><span>${whatsappNumber ? "NUMBER READY" : "NUMBER NEEDED"}</span></div>
+
+            <div class="whatsapp-readiness-list">
+              <div class="${whatsappNumber ? "is-done" : ""}"><b>${whatsappNumber ? "✓" : "1"}</b><div><strong>Business WhatsApp number</strong><small>${whatsappNumber ? escapeHtml(whatsappNumber) : "Add your WhatsApp number in Business Settings."}</small></div></div>
+              <div><b>2</b><div><strong>Official WhatsApp Business API</strong><small>Connect during the production integrations stage.</small></div></div>
+              <div><b>3</b><div><strong>YOUYOU AI engine</strong><small>Use the same Knowledge Base and AI controls for approved WhatsApp replies.</small></div></div>
+              <div><b>4</b><div><strong>Human takeover</strong><small>Keep a clear path for your team to step into high-value conversations.</small></div></div>
+            </div>
+
+            <div class="whatsapp-actions">
+              <button id="whatsapp-settings" class="secondary" type="button">Open Business Settings</button>
+              ${whatsappLaunchUrl ? `<a class="primary whatsapp-test-link" href="${escapeHtml(whatsappLaunchUrl)}" target="_blank" rel="noopener">Test WhatsApp handoff ↗</a>` : ""}
+            </div>
+          </div>
+
+          <div class="dashboard-card whatsapp-preview-card">
+            <div class="whatsapp-preview-label"><small>WEBSITE HANDOFF PREVIEW</small><span>DEMO</span></div>
+            <div class="whatsapp-mini-phone">
+              <div class="whatsapp-mini-head"><span>Y</span><div><strong>YOUYOU AI</strong><small>WhatsApp</small></div></div>
+              <div class="whatsapp-mini-chat">
+                <p>Hi — can you help me with pricing?</p>
+                <p class="mine">Absolutely. I can guide you and connect you with the team.</p>
+                <p>I want to continue here on WhatsApp.</p>
+              </div>
+              <div class="whatsapp-mini-input"><span>Message</span><b>➤</b></div>
+            </div>
+            <p class="whatsapp-preview-note">This is a product preview. Automatic AI replies are not enabled until the WhatsApp Business API and AI API are connected.</p>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
 else if (state.section === "billing") {
     const selectedPlan = state.pendingPlan || "growth";
     body = `
@@ -2712,16 +2916,16 @@ else if (state.section === "settings") {
       <section class="dashboard-hero">
 
         <div>
-          <small>YOUYOU AI</small>
+          <small>YOUYOU GROWTH PLATFORM</small>
 
           <h1>
-            Your AI agent,
+            Your growth workspace,
             <span>ready to work.</span>
           </h1>
 
           <p>
-            Turn website visitors into conversations,
-            leads and customers.
+            Manage conversations, qualified leads, SEO opportunities,
+            Revenue Rescue signals and WhatsApp readiness from one place.
           </p>
         </div>
 
@@ -2783,6 +2987,13 @@ else if (state.section === "settings") {
 
         </div>
 
+
+      </div>
+
+      <div class="overview-growth-grid">
+        <button class="overview-growth-card" data-overview-nav="seo" type="button"><span>↗</span><div><small>SEO GROWTH</small><strong>Find growth opportunities</strong></div><b>→</b></button>
+        <button class="overview-growth-card" data-overview-nav="rescue" type="button"><span>↻</span><div><small>REVENUE RESCUE</small><strong>Review quiet hot leads</strong></div><b>→</b></button>
+        <button class="overview-growth-card" data-overview-nav="whatsapp" type="button"><span>◉</span><div><small>WHATSAPP AI</small><strong>Prepare your channel</strong></div><b>→</b></button>
       </div>
     `;
   }
@@ -2795,6 +3006,12 @@ else if (state.section === "settings") {
       navigateDashboard("widget");
     }
   );
+
+  document.querySelectorAll("[data-overview-nav]").forEach((button) => {
+    button.addEventListener("click", () => navigateDashboard(button.dataset.overviewNav));
+  });
+
+  document.querySelector("#whatsapp-settings")?.addEventListener("click", () => navigateDashboard("settings"));
 
   document.querySelector("#copy-widget")?.addEventListener(
     "click",
@@ -2964,6 +3181,10 @@ if (state.section === "ai") {
 
 if (state.section === "seo") {
   initSeoGrowthCenter();
+}
+
+if (state.section === "rescue") {
+  loadRevenueRescue();
 }
 
 if (state.section === "billing") {
@@ -4212,6 +4433,93 @@ function extractLeadContact(conversation, messages = []) {
 
   return { email, phone };
 }
+
+
+function hoursSince(value) {
+  if (!value) return 0;
+  const diff = Date.now() - new Date(value).getTime();
+  if (!Number.isFinite(diff) || diff < 0) return 0;
+  return diff / 36e5;
+}
+
+async function loadRevenueRescue() {
+  const list = document.querySelector("#rescue-list");
+  if (!list || !state.company || !supabase) return;
+
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("id, visitor_name, visitor_email, status, created_at, updated_at, messages(id, sender, content, created_at)")
+    .eq("company_id", state.company.id)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    list.innerHTML = `<div class="conversation-error">${escapeHtml(error.message)}</div>`;
+    return;
+  }
+
+  const rows = (data || []).map((conversation) => {
+    const messages = [...(conversation.messages || [])].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    const score = scoreLeadFromMessages(messages);
+    const meta = leadMeta(score);
+    const contact = extractLeadContact(conversation, messages);
+    const ageHours = hoursSince(conversation.updated_at || conversation.created_at);
+    const qualified = score >= 40;
+    const stalled = qualified && ageHours >= 24;
+    const contactable = Boolean(contact.email || contact.phone);
+    return { conversation, messages, score, meta, contact, ageHours, qualified, stalled, contactable };
+  }).filter((row) => row.qualified);
+
+  rows.sort((a,b) => {
+    if (a.stalled !== b.stalled) return a.stalled ? -1 : 1;
+    if (a.score !== b.score) return b.score - a.score;
+    return b.ageHours - a.ageHours;
+  });
+
+  const atRisk = rows.filter((row) => row.stalled).length;
+  const hot = rows.filter((row) => row.score >= 70).length;
+  const contactable = rows.filter((row) => row.contactable).length;
+
+  const setText = (selector, value) => {
+    const node = document.querySelector(selector);
+    if (node) node.textContent = String(value);
+  };
+  setText("#rescue-at-risk", atRisk);
+  setText("#rescue-hot", hot);
+  setText("#rescue-contactable", contactable);
+
+  if (!rows.length) {
+    list.innerHTML = `<div class="rescue-empty dashboard-card"><strong>No qualified recovery signals yet.</strong><p>As visitors ask about pricing, demos, booking or buying, YOUYOU will surface the strongest opportunities here.</p></div>`;
+    return;
+  }
+
+  list.innerHTML = rows.slice(0, 20).map((row) => {
+    const name = row.conversation.visitor_name || "Website visitor";
+    const summary = summarizeLead(row.messages);
+    const inactivity = row.ageHours >= 48
+      ? `${Math.floor(row.ageHours / 24)} days quiet`
+      : row.ageHours >= 24
+        ? `${Math.floor(row.ageHours)} hours quiet`
+        : "Active recently";
+    const nextAction = row.contactable
+      ? "Follow up directly while intent is still warm."
+      : "Re-open the conversation and ask for a contact method.";
+    return `
+      <article class="rescue-row dashboard-card ${row.stalled ? "is-stalled" : ""}">
+        <div class="rescue-row-main">
+          <div class="rescue-row-title"><strong>${escapeHtml(name)}</strong><span class="lead-badge ${row.meta.cls}">${row.meta.icon} ${row.meta.label} ${row.score}</span></div>
+          <p>${escapeHtml(summary)}</p>
+          <div class="rescue-row-meta"><span>${escapeHtml(inactivity)}</span><span>${row.contactable ? "Contact captured" : "No contact yet"}</span></div>
+        </div>
+        <div class="rescue-row-action">
+          <small>NEXT ACTION</small>
+          <strong>${escapeHtml(nextAction)}</strong>
+          ${row.contact.email ? `<a href="mailto:${escapeHtml(row.contact.email)}">Email lead ↗</a>` : ""}
+          ${row.contact.phone ? `<a href="tel:${escapeHtml(row.contact.phone.replace(/\s+/g, ""))}">Call lead ↗</a>` : ""}
+        </div>
+      </article>`;
+  }).join("");
+}
+
 
 async function loadConversations() {
   const list = document.querySelector("#conversations-list");
