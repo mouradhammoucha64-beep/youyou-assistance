@@ -248,7 +248,10 @@ function renderLanding() {
             </p>
           </div>
 
-          <div class="feature-grid">
+          <div class="feature-carousel-shell">
+            <button class="feature-carousel-arrow feature-carousel-prev" type="button" aria-label="Previous feature">←</button>
+
+            <div class="feature-grid" id="feature-carousel">
 
             <article class="feature-card">
               <div class="feature-icon">◌</div>
@@ -304,6 +307,18 @@ function renderLanding() {
               </p>
             </article>
 
+            </div>
+
+            <button class="feature-carousel-arrow feature-carousel-next" type="button" aria-label="Next feature">→</button>
+          </div>
+
+          <div class="feature-carousel-dots" aria-label="Feature carousel navigation">
+            <button class="feature-dot is-active" type="button" aria-label="Feature group 1"></button>
+            <button class="feature-dot" type="button" aria-label="Feature group 2"></button>
+            <button class="feature-dot" type="button" aria-label="Feature group 3"></button>
+            <button class="feature-dot" type="button" aria-label="Feature group 4"></button>
+            <button class="feature-dot" type="button" aria-label="Feature group 5"></button>
+            <button class="feature-dot" type="button" aria-label="Feature group 6"></button>
           </div>
 
         </section>
@@ -685,6 +700,8 @@ function renderLanding() {
   document.querySelector("#nav-billing")?.addEventListener("click", () => navigateDashboard("billing"));
   document.querySelector("#hero-pricing")?.addEventListener("click", () => document.querySelector("#pricing")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   document.querySelector("#knowledge-start")?.addEventListener("click", showSignup);
+  setupLandingMotion();
+
   [["#pricing-starter","starter"],["#pricing-growth","growth"],["#pricing-pro","pro"]].forEach(([selector,plan]) => {
     document.querySelector(selector)?.addEventListener("click", () => {
       state.pendingPlan = plan;
@@ -1242,6 +1259,140 @@ function getWidgetInstallCode() {
   return `<script src="${origin}/widget.js" data-company="${companyId}" defer></script>`;
 }
 
+
+
+function setupLandingMotion() {
+  const featureTrack = document.querySelector("#feature-carousel");
+  const featureCards = [...document.querySelectorAll("#feature-carousel .feature-card")];
+  const featureDots = [...document.querySelectorAll(".feature-dot")];
+  const prevFeature = document.querySelector(".feature-carousel-prev");
+  const nextFeature = document.querySelector(".feature-carousel-next");
+
+  if (featureTrack && featureCards.length) {
+    let featureIndex = 0;
+    let autoplayId = null;
+    let resumeId = null;
+
+    const cardStep = () => {
+      const first = featureCards[0];
+      if (!first) return featureTrack.clientWidth;
+      const style = getComputedStyle(featureTrack);
+      const gap = parseFloat(style.columnGap || style.gap || "0") || 0;
+      return first.getBoundingClientRect().width + gap;
+    };
+
+    const visibleCount = () => {
+      if (window.innerWidth <= 700) return 1;
+      if (window.innerWidth <= 1050) return 2;
+      return 3;
+    };
+
+    const maxIndex = () => Math.max(0, featureCards.length - visibleCount());
+
+    const paintDots = () => {
+      const lastIndex = maxIndex();
+      featureDots.forEach((dot, index) => {
+        dot.hidden = index > lastIndex;
+        dot.classList.toggle("is-active", index === featureIndex);
+        dot.toggleAttribute("aria-current", index === featureIndex);
+      });
+    };
+
+    const goToFeature = (index, behavior = "smooth") => {
+      featureIndex = Math.min(Math.max(index, 0), maxIndex());
+      featureTrack.scrollTo({ left: cardStep() * featureIndex, behavior });
+      paintDots();
+    };
+
+    const stopAutoplay = () => {
+      if (autoplayId) clearInterval(autoplayId);
+      autoplayId = null;
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      autoplayId = setInterval(() => {
+        const next = featureIndex >= maxIndex() ? 0 : featureIndex + 1;
+        goToFeature(next);
+      }, 3800);
+    };
+
+    const pauseThenResume = () => {
+      stopAutoplay();
+      if (resumeId) clearTimeout(resumeId);
+      resumeId = setTimeout(startAutoplay, 6500);
+    };
+
+    prevFeature?.addEventListener("click", () => {
+      goToFeature(featureIndex <= 0 ? maxIndex() : featureIndex - 1);
+      pauseThenResume();
+    });
+
+    nextFeature?.addEventListener("click", () => {
+      goToFeature(featureIndex >= maxIndex() ? 0 : featureIndex + 1);
+      pauseThenResume();
+    });
+
+    featureDots.forEach((dot, index) => {
+      dot.addEventListener("click", () => {
+        goToFeature(Math.min(index, maxIndex()));
+        pauseThenResume();
+      });
+    });
+
+    featureTrack.addEventListener("pointerenter", stopAutoplay);
+    featureTrack.addEventListener("pointerleave", startAutoplay);
+    featureTrack.addEventListener("touchstart", pauseThenResume, { passive: true });
+    featureTrack.addEventListener("scroll", () => {
+      const step = cardStep();
+      if (!step) return;
+      featureIndex = Math.min(Math.max(Math.round(featureTrack.scrollLeft / step), 0), maxIndex());
+      paintDots();
+    }, { passive: true });
+
+    window.addEventListener("resize", () => goToFeature(Math.min(featureIndex, maxIndex()), "auto"));
+    paintDots();
+    startAutoplay();
+  }
+
+  const pricingGrid = document.querySelector(".pricing-grid");
+  const pricingPlans = [...document.querySelectorAll(".pricing-grid .pricing-plan")];
+
+  if (pricingGrid && pricingPlans.length) {
+    const setActivePlan = (plan) => {
+      pricingPlans.forEach((item) => item.classList.toggle("is-active", item === plan));
+    };
+
+    const growthPlan = document.querySelector(".pricing-grid .pricing-growth");
+    if (growthPlan) setActivePlan(growthPlan);
+
+    pricingPlans.forEach((plan) => {
+      plan.addEventListener("pointerenter", () => setActivePlan(plan));
+      plan.addEventListener("focusin", () => setActivePlan(plan));
+    });
+
+    pricingGrid.addEventListener("pointerleave", () => {
+      if (growthPlan) setActivePlan(growthPlan);
+    });
+  }
+
+  const revealTargets = document.querySelectorAll(
+    ".stats-section, .section-heading, .feature-carousel-shell, .steps, .landing-knowledge-shell, .pricing-grid, .final-cta"
+  );
+
+  if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    revealTargets.forEach((node) => node.classList.add("landing-reveal"));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+    revealTargets.forEach((node) => observer.observe(node));
+  }
+}
 
 function renderDashboard() {
   const company =

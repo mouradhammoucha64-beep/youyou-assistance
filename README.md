@@ -291,19 +291,24 @@ Improves SEO Growth Center V2 without changing its core design:
 - Page idea indicator clarified as an idea label
 - No SQL migration required
 
-## V4.8.2 — Clean Stable Merge
+## V4.8.3 — Landing Motion + Compact PRO Design
 
-This package is the cleaned continuation of the latest V4.8.1 codebase.
+Landing-only design pass. No dashboard feature changes and no SQL changes.
 
-Verified before packaging:
-- One Pricing section only
-- One Starter / Growth / Pro pricing ID each
-- Correct `/main.js` module script in `index.html`
-- Latest SEO Keyword Engine present
-- Functional SEO Analysis Summary present
-- Dark scrollbar polish present
-- `/faq` and `/dashboard/:path*` Vercel rewrites present
-- `main.js` syntax check passed
-- `public/widget.js` syntax check passed
+Changes:
+- Features section converted from a tall 6-card grid into a responsive carousel
+- Auto-slide every ~3.8 seconds with pause on interaction
+- Desktop shows multiple cards; mobile uses swipe/snap with one focused card
+- Added compact arrows and position dots
+- Pricing cards reduced in height and spacing
+- Pricing visual focus now follows the plan being hovered/focused
+- Growth remains the default "Most Popular" plan without permanently locking the glow
+- Mobile pricing becomes a horizontal swipe carousel instead of three stacked cards
+- Final CTA reduced substantially in vertical size
+- Reduced excessive spacing between landing sections
+- Added subtle scroll-reveal motion for a more polished SaaS feel
+- Respects prefers-reduced-motion accessibility setting
+- WhatsApp AI section intentionally unchanged for later product discussion
 
-No new SQL migration is required for V4.8.2.
+Validation:
+- main.js syntax check passed

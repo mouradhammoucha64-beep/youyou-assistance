@@ -1,0 +1,15 @@
+YOUYOU V4.8.3 - LANDING MOTION + COMPACT PRO DESIGN
+
+LANDING DESIGN STATUS
+- Features tall static grid: REPLACED WITH RESPONSIVE AUTO CAROUSEL
+- Mobile stacked feature cards: REPLACED WITH SWIPE CAROUSEL
+- Pricing oversized cards: COMPACTED
+- Pricing glow locked to Growth: FIXED; focus follows hovered/focused plan
+- Mobile stacked pricing: REPLACED WITH HORIZONTAL SNAP CARDS
+- Final CTA oversized: COMPACTED
+- Excess section spacing: REDUCED
+- Landing motion: ADDED (subtle reveal + carousel motion)
+- WhatsApp AI: UNCHANGED / RESERVED FOR LATER DISCUSSION
+
+NO SQL REQUIRED.
+NO MANUAL CODE EDITING REQUIRED.
