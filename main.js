@@ -1843,7 +1843,7 @@ else if (state.section === "ai") {
           </p>
         </div>
 
-        <div class="ai-status">
+        <div class="ai-status ai-status-compact">
           <span>●</span> CONFIGURATION READY
         </div>
       </div>
@@ -2519,13 +2519,13 @@ else if (state.section === "billing") {
           <div>
             <small>PLANS & BILLING</small>
             <h1>Choose the plan that fits your growth.</h1>
-            <p>Your workspace is currently on development access. Secure Stripe checkout will be connected in the billing integration step.</p>
+            <p>Your workspace is currently on development access. Secure Paddle checkout will be connected in the billing integration step.</p>
           </div>
           <span class="billing-status-pill">DEVELOPMENT ACCESS</span>
         </div>
 
         <div class="billing-plan-grid">
-          <article class="billing-plan-card ${selectedPlan === "starter" ? "is-selected" : ""}">
+          <article class="billing-plan-card ${selectedPlan === "starter" ? "is-selected" : ""}" data-billing-card="starter">
             <div class="billing-plan-label">STARTER</div>
             <div class="billing-price"><strong>$29</strong><span>/month</span></div>
             <p>AI customer support for your website.</p>
@@ -2533,7 +2533,7 @@ else if (state.section === "billing") {
             <button class="billing-select-btn" data-billing-plan="Starter" type="button">Choose Starter →</button>
           </article>
 
-          <article class="billing-plan-card billing-plan-featured ${selectedPlan === "growth" ? "is-selected" : ""}">
+          <article class="billing-plan-card billing-plan-featured ${selectedPlan === "growth" ? "is-selected" : ""}" data-billing-card="growth">
             <div class="billing-plan-popular">MOST POPULAR</div>
             <div class="billing-plan-label">GROWTH</div>
             <div class="billing-price"><strong>$59</strong><span>/month</span></div>
@@ -2542,7 +2542,7 @@ else if (state.section === "billing") {
             <button class="billing-select-btn billing-select-primary" data-billing-plan="Growth" type="button">Choose Growth →</button>
           </article>
 
-          <article class="billing-plan-card ${selectedPlan === "pro" ? "is-selected" : ""}">
+          <article class="billing-plan-card ${selectedPlan === "pro" ? "is-selected" : ""}" data-billing-card="pro">
             <div class="billing-plan-label">PRO</div>
             <div class="billing-price"><strong>$99</strong><span>/month</span></div>
             <p>AI, lead recovery and SEO growth.</p>
@@ -2552,7 +2552,7 @@ else if (state.section === "billing") {
         </div>
 
         <div id="billing-message" class="billing-message dashboard-card">
-          <div><small>CHECKOUT STATUS</small><strong>Stripe checkout is the next billing integration.</strong><p>No payment is taken yet. These buttons are ready to connect to secure checkout when Stripe is enabled.</p></div>
+          <div><small>CHECKOUT STATUS</small><strong>Paddle checkout is the next billing integration.</strong><p>No payment is taken yet. These buttons are ready to connect to secure checkout when Paddle is enabled.</p></div>
         </div>
       </section>
     `;
@@ -2830,7 +2830,7 @@ else if (state.section === "settings") {
                 <small>BILLING</small>
                 <strong>Not connected yet</strong>
               </div>
-              <span>Stripe subscription controls will be activated during the final launch stage.</span>
+              <span>Paddle subscription controls will be activated during the final launch stage.</span>
             </div>
           </div>
         </section>
@@ -2990,10 +2990,16 @@ else if (state.section === "settings") {
 
       </div>
 
-      <div class="overview-growth-grid">
-        <button class="overview-growth-card" data-overview-nav="seo" type="button"><span>↗</span><div><small>SEO GROWTH</small><strong>Find growth opportunities</strong></div><b>→</b></button>
-        <button class="overview-growth-card" data-overview-nav="rescue" type="button"><span>↻</span><div><small>REVENUE RESCUE</small><strong>Review quiet hot leads</strong></div><b>→</b></button>
-        <button class="overview-growth-card" data-overview-nav="whatsapp" type="button"><span>◉</span><div><small>WHATSAPP AI</small><strong>Prepare your channel</strong></div><b>→</b></button>
+      <div class="overview-growth-grid overview-growth-grid-motion">
+        <button class="overview-growth-card overview-growth-card-seo" data-overview-nav="seo" type="button">
+          <span>↗</span><div><small>SEO GROWTH <em class="overview-feature-badge badge-pro">PRO</em></small><strong>Find growth opportunities</strong></div><b>→</b>
+        </button>
+        <button class="overview-growth-card overview-growth-card-rescue" data-overview-nav="rescue" type="button">
+          <span>↻</span><div><small>REVENUE RESCUE <em class="overview-feature-badge badge-smart">SMART</em></small><strong>Review quiet hot leads</strong></div><b>→</b>
+        </button>
+        <button class="overview-growth-card overview-growth-card-whatsapp" data-overview-nav="whatsapp" type="button">
+          <span>◉</span><div><small>WHATSAPP AI <em class="overview-feature-badge badge-new">NEW</em></small><strong>Prepare your channel</strong></div><b>→</b>
+        </button>
       </div>
     `;
   }
@@ -3188,13 +3194,32 @@ if (state.section === "rescue") {
 }
 
 if (state.section === "billing") {
+  const billingGrid = document.querySelector(".billing-plan-grid");
+  const billingCards = [...document.querySelectorAll("[data-billing-card]")];
+
+  billingCards.forEach((card) => {
+    card.addEventListener("pointerenter", () => {
+      billingGrid?.classList.add("has-plan-hover");
+      billingCards.forEach((item) => item.classList.remove("is-focus"));
+      card.classList.add("is-focus");
+    });
+    card.addEventListener("pointerleave", () => {
+      card.classList.remove("is-focus");
+      if (!billingGrid?.querySelector(".billing-plan-card:hover")) billingGrid?.classList.remove("has-plan-hover");
+    });
+  });
+
   document.querySelectorAll("[data-billing-plan]").forEach((button) => {
     button.addEventListener("click", () => {
       const plan = button.dataset.billingPlan || "Selected plan";
+      const planKey = plan.toLowerCase();
+      state.pendingPlan = planKey;
+      billingCards.forEach((card) => card.classList.toggle("is-selected", card.dataset.billingCard === planKey));
+
       const message = document.querySelector("#billing-message");
       if (message) {
         message.classList.add("is-attention");
-        message.innerHTML = `<div><small>${escapeHtml(plan.toUpperCase())} SELECTED</small><strong>${escapeHtml(plan)} is ready for secure checkout.</strong><p>Stripe is not connected yet, so no payment has been taken. When Stripe is connected, this button will open the real checkout.</p></div>`;
+        message.innerHTML = `<div><small>${escapeHtml(plan.toUpperCase())} SELECTED</small><strong>${escapeHtml(plan)} is ready for secure Paddle checkout.</strong><p>Paddle is not connected yet, so no payment has been taken. When Paddle is connected, this button will open the real checkout.</p></div>`;
       }
     });
   });
@@ -4711,15 +4736,13 @@ async function loadLeads() {
             <small>LAST ACTIVITY</small>
             <strong>${escapeHtml(time)}</strong>
             <p>${escapeHtml(lead.lastMessage.slice(0, 120))}</p>
-            <div class="lead-actions">
-              ${lead.contact.email ? `<a class="secondary lead-action-link" href="mailto:${escapeHtml(lead.contact.email)}">Email</a>` : ""}
-              ${lead.contact.phone ? `<a class="secondary lead-action-link" href="tel:${escapeHtml(lead.contact.phone)}">Call</a>` : ""}
-              <button class="secondary open-lead-conversation" data-open-conversation="${escapeHtml(lead.id)}">
-                Open conversation →
-              </button>
+            <div class="lead-actions lead-actions-pro">
+              ${lead.contact.email ? `<a class="secondary lead-action-link" href="mailto:${escapeHtml(lead.contact.email)}">Email</a><button class="secondary lead-action-link lead-copy-action" type="button" data-copy-contact="${escapeHtml(lead.contact.email)}" data-copy-label="Email">Copy email</button>` : ""}
+              ${lead.contact.phone ? `<a class="secondary lead-action-link" href="tel:${escapeHtml(lead.contact.phone)}">Call</a><button class="secondary lead-action-link lead-copy-action" type="button" data-copy-contact="${escapeHtml(lead.contact.phone)}" data-copy-label="Phone">Copy phone</button>` : ""}
+              <button class="secondary open-lead-conversation" data-open-conversation="${escapeHtml(lead.id)}">Open conversation →</button>
             </div>
             ${!lead.contact.email && !lead.contact.phone ? `<div class="contact-needed">Contact not captured yet <span>YOUYOU will ask for it when lead capture is activated.</span></div>` : ""}
-            ${lead.score >= 70 ? `<div class="whatsapp-ready">WhatsApp alert ready <span>Integration pending</span></div>` : ""}
+            ${lead.score >= 70 ? `<div class="whatsapp-ready">WhatsApp AI ready after connection <span>Official API integration pending</span></div>` : ""}
           </div>
         </article>`;
     }).join("");
@@ -4730,6 +4753,25 @@ async function loadLeads() {
         setTimeout(() => {
           document.querySelector(`[data-conversation-id="${CSS.escape(button.dataset.openConversation)}"]`)?.click();
         }, 250);
+      };
+    });
+
+    document.querySelectorAll("[data-copy-contact]").forEach((button) => {
+      button.onclick = async () => {
+        const value = button.dataset.copyContact || "";
+        const label = button.dataset.copyLabel || "Contact";
+        if (!value) return;
+        const original = button.textContent;
+        try {
+          await navigator.clipboard.writeText(value);
+          button.textContent = `${label} copied ✓`;
+        } catch {
+          window.prompt(`Copy ${label.toLowerCase()}:`, value);
+          button.textContent = "Ready to copy";
+        }
+        window.setTimeout(() => {
+          if (button?.isConnected) button.textContent = original;
+        }, 1500);
       };
     });
   }

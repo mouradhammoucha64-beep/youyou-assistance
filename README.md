@@ -338,3 +338,15 @@ Product-wide connection pass built on V4.8.3.
 - No new SQL required
 - No paid API required for this version
 - Paddle/AI/WhatsApp API integrations are still deliberately deferred until final production wiring
+
+
+## V4.10 — Desktop Final Pass / Batch A
+
+- Overview motion + PRO/SMART/NEW badges
+- Leads compact layout + copy email/phone fallbacks
+- AI Control Center compact polish + dark selects
+- Settings compact desktop layout
+- Billing interactive focus + Paddle wording
+- Mobile intentionally untouched
+
+No SQL required.
