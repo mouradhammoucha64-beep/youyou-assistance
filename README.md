@@ -350,3 +350,22 @@ Product-wide connection pass built on V4.8.3.
 - Mobile intentionally untouched
 
 No SQL required.
+
+
+## V4.11 — Desktop Final Pass / Batch B
+
+Knowledge:
+- Added compact collapsible treatment for Upload Knowledge and Manual Entry
+- Reduced card/status visual weight
+- Kept Saved Knowledge as the primary library area
+
+Website Widget:
+- Switched dashboard widget area to a single-column desktop stack
+- Install code first, wide Live Preview below it, settings after
+- Improved preview proportions and spacing
+- Updated welcome wording
+- Replaced verbose save status with compact synced/saved wording
+- Added disabled “Continue on WhatsApp” preview hook for the future API connection
+
+No SQL required.
+Mobile intentionally untouched.

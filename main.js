@@ -1356,6 +1356,8 @@ function dashboardShell(content) {
 
   document.querySelector("#header-upgrade")?.addEventListener("click", () => navigateDashboard("billing"));
 
+  if (state.section === "knowledge") knowledgePanelToggleInit();
+
   document.querySelector("#logout").onclick =
     async () => {
       await supabase.auth.signOut();
@@ -1513,6 +1515,21 @@ function setupLandingMotion() {
   }
 }
 
+
+function knowledgePanelToggleInit() {
+  document.querySelectorAll("[data-knowledge-toggle]").forEach((button) => {
+    button.onclick = () => {
+      const key = button.dataset.knowledgeToggle;
+      const panel = document.querySelector(`[data-knowledge-panel="${CSS.escape(key)}"]`);
+      if (!panel) return;
+      const open = !panel.classList.contains("is-open");
+      panel.classList.toggle("is-open", open);
+      button.textContent = open ? "−" : "+";
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+  });
+}
+
 function renderDashboard() {
   const company =
     state.company?.name || "Your workspace";
@@ -1558,7 +1575,7 @@ function renderDashboard() {
         <div class="knowledge-upload-card dashboard-card">
           <div class="knowledge-card-heading">
             <div>
-              <small>UPLOAD KNOWLEDGE</small>
+              <div class="knowledge-inline-head"><small>UPLOAD KNOWLEDGE</small><button type="button" class="knowledge-collapse-toggle" data-knowledge-toggle="upload" aria-expanded="true">−</button></div>
               <h2>Import business files</h2>
               <p>
                 Upload an existing document and turn it into knowledge for this workspace.
@@ -1701,7 +1718,7 @@ function renderDashboard() {
     body = `
       <section class="widget-page-v38">
 
-        <div class="dashboard-grid">
+        <div class="dashboard-grid widget-dashboard-stack">
           <div class="dashboard-card widget-deploy-card">
             <small>DEPLOYMENT</small>
             <h1>Website Widget</h1>
@@ -3459,7 +3476,7 @@ async function loadWidgetConfiguration() {
   }
 
   previewWidgetConfiguration();
-  setWidgetConfigStatus(data ? "Saved settings loaded" : "Default settings ready", "success");
+  setWidgetConfigStatus(data ? "Settings synced" : "Default settings ready", "success");
 }
 
 async function saveWidgetConfiguration() {
