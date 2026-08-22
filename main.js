@@ -1530,6 +1530,43 @@ function knowledgePanelToggleInit() {
   });
 }
 
+
+function initSeoProTabs() {
+  const root = document.querySelector(".seo-growth-page");
+  if (!root) return;
+
+  const map = {
+    keywords: [".seo-keyword-lab"],
+    onpage: [".seo-onpage-card", ".seo-opportunity-card", ".seo-search-preview"],
+    content: [".seo-page-ideas-card", ".seo-brief-card"],
+    local: [".seo-local-pack"],
+    technical: [".seo-checklist-card", ".seo-console-card"],
+  };
+
+  Object.entries(map).forEach(([key, selectors]) => {
+    selectors.forEach((selector) => root.querySelectorAll(selector).forEach((el) => {
+      el.dataset.seoPanel = key;
+    }));
+  });
+
+  const setTab = (key) => {
+    root.querySelectorAll("[data-seo-tab]").forEach((btn) => {
+      const active = btn.dataset.seoTab === key;
+      btn.classList.toggle("is-active", active);
+      btn.setAttribute("aria-selected", active ? "true" : "false");
+    });
+    root.querySelectorAll("[data-seo-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.seoPanel !== key;
+    });
+  };
+
+  root.querySelectorAll("[data-seo-tab]").forEach((btn) => {
+    btn.addEventListener("click", () => setTab(btn.dataset.seoTab || "keywords"));
+  });
+
+  setTab("keywords");
+}
+
 function renderDashboard() {
   const company =
     state.company?.name || "Your workspace";
@@ -1769,6 +1806,10 @@ function renderDashboard() {
                   Absolutely. I can help with that and connect you with the team.
                 </div>
               </div>
+
+              <button type="button" class="widget-whatsapp-handoff-pro" disabled title="Available after WhatsApp AI is connected">
+                Continue on WhatsApp <span>COMING WITH WHATSAPP AI</span>
+              </button>
 
               <div class="widget-device-input">
                 <span>Ask YOUYOU anything...</span>
@@ -2103,13 +2144,21 @@ else if (state.section === "seo") {
 
 
 
+      <div class="seo-pro-tabs dashboard-card" role="tablist" aria-label="SEO workspace">
+        <button class="seo-pro-tab is-active" type="button" data-seo-tab="keywords">Keywords</button>
+        <button class="seo-pro-tab" type="button" data-seo-tab="onpage">On-page</button>
+        <button class="seo-pro-tab" type="button" data-seo-tab="content">Content</button>
+        <button class="seo-pro-tab" type="button" data-seo-tab="local">Local</button>
+        <button class="seo-pro-tab" type="button" data-seo-tab="technical">Technical</button>
+      </div>
+
       <div class="seo-analysis-summary dashboard-card">
         <div class="seo-analysis-summary-head">
           <div>
             <small>ANALYSIS SUMMARY</small>
             <strong>What YOUYOU found in your workspace</strong>
           </div>
-          <span id="seo-summary-readiness">—</span>
+          <span class="seo-summary-scope">WORKSPACE SIGNALS</span>
         </div>
 
         <div class="seo-summary-grid">
@@ -2453,19 +2502,29 @@ else if (state.section === "rescue") {
             <h1>Catch valuable leads before they disappear.</h1>
             <p>YOUYOU reviews your existing conversations for buying intent, contact availability and inactivity so your team knows what deserves attention first.</p>
           </div>
-          <div class="rescue-hero-status"><span>●</span> SIGNAL ENGINE READY</div>
+          <div class="rescue-hero-status rescue-status-compact"><span>●</span> SIGNAL ENGINE READY</div>
         </div>
 
         <div class="rescue-metric-grid">
           <div class="dashboard-card"><small>AT-RISK LEADS</small><strong id="rescue-at-risk">—</strong><span>Qualified + quiet</span></div>
           <div class="dashboard-card"><small>HOT OPPORTUNITIES</small><strong id="rescue-hot">—</strong><span>Intent score 70+</span></div>
           <div class="dashboard-card"><small>CONTACTABLE</small><strong id="rescue-contactable">—</strong><span>Email or phone captured</span></div>
-          <div class="dashboard-card"><small>FOLLOW-UP MODE</small><strong>MANUAL</strong><span>Automation activates with APIs</span></div>
+          <div class="dashboard-card"><small>FOLLOW-UP MODE</small><strong><span class="rescue-mode-pill">MANUAL</span></strong><span>Automation activates with APIs</span></div>
         </div>
 
         <div class="rescue-control-card dashboard-card">
           <div><small>OPPORTUNITY QUEUE</small><h2>Who should you follow up with next?</h2><p>Sorted by intent and inactivity. No message is sent automatically in this version.</p></div>
           <span class="rescue-safe-badge">NO AUTO-SEND</span>
+        </div>
+        <div class="rescue-workflow dashboard-card">
+          <small>RESCUE WORKFLOW</small>
+          <div class="rescue-workflow-steps">
+            <span class="is-current">Needs follow-up</span>
+            <span>Follow-up sent</span>
+            <span>Replied</span>
+            <span>Recovered</span>
+          </div>
+          <p>Only “Needs follow-up” is detected automatically today. Later stages activate when messaging integrations are connected.</p>
         </div>
 
         <div id="rescue-list" class="rescue-list">
@@ -2490,7 +2549,14 @@ else if (state.section === "rescue") {
             <h1>Carry the customer conversation beyond your website.</h1>
             <p>Prepare your WhatsApp channel now. The direct handoff link works with a saved business number; AI replies require the official WhatsApp Business API and your AI API connection.</p>
           </div>
-          <span class="whatsapp-api-status">API CONNECTION PENDING</span>
+          <span class="whatsapp-api-status whatsapp-api-status-compact">API CONNECTION PENDING</span>
+        </div>
+
+        <div class="whatsapp-channel-status dashboard-card">
+          <div><small>BUSINESS NUMBER</small><strong>${whatsappNumber ? "READY" : "NEEDED"}</strong></div>
+          <div><small>WHATSAPP API</small><strong>PENDING</strong></div>
+          <div><small>AI REPLIES</small><strong>LOCKED</strong></div>
+          <div><small>HUMAN TAKEOVER</small><strong>PLANNED</strong></div>
         </div>
 
         <div class="whatsapp-layout">
@@ -2498,15 +2564,15 @@ else if (state.section === "rescue") {
             <div class="whatsapp-section-head"><div><small>CHANNEL SETUP</small><h2>WhatsApp readiness</h2></div><span>${whatsappNumber ? "NUMBER READY" : "NUMBER NEEDED"}</span></div>
 
             <div class="whatsapp-readiness-list">
-              <div class="${whatsappNumber ? "is-done" : ""}"><b>${whatsappNumber ? "✓" : "1"}</b><div><strong>Business WhatsApp number</strong><small>${whatsappNumber ? escapeHtml(whatsappNumber) : "Add your WhatsApp number in Business Settings."}</small></div></div>
-              <div><b>2</b><div><strong>Official WhatsApp Business API</strong><small>Connect during the production integrations stage.</small></div></div>
-              <div><b>3</b><div><strong>YOUYOU AI engine</strong><small>Use the same Knowledge Base and AI controls for approved WhatsApp replies.</small></div></div>
-              <div><b>4</b><div><strong>Human takeover</strong><small>Keep a clear path for your team to step into high-value conversations.</small></div></div>
+              <div class="${whatsappNumber ? "is-done" : "is-pending"}"><b>${whatsappNumber ? "✓" : "1"}</b><div><strong>Business WhatsApp number</strong><small>${whatsappNumber ? escapeHtml(whatsappNumber) : "Add your WhatsApp number in Business Settings."}</small></div><span>${whatsappNumber ? "COMPLETED" : "PENDING"}</span></div>
+              <div class="is-pending"><b>2</b><div><strong>Official WhatsApp Business API</strong><small>Connect during the production integrations stage.</small></div><span>PENDING</span></div>
+              <div class="is-locked"><b>3</b><div><strong>YOUYOU AI engine</strong><small>Uses the same Knowledge Base and AI controls after the official channel is connected.</small></div><span>LOCKED</span></div>
+              <div class="is-takeover"><b>4</b><div><strong>Human takeover</strong><small>Your team keeps control of high-value or sensitive conversations when the live channel is connected.</small></div><span>READY PLAN</span></div>
             </div>
 
             <div class="whatsapp-actions">
               <button id="whatsapp-settings" class="secondary" type="button">Open Business Settings</button>
-              ${whatsappLaunchUrl ? `<a class="primary whatsapp-test-link" href="${escapeHtml(whatsappLaunchUrl)}" target="_blank" rel="noopener">Test WhatsApp handoff ↗</a>` : ""}
+              ${whatsappLaunchUrl ? `<a class="primary whatsapp-test-link" href="${escapeHtml(whatsappLaunchUrl)}" target="_blank" rel="noopener">Test handoff — opens WhatsApp ↗</a>` : ""}
             </div>
           </div>
 
@@ -3203,6 +3269,7 @@ if (state.section === "ai") {
 }
 
 if (state.section === "seo") {
+  initSeoProTabs();
   initSeoGrowthCenter();
 }
 
@@ -3666,6 +3733,33 @@ function seoUnique(values = []) {
   return [...new Set(values.map((value) => seoCleanText(value)).filter(Boolean))];
 }
 
+
+function seoUsefulKnowledgeTitle(value = "") {
+  const title = seoCleanText(value);
+  if (!title || title.length < 4 || title.length > 80) return false;
+  const lowered = title.toLowerCase();
+  const blocked = [
+    /^file\s*:/,
+    /\bknowledge[-_\s]?test\b/,
+    /\bbusiness hours?\b/,
+    /\bmanual entry\b/,
+    /\bupload knowledge\b/,
+    /\bsaved knowledge\b/,
+    /\babout youyou\b/,
+    /\bworkspace\b/,
+    /\.(pdf|docx?|xlsx?|csv|txt)$/i,
+  ];
+  return !blocked.some((pattern) => pattern.test(lowered));
+}
+
+function seoUsefulBusinessDescription(value = "") {
+  const text = seoCleanText(value);
+  if (text.length < 35) return "";
+  const lowered = text.toLowerCase();
+  if (["services", "service", "business", "company"].includes(lowered)) return "";
+  return text;
+}
+
 function buildSeoKeywordEngine(company = {}, knowledge = [], focus = {}) {
   const companyName = seoCleanText(company.name) || "Your Business";
   const service = seoCleanText(focus.service) || seoCleanText(company.industry) || "professional services";
@@ -3688,7 +3782,7 @@ function buildSeoKeywordEngine(company = {}, knowledge = [], focus = {}) {
 
   const knowledgeTopics = knowledge
     .map((item) => seoCleanText(item.title))
-    .filter(Boolean)
+    .filter(seoUsefulKnowledgeTitle)
     .slice(0, 4);
 
   const longTail = seoUnique([
@@ -3784,11 +3878,11 @@ function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
 
   const title = seoClip(titleBase, 60);
 
-  const businessDescription = seoCleanText(company.business_description);
+  const businessDescription = seoUsefulBusinessDescription(company.business_description);
 
   const descriptionSeed = businessDescription
     ? `${businessDescription}${city ? ` Serving customers in ${city}.` : ""}`
-    : `${companyName} offers ${service.toLowerCase()}${city ? ` in ${city}` : ""}. Explore services, pricing, FAQs and clear ways to book or get in touch.`;
+    : `${companyName} provides ${service.toLowerCase()}${city ? ` in ${city}` : ""}. Explore what is included, pricing factors, common questions and the next step to get started.`;
 
   const description = seoClip(descriptionSeed, 155);
 
@@ -3851,7 +3945,7 @@ function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
 
   const knowledgeTitles = knowledge
     .map((item) => seoCleanText(item.title))
-    .filter(Boolean)
+    .filter(seoUsefulKnowledgeTitle)
     .slice(0, 5);
 
   const pageIdeas = [
@@ -4083,16 +4177,31 @@ function renderSeoAnalysis(analysis) {
     quickWins.innerHTML = analysis.quickWins
       .map(
         (item, index) => `
-          <div class="seo-quickwin-item">
+          <div class="seo-quickwin-item seo-action-plan-item">
             <div class="seo-quickwin-number">${String(index + 1).padStart(2, "0")}</div>
             <div class="seo-quickwin-copy">
               <div class="seo-quickwin-title-row">
                 <strong>${escapeHtml(item.title)}</strong>
-                <span class="seo-priority seo-priority-${item.priority.toLowerCase()}">
-                  ${escapeHtml(item.priority)}
-                </span>
+                <span class="seo-priority seo-priority-${item.priority.toLowerCase()}">${escapeHtml(item.priority)}</span>
               </div>
-              <p>${escapeHtml(item.text)}</p>
+              <div class="seo-action-grid">
+                <div><small>PROBLEM</small><p>${escapeHtml(item.title)}</p></div>
+                <div><small>WHERE</small><p>${escapeHtml(
+                  item.priority === "LOCAL" ? "Location / local business signals" :
+                  item.priority === "FAQ" ? "FAQ / customer questions" :
+                  item.priority === "LINKS" ? "Internal links between related pages" :
+                  item.priority === "KEYWORD" ? "Target service page" :
+                  item.priority === "CONTENT" ? "Service / landing page" :
+                  "Business profile or website foundation"
+                )}</p></div>
+                <div class="seo-action-wide"><small>FIX / SUGGESTED ACTION</small><p>${escapeHtml(item.text)}</p></div>
+                <div class="seo-action-wide seo-action-why"><small>WHY IT MATTERS</small><p>${escapeHtml(
+                  item.priority === "LOCAL" ? "Clear local signals help customers and search engines understand where the business operates." :
+                  item.priority === "LINKS" ? "Useful internal links make related pages easier to discover and understand." :
+                  item.priority === "FAQ" ? "Helpful answers can match real pre-sale questions and reduce customer uncertainty." :
+                  "A clearer page topic makes the page easier for visitors and search engines to understand."
+                )}</p></div>
+              </div>
             </div>
           </div>
         `
@@ -4553,10 +4662,13 @@ async function loadRevenueRescue() {
           <div class="rescue-row-meta"><span>${escapeHtml(inactivity)}</span><span>${row.contactable ? "Contact captured" : "No contact yet"}</span></div>
         </div>
         <div class="rescue-row-action">
+          <div class="rescue-row-status">Needs follow-up</div>
           <small>NEXT ACTION</small>
           <strong>${escapeHtml(nextAction)}</strong>
-          ${row.contact.email ? `<a href="mailto:${escapeHtml(row.contact.email)}">Email lead ↗</a>` : ""}
-          ${row.contact.phone ? `<a href="tel:${escapeHtml(row.contact.phone.replace(/\s+/g, ""))}">Call lead ↗</a>` : ""}
+          <div class="rescue-action-chips">
+            ${row.contact.email ? `<a href="mailto:${escapeHtml(row.contact.email)}">Email lead ↗</a>` : ""}
+            ${row.contact.phone ? `<a href="tel:${escapeHtml(row.contact.phone.replace(/\s+/g, ""))}">Call lead ↗</a>` : ""}
+          </div>
         </div>
       </article>`;
   }).join("");

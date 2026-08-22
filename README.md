@@ -369,3 +369,29 @@ Website Widget:
 
 No SQL required.
 Mobile intentionally untouched.
+
+
+## V4.12 — Desktop Final Pass / Batch C
+
+SEO Growth:
+- Compact tabs: Keywords / On-page / Content / Local / Technical
+- Duplicate readiness score removed from summary
+- Weak internal/file-name keyword ideas filtered
+- Stronger fallback meta description
+- Quick Wins upgraded to action-first: Problem / Where / Fix / Why
+
+Revenue Rescue:
+- Compact badges and cards
+- Workflow: Needs follow-up / Follow-up sent / Replied / Recovered
+- Later states remain clearly API-dependent
+- Clearer Email/Call action chips
+
+WhatsApp AI:
+- Completed / Pending / Locked / Planned states
+- Stronger Human Takeover presentation
+- Bigger preview and explicit handoff test wording
+- Channel status strip without fake live metrics
+- Actual future “Continue on WhatsApp” hook added to Website Widget preview
+
+No SQL required.
+Mobile intentionally untouched.
