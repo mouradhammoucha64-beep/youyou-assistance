@@ -469,3 +469,34 @@ No SQL required for this UI review build.
 - Sidebar click now resolves to the AI Studio section instead of falling back to Overview.
 - Direct browser navigation to `/dashboard/ai-studio` is supported by the existing Vercel dashboard rewrite.
 - No SQL changes.
+
+
+## V4.17 — Smart Landing Pages PRO Workshop
+
+New standalone dashboard section: **Landing Pages**
+
+What works now:
+- 30 professional landing page presets
+- Categories for Product, Service, Beauty & Wellness, Health, Hospitality, Real Estate, Digital and Campaign
+- Visual editor with live desktop/mobile preview
+- Product/service headline, description, benefits, offer and trust content
+- Image URL, video URL and local image preview
+- Custom accent/background/surface/text colors + palette presets
+- LTR / RTL page direction
+- Multi-currency pricing:
+  USD, EUR, MAD, SAR, AED, QAR, KWD, BHD, OMR, EGP, DZD, TND
+- Price display: show price / contact for price / hide price
+- CTA actions: lead form / WhatsApp / call / email
+- WhatsApp direct action
+- Save drafts per workspace in browser local storage
+- Edit, duplicate and delete saved drafts
+- Export a self-contained HTML landing page
+- No changes were made to SEO or AI Studio logic
+
+Deliberately not faked:
+- Public YOUYOU-hosted landing-page URLs
+- Server-side publishing
+- Cross-device draft storage
+- Visits / leads / WhatsApp-click analytics
+
+Those require the publishing database/backend and should be connected only after the builder UX is approved.

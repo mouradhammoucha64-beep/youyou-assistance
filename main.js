@@ -37,6 +37,7 @@ const DASHBOARD_ROUTES = {
   widget: "/dashboard/widget",
   ai: "/dashboard/ai-control",
   studio: "/dashboard/ai-studio",
+  pages: "/dashboard/landing-pages",
   seo: "/dashboard/seo-growth",
   rescue: "/dashboard/revenue-rescue",
   whatsapp: "/dashboard/whatsapp-ai",
@@ -1296,6 +1297,7 @@ function dashboardShell(content) {
             ${navItem("widget", "◇", "Website Widget")}
             ${navItem("ai", "✧", "AI Control Center")}
             ${navItem("studio", "✦", "AI Studio")}
+            ${navItem("pages", "▣", "Landing Pages")}
             ${navItem("seo", "↗", "SEO Growth")}
             ${navItem("rescue", "↻", "Revenue Rescue")}
             ${navItem("whatsapp", "◉", "WhatsApp AI")}
@@ -1681,6 +1683,689 @@ function initAiStudio() {
 
   setType("Video Ad");
 }
+
+
+/* =========================
+   SMART LANDING PAGES
+   V4.17 PRO WORKSHOP
+========================= */
+
+const LANDING_PAGE_TEMPLATES = [
+  { id:"product-launch", name:"Product Launch", category:"Product", layout:"product", accent:"#7c5cff", bg:"#090b12", surface:"#111522", headline:"Meet the product built to make everyday work simpler.", sub:"A focused launch page with product visuals, benefits and one clear action.", cta:"Get yours today", badge:"NEW" },
+  { id:"product-offer", name:"Flash Product Offer", category:"Product", layout:"offer", accent:"#ff7a59", bg:"#0b0b0d", surface:"#171216", headline:"A limited-time offer worth acting on.", sub:"Put the product, price and urgency at the center of the page.", cta:"Claim the offer", badge:"LIMITED" },
+  { id:"premium-product", name:"Premium Product", category:"Product", layout:"luxury", accent:"#d7b46a", bg:"#0a0a0a", surface:"#151310", headline:"Crafted for customers who expect more.", sub:"A refined product page for premium positioning and higher-value offers.", cta:"Discover the product", badge:"PREMIUM" },
+  { id:"beauty-product", name:"Beauty Product", category:"Product", layout:"beauty", accent:"#ff8bb6", bg:"#130d12", surface:"#1d1219", headline:"Your next beauty essential starts here.", sub:"Show the product, benefits, social proof and a direct purchase action.", cta:"Shop the offer", badge:"BEAUTY" },
+  { id:"tech-product", name:"Tech Product", category:"Product", layout:"tech", accent:"#4db8ff", bg:"#071019", surface:"#0d1924", headline:"Smarter technology. Clearer results.", sub:"Built for tech products, gadgets, devices and software-enabled offers.", cta:"See it in action", badge:"TECH" },
+
+  { id:"local-service", name:"Local Service", category:"Service", layout:"service", accent:"#59d7a4", bg:"#08100d", surface:"#0f1a16", headline:"A trusted local service, ready when you need it.", sub:"Turn local ad traffic into calls, quotes and WhatsApp conversations.", cta:"Get a quote", badge:"LOCAL" },
+  { id:"emergency-service", name:"Emergency Service", category:"Service", layout:"urgent", accent:"#ff675f", bg:"#130a09", surface:"#1c1110", headline:"Need help now? We are ready.", sub:"A direct-response layout for urgent services and high-intent customers.", cta:"Call now", badge:"FAST RESPONSE" },
+  { id:"consulting", name:"Consulting Service", category:"Service", layout:"consult", accent:"#8b7cff", bg:"#0b0b13", surface:"#151421", headline:"Turn expertise into a clear next step.", sub:"Explain the problem you solve, your approach and how customers can start.", cta:"Book a consultation", badge:"EXPERT" },
+  { id:"cleaning", name:"Cleaning Service", category:"Service", layout:"clean", accent:"#57c6e1", bg:"#071116", surface:"#0e1b20", headline:"A cleaner space without the hassle.", sub:"Perfect for residential, office and specialized cleaning campaigns.", cta:"Request a quote", badge:"SERVICE" },
+  { id:"repair", name:"Repair Service", category:"Service", layout:"repair", accent:"#f0a44b", bg:"#120e08", surface:"#1c160d", headline:"Fast repairs. Clear communication. No guesswork.", sub:"Show the issue you solve, service area, trust signals and direct contact.", cta:"Get help now", badge:"REPAIR" },
+
+  { id:"spa", name:"Spa & Wellness", category:"Beauty & Wellness", layout:"spa", accent:"#c79cff", bg:"#100b14", surface:"#1a1320", headline:"Make time for the reset you deserve.", sub:"A calm premium layout for spa, massage, wellness and beauty offers.", cta:"Book your session", badge:"WELLNESS" },
+  { id:"salon", name:"Salon Promotion", category:"Beauty & Wellness", layout:"salon", accent:"#ff9ec7", bg:"#140c12", surface:"#21131b", headline:"Your next look starts with one booking.", sub:"Promote a treatment, stylist, package or first-visit offer.", cta:"Book now", badge:"SALON" },
+  { id:"fitness", name:"Fitness Offer", category:"Beauty & Wellness", layout:"fitness", accent:"#a8f05a", bg:"#0a0f07", surface:"#141b0f", headline:"Start stronger. Stay consistent.", sub:"A high-energy layout for gyms, coaches, classes and transformation offers.", cta:"Start today", badge:"FITNESS" },
+  { id:"dental", name:"Dental Service", category:"Health", layout:"dental", accent:"#5fd7ff", bg:"#071116", surface:"#0e1b21", headline:"A confident smile starts with the right care.", sub:"Explain the treatment, answer common concerns and drive appointment requests.", cta:"Book an appointment", badge:"DENTAL" },
+  { id:"clinic", name:"Clinic Appointment", category:"Health", layout:"clinic", accent:"#73e0b1", bg:"#07110e", surface:"#0d1a15", headline:"Professional care with a simpler booking experience.", sub:"A clean appointment-focused page for clinics and healthcare services.", cta:"Request appointment", badge:"CARE" },
+
+  { id:"restaurant", name:"Restaurant Offer", category:"Hospitality", layout:"restaurant", accent:"#ffb457", bg:"#120c07", surface:"#1d150d", headline:"One offer designed to fill more tables.", sub:"Highlight a signature dish, menu offer, event or reservation campaign.", cta:"Reserve a table", badge:"FOOD" },
+  { id:"hotel", name:"Hotel Stay", category:"Hospitality", layout:"hotel", accent:"#e4c37b", bg:"#0e0d0a", surface:"#191711", headline:"Turn the next trip into a better stay.", sub:"Show rooms, experience, location and the strongest booking reason.", cta:"Check availability", badge:"STAY" },
+  { id:"travel", name:"Travel Package", category:"Hospitality", layout:"travel", accent:"#65c9ff", bg:"#071018", surface:"#0d1923", headline:"Your next escape is closer than it feels.", sub:"Built for travel packages, tours, excursions and destination offers.", cta:"Explore the package", badge:"TRAVEL" },
+
+  { id:"real-estate", name:"Property Lead", category:"Real Estate", layout:"property", accent:"#cdb47a", bg:"#0c0c0a", surface:"#171611", headline:"A property worth seeing in person.", sub:"Show the property, key facts and capture qualified buyer or renter leads.", cta:"Schedule a viewing", badge:"PROPERTY" },
+  { id:"real-estate-agent", name:"Real Estate Agent", category:"Real Estate", layout:"agent", accent:"#7aa9ff", bg:"#080c13", surface:"#101824", headline:"Find the right property with a clearer process.", sub:"Position the agent, local expertise and a direct consultation path.", cta:"Talk to an agent", badge:"REAL ESTATE" },
+
+  { id:"saas", name:"SaaS Conversion", category:"Digital", layout:"saas", accent:"#7c5cff", bg:"#080a12", surface:"#111523", headline:"One product. One clear reason to start.", sub:"A focused SaaS landing page for demos, trials and lead generation.", cta:"Start now", badge:"SAAS" },
+  { id:"agency", name:"Agency Lead Gen", category:"Digital", layout:"agency", accent:"#ff6f91", bg:"#11090e", surface:"#1d1118", headline:"Turn your next campaign into measurable growth.", sub:"Show the service, proof, process and one strong lead-generation CTA.", cta:"Get a proposal", badge:"AGENCY" },
+  { id:"app-launch", name:"App Launch", category:"Digital", layout:"app", accent:"#65b7ff", bg:"#080d14", surface:"#101925", headline:"A better way to get the job done — now in your pocket.", sub:"Launch an app with benefits, screenshots, proof and store actions.", cta:"Get the app", badge:"APP" },
+  { id:"webinar", name:"Webinar Registration", category:"Digital", layout:"webinar", accent:"#b184ff", bg:"#0e0914", surface:"#181022", headline:"One session. Practical answers you can use immediately.", sub:"Drive registrations with a clear topic, agenda, host and registration form.", cta:"Save my seat", badge:"LIVE" },
+  { id:"course", name:"Course Enrollment", category:"Digital", layout:"course", accent:"#f0b45e", bg:"#110d07", surface:"#1d160c", headline:"Learn the skill. Apply it with confidence.", sub:"Sell a focused course with outcomes, modules, instructor proof and enrollment CTA.", cta:"Enroll now", badge:"COURSE" },
+
+  { id:"event", name:"Event Registration", category:"Campaign", layout:"event", accent:"#ff6a78", bg:"#12090b", surface:"#1d1115", headline:"Make this the event people do not want to miss.", sub:"Promote a date, location, experience and registration action.", cta:"Register now", badge:"EVENT" },
+  { id:"lead-magnet", name:"Lead Magnet", category:"Campaign", layout:"lead", accent:"#66d7bb", bg:"#07110f", surface:"#0e1a17", headline:"Get the guide that makes the next step easier.", sub:"Capture leads with a downloadable guide, checklist, audit or resource.", cta:"Get the free guide", badge:"FREE" },
+  { id:"quote-request", name:"Quote Request", category:"Campaign", layout:"quote", accent:"#6da8ff", bg:"#080d14", surface:"#101824", headline:"Tell us what you need. Get a clear next step.", sub:"A simple conversion page for custom pricing and service requests.", cta:"Request my quote", badge:"QUOTE" },
+  { id:"whatsapp-offer", name:"WhatsApp Offer", category:"Campaign", layout:"whatsapp", accent:"#45d483", bg:"#07110c", surface:"#0e1b14", headline:"Interested? Continue directly on WhatsApp.", sub:"A fast mobile-first offer page designed around WhatsApp conversations.", cta:"Chat on WhatsApp", badge:"WHATSAPP" },
+  { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
+];
+
+const LANDING_CURRENCIES = [
+  ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
+  ["SAR","ر.س","Saudi Riyal"],["AED","د.إ","UAE Dirham"],["QAR","ر.ق","Qatari Riyal"],
+  ["KWD","د.ك","Kuwaiti Dinar"],["BHD","د.ب","Bahraini Dinar"],["OMR","ر.ع.","Omani Rial"],
+  ["EGP","ج.م","Egyptian Pound"],["DZD","د.ج","Algerian Dinar"],["TND","د.ت","Tunisian Dinar"]
+];
+
+function landingTemplateById(id) {
+  return LANDING_PAGE_TEMPLATES.find((item) => item.id === id) || LANDING_PAGE_TEMPLATES[0];
+}
+
+function landingDraftKey() {
+  return `youyou-landing-pages:${state.company?.id || state.user?.id || "workspace"}`;
+}
+
+function loadLandingDrafts() {
+  try {
+    return JSON.parse(localStorage.getItem(landingDraftKey()) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveLandingDrafts(items) {
+  localStorage.setItem(landingDraftKey(), JSON.stringify(items.slice(0, 50)));
+}
+
+function landingCurrencySymbol(code) {
+  return LANDING_CURRENCIES.find(([value]) => value === code)?.[1] || code;
+}
+
+function defaultLandingPageData(templateId = "product-launch") {
+  const template = landingTemplateById(templateId);
+  const c = state.company || {};
+
+  return {
+    id: `lp_${Date.now()}`,
+    templateId: template.id,
+    name: template.name,
+    pageType: template.category,
+    headline: template.headline,
+    subheadline: template.sub,
+    description: c.business_description || "Add a short, persuasive description that explains why this offer matters and what the customer should do next.",
+    badge: template.badge,
+    price: "",
+    oldPrice: "",
+    currency: "USD",
+    priceMode: "show",
+    ctaText: template.cta,
+    ctaAction: template.layout === "whatsapp" ? "whatsapp" : "form",
+    whatsapp: c.whatsapp_number || "",
+    phone: c.business_phone || "",
+    email: c.business_email || "",
+    imageUrl: "",
+    videoUrl: "",
+    accent: template.accent,
+    background: template.bg,
+    surface: template.surface,
+    textColor: "#f7f8fb",
+    direction: "ltr",
+    benefits: "Clear value proposition\nFast customer response\nSimple next step",
+    testimonial: "Add a short customer quote or trust statement here.",
+    faqQuestion: "What should customers know before getting started?",
+    faqAnswer: "Add a concise answer that removes hesitation and makes the next step easier.",
+    createdAt: new Date().toISOString(),
+    status: "Draft",
+  };
+}
+
+function landingPriceMarkup(data) {
+  if (data.priceMode === "hide") return "";
+  if (data.priceMode === "quote") return `<div class="lp-live-price quote">Contact for price</div>`;
+
+  const symbol = landingCurrencySymbol(data.currency);
+  const current = data.price?.trim() ? `${symbol} ${escapeHtml(data.price.trim())}` : "Add price";
+  const old = data.oldPrice?.trim() ? `<del>${symbol} ${escapeHtml(data.oldPrice.trim())}</del>` : "";
+
+  return `<div class="lp-live-price">${old}<strong>${current}</strong><small>${escapeHtml(data.currency)}</small></div>`;
+}
+
+function landingCtaHref(data) {
+  if (data.ctaAction === "whatsapp") {
+    const digits = String(data.whatsapp || "").replace(/\D/g, "");
+    return digits ? `https://wa.me/${digits}` : "#contact";
+  }
+  if (data.ctaAction === "call") {
+    const phone = String(data.phone || "").replace(/[^\d+]/g, "");
+    return phone ? `tel:${phone}` : "#contact";
+  }
+  if (data.ctaAction === "email") {
+    return data.email ? `mailto:${data.email}` : "#contact";
+  }
+  return "#contact";
+}
+
+function landingPreviewMarkup(data, compact = false) {
+  const benefits = String(data.benefits || "")
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 6);
+
+  const media = data.videoUrl?.trim()
+    ? `<div class="lp-live-media video"><div class="lp-live-video-placeholder"><span>▶</span><small>Video URL connected</small></div></div>`
+    : data.imageUrl?.trim()
+      ? `<div class="lp-live-media"><img src="${escapeHtml(data.imageUrl.trim())}" alt="${escapeHtml(data.name || "Landing page visual")}" /></div>`
+      : `<div class="lp-live-media placeholder"><div><span>✦</span><strong>Your product or service visual</strong><small>Add an image or video in the editor</small></div></div>`;
+
+  const direction = data.direction === "rtl" ? "rtl" : "ltr";
+
+  return `
+    <article class="lp-live-page ${compact ? "is-compact" : ""}" dir="${direction}"
+      style="--lp-accent:${escapeHtml(data.accent)};--lp-bg:${escapeHtml(data.background)};--lp-surface:${escapeHtml(data.surface)};--lp-text:${escapeHtml(data.textColor)}">
+      <nav class="lp-live-nav">
+        <strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong>
+        <span>${escapeHtml(data.pageType || "Landing Page")}</span>
+      </nav>
+
+      <section class="lp-live-hero">
+        <div class="lp-live-copy">
+          <span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span>
+          <h1>${escapeHtml(data.headline || "Your headline goes here")}</h1>
+          <p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>
+          ${landingPriceMarkup(data)}
+          <div class="lp-live-actions">
+            <a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>
+            ${data.whatsapp ? `<a href="https://wa.me/${String(data.whatsapp).replace(/\D/g, "")}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}
+          </div>
+          <div class="lp-live-trust"><span>✓ Clear offer</span><span>✓ Direct response</span><span>✓ Mobile ready</span></div>
+        </div>
+        ${media}
+      </section>
+
+      <section class="lp-live-section lp-live-benefits">
+        <small>WHY THIS OFFER</small>
+        <h2>${escapeHtml(data.description || "Explain the value clearly.")}</h2>
+        <div class="lp-live-benefit-grid">
+          ${benefits.map((item, index) => `<div><span>0${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}
+        </div>
+      </section>
+
+      <section class="lp-live-section lp-live-proof">
+        <small>TRUST</small>
+        <blockquote>“${escapeHtml(data.testimonial || "Add a customer quote here.")}”</blockquote>
+      </section>
+
+      <section class="lp-live-section lp-live-faq">
+        <small>FAQ</small>
+        <h3>${escapeHtml(data.faqQuestion || "Common customer question")}</h3>
+        <p>${escapeHtml(data.faqAnswer || "Add the answer here.")}</p>
+      </section>
+
+      <section id="contact" class="lp-live-section lp-live-contact">
+        <div>
+          <small>READY TO CONVERT</small>
+          <h2>${escapeHtml(data.ctaText || "Get started")}</h2>
+          <p>Give visitors one clear next step: a lead form, WhatsApp, call or email.</p>
+        </div>
+        <form onsubmit="return false">
+          <input placeholder="Name" />
+          <input placeholder="Email or phone" />
+          <textarea rows="3" placeholder="Tell us what you need"></textarea>
+          <button type="button">${escapeHtml(data.ctaText || "Send request")}</button>
+        </form>
+      </section>
+
+      <footer class="lp-live-footer">
+        <strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong>
+        <span>Landing page preview · Powered by YOUYOU</span>
+      </footer>
+    </article>
+  `;
+}
+
+function landingExportHtml(data) {
+  const body = landingPreviewMarkup(data, false);
+  return `<!doctype html>
+<html lang="${data.direction === "rtl" ? "ar" : "en"}" dir="${data.direction === "rtl" ? "rtl" : "ltr"}">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${escapeHtml(data.name || "Landing Page")}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:${data.background};font-family:Arial,sans-serif;color:${data.textColor}}
+.lp-live-page{--lp-accent:${data.accent};--lp-bg:${data.background};--lp-surface:${data.surface};--lp-text:${data.textColor};max-width:1180px;margin:auto;background:var(--lp-bg);color:var(--lp-text);min-height:100vh}
+.lp-live-nav,.lp-live-footer{display:flex;justify-content:space-between;padding:22px 5%;border-bottom:1px solid #ffffff14}
+.lp-live-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;padding:70px 5%;align-items:center}.lp-live-copy h1{font-size:56px;line-height:1.02;margin:18px 0}.lp-live-sub{font-size:18px;line-height:1.6;color:#b8bdc9}.lp-live-badge{padding:7px 10px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 16%,transparent);color:var(--lp-accent);font-weight:700;font-size:12px}.lp-live-price{display:flex;gap:12px;align-items:baseline;margin:24px 0}.lp-live-price strong{font-size:34px}.lp-live-price del{opacity:.45}.lp-live-actions{display:flex;gap:10px;flex-wrap:wrap}.lp-live-actions a{padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:700}.lp-live-primary{background:var(--lp-accent);color:#080808}.lp-live-secondary{border:1px solid #ffffff25;color:var(--lp-text)}.lp-live-media{min-height:380px;border-radius:24px;background:var(--lp-surface);overflow:hidden;display:grid;place-items:center}.lp-live-media img{width:100%;height:100%;object-fit:cover}.lp-live-media.placeholder div{text-align:center;opacity:.7}.lp-live-section{padding:55px 5%;border-top:1px solid #ffffff10}.lp-live-section>small{color:var(--lp-accent);font-weight:800}.lp-live-section h2{font-size:34px;max-width:780px}.lp-live-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.lp-live-benefit-grid div{padding:20px;background:var(--lp-surface);border-radius:14px}.lp-live-benefit-grid span{display:block;color:var(--lp-accent);font-size:12px;margin-bottom:10px}.lp-live-proof blockquote{font-size:28px;max-width:780px;margin:20px 0}.lp-live-contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}.lp-live-contact form{display:grid;gap:10px}.lp-live-contact input,.lp-live-contact textarea{width:100%;padding:13px;border:1px solid #ffffff18;border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-live-contact button{padding:14px;border:0;border-radius:9px;background:var(--lp-accent);font-weight:800}
+.lp-live-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;font-size:12px;opacity:.65}.lp-live-footer{border-top:1px solid #ffffff14;border-bottom:0}
+@media(max-width:760px){.lp-live-hero,.lp-live-contact{grid-template-columns:1fr}.lp-live-copy h1{font-size:38px}.lp-live-benefit-grid{grid-template-columns:1fr}.lp-live-media{min-height:280px}}
+</style>
+</head>
+<body>${body}</body>
+</html>`;
+}
+
+function renderLandingPagesSection() {
+  const drafts = loadLandingDrafts();
+  const published = drafts.filter((item) => item.status === "Published").length;
+
+  return `
+    <section class="landing-builder-page">
+      <div class="lpb-hero dashboard-card">
+        <div>
+          <div class="lpb-kicker-row">
+            <span class="lpb-kicker">SMART LANDING PAGES</span>
+            <span class="lpb-pro-pill">PRO BUILDER</span>
+          </div>
+          <h1>Build a page for one offer. Send every click somewhere focused.</h1>
+          <p>
+            Choose a professional template, add your product or service, customize the colors,
+            connect WhatsApp or lead capture, preview it and save the campaign as a reusable page.
+          </p>
+          <div class="lpb-hero-actions">
+            <button type="button" class="primary" data-lpb-open-builder="product-launch">Create landing page →</button>
+            <button type="button" class="lpb-secondary" data-lpb-view="templates">Browse 30 templates</button>
+          </div>
+        </div>
+
+        <div class="lpb-flow-card">
+          <small>CONVERSION FLOW</small>
+          <div><span>01</span><strong>Ad</strong><small>Meta · Google · TikTok</small></div>
+          <b>→</b>
+          <div><span>02</span><strong>Landing Page</strong><small>One product or service</small></div>
+          <b>→</b>
+          <div><span>03</span><strong>Lead / WhatsApp</strong><small>One clear next step</small></div>
+        </div>
+      </div>
+
+      <div class="lpb-metrics">
+        <div class="dashboard-card"><small>TEMPLATES</small><strong>30</strong><span>Product · Service · Campaign</span></div>
+        <div class="dashboard-card"><small>SAVED PAGES</small><strong>${drafts.length}</strong><span>Local workspace drafts</span></div>
+        <div class="dashboard-card"><small>PUBLISHED</small><strong>${published}</strong><span>Publishing backend next</span></div>
+        <div class="dashboard-card"><small>CONVERSION ACTIONS</small><strong>4</strong><span>Form · WhatsApp · Call · Email</span></div>
+      </div>
+
+      <div class="lpb-tabs dashboard-card">
+        <button class="is-active" type="button" data-lpb-view="templates">Template Gallery</button>
+        <button type="button" data-lpb-view="builder">Visual Builder</button>
+        <button type="button" data-lpb-view="saved">My Pages <span>${drafts.length}</span></button>
+      </div>
+
+      <div class="lpb-panel" data-lpb-panel="templates">
+        <div class="lpb-gallery-head">
+          <div>
+            <small>START FAST</small>
+            <h2>Choose a conversion-ready starting point.</h2>
+            <p>30 presets built from reusable professional layouts. Pick one, then replace the content with your own.</p>
+          </div>
+          <label class="lpb-template-filter">
+            Category
+            <select id="lpb-template-category">
+              <option value="all">All templates</option>
+              ${[...new Set(LANDING_PAGE_TEMPLATES.map((item) => item.category))]
+                .map((category) => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`)
+                .join("")}
+            </select>
+          </label>
+        </div>
+
+        <div id="lpb-template-grid" class="lpb-template-grid">
+          ${LANDING_PAGE_TEMPLATES.map((item) => `
+            <article class="lpb-template-card" data-template-category="${escapeHtml(item.category)}">
+              <div class="lpb-template-preview" style="--preview-bg:${item.bg};--preview-surface:${item.surface};--preview-accent:${item.accent}">
+                <div class="lpb-template-mini-nav"><i></i><span></span></div>
+                <div class="lpb-template-mini-body">
+                  <div>
+                    <small>${escapeHtml(item.badge)}</small>
+                    <b></b><b class="short"></b><p></p>
+                    <button></button>
+                  </div>
+                  <aside></aside>
+                </div>
+                <div class="lpb-template-mini-row"><span></span><span></span><span></span></div>
+              </div>
+              <div class="lpb-template-info">
+                <div><small>${escapeHtml(item.category)}</small><strong>${escapeHtml(item.name)}</strong></div>
+                <button type="button" data-lpb-open-builder="${item.id}">Use template →</button>
+              </div>
+            </article>
+          `).join("")}
+        </div>
+      </div>
+
+      <div class="lpb-panel" data-lpb-panel="builder" hidden>
+        <div class="lpb-builder-shell">
+          <aside class="lpb-editor dashboard-card">
+            <div class="lpb-editor-head">
+              <div><small>VISUAL BUILDER</small><h2>Build the offer page.</h2></div>
+              <span id="lpb-save-state">Draft</span>
+            </div>
+
+            <div class="lpb-editor-section">
+              <small>PAGE</small>
+              <label>Page name<input id="lpb-name" placeholder="Summer Spa Offer" /></label>
+              <div class="lpb-two">
+                <label>Type
+                  <select id="lpb-page-type"><option>Product</option><option>Service</option><option>Offer</option><option>Lead Generation</option><option>Booking</option><option>Event</option></select>
+                </label>
+                <label>Direction
+                  <select id="lpb-direction"><option value="ltr">LTR</option><option value="rtl">RTL · Arabic</option></select>
+                </label>
+              </div>
+            </div>
+
+            <div class="lpb-editor-section">
+              <small>MAIN CONTENT</small>
+              <label>Badge<input id="lpb-badge" placeholder="LIMITED OFFER" /></label>
+              <label>Headline<textarea id="lpb-headline" rows="3"></textarea></label>
+              <label>Subheadline<textarea id="lpb-subheadline" rows="3"></textarea></label>
+              <label>Description<textarea id="lpb-description" rows="4"></textarea></label>
+              <label>Benefits <span>One per line</span><textarea id="lpb-benefits" rows="4"></textarea></label>
+            </div>
+
+            <div class="lpb-editor-section">
+              <small>PRICE & OFFER</small>
+              <div class="lpb-two">
+                <label>Price<input id="lpb-price" inputmode="decimal" placeholder="79" /></label>
+                <label>Old price<input id="lpb-old-price" inputmode="decimal" placeholder="99" /></label>
+              </div>
+              <div class="lpb-two">
+                <label>Currency
+                  <select id="lpb-currency">
+                    ${LANDING_CURRENCIES.map(([code,symbol,name]) => `<option value="${code}">${code} · ${symbol} · ${name}</option>`).join("")}
+                  </select>
+                </label>
+                <label>Price display
+                  <select id="lpb-price-mode"><option value="show">Show price</option><option value="quote">Contact for price</option><option value="hide">Hide price</option></select>
+                </label>
+              </div>
+            </div>
+
+            <div class="lpb-editor-section">
+              <small>CONVERSION</small>
+              <div class="lpb-two">
+                <label>CTA text<input id="lpb-cta-text" placeholder="Get a quote" /></label>
+                <label>CTA action
+                  <select id="lpb-cta-action"><option value="form">Lead form</option><option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="email">Email</option></select>
+                </label>
+              </div>
+              <label>WhatsApp number<input id="lpb-whatsapp" placeholder="+212..." /></label>
+              <div class="lpb-two">
+                <label>Phone<input id="lpb-phone" placeholder="+1..." /></label>
+                <label>Email<input id="lpb-email" type="email" placeholder="sales@company.com" /></label>
+              </div>
+            </div>
+
+            <div class="lpb-editor-section">
+              <small>MEDIA</small>
+              <label>Image URL<input id="lpb-image-url" type="url" placeholder="https://..." /></label>
+              <label>Video URL<input id="lpb-video-url" type="url" placeholder="YouTube / Vimeo / hosted video URL" /></label>
+              <label class="lpb-upload-label">Or preview a local image
+                <input id="lpb-image-file" type="file" accept="image/*" />
+              </label>
+            </div>
+
+            <div class="lpb-editor-section">
+              <small>COLORS</small>
+              <div class="lpb-color-grid">
+                <label>Accent<input id="lpb-accent" type="color" /></label>
+                <label>Background<input id="lpb-background" type="color" /></label>
+                <label>Surface<input id="lpb-surface" type="color" /></label>
+                <label>Text<input id="lpb-text-color" type="color" /></label>
+              </div>
+              <div class="lpb-palette-row">
+                <button type="button" data-lpb-palette="#7c5cff|#090b12|#111522|#f7f8fb">Violet</button>
+                <button type="button" data-lpb-palette="#d7b46a|#0a0a0a|#151310|#f8f4ea">Luxury</button>
+                <button type="button" data-lpb-palette="#45d483|#07110c|#0e1b14|#f5fff9">Green</button>
+                <button type="button" data-lpb-palette="#59b7ff|#071019|#0d1924|#f2f8ff">Blue</button>
+                <button type="button" data-lpb-palette="#ff8bb6|#130d12|#1d1219|#fff4f8">Rose</button>
+              </div>
+            </div>
+
+            <div class="lpb-editor-section">
+              <small>TRUST & FAQ</small>
+              <label>Testimonial<textarea id="lpb-testimonial" rows="3"></textarea></label>
+              <label>FAQ question<input id="lpb-faq-q" /></label>
+              <label>FAQ answer<textarea id="lpb-faq-a" rows="3"></textarea></label>
+            </div>
+
+            <div class="lpb-editor-actions">
+              <button id="lpb-save-draft" class="primary" type="button">Save draft</button>
+              <button id="lpb-export-html" type="button">Export HTML</button>
+              <button id="lpb-publish" type="button">Publish</button>
+            </div>
+            <p class="lpb-publish-note">Drafts and HTML export work now. Public YOUYOU links + analytics will be connected to the publishing backend after the builder is approved.</p>
+          </aside>
+
+          <div class="lpb-preview-column">
+            <div class="lpb-preview-toolbar dashboard-card">
+              <div>
+                <small>LIVE PREVIEW</small>
+                <strong id="lpb-preview-name">Landing page</strong>
+              </div>
+              <div class="lpb-device-toggle">
+                <button class="is-active" type="button" data-lpb-device="desktop">Desktop</button>
+                <button type="button" data-lpb-device="mobile">Mobile</button>
+              </div>
+            </div>
+            <div id="lpb-preview-frame" class="lpb-preview-frame dashboard-card">
+              <div id="lpb-live-preview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lpb-panel" data-lpb-panel="saved" hidden>
+        <div class="lpb-saved-head">
+          <div><small>MY PAGES</small><h2>Saved landing page projects.</h2><p>Edit, duplicate or export pages without starting from zero.</p></div>
+          <button class="primary" type="button" data-lpb-open-builder="product-launch">Create new →</button>
+        </div>
+        <div id="lpb-saved-grid" class="lpb-saved-grid"></div>
+      </div>
+    </section>
+  `;
+}
+
+function initLandingPages() {
+  const root = document.querySelector(".landing-builder-page");
+  if (!root) return;
+
+  let current = defaultLandingPageData("product-launch");
+
+  const fieldMap = {
+    name:"lpb-name", pageType:"lpb-page-type", direction:"lpb-direction",
+    badge:"lpb-badge", headline:"lpb-headline", subheadline:"lpb-subheadline",
+    description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
+    oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
+    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", whatsapp:"lpb-whatsapp",
+    phone:"lpb-phone", email:"lpb-email", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
+    accent:"lpb-accent", background:"lpb-background", surface:"lpb-surface",
+    textColor:"lpb-text-color", testimonial:"lpb-testimonial",
+    faqQuestion:"lpb-faq-q", faqAnswer:"lpb-faq-a",
+  };
+
+  const setView = (view) => {
+    root.querySelectorAll("[data-lpb-view]").forEach((button) => {
+      button.classList.toggle("is-active", button.dataset.lpbView === view);
+    });
+    root.querySelectorAll("[data-lpb-panel]").forEach((panel) => {
+      panel.hidden = panel.dataset.lpbPanel !== view;
+    });
+    if (view === "saved") renderSaved();
+    if (view === "builder") requestAnimationFrame(renderPreview);
+  };
+
+  const hydrateFields = () => {
+    Object.entries(fieldMap).forEach(([key,id]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = current[key] ?? "";
+    });
+    const saveState = document.querySelector("#lpb-save-state");
+    if (saveState) saveState.textContent = current.status || "Draft";
+  };
+
+  const readFields = () => {
+    Object.entries(fieldMap).forEach(([key,id]) => {
+      const el = document.getElementById(id);
+      if (el) current[key] = el.value;
+    });
+  };
+
+  const renderPreview = () => {
+    readFields();
+    const preview = document.querySelector("#lpb-live-preview");
+    const name = document.querySelector("#lpb-preview-name");
+    if (preview) preview.innerHTML = landingPreviewMarkup(current);
+    if (name) name.textContent = current.name || "Untitled landing page";
+  };
+
+  const openTemplate = (templateId) => {
+    current = defaultLandingPageData(templateId);
+    hydrateFields();
+    setView("builder");
+    renderPreview();
+    root.querySelector(".lpb-tabs")?.scrollIntoView({ behavior:"smooth", block:"start" });
+  };
+
+  const renderSaved = () => {
+    const container = document.querySelector("#lpb-saved-grid");
+    if (!container) return;
+    const drafts = loadLandingDrafts();
+
+    if (!drafts.length) {
+      container.innerHTML = `
+        <div class="lpb-empty dashboard-card">
+          <span>▣</span><strong>No saved landing pages yet.</strong>
+          <p>Choose one of the 30 templates, customize it, then save the draft here.</p>
+          <button class="primary" type="button" data-lpb-open-builder="product-launch">Create first page →</button>
+        </div>`;
+      container.querySelector("[data-lpb-open-builder]")?.addEventListener("click", (event) => openTemplate(event.currentTarget.dataset.lpbOpenBuilder));
+      return;
+    }
+
+    container.innerHTML = drafts.map((item) => `
+      <article class="lpb-saved-card dashboard-card" data-lpb-saved-id="${escapeHtml(item.id)}">
+        <div class="lpb-saved-swatch" style="--saved-bg:${escapeHtml(item.background)};--saved-accent:${escapeHtml(item.accent)}">
+          <span></span><b></b><i></i>
+        </div>
+        <div class="lpb-saved-copy">
+          <small>${escapeHtml(item.status || "Draft")} · ${escapeHtml(item.pageType || "Landing Page")}</small>
+          <strong>${escapeHtml(item.name || "Untitled page")}</strong>
+          <span>${escapeHtml(item.headline || "")}</span>
+        </div>
+        <div class="lpb-saved-actions">
+          <button type="button" data-lpb-edit="${escapeHtml(item.id)}">Edit</button>
+          <button type="button" data-lpb-duplicate="${escapeHtml(item.id)}">Duplicate</button>
+          <button type="button" data-lpb-delete="${escapeHtml(item.id)}">Delete</button>
+        </div>
+      </article>
+    `).join("");
+
+    container.querySelectorAll("[data-lpb-edit]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = loadLandingDrafts().find((entry) => entry.id === button.dataset.lpbEdit);
+        if (!item) return;
+        current = { ...item };
+        hydrateFields();
+        setView("builder");
+        renderPreview();
+      });
+    });
+
+    container.querySelectorAll("[data-lpb-duplicate]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const draftsNow = loadLandingDrafts();
+        const item = draftsNow.find((entry) => entry.id === button.dataset.lpbDuplicate);
+        if (!item) return;
+        const copy = { ...item, id:`lp_${Date.now()}`, name:`${item.name} Copy`, status:"Draft", createdAt:new Date().toISOString() };
+        saveLandingDrafts([copy, ...draftsNow]);
+        renderSaved();
+      });
+    });
+
+    container.querySelectorAll("[data-lpb-delete]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const next = loadLandingDrafts().filter((entry) => entry.id !== button.dataset.lpbDelete);
+        saveLandingDrafts(next);
+        renderSaved();
+      });
+    });
+  };
+
+  root.querySelectorAll("[data-lpb-view]").forEach((button) => {
+    button.addEventListener("click", () => setView(button.dataset.lpbView));
+  });
+
+  root.querySelectorAll("[data-lpb-open-builder]").forEach((button) => {
+    button.addEventListener("click", () => openTemplate(button.dataset.lpbOpenBuilder));
+  });
+
+  document.querySelector("#lpb-template-category")?.addEventListener("change", (event) => {
+    const value = event.currentTarget.value;
+    root.querySelectorAll(".lpb-template-card").forEach((card) => {
+      card.hidden = value !== "all" && card.dataset.templateCategory !== value;
+    });
+  });
+
+  Object.values(fieldMap).forEach((id) => {
+    const el = document.getElementById(id);
+    el?.addEventListener("input", renderPreview);
+    el?.addEventListener("change", renderPreview);
+  });
+
+  document.querySelector("#lpb-image-file")?.addEventListener("change", (event) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    if (file.size > 1_500_000) {
+      const stateEl = document.querySelector("#lpb-save-state");
+      if (stateEl) stateEl.textContent = "Image too large for local preview";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      current.imageUrl = String(reader.result || "");
+      const imageUrlInput = document.querySelector("#lpb-image-url");
+      if (imageUrlInput) imageUrlInput.value = current.imageUrl;
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  root.querySelectorAll("[data-lpb-palette]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const [accent,background,surface,textColor] = button.dataset.lpbPalette.split("|");
+      current = { ...current, accent, background, surface, textColor };
+      hydrateFields();
+      renderPreview();
+    });
+  });
+
+  root.querySelectorAll("[data-lpb-device]").forEach((button) => {
+    button.addEventListener("click", () => {
+      root.querySelectorAll("[data-lpb-device]").forEach((item) => item.classList.toggle("is-active", item === button));
+      document.querySelector("#lpb-preview-frame")?.classList.toggle("is-mobile", button.dataset.lpbDevice === "mobile");
+    });
+  });
+
+  document.querySelector("#lpb-save-draft")?.addEventListener("click", () => {
+    readFields();
+    current.status = "Draft";
+    current.updatedAt = new Date().toISOString();
+    const drafts = loadLandingDrafts();
+    const index = drafts.findIndex((item) => item.id === current.id);
+    if (index >= 0) drafts[index] = { ...current };
+    else drafts.unshift({ ...current });
+    saveLandingDrafts(drafts);
+    const stateEl = document.querySelector("#lpb-save-state");
+    if (stateEl) stateEl.textContent = "Saved";
+    setTimeout(() => { if (stateEl) stateEl.textContent = "Draft"; }, 1500);
+  });
+
+  document.querySelector("#lpb-export-html")?.addEventListener("click", () => {
+    readFields();
+    const html = landingExportHtml(current);
+    const blob = new Blob([html], { type:"text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const slug = String(current.name || "landing-page").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+    link.href = url;
+    link.download = `${slug || "landing-page"}.html`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+
+  document.querySelector("#lpb-publish")?.addEventListener("click", () => {
+    readFields();
+    const stateEl = document.querySelector("#lpb-save-state");
+    if (stateEl) stateEl.textContent = "Publishing backend pending";
+  });
+
+  hydrateFields();
+  renderPreview();
+  renderSaved();
+}
+
 
 function renderDashboard() {
   const company =
@@ -2364,6 +3049,10 @@ else if (state.section === "studio") {
   `;
 }
 
+
+else if (state.section === "pages") {
+  body = renderLandingPagesSection();
+}
 
 else if (state.section === "seo") {
   const c = state.company || {};
@@ -3772,6 +4461,10 @@ if (state.section === "ai") {
 
 if (state.section === "studio") {
   initAiStudio();
+}
+
+if (state.section === "pages") {
+  initLandingPages();
 }
 
 if (state.section === "seo") {
