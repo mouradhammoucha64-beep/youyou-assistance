@@ -1537,6 +1537,7 @@ function initSeoProTabs() {
 
   const map = {
     overview: [".seo-overview-panel"],
+    audit: [".seo-website-audit"],
     keywords: [".seo-keyword-lab"],
     onpage: [".seo-onpage-card", ".seo-opportunity-card", ".seo-search-preview"],
     content: [".seo-page-ideas-card", ".seo-brief-card"],
@@ -2170,6 +2171,7 @@ else if (state.section === "seo") {
 
       <div class="seo-pro-tabs dashboard-card" role="tablist" aria-label="SEO workspace">
         <button class="seo-pro-tab is-active" type="button" data-seo-tab="overview">Overview</button>
+        <button class="seo-pro-tab" type="button" data-seo-tab="audit">Website Audit</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="keywords">Keywords</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="onpage">On-page</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="content">Content</button>
@@ -2249,6 +2251,145 @@ else if (state.section === "seo") {
 
 
       </div>
+
+
+      <section class="seo-website-audit dashboard-card" data-seo-panel="audit" hidden>
+        <div class="seo-audit-head">
+          <div>
+            <div class="seo-audit-title-row">
+              <span class="seo-kicker">REAL WEBSITE AUDIT</span>
+              <span class="seo-live-pill">LIVE PAGE CHECK</span>
+            </div>
+            <h2>Analyze the real website, then turn problems into actions.</h2>
+            <p>
+              Enter a public website URL. YOUYOU checks the live page from the server,
+              then connects the findings to your SEO service, city and workspace strategy.
+            </p>
+          </div>
+        </div>
+
+        <div class="seo-audit-runner">
+          <label>
+            Website URL
+            <input
+              id="seo-audit-url"
+              value="${escapeHtml(c.website_url || "")}"
+              placeholder="https://example.com"
+              inputmode="url"
+            />
+          </label>
+
+          <button id="seo-run-website-audit" class="primary" type="button">
+            Run real website audit →
+          </button>
+
+          <span id="seo-audit-status" class="seo-audit-status">
+            Ready
+          </span>
+        </div>
+
+        <div id="seo-audit-empty" class="seo-audit-empty">
+          <div class="seo-audit-empty-icon">⌁</div>
+          <div>
+            <strong>Paste a public website and run the audit.</strong>
+            <p>
+              YOUYOU will check on-page SEO, crawl signals, content structure,
+              images, links, robots/sitemap basics and target-topic usage.
+            </p>
+          </div>
+        </div>
+
+        <div id="seo-audit-results" class="seo-audit-results" hidden>
+          <div class="seo-audit-overview">
+            <div class="seo-audit-score-card">
+              <div class="seo-audit-score-ring" id="seo-audit-score-ring">
+                <strong id="seo-audit-score">—</strong>
+                <span>/100</span>
+              </div>
+              <div>
+                <small>LIVE PAGE AUDIT</small>
+                <strong id="seo-audit-label">—</strong>
+                <span id="seo-audit-url-result">—</span>
+              </div>
+            </div>
+
+            <div class="seo-audit-kpis">
+              <div><small>TITLE</small><strong id="seo-audit-title-kpi">—</strong><span id="seo-audit-title-note">—</span></div>
+              <div><small>META DESCRIPTION</small><strong id="seo-audit-meta-kpi">—</strong><span id="seo-audit-meta-note">—</span></div>
+              <div><small>H1</small><strong id="seo-audit-h1-kpi">—</strong><span id="seo-audit-h1-note">—</span></div>
+              <div><small>IMAGES</small><strong id="seo-audit-images-kpi">—</strong><span id="seo-audit-images-note">—</span></div>
+            </div>
+          </div>
+
+          <div class="seo-audit-tech-grid">
+            <article>
+              <small>INDEXING</small>
+              <strong id="seo-audit-indexing">—</strong>
+              <span id="seo-audit-indexing-note">—</span>
+            </article>
+            <article>
+              <small>CANONICAL</small>
+              <strong id="seo-audit-canonical">—</strong>
+              <span id="seo-audit-canonical-note">—</span>
+            </article>
+            <article>
+              <small>ROBOTS.TXT</small>
+              <strong id="seo-audit-robots">—</strong>
+              <span id="seo-audit-robots-note">—</span>
+            </article>
+            <article>
+              <small>SITEMAP</small>
+              <strong id="seo-audit-sitemap">—</strong>
+              <span id="seo-audit-sitemap-note">—</span>
+            </article>
+            <article>
+              <small>WORDS</small>
+              <strong id="seo-audit-words">—</strong>
+              <span>Visible page text</span>
+            </article>
+            <article>
+              <small>LINKS</small>
+              <strong id="seo-audit-links">—</strong>
+              <span id="seo-audit-links-note">—</span>
+            </article>
+          </div>
+
+          <div class="seo-audit-target-check dashboard-card">
+            <div>
+              <small>WORKSPACE ↔ WEBSITE MATCH</small>
+              <h3>Does the live page clearly target your chosen service and market?</h3>
+            </div>
+            <div id="seo-audit-target-signals" class="seo-audit-target-signals"></div>
+          </div>
+
+          <div class="seo-audit-action-head">
+            <div>
+              <small>ACTION PLAN</small>
+              <h3>What to fix, where to fix it, and why.</h3>
+            </div>
+            <span id="seo-audit-issue-count">—</span>
+          </div>
+
+          <div id="seo-audit-findings" class="seo-audit-findings"></div>
+
+          <div class="seo-audit-footer-actions">
+            <button id="seo-copy-audit-plan" class="seo-secondary-btn" type="button">
+              Copy action plan
+            </button>
+            <button class="seo-secondary-btn" type="button" data-seo-go="onpage">
+              Open On-page SEO →
+            </button>
+            <button class="seo-secondary-btn" type="button" data-seo-go="content">
+              Open Content ideas →
+            </button>
+          </div>
+
+          <p class="seo-audit-disclaimer">
+            This is a live single-page audit of the URL you entered. It is not yet a full-site crawler
+            and it does not claim live Google rankings or keyword search volume.
+          </p>
+        </div>
+      </section>
 
       <div class="seo-keyword-lab dashboard-card">
         <div class="seo-card-head">
@@ -3328,6 +3469,7 @@ if (state.section === "ai") {
 
 if (state.section === "seo") {
   initSeoProTabs();
+  initSeoWebsiteAudit();
   initSeoGrowthCenter();
 }
 
@@ -4463,6 +4605,225 @@ function seoCopyText(text, successMessage) {
       }
     })
     .catch(() => {});
+}
+
+
+function seoAuditSeverityMeta(severity = "medium") {
+  const key = String(severity || "medium").toLowerCase();
+  if (key === "high") return { label: "HIGH", cls: "is-high" };
+  if (key === "low") return { label: "LOW", cls: "is-low" };
+  return { label: "MEDIUM", cls: "is-medium" };
+}
+
+function seoAuditSetText(selector, value) {
+  const el = document.querySelector(selector);
+  if (el) el.textContent = value ?? "—";
+}
+
+function seoAuditRender(result) {
+  const empty = document.querySelector("#seo-audit-empty");
+  const results = document.querySelector("#seo-audit-results");
+
+  if (empty) empty.hidden = true;
+  if (results) results.hidden = false;
+
+  seoAuditSetText("#seo-audit-score", result.score);
+  seoAuditSetText("#seo-audit-label", result.scoreLabel);
+  seoAuditSetText("#seo-audit-url-result", result.finalUrl || result.url || "—");
+
+  const ring = document.querySelector("#seo-audit-score-ring");
+  if (ring) ring.style.setProperty("--audit-score", `${Math.max(0, Math.min(100, result.score || 0)) * 3.6}deg`);
+
+  const page = result.page || {};
+  const tech = result.technical || {};
+  const links = result.links || {};
+  const target = result.target || {};
+
+  seoAuditSetText("#seo-audit-title-kpi", page.title ? `${page.titleLength}/60` : "MISSING");
+  seoAuditSetText("#seo-audit-title-note", page.title || "No <title> found");
+
+  seoAuditSetText("#seo-audit-meta-kpi", page.metaDescription ? `${page.metaDescriptionLength}/155` : "MISSING");
+  seoAuditSetText("#seo-audit-meta-note", page.metaDescription || "No meta description found");
+
+  seoAuditSetText("#seo-audit-h1-kpi", `${page.h1Count ?? 0}`);
+  seoAuditSetText("#seo-audit-h1-note", page.h1 || "No H1 found");
+
+  const missingAlt = page.imagesMissingAlt ?? 0;
+  seoAuditSetText("#seo-audit-images-kpi", `${missingAlt}/${page.imagesCount ?? 0}`);
+  seoAuditSetText("#seo-audit-images-note", missingAlt ? "images missing alt text" : "missing alt text");
+
+  seoAuditSetText("#seo-audit-indexing", tech.noindex ? "NOINDEX" : "INDEXABLE");
+  seoAuditSetText("#seo-audit-indexing-note", tech.metaRobots || "No noindex directive detected");
+
+  seoAuditSetText("#seo-audit-canonical", tech.canonical ? "FOUND" : "MISSING");
+  seoAuditSetText("#seo-audit-canonical-note", tech.canonical || "Add a canonical URL where appropriate");
+
+  seoAuditSetText("#seo-audit-robots", tech.robotsFound ? "FOUND" : "NOT FOUND");
+  seoAuditSetText("#seo-audit-robots-note", tech.robotsStatus ? `HTTP ${tech.robotsStatus}` : "Could not confirm robots.txt");
+
+  seoAuditSetText("#seo-audit-sitemap", tech.sitemapFound ? "FOUND" : "NOT FOUND");
+  seoAuditSetText("#seo-audit-sitemap-note", tech.sitemapStatus ? `HTTP ${tech.sitemapStatus}` : "Could not confirm /sitemap.xml");
+
+  seoAuditSetText("#seo-audit-words", page.wordCount ?? 0);
+  seoAuditSetText("#seo-audit-links", `${links.internal ?? 0} / ${links.external ?? 0}`);
+  seoAuditSetText("#seo-audit-links-note", "internal / external");
+
+  const targetSignals = document.querySelector("#seo-audit-target-signals");
+  if (targetSignals) {
+    const rows = [
+      ["Service in title", target.serviceInTitle],
+      ["Service in H1", target.serviceInH1],
+      ["City in title", target.city ? target.cityInTitle : null],
+      ["City in H1", target.city ? target.cityInH1 : null],
+      ["Service in page text", target.serviceInBody],
+      ["City in page text", target.city ? target.cityInBody : null],
+    ].filter(([, value]) => value !== null && value !== undefined);
+
+    targetSignals.innerHTML = rows.map(([label, ok]) => `
+      <div class="${ok ? "is-good" : "is-missing"}">
+        <span>${ok ? "✓" : "!"}</span>
+        <strong>${escapeHtml(label)}</strong>
+        <small>${ok ? "Detected" : "Needs attention"}</small>
+      </div>
+    `).join("");
+  }
+
+  const findings = document.querySelector("#seo-audit-findings");
+  const list = Array.isArray(result.findings) ? result.findings : [];
+
+  seoAuditSetText(
+    "#seo-audit-issue-count",
+    `${list.length} action${list.length === 1 ? "" : "s"}`
+  );
+
+  if (findings) {
+    findings.innerHTML = list.length
+      ? list.map((item, index) => {
+          const meta = seoAuditSeverityMeta(item.severity);
+          return `
+            <article class="seo-audit-finding ${meta.cls}">
+              <div class="seo-audit-finding-number">${String(index + 1).padStart(2, "0")}</div>
+              <div class="seo-audit-finding-body">
+                <div class="seo-audit-finding-title">
+                  <div>
+                    <small>${escapeHtml(item.category || "SEO")}</small>
+                    <h4>${escapeHtml(item.problem || "SEO improvement")}</h4>
+                  </div>
+                  <span>${meta.label}</span>
+                </div>
+
+                <div class="seo-audit-finding-grid">
+                  <div><small>WHERE</small><p>${escapeHtml(item.where || "Live page")}</p></div>
+                  <div><small>FIX</small><p>${escapeHtml(item.fix || "Review this item.")}</p></div>
+                  ${item.suggested ? `<div class="is-wide"><small>SUGGESTED TEXT / ACTION</small><p>${escapeHtml(item.suggested)}</p></div>` : ""}
+                  <div class="is-wide seo-audit-why"><small>WHY IT MATTERS</small><p>${escapeHtml(item.why || "Helps make the page clearer for visitors and search engines.")}</p></div>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("")
+      : `<div class="seo-audit-clean">No major issues were detected by this lightweight live-page audit.</div>`;
+  }
+
+  window.__youyouWebsiteAudit = result;
+}
+
+async function runSeoWebsiteAudit() {
+  const input = document.querySelector("#seo-audit-url");
+  const button = document.querySelector("#seo-run-website-audit");
+  const status = document.querySelector("#seo-audit-status");
+
+  const rawUrl = input?.value.trim() || state.company?.website_url || "";
+  if (!rawUrl) {
+    if (status) {
+      status.textContent = "Add a website URL first";
+      status.className = "seo-audit-status is-error";
+    }
+    input?.focus();
+    return;
+  }
+
+  const service = document.querySelector("#seo-target-service")?.value.trim() || state.company?.industry || "";
+  const city = document.querySelector("#seo-target-city")?.value.trim() || state.company?.city || "";
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Auditing live page...";
+  }
+  if (status) {
+    status.textContent = "Fetching the live website securely...";
+    status.className = "seo-audit-status is-loading";
+  }
+
+  try {
+    const response = await fetch("/api/seo-audit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url: rawUrl,
+        service,
+        city,
+        companyName: state.company?.name || "",
+      }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(payload.error || "Website audit failed.");
+    }
+
+    seoAuditRender(payload);
+
+    if (status) {
+      status.textContent = `Live audit complete · ${payload.findings?.length || 0} actions found`;
+      status.className = "seo-audit-status is-success";
+    }
+  } catch (error) {
+    console.error("SEO website audit error:", error);
+    if (status) {
+      status.textContent = error?.message || "Could not audit this website.";
+      status.className = "seo-audit-status is-error";
+    }
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Run real website audit →";
+    }
+  }
+}
+
+function initSeoWebsiteAudit() {
+  const runButton = document.querySelector("#seo-run-website-audit");
+  runButton?.addEventListener("click", runSeoWebsiteAudit);
+
+  document.querySelector("#seo-audit-url")?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      runSeoWebsiteAudit();
+    }
+  });
+
+  document.querySelector("#seo-copy-audit-plan")?.addEventListener("click", () => {
+    const result = window.__youyouWebsiteAudit;
+    if (!result) return;
+
+    const lines = [
+      `YOUYOU Website Audit — ${result.finalUrl || result.url || ""}`,
+      `Score: ${result.score}/100 — ${result.scoreLabel}`,
+      "",
+      ...(result.findings || []).flatMap((item, index) => [
+        `${index + 1}. ${item.problem}`,
+        `Where: ${item.where}`,
+        `Fix: ${item.fix}`,
+        item.suggested ? `Suggested: ${item.suggested}` : "",
+        `Why: ${item.why}`,
+        "",
+      ]).filter(Boolean),
+    ];
+
+    seoCopyText(lines.join("\n"), "Website audit action plan copied");
+  });
 }
 
 function initSeoGrowthCenter() {

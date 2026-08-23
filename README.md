@@ -408,3 +408,32 @@ Mobile intentionally untouched.
 - Desktop only; mobile remains untouched
 
 No SQL required.
+
+
+## V4.14 — Real Website Audit
+
+Adds a real server-side public website audit inside SEO Growth Center.
+
+Website Audit now:
+- Accepts a public website URL
+- Fetches the live page through a Vercel serverless endpoint (avoids browser CORS)
+- Checks title, meta description, H1/H2, visible words, images/alt text, links, canonical, robots meta, viewport and language
+- Checks basic robots.txt and /sitemap.xml presence
+- Compares the live page against YOUYOU's target service + city
+- Produces a score and action-first findings:
+  Problem → Where → Fix → Suggested text/action → Why it matters
+- Copyable audit action plan
+- Links back into On-page and Content SEO work
+
+Security:
+- Only http/https public sites
+- Blocks localhost/private IP targets
+- Validates redirects
+- Uses request timeout and body-size limits
+
+Scope:
+- Live single-page audit for the entered URL
+- Not yet a full-site crawler
+- No fake Google rankings, traffic, volume or difficulty data
+
+No SQL migration required.
