@@ -461,3 +461,11 @@ Review outcome before implementation:
 - Project persistence, image generation, voice generation and final video rendering come after the UI/workflow is approved.
 
 No SQL required for this UI review build.
+
+
+## V4.16.3 — AI Studio Full Project Route Fix
+- Fixed the real root cause found in the full uploaded project: `studio` was rendered and initialized, but missing from `DASHBOARD_ROUTES`.
+- Added `/dashboard/ai-studio`.
+- Sidebar click now resolves to the AI Studio section instead of falling back to Overview.
+- Direct browser navigation to `/dashboard/ai-studio` is supported by the existing Vercel dashboard rewrite.
+- No SQL changes.

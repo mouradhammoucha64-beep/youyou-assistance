@@ -36,6 +36,7 @@ const DASHBOARD_ROUTES = {
   knowledge: "/dashboard/knowledge",
   widget: "/dashboard/widget",
   ai: "/dashboard/ai-control",
+  studio: "/dashboard/ai-studio",
   seo: "/dashboard/seo-growth",
   rescue: "/dashboard/revenue-rescue",
   whatsapp: "/dashboard/whatsapp-ai",
