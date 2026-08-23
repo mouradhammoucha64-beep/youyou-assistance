@@ -46,6 +46,13 @@ const DASHBOARD_ROUTES = {
 };
 
 function sectionFromPath(pathname = window.location.pathname) {
+  if (
+    pathname === "/dashboard/landing-pages/new" ||
+    /^\/dashboard\/landing-pages\/edit\/[^/]+$/.test(pathname)
+  ) {
+    return "pages-builder";
+  }
+
   const match = Object.entries(DASHBOARD_ROUTES)
     .find(([, path]) => path === pathname);
 
@@ -1740,6 +1747,30 @@ function landingTemplateById(id) {
   return LANDING_PAGE_TEMPLATES.find((item) => item.id === id) || LANDING_PAGE_TEMPLATES[0];
 }
 
+function landingBuilderRoute({ templateId = "product-launch", pageId = "" } = {}) {
+  if (pageId) return `/dashboard/landing-pages/edit/${encodeURIComponent(pageId)}`;
+  return `/dashboard/landing-pages/new?template=${encodeURIComponent(templateId)}`;
+}
+
+function openLandingBuilder({ templateId = "product-launch", pageId = "" } = {}) {
+  const nextPath = landingBuilderRoute({ templateId, pageId });
+  state.section = "pages-builder";
+  window.history.pushState({ section: "pages-builder", pageId, templateId }, "", nextPath);
+  renderDashboard();
+}
+
+function landingBuilderRequest() {
+  const pathname = window.location.pathname;
+  const editMatch = pathname.match(/^\/dashboard\/landing-pages\/edit\/([^/]+)$/);
+  const params = new URLSearchParams(window.location.search);
+
+  return {
+    mode: editMatch ? "edit" : "new",
+    pageId: editMatch ? decodeURIComponent(editMatch[1]) : "",
+    templateId: params.get("template") || "product-launch",
+  };
+}
+
 function landingDraftKey() {
   return `youyou-landing-pages:${state.company?.id || state.user?.id || "workspace"}`;
 }
@@ -1966,8 +1997,8 @@ function renderLandingPagesSection() {
 
       <div class="lpb-tabs dashboard-card">
         <button class="is-active" type="button" data-lpb-view="templates">Template Gallery</button>
-        <button type="button" data-lpb-view="builder">Visual Builder</button>
         <button type="button" data-lpb-view="saved">My Pages <span>${drafts.length}</span></button>
+        <span class="lpb-workspace-note">Builder opens in a dedicated workspace ↗</span>
       </div>
 
       <div class="lpb-panel" data-lpb-panel="templates">
@@ -2145,6 +2176,312 @@ function renderLandingPagesSection() {
   `;
 }
 
+
+function renderLandingPageWorkspace() {
+  const request = landingBuilderRequest();
+  const drafts = loadLandingDrafts();
+  const saved = request.mode === "edit"
+    ? drafts.find((item) => item.id === request.pageId)
+    : null;
+
+  const current = saved
+    ? { ...saved }
+    : defaultLandingPageData(request.templateId);
+
+  window.__youyouLandingWorkspaceDraft = current;
+
+  app.innerHTML = `
+    <div class="lpw-shell">
+      <header class="lpw-topbar">
+        <div class="lpw-brand-area">
+          <button id="lpw-back" type="button" class="lpw-back">← Landing Pages</button>
+          <span class="lpw-divider"></span>
+          <span class="brand-wordmark lpw-wordmark" aria-label="YOUYOU">
+            <span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span>
+          </span>
+          <div class="lpw-document">
+            <small>LANDING PAGE WORKSPACE</small>
+            <strong id="lpw-document-name">${escapeHtml(current.name || "Untitled page")}</strong>
+          </div>
+        </div>
+
+        <div class="lpw-top-actions">
+          <span id="lpw-save-state" class="lpw-status">${request.mode === "edit" ? "Saved draft" : "New draft"}</span>
+          <button id="lpw-export-top" type="button">Export HTML</button>
+          <button id="lpw-save-top" class="primary" type="button">Save</button>
+        </div>
+      </header>
+
+      <main class="lpw-main">
+        <aside class="lpw-editor">
+          <div class="lpw-editor-intro">
+            <div>
+              <small>VISUAL BUILDER</small>
+              <h1>Build the page your ad deserves.</h1>
+              <p>Change the content, offer, colors and conversion action. Your preview updates as you work.</p>
+            </div>
+          </div>
+
+          <div class="lpb-editor-section">
+            <small>PAGE</small>
+            <label>Page name<input id="lpb-name" placeholder="Summer Spa Offer" /></label>
+            <div class="lpb-two">
+              <label>Type
+                <select id="lpb-page-type"><option>Product</option><option>Service</option><option>Offer</option><option>Lead Generation</option><option>Booking</option><option>Event</option></select>
+              </label>
+              <label>Direction
+                <select id="lpb-direction"><option value="ltr">LTR</option><option value="rtl">RTL · Arabic</option></select>
+              </label>
+            </div>
+          </div>
+
+          <div class="lpb-editor-section">
+            <small>MAIN CONTENT</small>
+            <label>Badge<input id="lpb-badge" placeholder="LIMITED OFFER" /></label>
+            <label>Headline<textarea id="lpb-headline" rows="3"></textarea></label>
+            <label>Subheadline<textarea id="lpb-subheadline" rows="3"></textarea></label>
+            <label>Description<textarea id="lpb-description" rows="4"></textarea></label>
+            <label>Benefits <span>One per line</span><textarea id="lpb-benefits" rows="4"></textarea></label>
+          </div>
+
+          <div class="lpb-editor-section">
+            <small>PRICE & OFFER</small>
+            <div class="lpb-two">
+              <label>Price<input id="lpb-price" inputmode="decimal" placeholder="79" /></label>
+              <label>Old price<input id="lpb-old-price" inputmode="decimal" placeholder="99" /></label>
+            </div>
+            <div class="lpb-two">
+              <label>Currency
+                <select id="lpb-currency">
+                  ${LANDING_CURRENCIES.map(([code,symbol,name]) => `<option value="${code}">${code} · ${symbol} · ${name}</option>`).join("")}
+                </select>
+              </label>
+              <label>Price display
+                <select id="lpb-price-mode"><option value="show">Show price</option><option value="quote">Contact for price</option><option value="hide">Hide price</option></select>
+              </label>
+            </div>
+          </div>
+
+          <div class="lpb-editor-section">
+            <small>CONVERSION</small>
+            <div class="lpb-two">
+              <label>CTA text<input id="lpb-cta-text" placeholder="Get a quote" /></label>
+              <label>CTA action
+                <select id="lpb-cta-action"><option value="form">Lead form</option><option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="email">Email</option></select>
+              </label>
+            </div>
+            <label>WhatsApp number<input id="lpb-whatsapp" placeholder="+212..." /></label>
+            <div class="lpb-two">
+              <label>Phone<input id="lpb-phone" placeholder="+1..." /></label>
+              <label>Email<input id="lpb-email" type="email" placeholder="sales@company.com" /></label>
+            </div>
+          </div>
+
+          <div class="lpb-editor-section">
+            <small>MEDIA</small>
+            <label>Image URL<input id="lpb-image-url" type="url" placeholder="https://..." /></label>
+            <label>Video URL<input id="lpb-video-url" type="url" placeholder="YouTube / Vimeo / hosted video URL" /></label>
+            <label class="lpb-upload-label">Or preview a local image
+              <input id="lpb-image-file" type="file" accept="image/*" />
+            </label>
+          </div>
+
+          <div class="lpb-editor-section">
+            <small>COLORS</small>
+            <div class="lpb-color-grid">
+              <label>Accent<input id="lpb-accent" type="color" /></label>
+              <label>Background<input id="lpb-background" type="color" /></label>
+              <label>Surface<input id="lpb-surface" type="color" /></label>
+              <label>Text<input id="lpb-text-color" type="color" /></label>
+            </div>
+            <div class="lpb-palette-row">
+              <button type="button" data-lpb-palette="#7c5cff|#090b12|#111522|#f7f8fb">Violet</button>
+              <button type="button" data-lpb-palette="#d7b46a|#f6f0e4|#fffaf0|#251f18">Cream</button>
+              <button type="button" data-lpb-palette="#45a775|#f4fbf7|#ffffff|#14231b">Fresh</button>
+              <button type="button" data-lpb-palette="#478edb|#f3f7fc|#ffffff|#17202c">Blue</button>
+              <button type="button" data-lpb-palette="#de7aa5|#fff5f8|#ffffff|#2a1821">Rose</button>
+              <button type="button" data-lpb-palette="#d7b46a|#0a0a0a|#151310|#f8f4ea">Dark luxury</button>
+            </div>
+          </div>
+
+          <div class="lpb-editor-section">
+            <small>TRUST & FAQ</small>
+            <label>Testimonial<textarea id="lpb-testimonial" rows="3"></textarea></label>
+            <label>FAQ question<input id="lpb-faq-q" /></label>
+            <label>FAQ answer<textarea id="lpb-faq-a" rows="3"></textarea></label>
+          </div>
+
+          <div class="lpw-editor-footer">
+            <button id="lpw-save-bottom" class="primary" type="button">Save draft</button>
+            <button id="lpw-export-bottom" type="button">Export HTML</button>
+          </div>
+        </aside>
+
+        <section class="lpw-canvas">
+          <div class="lpw-canvas-toolbar">
+            <div>
+              <small>LIVE CANVAS</small>
+              <strong>See every change immediately</strong>
+            </div>
+
+            <div class="lpw-canvas-tools">
+              <div class="lpb-device-toggle">
+                <button class="is-active" type="button" data-lpb-device="desktop">Desktop</button>
+                <button type="button" data-lpb-device="mobile">Mobile</button>
+              </div>
+              <span class="lpw-preview-badge">LIVE PREVIEW</span>
+            </div>
+          </div>
+
+          <div id="lpb-preview-frame" class="lpw-preview-stage">
+            <div id="lpb-live-preview"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+  `;
+}
+
+function initLandingPageWorkspace() {
+  const request = landingBuilderRequest();
+  const storedDrafts = loadLandingDrafts();
+  let current = request.mode === "edit"
+    ? { ...(storedDrafts.find((item) => item.id === request.pageId) || defaultLandingPageData("product-launch")) }
+    : { ...(window.__youyouLandingWorkspaceDraft || defaultLandingPageData(request.templateId)) };
+
+  const fieldMap = {
+    name:"lpb-name", pageType:"lpb-page-type", direction:"lpb-direction",
+    badge:"lpb-badge", headline:"lpb-headline", subheadline:"lpb-subheadline",
+    description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
+    oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
+    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", whatsapp:"lpb-whatsapp",
+    phone:"lpb-phone", email:"lpb-email", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
+    accent:"lpb-accent", background:"lpb-background", surface:"lpb-surface",
+    textColor:"lpb-text-color", testimonial:"lpb-testimonial",
+    faqQuestion:"lpb-faq-q", faqAnswer:"lpb-faq-a",
+  };
+
+  const hydrateFields = () => {
+    Object.entries(fieldMap).forEach(([key,id]) => {
+      const el = document.getElementById(id);
+      if (el) el.value = current[key] ?? "";
+    });
+  };
+
+  const readFields = () => {
+    Object.entries(fieldMap).forEach(([key,id]) => {
+      const el = document.getElementById(id);
+      if (el) current[key] = el.value;
+    });
+  };
+
+  const renderPreview = () => {
+    readFields();
+    const preview = document.querySelector("#lpb-live-preview");
+    const name = document.querySelector("#lpw-document-name");
+    if (preview) preview.innerHTML = landingPreviewMarkup(current);
+    if (name) name.textContent = current.name || "Untitled page";
+  };
+
+  const saveDraft = () => {
+    readFields();
+    current.status = "Draft";
+    current.updatedAt = new Date().toISOString();
+
+    const drafts = loadLandingDrafts();
+    const index = drafts.findIndex((item) => item.id === current.id);
+    if (index >= 0) drafts[index] = { ...current };
+    else drafts.unshift({ ...current });
+    saveLandingDrafts(drafts);
+
+    const nextPath = landingBuilderRoute({ pageId: current.id });
+    if (window.location.pathname !== nextPath) {
+      window.history.replaceState({ section:"pages-builder", pageId:current.id }, "", nextPath);
+    }
+
+    const stateEl = document.querySelector("#lpw-save-state");
+    if (stateEl) {
+      stateEl.textContent = "Saved";
+      stateEl.classList.add("is-saved");
+      setTimeout(() => {
+        stateEl.textContent = "Saved draft";
+        stateEl.classList.remove("is-saved");
+      }, 1400);
+    }
+  };
+
+  const exportHtml = () => {
+    readFields();
+    const html = landingExportHtml(current);
+    const blob = new Blob([html], { type:"text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const slug = String(current.name || "landing-page")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g,"-")
+      .replace(/^-|-$/g,"");
+
+    link.href = url;
+    link.download = `${slug || "landing-page"}.html`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  hydrateFields();
+  renderPreview();
+
+  Object.values(fieldMap).forEach((id) => {
+    const el = document.getElementById(id);
+    el?.addEventListener("input", renderPreview);
+    el?.addEventListener("change", renderPreview);
+  });
+
+  document.querySelector("#lpb-image-file")?.addEventListener("change", (event) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+
+    if (file.size > 1_500_000) {
+      const status = document.querySelector("#lpw-save-state");
+      if (status) status.textContent = "Image too large for local preview";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      current.imageUrl = String(reader.result || "");
+      const imageUrlInput = document.querySelector("#lpb-image-url");
+      if (imageUrlInput) imageUrlInput.value = current.imageUrl;
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.querySelectorAll("[data-lpb-palette]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const [accent,background,surface,textColor] = button.dataset.lpbPalette.split("|");
+      current = { ...current, accent, background, surface, textColor };
+      hydrateFields();
+      renderPreview();
+    });
+  });
+
+  document.querySelectorAll("[data-lpb-device]").forEach((button) => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-lpb-device]").forEach((item) => item.classList.toggle("is-active", item === button));
+      document.querySelector("#lpb-preview-frame")?.classList.toggle("is-mobile", button.dataset.lpbDevice === "mobile");
+    });
+  });
+
+  document.querySelector("#lpw-back")?.addEventListener("click", () => navigateDashboard("pages"));
+  document.querySelector("#lpw-save-top")?.addEventListener("click", saveDraft);
+  document.querySelector("#lpw-save-bottom")?.addEventListener("click", saveDraft);
+  document.querySelector("#lpw-export-top")?.addEventListener("click", exportHtml);
+  document.querySelector("#lpw-export-bottom")?.addEventListener("click", exportHtml);
+}
+
+
 function initLandingPages() {
   const root = document.querySelector(".landing-builder-page");
   if (!root) return;
@@ -2199,11 +2536,7 @@ function initLandingPages() {
   };
 
   const openTemplate = (templateId) => {
-    current = defaultLandingPageData(templateId);
-    hydrateFields();
-    setView("builder");
-    renderPreview();
-    root.querySelector(".lpb-tabs")?.scrollIntoView({ behavior:"smooth", block:"start" });
+    openLandingBuilder({ templateId });
   };
 
   const renderSaved = () => {
@@ -2244,10 +2577,7 @@ function initLandingPages() {
       button.addEventListener("click", () => {
         const item = loadLandingDrafts().find((entry) => entry.id === button.dataset.lpbEdit);
         if (!item) return;
-        current = { ...item };
-        hydrateFields();
-        setView("builder");
-        renderPreview();
+        openLandingBuilder({ pageId: item.id });
       });
     });
 
@@ -2368,6 +2698,12 @@ function initLandingPages() {
 
 
 function renderDashboard() {
+  if (state.section === "pages-builder") {
+    renderLandingPageWorkspace();
+    initLandingPageWorkspace();
+    return;
+  }
+
   const company =
     state.company?.name || "Your workspace";
 

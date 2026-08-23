@@ -500,3 +500,25 @@ Deliberately not faked:
 - Visits / leads / WhatsApp-click analytics
 
 Those require the publishing database/backend and should be connected only after the builder UX is approved.
+
+
+## V4.18 — Dedicated Landing Page Workspace
+
+Landing Page creation/editing now opens in its own full-width workspace.
+
+Routes:
+- `/dashboard/landing-pages/new?template=<template-id>`
+- `/dashboard/landing-pages/edit/<page-id>`
+
+Changes:
+- Create New opens a dedicated builder URL
+- Selecting any of the 30 templates opens the dedicated builder URL
+- Editing a saved page opens its own edit URL
+- Builder no longer depends on the narrow dashboard content area
+- Full-width live canvas remains visible while editing
+- Sticky top bar with Back, Save and Export HTML
+- Desktop / Mobile live preview
+- Save converts a new workspace URL to a stable edit URL
+- Existing draft storage, currencies, WhatsApp actions, templates and HTML export retained
+- Added several light color palettes in the workspace preview controls
+- SEO and AI Studio logic were not modified
