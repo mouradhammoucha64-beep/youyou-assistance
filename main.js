@@ -2132,12 +2132,22 @@ else if (state.section === "seo") {
       </div>
 
 
-      <div class="seo-input-strip dashboard-card">
+      <div class="seo-input-strip seo-audit-config dashboard-card">
         <div class="seo-input-strip-copy">
-          <small>FOCUS MARKET</small>
-          <strong>Shape the recommendations around one service and location.</strong>
-          <span>No keyword-volume or ranking data is invented.</span>
+          <small>SEO CONFIGURATION</small>
+          <strong>Connect the real website, then build the SEO plan around it.</strong>
+          <span>Website Audit checks the live page. Strategy uses your service, city and workspace knowledge.</span>
         </div>
+
+        <label class="seo-config-url">
+          Website URL
+          <input
+            id="seo-focus-url"
+            value="${escapeHtml(c.website_url || "")}"
+            placeholder="https://yourwebsite.com"
+            inputmode="url"
+          />
+        </label>
 
         <label>
           Target service
@@ -2157,9 +2167,14 @@ else if (state.section === "seo") {
           />
         </label>
 
-        <button id="seo-update-focus" class="seo-secondary-btn" type="button">
-          Refresh ideas
-        </button>
+        <div class="seo-config-actions">
+          <button id="seo-run-focus-audit" class="primary seo-run-audit-main" type="button">
+            Run Website Audit →
+          </button>
+          <button id="seo-update-focus" class="seo-secondary-btn" type="button">
+            Refresh strategy
+          </button>
+        </div>
       </div>
 
 
@@ -2171,7 +2186,7 @@ else if (state.section === "seo") {
 
       <div class="seo-pro-tabs dashboard-card" role="tablist" aria-label="SEO workspace">
         <button class="seo-pro-tab is-active" type="button" data-seo-tab="overview">Overview</button>
-        <button class="seo-pro-tab" type="button" data-seo-tab="audit">Website Audit</button>
+        <button class="seo-pro-tab" type="button" data-seo-tab="audit">Website Audit <span class="seo-tab-live">LIVE</span></button>
         <button class="seo-pro-tab" type="button" data-seo-tab="keywords">Keywords</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="onpage">On-page</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="content">Content</button>
@@ -2266,6 +2281,11 @@ else if (state.section === "seo") {
               then connects the findings to your SEO service, city and workspace strategy.
             </p>
           </div>
+        </div>
+
+        <div class="seo-audit-source-note">
+          <span>1</span>
+          <p>Use the website URL above or paste another public page here. YOUYOU audits the real live page — not a demo score.</p>
         </div>
 
         <div class="seo-audit-runner">
@@ -4795,7 +4815,38 @@ async function runSeoWebsiteAudit() {
 
 function initSeoWebsiteAudit() {
   const runButton = document.querySelector("#seo-run-website-audit");
+  const focusUrl = document.querySelector("#seo-focus-url");
+  const auditUrl = document.querySelector("#seo-audit-url");
+  const focusAuditButton = document.querySelector("#seo-run-focus-audit");
+
+  const syncFocusToAudit = () => {
+    if (focusUrl && auditUrl && focusUrl.value.trim()) {
+      auditUrl.value = focusUrl.value.trim();
+    }
+  };
+
+  focusUrl?.addEventListener("input", syncFocusToAudit);
+
+  focusAuditButton?.addEventListener("click", () => {
+    syncFocusToAudit();
+
+    const auditTab = document.querySelector('[data-seo-tab="audit"]');
+    auditTab?.click();
+
+    window.requestAnimationFrame(() => {
+      document.querySelector(".seo-website-audit")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      runSeoWebsiteAudit();
+    });
+  });
+
   runButton?.addEventListener("click", runSeoWebsiteAudit);
+
+  auditUrl?.addEventListener("input", () => {
+    if (focusUrl && auditUrl.value.trim()) focusUrl.value = auditUrl.value.trim();
+  });
 
   document.querySelector("#seo-audit-url")?.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {

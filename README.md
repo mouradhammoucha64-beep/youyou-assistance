@@ -437,3 +437,14 @@ Scope:
 - No fake Google rankings, traffic, volume or difficulty data
 
 No SQL migration required.
+
+
+## V4.15 — SEO FINAL PRO
+- Website URL is now visible directly in the main SEO Configuration row
+- Main Run Website Audit button is visible immediately
+- One click opens Website Audit and runs the real live-page audit
+- Website Audit tab is marked LIVE
+- Main URL and Audit URL stay synchronized
+- Existing real server-side /api/seo-audit integration retained
+- Existing PRO SEO strategy and tabs retained
+- No SQL required
