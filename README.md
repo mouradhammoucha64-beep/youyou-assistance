@@ -461,14 +461,3 @@ Review outcome before implementation:
 - Project persistence, image generation, voice generation and final video rendering come after the UI/workflow is approved.
 
 No SQL required for this UI review build.
-
-
-## V4.16.1 — SEO 100% Zoom Desktop Fix
-- Fixes SEO horizontal clipping seen at normal 100% browser zoom
-- SEO Configuration becomes responsive instead of forcing a 5-column minimum width
-- Audit action buttons move to their own row on normal desktop widths
-- At compact desktop widths, configuration becomes a clean two-column layout
-- Hero score panel and tabs no longer force page overflow
-- 80% zoom is no longer required
-- AI Studio functionality unchanged
-- Mobile logic intentionally untouched
