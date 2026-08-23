@@ -1536,6 +1536,7 @@ function initSeoProTabs() {
   if (!root) return;
 
   const map = {
+    overview: [".seo-overview-panel"],
     keywords: [".seo-keyword-lab"],
     onpage: [".seo-onpage-card", ".seo-opportunity-card", ".seo-search-preview"],
     content: [".seo-page-ideas-card", ".seo-brief-card"],
@@ -1549,22 +1550,40 @@ function initSeoProTabs() {
     }));
   });
 
-  const setTab = (key) => {
+  const setTab = (key, targetSelector = "") => {
+    root.dataset.activeSeoTab = key;
+
     root.querySelectorAll("[data-seo-tab]").forEach((btn) => {
       const active = btn.dataset.seoTab === key;
       btn.classList.toggle("is-active", active);
       btn.setAttribute("aria-selected", active ? "true" : "false");
     });
+
     root.querySelectorAll("[data-seo-panel]").forEach((panel) => {
       panel.hidden = panel.dataset.seoPanel !== key;
+    });
+
+    requestAnimationFrame(() => {
+      const target = targetSelector
+        ? root.querySelector(targetSelector)
+        : root.querySelector(`[data-seo-panel="${CSS.escape(key)}"]:not([hidden])`);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   };
 
   root.querySelectorAll("[data-seo-tab]").forEach((btn) => {
-    btn.addEventListener("click", () => setTab(btn.dataset.seoTab || "keywords"));
+    btn.addEventListener("click", () => setTab(btn.dataset.seoTab || "overview"));
   });
 
-  setTab("keywords");
+  root.querySelectorAll("[data-seo-go]").forEach((btn) => {
+    btn.addEventListener("click", () => setTab(btn.dataset.seoGo || "overview", btn.dataset.seoTarget || ""));
+  });
+
+  root.querySelectorAll("[data-dashboard-go]").forEach((btn) => {
+    btn.addEventListener("click", () => navigateDashboard(btn.dataset.dashboardGo));
+  });
+
+  setTab("overview");
 }
 
 function renderDashboard() {
@@ -2144,14 +2163,21 @@ else if (state.section === "seo") {
 
 
 
+      <div class="seo-data-note">
+        <span>i</span>
+        <p>Workspace-based recommendations. Live rankings, clicks and impressions appear after real search integrations are connected.</p>
+      </div>
+
       <div class="seo-pro-tabs dashboard-card" role="tablist" aria-label="SEO workspace">
-        <button class="seo-pro-tab is-active" type="button" data-seo-tab="keywords">Keywords</button>
+        <button class="seo-pro-tab is-active" type="button" data-seo-tab="overview">Overview</button>
+        <button class="seo-pro-tab" type="button" data-seo-tab="keywords">Keywords</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="onpage">On-page</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="content">Content</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="local">Local</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="technical">Technical</button>
       </div>
 
+      <div class="seo-overview-panel" data-seo-panel="overview">
       <div class="seo-analysis-summary dashboard-card">
         <div class="seo-analysis-summary-head">
           <div>
@@ -2162,65 +2188,67 @@ else if (state.section === "seo") {
         </div>
 
         <div class="seo-summary-grid">
-          <div>
-            <small>KEYWORD IDEAS</small>
-            <strong id="seo-summary-keywords">—</strong>
-          </div>
-          <div>
-            <small>PAGE IDEAS</small>
-            <strong id="seo-summary-pages">—</strong>
-          </div>
-          <div>
-            <small>QUICK WINS</small>
-            <strong id="seo-summary-wins">—</strong>
-          </div>
-          <div>
-            <small>SETUP GAPS</small>
-            <strong id="seo-summary-gaps">—</strong>
-          </div>
+          <button type="button" class="seo-kpi-card" data-seo-go="keywords">
+            <small>KEYWORD IDEAS</small><strong id="seo-summary-keywords">—</strong><span>Open strategy →</span>
+          </button>
+          <button type="button" class="seo-kpi-card" data-seo-go="content" data-seo-target=".seo-page-ideas-card">
+            <small>PAGE IDEAS</small><strong id="seo-summary-pages">—</strong><span>See opportunities →</span>
+          </button>
+          <button type="button" class="seo-kpi-card" data-seo-go="onpage" data-seo-target=".seo-opportunity-card">
+            <small>QUICK WINS</small><strong id="seo-summary-wins">—</strong><span>Open action plan →</span>
+          </button>
+          <button type="button" class="seo-kpi-card" data-seo-go="technical" data-seo-target=".seo-checklist-card">
+            <small>SETUP GAPS</small><strong id="seo-summary-gaps">—</strong><span>Fix setup →</span>
+          </button>
         </div>
       </div>
 
 
       <div class="seo-metric-grid">
-        <article class="seo-metric-card">
+        <button type="button" class="seo-metric-card seo-metric-action" data-dashboard-go="settings">
           <div class="seo-metric-icon">◎</div>
           <div>
             <small>BUSINESS PROFILE</small>
             <strong id="seo-profile-score">—</strong>
             <span id="seo-profile-note">Checking business details...</span>
+            <em>Open settings →</em>
           </div>
-        </article>
+        </button>
 
-        <article class="seo-metric-card">
+        <button type="button" class="seo-metric-card seo-metric-action" data-dashboard-go="knowledge">
           <div class="seo-metric-icon">▤</div>
           <div>
             <small>KNOWLEDGE DEPTH</small>
             <strong id="seo-knowledge-count">—</strong>
             <span id="seo-knowledge-note">Checking saved knowledge...</span>
+            <em>Open knowledge →</em>
           </div>
-        </article>
+        </button>
 
-        <article class="seo-metric-card">
+        <button type="button" class="seo-metric-card seo-metric-action" data-seo-go="local">
           <div class="seo-metric-icon">⌖</div>
           <div>
             <small>LOCAL SEO</small>
             <strong id="seo-local-status">—</strong>
             <span id="seo-local-note">Checking location signals...</span>
+            <em>Open local plan →</em>
           </div>
-        </article>
+        </button>
 
-        <article class="seo-metric-card">
+        <button type="button" class="seo-metric-card seo-metric-action" data-seo-go="onpage" data-seo-target=".seo-opportunity-card">
           <div class="seo-metric-icon">✦</div>
           <div>
             <small>QUICK WINS</small>
             <strong id="seo-quickwin-count">—</strong>
             <span>Prioritized workspace opportunities</span>
+            <em>Open action plan →</em>
           </div>
-        </article>
+        </button>
       </div>
 
 
+
+      </div>
 
       <div class="seo-keyword-lab dashboard-card">
         <div class="seo-card-head">
@@ -2238,10 +2266,32 @@ else if (state.section === "seo") {
         </div>
 
         <div class="seo-keyword-layout">
-          <div class="seo-keyword-primary">
-            <small>PRIMARY KEYWORD</small>
-            <strong id="seo-primary-keyword">—</strong>
-            <span id="seo-primary-intent">Commercial intent</span>
+          <div class="seo-keyword-primary seo-strategy-panel">
+            <div class="seo-strategy-head">
+              <div>
+                <small>PRIMARY KEYWORD</small>
+                <strong id="seo-primary-keyword">—</strong>
+                <span id="seo-primary-intent">Commercial intent</span>
+              </div>
+              <span class="seo-strategy-badge">PRIMARY TARGET</span>
+            </div>
+
+            <div class="seo-strategy-grid">
+              <div><small>SUGGESTED PAGE</small><strong id="seo-strategy-page">—</strong></div>
+              <div><small>SEO TITLE</small><strong id="seo-strategy-title">—</strong></div>
+              <div><small>H1</small><strong id="seo-strategy-h1">—</strong></div>
+              <div><small>URL SLUG</small><strong id="seo-strategy-slug">—</strong></div>
+              <div><small>CONTENT ANGLE</small><strong id="seo-strategy-angle">—</strong></div>
+              <div><small>CTA IDEA</small><strong id="seo-strategy-cta">—</strong></div>
+            </div>
+
+            <div class="seo-use-guide">
+              <small>WHERE TO USE THIS</small>
+              <div>
+                <span>Service page</span><span>SEO title</span><span>H1</span>
+                <span>Intro copy</span><span>FAQ</span><span>Internal links</span>
+              </div>
+            </div>
           </div>
 
           <div class="seo-keyword-clusters">
@@ -2261,6 +2311,14 @@ else if (state.section === "seo") {
               <div id="seo-longtail-keywords" class="seo-keyword-list"></div>
             </section>
           </div>
+
+          <section class="seo-related-themes">
+            <div class="seo-related-themes-head">
+              <span>RELATED THEMES</span>
+              <small>Expand supporting content without repeating the same keyword.</small>
+            </div>
+            <div id="seo-related-themes-list" class="seo-related-theme-chips"></div>
+          </section>
         </div>
 
         <div class="seo-keyword-note">
@@ -4125,6 +4183,40 @@ function renderSeoAnalysis(analysis) {
 
   if (primaryKeyword) primaryKeyword.textContent = keywordEngine.primary;
   if (primaryIntent) primaryIntent.textContent = "Commercial / local intent";
+
+  const strategyPage = document.querySelector("#seo-strategy-page");
+  const strategyTitle = document.querySelector("#seo-strategy-title");
+  const strategyH1 = document.querySelector("#seo-strategy-h1");
+  const strategySlug = document.querySelector("#seo-strategy-slug");
+  const strategyAngle = document.querySelector("#seo-strategy-angle");
+  const strategyCta = document.querySelector("#seo-strategy-cta");
+  const relatedThemes = document.querySelector("#seo-related-themes-list");
+
+  if (strategyPage) strategyPage.textContent = analysis.brief.title || "Focused service page";
+  if (strategyTitle) strategyTitle.textContent = keywordEngine.title || "—";
+  if (strategyH1) strategyH1.textContent = keywordEngine.h1 || "—";
+  if (strategySlug) strategySlug.textContent = `/${keywordEngine.slug || ""}`;
+  if (strategyAngle) {
+    strategyAngle.textContent = `Explain ${analysis.service} clearly${analysis.city ? ` for customers in ${analysis.city}` : ""}, including benefits, trust signals and buying questions.`;
+  }
+  if (strategyCta) {
+    strategyCta.textContent = `Talk to us about ${analysis.service}${analysis.city ? ` in ${analysis.city}` : ""}`;
+  }
+
+  if (relatedThemes) {
+    const themes = [
+      `${analysis.service} pricing`,
+      `${analysis.service} benefits`,
+      `how ${analysis.service} works`,
+      `${analysis.service} FAQ`,
+      `${analysis.service} for businesses`,
+      analysis.city ? `${analysis.service} near ${analysis.city}` : "",
+    ].filter(Boolean);
+
+    relatedThemes.innerHTML = [...new Set(themes)]
+      .map((item) => `<span>${escapeHtml(item)}</span>`)
+      .join("");
+  }
 
   if (secondaryKeywords) {
     secondaryKeywords.innerHTML = keywordEngine.secondary

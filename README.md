@@ -395,3 +395,16 @@ WhatsApp AI:
 
 No SQL required.
 Mobile intentionally untouched.
+
+
+## V4.13 — SEO Final PRO
+- SEO converted from static report into a working module
+- Added Overview tab
+- KPI cards are clickable and route to relevant work
+- Business Profile opens Settings; Knowledge Depth opens Knowledge
+- Keyword tab enriched with page/title/H1/slug/content angle/CTA
+- Added related themes and clear “where to use this” guidance
+- Reduced empty space and improved per-tab focus
+- Desktop only; mobile remains untouched
+
+No SQL required.
