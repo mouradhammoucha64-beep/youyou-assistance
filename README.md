@@ -448,3 +448,16 @@ No SQL migration required.
 - Existing real server-side /api/seo-audit integration retained
 - Existing PRO SEO strategy and tabs retained
 - No SQL required
+
+## V4.16 — AI Studio PRO Foundation
+
+Review outcome before implementation:
+- AI Studio should be a marketing workspace, not a generic prompt box.
+- The client must have a large free-text idea field before generation.
+- Business Info + Knowledge Base + tone should be reused automatically.
+- Core creation types: Video Ad, Ad Copy, Social Post, Email, Landing Page, Campaign.
+- Video Ad is a first-class workflow with duration, format, voice style and visual direction.
+- Actual AI generation is NOT faked in this version. The UI prepares a structured creative brief and clearly marks the AI API as pending.
+- Project persistence, image generation, voice generation and final video rendering come after the UI/workflow is approved.
+
+No SQL required for this UI review build.

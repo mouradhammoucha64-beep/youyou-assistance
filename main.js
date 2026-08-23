@@ -1294,6 +1294,7 @@ function dashboardShell(content) {
             ${navItem("knowledge", "▤", "Knowledge")}
             ${navItem("widget", "◇", "Website Widget")}
             ${navItem("ai", "✧", "AI Control Center")}
+            ${navItem("studio", "✦", "AI Studio")}
             ${navItem("seo", "↗", "SEO Growth")}
             ${navItem("rescue", "↻", "Revenue Rescue")}
             ${navItem("whatsapp", "◉", "WhatsApp AI")}
@@ -1585,6 +1586,99 @@ function initSeoProTabs() {
   });
 
   setTab("overview");
+}
+
+
+function initAiStudio() {
+  const root = document.querySelector(".studio-page");
+  if (!root) return;
+
+  let currentType = "Video Ad";
+  const idea = root.querySelector("#studio-idea");
+  const videoSettings = root.querySelector("#studio-video-settings");
+  const status = root.querySelector("#studio-status");
+  const empty = root.querySelector("#studio-output-empty");
+  const preview = root.querySelector("#studio-brief-preview");
+
+  const setType = (type) => {
+    currentType = type;
+    root.querySelectorAll("[data-studio-type]").forEach((btn) => {
+      btn.classList.toggle("is-active", btn.dataset.studioType === type);
+    });
+    if (videoSettings) videoSettings.hidden = type !== "Video Ad";
+  };
+
+  root.querySelectorAll("[data-studio-type]").forEach((btn) => {
+    btn.addEventListener("click", () => setType(btn.dataset.studioType || "Video Ad"));
+  });
+
+  root.querySelectorAll("[data-studio-example]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (!idea) return;
+      idea.value = btn.dataset.studioExample || "";
+      idea.focus();
+      if (status) status.textContent = "Idea added — review it before generation";
+    });
+  });
+
+  root.querySelector("#studio-improve-idea")?.addEventListener("click", () => {
+    if (!idea?.value.trim()) {
+      if (status) status.textContent = "Write your idea first";
+      idea?.focus();
+      return;
+    }
+    if (status) status.textContent = "Improve Idea will activate with the AI API";
+  });
+
+  root.querySelector("#studio-generate")?.addEventListener("click", () => {
+    const ideaText = idea?.value.trim() || "";
+    if (!ideaText) {
+      if (status) status.textContent = "Describe your idea before generating";
+      idea?.focus();
+      return;
+    }
+
+    const goal = root.querySelector("#studio-goal")?.value || "—";
+    const platform = root.querySelector("#studio-platform")?.value || "—";
+    const tone = root.querySelector("#studio-tone")?.value || "—";
+    const language = root.querySelector("#studio-language")?.value || "—";
+    const audience = root.querySelector("#studio-audience")?.value.trim() || "Use business context";
+    const offer = root.querySelector("#studio-offer")?.value.trim() || "No specific offer";
+
+    if (empty) empty.hidden = true;
+    if (preview) {
+      preview.hidden = false;
+      preview.innerHTML = `
+        <div class="studio-preview-head">
+          <div><small>CREATIVE BRIEF</small><strong>${escapeHtml(currentType)}</strong></div>
+          <span>READY FOR AI</span>
+        </div>
+        <p>${escapeHtml(ideaText)}</p>
+        <div class="studio-preview-grid">
+          <div><small>GOAL</small><strong>${escapeHtml(goal)}</strong></div>
+          <div><small>PLATFORM</small><strong>${escapeHtml(platform)}</strong></div>
+          <div><small>TONE</small><strong>${escapeHtml(tone)}</strong></div>
+          <div><small>LANGUAGE</small><strong>${escapeHtml(language)}</strong></div>
+          <div><small>AUDIENCE</small><strong>${escapeHtml(audience)}</strong></div>
+          <div><small>OFFER</small><strong>${escapeHtml(offer)}</strong></div>
+        </div>
+        ${currentType === "Video Ad" ? `
+          <div class="studio-preview-video">
+            <small>VIDEO PLAN</small>
+            <span>${escapeHtml(root.querySelector("#studio-duration")?.value || "30 sec")}</span>
+            <span>${escapeHtml(root.querySelector("#studio-format")?.value || "9:16")}</span>
+            <span>${escapeHtml(root.querySelector("#studio-voice")?.value || "Professional")}</span>
+            <span>${escapeHtml(root.querySelector("#studio-visual")?.value || "Premium realistic")}</span>
+          </div>` : ""}
+        <div class="studio-preview-notice">
+          This is the structured brief only. No AI content has been generated yet.
+        </div>
+      `;
+    }
+    if (status) status.textContent = "Creative brief ready for AI connection";
+  });
+
+  setType("Video Ad");
 }
 
 function renderDashboard() {
@@ -2078,6 +2172,194 @@ and identify qualified leads.</textarea>
       </div>
 
     </div>
+  `;
+}
+
+
+else if (state.section === "studio") {
+  const c = state.company || {};
+  const companyName = c.name || "Your business";
+  const businessIndustry = c.industry || "Business not set";
+  const businessCity = c.city || "Location not set";
+
+  body = `
+    <section class="studio-page">
+      <div class="studio-hero dashboard-card">
+        <div>
+          <div class="studio-kicker-row">
+            <span class="studio-kicker">AI MARKETING STUDIO</span>
+            <span class="studio-pro-pill">PRO WORKSPACE</span>
+          </div>
+          <h1>Turn one idea into campaign-ready content.</h1>
+          <p>
+            Start with your own idea. YOUYOU will combine it with your business context,
+            brand voice and Knowledge Base when the AI generation layer is connected.
+          </p>
+        </div>
+        <div class="studio-context-card">
+          <small>USING BUSINESS CONTEXT</small>
+          <strong>${escapeHtml(companyName)}</strong>
+          <div class="studio-context-chips">
+            <span>${escapeHtml(businessIndustry)}</span>
+            <span>${escapeHtml(businessCity)}</span>
+            <span>Knowledge connected</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="studio-create-grid">
+        <div class="studio-builder dashboard-card">
+          <div class="studio-section-head">
+            <div>
+              <small>CREATE</small>
+              <h2>What do you want to create?</h2>
+            </div>
+            <span class="studio-step">STEP 1</span>
+          </div>
+
+          <div class="studio-type-grid" role="radiogroup" aria-label="Content type">
+            <button class="studio-type-card is-active" type="button" data-studio-type="Video Ad">
+              <span>▶</span><strong>Video Ad</strong><small>Script · voice · scenes · visuals</small>
+            </button>
+            <button class="studio-type-card" type="button" data-studio-type="Ad Copy">
+              <span>↗</span><strong>Ad Copy</strong><small>Meta · Google · TikTok · LinkedIn</small>
+            </button>
+            <button class="studio-type-card" type="button" data-studio-type="Social Post">
+              <span>◎</span><strong>Social Post</strong><small>Posts · hooks · captions · CTA</small>
+            </button>
+            <button class="studio-type-card" type="button" data-studio-type="Email">
+              <span>✉</span><strong>Email</strong><small>Campaigns · follow-up · reactivation</small>
+            </button>
+            <button class="studio-type-card" type="button" data-studio-type="Landing Page">
+              <span>▤</span><strong>Landing Page</strong><small>Hero · benefits · CTA · FAQ</small>
+            </button>
+            <button class="studio-type-card" type="button" data-studio-type="Campaign">
+              <span>✦</span><strong>Campaign</strong><small>Angle · audience · channels · content</small>
+            </button>
+          </div>
+
+          <div class="studio-idea-block">
+            <div class="studio-field-title">
+              <div>
+                <small>YOUR IDEA</small>
+                <h3>Tell YOUYOU what you want to create.</h3>
+              </div>
+              <span>STEP 2</span>
+            </div>
+            <p>Describe the campaign, message, offer, style or idea in your own words.</p>
+            <textarea id="studio-idea" rows="7" maxlength="2500" placeholder="Example: Create a 30-second Instagram Reel for a luxury spa in Miami. Target women 25–45, promote 20% off the first visit, calm premium style, focus on bookings."></textarea>
+            <div class="studio-idea-footer">
+              <div class="studio-example-chips">
+                <button type="button" data-studio-example="Create a 30-second Instagram Reel promoting my main service with a strong booking CTA.">30-sec Reel</button>
+                <button type="button" data-studio-example="Create a lead-generation campaign for my business with a clear offer and direct call to action.">Lead campaign</button>
+                <button type="button" data-studio-example="Create a promotional social post that feels premium, clear and not pushy.">Premium promo</button>
+              </div>
+              <button id="studio-improve-idea" class="studio-ghost-btn" type="button">✦ Improve my idea</button>
+            </div>
+          </div>
+
+          <div class="studio-settings-grid">
+            <label>
+              Goal
+              <select id="studio-goal">
+                <option>Sales</option><option>Leads</option><option>Awareness</option><option>Promotion</option><option>Retargeting</option><option>Launch</option>
+              </select>
+            </label>
+            <label>
+              Platform
+              <select id="studio-platform">
+                <option>Instagram</option><option>Facebook</option><option>TikTok</option><option>Google</option><option>LinkedIn</option><option>YouTube</option><option>Website</option>
+              </select>
+            </label>
+            <label>
+              Tone
+              <select id="studio-tone">
+                <option>Professional</option><option>Friendly</option><option>Premium</option><option>Direct</option><option>Warm</option><option>Energetic</option>
+              </select>
+            </label>
+            <label>
+              Language
+              <select id="studio-language">
+                <option>English</option><option>French</option><option>Spanish</option><option>Arabic</option>
+              </select>
+            </label>
+            <label class="studio-span-2">
+              Audience <span>Optional</span>
+              <input id="studio-audience" placeholder="e.g. Women 25–45 in Miami" />
+            </label>
+            <label class="studio-span-2">
+              Offer <span>Optional</span>
+              <input id="studio-offer" placeholder="e.g. 20% off the first visit" />
+            </label>
+          </div>
+
+          <div id="studio-video-settings" class="studio-video-settings">
+            <div class="studio-mini-head">
+              <div><small>VIDEO SETTINGS</small><strong>Voice + image creative direction</strong></div>
+              <span>VIDEO AD</span>
+            </div>
+            <div class="studio-video-grid">
+              <label>Duration
+                <select id="studio-duration"><option>15 sec</option><option selected>30 sec</option><option>45 sec</option><option>60 sec</option></select>
+              </label>
+              <label>Format
+                <select id="studio-format"><option>9:16 · Reels / TikTok</option><option>1:1 · Social Ad</option><option>16:9 · YouTube / Web</option></select>
+              </label>
+              <label>Voice style
+                <select id="studio-voice"><option>Professional</option><option>Warm</option><option>Calm</option><option>Energetic</option><option>Premium</option></select>
+              </label>
+              <label>Visual style
+                <select id="studio-visual"><option>Premium realistic</option><option>Clean commercial</option><option>Minimal product</option><option>Editorial</option><option>Bold social</option></select>
+              </label>
+            </div>
+            <div class="studio-video-output-plan">
+              <span>Hook</span><span>Scene plan</span><span>Voiceover</span><span>On-screen text</span><span>Image direction</span><span>CTA</span>
+            </div>
+          </div>
+
+          <div class="studio-generate-row">
+            <div>
+              <small>GENERATION STATUS</small>
+              <strong id="studio-status">Creative brief ready</strong>
+              <span>AI generation is intentionally not connected yet.</span>
+            </div>
+            <button id="studio-generate" class="primary studio-generate-btn" type="button">Generate with AI →</button>
+          </div>
+        </div>
+
+        <aside class="studio-side-column">
+          <div class="studio-output dashboard-card">
+            <div class="studio-section-head">
+              <div><small>OUTPUT WORKSPACE</small><h2>Your creative will appear here.</h2></div>
+              <span class="studio-api-badge">AI API LATER</span>
+            </div>
+            <div id="studio-output-empty" class="studio-output-empty">
+              <div class="studio-output-icon">✦</div>
+              <strong>Start with your idea.</strong>
+              <p>Choose a content type, describe what you want, then set the goal and audience.</p>
+              <div class="studio-output-list">
+                <span>✓ Uses Business Info</span>
+                <span>✓ Uses Knowledge Base</span>
+                <span>✓ Uses your selected tone</span>
+                <span>✓ Keeps the client in control</span>
+              </div>
+            </div>
+            <div id="studio-brief-preview" class="studio-brief-preview" hidden></div>
+          </div>
+
+          <div class="studio-projects dashboard-card">
+            <div class="studio-section-head compact">
+              <div><small>PROJECTS</small><h2>Saved creative work</h2></div>
+              <span>COMING NEXT</span>
+            </div>
+            <div class="studio-project-empty">
+              <strong>No projects yet</strong>
+              <span>Generated campaigns, ads and videos will be saved here per company.</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
   `;
 }
 
@@ -3485,6 +3767,10 @@ if (state.section === "overview") {
 
 if (state.section === "ai") {
   loadAiConfiguration();
+}
+
+if (state.section === "studio") {
+  initAiStudio();
 }
 
 if (state.section === "seo") {
