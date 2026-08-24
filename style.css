@@ -7841,3 +7841,59 @@ body::-webkit-scrollbar-thumb:hover,
   .lpw-editor{max-height:none;border-right:0;border-bottom:1px solid rgba(255,255,255,.06)}
   .lpw-canvas{min-height:720px}
 }
+
+
+/* =========================================================
+   YOUYOU MASTER QA — SEO COMPACT + READABLE AT 100% ZOOM
+   ========================================================= */
+@media (min-width: 769px) {
+  .dashboard-main,.dashboard-content,.seo-growth-page,.seo-growth-page>*{min-width:0;max-width:100%;box-sizing:border-box}
+  .seo-growth-page{gap:10px!important}
+  .seo-hero{grid-template-columns:minmax(0,1fr) auto!important;gap:18px!important;padding:20px 22px!important;min-height:0!important}
+  .seo-hero h1{font-size:clamp(30px,3vw,44px)!important;line-height:1.04!important;margin:8px 0!important;max-width:720px!important}
+  .seo-hero-copy>p{font-size:11px!important;line-height:1.55!important;max-width:720px!important}
+  .seo-score-ring{width:92px!important;height:92px!important}
+  .seo-score-inner{width:74px!important;height:74px!important;padding-bottom:20px!important}.seo-score-inner strong{font-size:25px!important}
+  .seo-score-panel{gap:12px!important}.seo-score-panel>div:last-child{max-width:145px!important}
+  .seo-audit-config,.seo-input-strip{grid-template-columns:minmax(220px,1.15fr) minmax(205px,.9fr) minmax(150px,.62fr) minmax(140px,.58fr)!important;gap:9px!important;padding:12px 14px!important;align-items:end!important}
+  .seo-audit-config .seo-input-strip-copy{grid-column:auto!important}.seo-config-actions{grid-column:1/-1!important;display:flex!important;justify-content:flex-end!important;gap:7px!important;min-width:0!important;white-space:normal!important}
+  .seo-input-strip input{min-height:36px!important;font-size:9px!important}.seo-input-strip label{font-size:8px!important;gap:5px!important}.seo-input-strip-copy strong{font-size:10px!important}.seo-input-strip-copy span{font-size:8px!important}
+  .seo-run-audit-main,.seo-config-actions .seo-secondary-btn{min-height:36px!important;padding:0 12px!important;font-size:8px!important}
+  .seo-data-note{margin:4px 0 6px!important;padding:6px 8px!important}.seo-pro-tabs{margin:5px 0 8px!important;padding:5px!important;max-width:760px!important}.seo-pro-tab{padding:7px 8px!important;font-size:7px!important}
+  .seo-analysis-summary{padding:12px 14px!important}.seo-summary-grid,.seo-metric-grid{gap:7px!important}.seo-kpi-card{min-height:62px!important;padding:9px 10px!important}.seo-metric-card{min-height:68px!important;padding:10px 11px!important;border-radius:11px!important}
+  .seo-metric-icon{width:30px!important;height:30px!important;border-radius:9px!important}.seo-keyword-lab,.seo-onpage-card,.seo-page-ideas-card,.seo-brief-card,.seo-local-pack,.seo-checklist-card,.seo-console-card,.seo-website-audit{padding:13px!important}
+}
+@media (min-width:769px) and (max-width:1250px){
+  .seo-hero{grid-template-columns:1fr!important}.seo-score-panel{justify-content:flex-start!important}
+  .seo-audit-config,.seo-input-strip{grid-template-columns:1fr 1fr!important}.seo-audit-config .seo-input-strip-copy,.seo-config-url,.seo-config-actions{grid-column:1/-1!important}.seo-config-actions{justify-content:flex-start!important}
+}
+
+/* AI Studio readability pass — larger text without changing workflow logic */
+@media (min-width:769px){
+  .studio-page{gap:14px!important}.studio-hero h1{font-size:30px!important}.studio-hero p{font-size:12px!important}.studio-kicker,.studio-pro-pill{font-size:9px!important}
+  .studio-context-card small,.studio-section-head small,.studio-field-title small,.studio-settings-grid label,.studio-video-grid label,.studio-mini-head small,.studio-generate-row small{font-size:9px!important}
+  .studio-context-chips span,.studio-type-card small,.studio-example-chips button,.studio-ghost-btn,.studio-step,.studio-api-badge,.studio-section-head.compact>span,.studio-video-output-plan span,.studio-generate-row div>span{font-size:9px!important}
+  .studio-type-card strong{font-size:11px!important}.studio-field-title h3{font-size:16px!important}.studio-idea-block>p{font-size:10px!important}.studio-idea-block textarea{font-size:12px!important;min-height:140px!important}
+  .studio-settings-grid input,.studio-settings-grid select,.studio-video-grid select{font-size:10px!important;min-height:40px!important}.studio-mini-head strong,.studio-generate-row strong{font-size:11px!important}
+  .studio-output-empty strong{font-size:14px!important}.studio-output-empty p{font-size:10px!important}.studio-output-list span{font-size:9px!important}
+}
+
+/* Public site language switch + RTL */
+.public-language-switch{display:flex;gap:3px;padding:3px;border:1px solid rgba(255,255,255,.07);border-radius:999px;background:rgba(255,255,255,.018)}
+.public-language-switch button{min-width:31px;height:27px;border:0;border-radius:999px;background:transparent;color:#70798a;font-size:8px;font-weight:900;cursor:pointer}.public-language-switch button.is-active{background:rgba(126,91,255,.13);color:#c4b9ff}
+.landing[data-site-language="ar"]{font-family:Arial,"Noto Sans Arabic",sans-serif}.landing[data-site-language="ar"] .hero-copy,.landing[data-site-language="ar"] .section-heading,.landing[data-site-language="ar"] .growth-platform-copy,.landing[data-site-language="ar"] .landing-pages-showcase-copy,.landing[data-site-language="ar"] .final-cta{text-align:right}.landing[data-site-language="ar"] .hero-buttons,.landing[data-site-language="ar"] .trust,.landing[data-site-language="ar"] .landing-pages-showcase-badges{justify-content:flex-start}.landing[data-site-language="ar"] .growth-flow-line i{transform:rotate(180deg)}
+
+/* Main-site Smart Landing Pages showcase */
+.landing-pages-showcase{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:44px;align-items:center;max-width:1180px;margin:0 auto;padding:90px 28px}
+.landing-pages-showcase-copy h2{margin:12px 0;font-size:clamp(34px,4vw,56px);line-height:1.02;letter-spacing:-.045em}.landing-pages-showcase-copy h2 span{color:#8d79ff}.landing-pages-showcase-copy>p{max-width:620px;color:#8b93a5;font-size:14px;line-height:1.7}.landing-pages-showcase-badges{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0}.landing-pages-showcase-badges span{padding:7px 9px;border:1px solid rgba(126,91,255,.13);border-radius:999px;background:rgba(126,91,255,.035);color:#9aa2b2;font-size:9px;font-weight:800}
+.landing-pages-showcase-visuals{display:grid;grid-template-columns:1fr 1fr;gap:11px;perspective:1000px}.landing-mini{position:relative;min-height:210px;padding:18px;border-radius:18px;overflow:hidden;box-shadow:0 22px 55px rgba(0,0,0,.18);transition:.2s ease}.landing-mini:hover{transform:translateY(-4px)}.landing-mini i{display:block;width:34px;height:6px;border-radius:99px;margin-bottom:40px}.landing-mini b{display:block;width:72%;height:11px;border-radius:99px}.landing-mini strong{display:block;width:50%;height:8px;border-radius:99px;margin-top:7px}.landing-mini span{display:block;width:80%;height:6px;border-radius:99px;margin-top:18px}.landing-mini button{display:block;width:70px;height:25px;border:0;border-radius:7px;margin-top:20px}
+.landing-mini-clean{background:#f7f5ff;border:1px solid #e8e2ff;transform:rotate(-2deg)}.landing-mini-clean i,.landing-mini-clean button{background:#6d54e8}.landing-mini-clean b,.landing-mini-clean strong{background:#242032}.landing-mini-clean span{background:#c9c4d6}
+.landing-mini-luxury{background:#0d0b08;border:1px solid #40331e;transform:translateY(22px) rotate(2deg)}.landing-mini-luxury i,.landing-mini-luxury button{background:#d7b46a}.landing-mini-luxury b,.landing-mini-luxury strong{background:#f3ead8}.landing-mini-luxury span{background:#665d50}
+.landing-mini-wellness{background:#eefaf4;border:1px solid #d7eee2;transform:translateX(18px)}.landing-mini-wellness i,.landing-mini-wellness button{background:#3b9b70}.landing-mini-wellness b,.landing-mini-wellness strong{background:#1e3328}.landing-mini-wellness span{background:#b4cfc0}
+.landing-mini-bold{background:linear-gradient(145deg,#311032,#7a194b);border:1px solid #9c3b69;transform:translate(18px,18px) rotate(-1deg)}.landing-mini-bold i,.landing-mini-bold button{background:#ff9bc5}.landing-mini-bold b,.landing-mini-bold strong{background:#fff1f7}.landing-mini-bold span{background:#c988a5}
+
+/* Template gallery visual variety: shapes/layouts differ, not only colors */
+.lpb-template-card.layout-luxury .lpb-template-mini-body{grid-template-columns:.75fr 1.25fr}.lpb-template-card.layout-luxury .lpb-template-mini-body aside{border-radius:50% 50% 16px 16px}.lpb-template-card.layout-beauty .lpb-template-preview{border-radius:0 0 42px 0}.lpb-template-card.layout-tech .lpb-template-mini-body aside{clip-path:polygon(12% 0,100% 0,88% 100%,0 100%)}.lpb-template-card.layout-service .lpb-template-mini-row{grid-template-columns:1.5fr .75fr .75fr}.lpb-template-card.layout-urgent .lpb-template-mini-body{grid-template-columns:1.2fr .8fr}.lpb-template-card.layout-urgent .lpb-template-mini-body button{width:72px}.lpb-template-card.layout-spa .lpb-template-mini-body aside{border-radius:46% 46% 14px 14px}.lpb-template-card.layout-dental .lpb-template-preview,.lpb-template-card.layout-clinic .lpb-template-preview{background:linear-gradient(145deg,var(--preview-bg),var(--preview-surface))}.lpb-template-card.layout-property .lpb-template-mini-body aside{border-radius:5px}.lpb-template-card.layout-app .lpb-template-mini-body aside{max-width:56px;justify-self:center;border-radius:14px}.lpb-template-card.layout-event .lpb-template-mini-body{grid-template-columns:1fr}.lpb-template-card.layout-event .lpb-template-mini-body aside{display:none}.lpb-template-card.layout-whatsapp .lpb-template-mini-body button{background:#45d483!important;border-radius:99px}
+
+@media(max-width:900px){.landing-pages-showcase{grid-template-columns:1fr;padding:65px 22px}.landing-pages-showcase-visuals{max-width:620px}.public-language-switch{order:3}}
+@media(max-width:560px){.landing-pages-showcase-visuals{grid-template-columns:1fr 1fr;gap:7px}.landing-mini{min-height:160px;padding:12px}.landing-mini-wellness,.landing-mini-bold{transform:none}.public-language-switch button{min-width:28px}}

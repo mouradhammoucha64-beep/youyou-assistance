@@ -87,6 +87,141 @@ function escapeHtml(value) {
 }
 
 /* =========================
+   PUBLIC SITE LANGUAGE
+   EN / FR / AR
+========================= */
+
+const PUBLIC_SITE_LANGUAGES = ["en", "fr", "ar"];
+
+function getPublicSiteLanguage() {
+  const saved = localStorage.getItem("youyou-public-language");
+  return PUBLIC_SITE_LANGUAGES.includes(saved) ? saved : "en";
+}
+
+function setPublicSiteLanguage(language) {
+  const next = PUBLIC_SITE_LANGUAGES.includes(language) ? language : "en";
+  localStorage.setItem("youyou-public-language", next);
+  applyPublicSiteLanguage(next);
+}
+
+const PUBLIC_SITE_COPY = {
+  en: {
+    features:"Features", how:"How it works", pricing:"Pricing", faq:"FAQ", login:"Log in", start:"Start free",
+    dashboard:"Open dashboard", billing:"Plans & billing", plans:"View plans",
+    heroEyebrow:"AI GROWTH PLATFORM",
+    heroTitle:'Turn more visitors into <span>customers and growth.</span>',
+    heroText:"YOUYOU brings AI conversations, SEO growth, Revenue Rescue, WhatsApp AI, AI Studio and campaign landing pages into one focused workspace for modern businesses.",
+    trust1:"✓ No credit card required", trust2:"✓ Setup in minutes", trust3:"✓ Available 24/7",
+    always:"Always available", engines:"Growth engines", workspace:"Unified workspace", conversion:"Built for conversion",
+    platformEyebrow:"YOUYOU PLATFORM",
+    platformTitle:'Growth tools that <span>work together.</span>',
+    platformText:"Get discovered, create campaigns, convert visitors, keep valuable leads moving and continue conversations on WhatsApp — from one connected workspace.",
+    why:"WHY YOUYOU", whyTitle:'One platform. <span>More ways to grow.</span>',
+    whyText:"Bring customer conversations, content creation, landing pages and growth workflows into one place.",
+    howEyebrow:"HOW IT WORKS", howTitle:'From setup to <span>your first lead.</span>',
+    lpEyebrow:"SMART LANDING PAGES", lpTitle:'Send every ad click to <span>a page built to convert.</span>',
+    lpText:"Choose a professional template, add your product or service, connect WhatsApp or lead capture, then publish a focused campaign page.",
+    lpCta:"Explore landing pages →", lpBadge1:"30 templates", lpBadge2:"Live editor", lpBadge3:"WhatsApp ready",
+    pricingEyebrow:"SIMPLE MONTHLY PRICING", pricingTitle:'Start with AI. <span>Upgrade when growth matters.</span>',
+    pricingText:"Three clear plans. No annual commitment. Start free and choose the level that fits your business when you're ready.",
+    ready:"READY TO START?", finalTitle:'One workspace to <span>answer, grow and recover.</span>',
+    finalText:"Start with your website AI, then unlock SEO growth, AI Studio, landing pages, Revenue Rescue and WhatsApp AI as your business grows.",
+    create:"Create your free account →", footer:"AI Growth Platform for modern businesses.", copyright:"© 2026 YOUYOU. All rights reserved."
+  },
+  fr: {
+    features:"Fonctionnalités", how:"Comment ça marche", pricing:"Tarifs", faq:"FAQ", login:"Connexion", start:"Commencer gratuitement",
+    dashboard:"Ouvrir le tableau de bord", billing:"Offres et facturation", plans:"Voir les offres",
+    heroEyebrow:"PLATEFORME DE CROISSANCE IA",
+    heroTitle:'Transformez plus de visiteurs en <span>clients et en croissance.</span>',
+    heroText:"YOUYOU réunit conversations IA, croissance SEO, Revenue Rescue, WhatsApp AI, AI Studio et pages de campagne dans un seul espace de travail.",
+    trust1:"✓ Sans carte bancaire", trust2:"✓ Configuration en quelques minutes", trust3:"✓ Disponible 24/7",
+    always:"Toujours disponible", engines:"Moteurs de croissance", workspace:"Espace de travail unifié", conversion:"Conçu pour convertir",
+    platformEyebrow:"PLATEFORME YOUYOU", platformTitle:'Des outils de croissance qui <span>travaillent ensemble.</span>',
+    platformText:"Soyez trouvé, créez vos campagnes, convertissez les visiteurs, relancez les prospects et poursuivez la conversation sur WhatsApp depuis un seul espace.",
+    why:"POURQUOI YOUYOU", whyTitle:'Une plateforme. <span>Plus de façons de grandir.</span>',
+    whyText:"Centralisez conversations clients, création de contenu, landing pages et workflows de croissance.",
+    howEyebrow:"COMMENT ÇA MARCHE", howTitle:'De la configuration à <span>votre premier prospect.</span>',
+    lpEyebrow:"LANDING PAGES INTELLIGENTES", lpTitle:'Envoyez chaque clic publicitaire vers <span>une page conçue pour convertir.</span>',
+    lpText:"Choisissez un modèle professionnel, ajoutez votre produit ou service, connectez WhatsApp ou un formulaire, puis préparez une page de campagne ciblée.",
+    lpCta:"Découvrir les landing pages →", lpBadge1:"30 modèles", lpBadge2:"Éditeur en direct", lpBadge3:"WhatsApp prêt",
+    pricingEyebrow:"TARIFICATION MENSUELLE SIMPLE", pricingTitle:'Commencez avec l’IA. <span>Passez au niveau supérieur quand la croissance compte.</span>',
+    pricingText:"Trois offres claires, sans engagement annuel. Commencez gratuitement puis choisissez l’offre adaptée à votre entreprise.",
+    ready:"PRÊT À COMMENCER ?", finalTitle:'Un seul espace pour <span>répondre, grandir et récupérer.</span>',
+    finalText:"Commencez avec l’IA de votre site, puis activez le SEO, AI Studio, les landing pages, Revenue Rescue et WhatsApp AI selon votre croissance.",
+    create:"Créer mon compte gratuit →", footer:"Plateforme de croissance IA pour les entreprises modernes.", copyright:"© 2026 YOUYOU. Tous droits réservés."
+  },
+  ar: {
+    features:"المزايا", how:"كيف يعمل", pricing:"الأسعار", faq:"الأسئلة الشائعة", login:"تسجيل الدخول", start:"ابدأ مجاناً",
+    dashboard:"فتح لوحة التحكم", billing:"الباقات والفوترة", plans:"عرض الباقات",
+    heroEyebrow:"منصة نمو بالذكاء الاصطناعي",
+    heroTitle:'حوّل المزيد من الزوار إلى <span>عملاء ونمو حقيقي.</span>',
+    heroText:"تجمع YOUYOU محادثات الذكاء الاصطناعي، ونمو SEO، واسترجاع العملاء، وواتساب، وAI Studio، وصفحات الحملات في مساحة عمل واحدة.",
+    trust1:"✓ بدون بطاقة بنكية", trust2:"✓ إعداد خلال دقائق", trust3:"✓ متاح 24/7",
+    always:"متاح دائماً", engines:"محركات نمو", workspace:"مساحة عمل موحدة", conversion:"مصمم للتحويل",
+    platformEyebrow:"منصة YOUYOU", platformTitle:'أدوات نمو <span>تعمل معاً.</span>',
+    platformText:"ساعد نشاطك على الظهور، وأنشئ الحملات، وحوّل الزوار إلى عملاء، وتابع الفرص المهمة، وواصل المحادثة عبر واتساب من مكان واحد.",
+    why:"لماذا YOUYOU", whyTitle:'منصة واحدة. <span>طرق أكثر للنمو.</span>',
+    whyText:"اجمع محادثات العملاء وصناعة المحتوى وصفحات الهبوط وعمليات النمو في مكان واحد.",
+    howEyebrow:"كيف يعمل", howTitle:'من الإعداد إلى <span>أول عميل محتمل.</span>',
+    lpEyebrow:"صفحات هبوط ذكية", lpTitle:'وجّه كل نقرة إعلانية إلى <span>صفحة مصممة للتحويل.</span>',
+    lpText:"اختر قالباً احترافياً، أضف منتجك أو خدمتك، اربط واتساب أو نموذج العملاء، ثم جهّز صفحة حملة مركزة.",
+    lpCta:"استكشف صفحات الهبوط ←", lpBadge1:"30 قالباً", lpBadge2:"محرر مباشر", lpBadge3:"جاهز لواتساب",
+    pricingEyebrow:"أسعار شهرية واضحة", pricingTitle:'ابدأ بالذكاء الاصطناعي. <span>وطوّر باقتك عندما يحتاج نموك.</span>',
+    pricingText:"ثلاث باقات واضحة دون التزام سنوي. ابدأ مجاناً واختر المستوى المناسب لنشاطك عندما تكون جاهزاً.",
+    ready:"جاهز للبدء؟", finalTitle:'مساحة واحدة من أجل <span>الرد والنمو واسترجاع الفرص.</span>',
+    finalText:"ابدأ بذكاء موقعك، ثم فعّل SEO وAI Studio وصفحات الهبوط وRevenue Rescue وWhatsApp AI مع نمو نشاطك.",
+    create:"أنشئ حسابك المجاني ←", footer:"منصة نمو بالذكاء الاصطناعي للأعمال الحديثة.", copyright:"© 2026 YOUYOU. جميع الحقوق محفوظة."
+  }
+};
+
+function applyPublicSiteLanguage(language = getPublicSiteLanguage()) {
+  const copy = PUBLIC_SITE_COPY[language] || PUBLIC_SITE_COPY.en;
+  const landing = document.querySelector(".landing:not(.faq-page)");
+  if (!landing) return;
+
+  landing.dataset.siteLanguage = language;
+  landing.dir = language === "ar" ? "rtl" : "ltr";
+  landing.lang = language;
+  document.documentElement.lang = language;
+  document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+
+  const setText = (selector, value) => { const el = landing.querySelector(selector); if (el) el.textContent = value; };
+  const setHtml = (selector, value) => { const el = landing.querySelector(selector); if (el) el.innerHTML = value; };
+
+  const navLinks = landing.querySelectorAll(".landing-links a");
+  if (navLinks[0]) navLinks[0].textContent = copy.features;
+  if (navLinks[1]) navLinks[1].textContent = copy.how;
+  if (navLinks[2]) navLinks[2].textContent = copy.pricing;
+  if (navLinks[3]) navLinks[3].textContent = copy.faq;
+
+  setText("#nav-login", copy.login); setText("#nav-start", copy.start);
+  setText("#nav-dashboard", copy.dashboard); setText("#nav-billing", copy.billing);
+  setText("#hero-login", copy.login); setText("#hero-pricing", copy.plans);
+  const heroStart = landing.querySelector("#hero-start"); if (heroStart) heroStart.innerHTML = `${copy.start} <span>→</span>`;
+  const heroDashboard = landing.querySelector("#hero-dashboard"); if (heroDashboard) heroDashboard.innerHTML = `${copy.dashboard} <span>→</span>`;
+
+  setText(".hero-copy .eyebrow", copy.heroEyebrow); setHtml(".hero-copy h1", copy.heroTitle); setText(".hero-text", copy.heroText);
+  const trust = landing.querySelectorAll(".trust span"); [copy.trust1,copy.trust2,copy.trust3].forEach((v,i)=>{ if(trust[i]) trust[i].textContent=v; });
+  const stats = landing.querySelectorAll(".stats-section span"); [copy.always,copy.engines,copy.workspace,copy.conversion].forEach((v,i)=>{if(stats[i])stats[i].textContent=v;});
+
+  setText(".growth-platform-copy .eyebrow", copy.platformEyebrow); setHtml(".growth-platform-copy h2", copy.platformTitle); setText(".growth-platform-copy > p", copy.platformText);
+  setText("#features .section-heading .eyebrow", copy.why); setHtml("#features .section-heading h2", copy.whyTitle); setText("#features .section-heading > p", copy.whyText);
+  setText("#how .section-heading .eyebrow", copy.howEyebrow); setHtml("#how .section-heading h2", copy.howTitle);
+
+  setText(".landing-pages-showcase .eyebrow", copy.lpEyebrow); setHtml(".landing-pages-showcase h2", copy.lpTitle); setText(".landing-pages-showcase .landing-pages-showcase-copy > p", copy.lpText);
+  setText("#landing-pages-showcase-cta", copy.lpCta);
+  const lpBadges = landing.querySelectorAll(".landing-pages-showcase-badges span"); [copy.lpBadge1,copy.lpBadge2,copy.lpBadge3].forEach((v,i)=>{if(lpBadges[i])lpBadges[i].textContent=v;});
+
+  setText(".pricing-heading .eyebrow", copy.pricingEyebrow); setHtml(".pricing-heading h2", copy.pricingTitle); setText(".pricing-heading > p", copy.pricingText);
+  setText(".final-cta .eyebrow", copy.ready); setHtml(".final-cta h2", copy.finalTitle); setText(".final-cta > p", copy.finalText); setText("#final-start", copy.create);
+  setText(".footer-brand p", copy.footer); setText(".copyright", copy.copyright);
+  setText("#footer-login", copy.login);
+  const footerLinks = landing.querySelectorAll(".footer-links a"); if(footerLinks[0])footerLinks[0].textContent=copy.features; if(footerLinks[1])footerLinks[1].textContent=copy.how; if(footerLinks[2])footerLinks[2].textContent=copy.pricing;
+
+  landing.querySelectorAll("[data-public-language]").forEach((button)=>button.classList.toggle("is-active", button.dataset.publicLanguage===language));
+}
+
+/* =========================
    LANDING PAGE
 ========================= */
 
@@ -109,6 +244,11 @@ function renderLanding() {
         </nav>
 
         <div class="nav-actions">
+          <div class="public-language-switch" aria-label="Website language">
+            <button type="button" data-public-language="en">EN</button>
+            <button type="button" data-public-language="fr">FR</button>
+            <button type="button" data-public-language="ar">AR</button>
+          </div>
           ${state.user
             ? `<button id="nav-dashboard" class="nav-login">Open dashboard</button>
                <button id="nav-billing" class="primary small">Plans & billing</button>`
@@ -638,6 +778,22 @@ function renderLanding() {
           </div>
         </section>
 
+        <section class="landing-pages-showcase" id="landing-pages-showcase">
+          <div class="landing-pages-showcase-copy">
+            <div class="eyebrow">SMART LANDING PAGES</div>
+            <h2>Send every ad click to <span>a page built to convert.</span></h2>
+            <p>Choose a professional template, add your product or service, connect WhatsApp or lead capture, then publish a focused campaign page.</p>
+            <div class="landing-pages-showcase-badges"><span>30 templates</span><span>Live editor</span><span>WhatsApp ready</span></div>
+            <button id="landing-pages-showcase-cta" class="primary" type="button">Explore landing pages →</button>
+          </div>
+          <div class="landing-pages-showcase-visuals" aria-label="Landing page examples">
+            <article class="landing-mini landing-mini-clean"><i></i><b></b><strong></strong><span></span><button></button></article>
+            <article class="landing-mini landing-mini-luxury"><i></i><b></b><strong></strong><span></span><button></button></article>
+            <article class="landing-mini landing-mini-wellness"><i></i><b></b><strong></strong><span></span><button></button></article>
+            <article class="landing-mini landing-mini-bold"><i></i><b></b><strong></strong><span></span><button></button></article>
+          </div>
+        </section>
+
         <section id="pricing" class="pricing-section pricing-v45">
 
           <div class="section-heading pricing-heading">
@@ -827,6 +983,13 @@ function renderLanding() {
   document.querySelector("#hero-pricing")?.addEventListener("click", () => document.querySelector("#pricing")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   document.querySelector("#knowledge-start")?.addEventListener("click", showSignup);
   setupLandingMotion();
+  applyPublicSiteLanguage();
+  document.querySelectorAll("[data-public-language]").forEach((button) => {
+    button.addEventListener("click", () => setPublicSiteLanguage(button.dataset.publicLanguage));
+  });
+  document.querySelector("#landing-pages-showcase-cta")?.addEventListener("click", () => {
+    state.user ? navigateDashboard("pages") : showSignup();
+  });
 
   [["#pricing-starter","starter"],["#pricing-growth","growth"],["#pricing-pro","pro"]].forEach(([selector,plan]) => {
     document.querySelector(selector)?.addEventListener("click", () => {
@@ -1698,40 +1861,40 @@ function initAiStudio() {
 ========================= */
 
 const LANDING_PAGE_TEMPLATES = [
-  { id:"product-launch", name:"Product Launch", category:"Product", layout:"product", accent:"#7c5cff", bg:"#090b12", surface:"#111522", headline:"Meet the product built to make everyday work simpler.", sub:"A focused launch page with product visuals, benefits and one clear action.", cta:"Get yours today", badge:"NEW" },
+  { id:"product-launch", name:"Product Launch", category:"Product", layout:"product", accent:"#6d54e8", bg:"#f7f5ff", surface:"#ffffff", headline:"Meet the product built to make everyday work simpler.", sub:"A focused launch page with product visuals, benefits and one clear action.", cta:"Get yours today", badge:"NEW" },
   { id:"product-offer", name:"Flash Product Offer", category:"Product", layout:"offer", accent:"#ff7a59", bg:"#0b0b0d", surface:"#171216", headline:"A limited-time offer worth acting on.", sub:"Put the product, price and urgency at the center of the page.", cta:"Claim the offer", badge:"LIMITED" },
   { id:"premium-product", name:"Premium Product", category:"Product", layout:"luxury", accent:"#d7b46a", bg:"#0a0a0a", surface:"#151310", headline:"Crafted for customers who expect more.", sub:"A refined product page for premium positioning and higher-value offers.", cta:"Discover the product", badge:"PREMIUM" },
-  { id:"beauty-product", name:"Beauty Product", category:"Product", layout:"beauty", accent:"#ff8bb6", bg:"#130d12", surface:"#1d1219", headline:"Your next beauty essential starts here.", sub:"Show the product, benefits, social proof and a direct purchase action.", cta:"Shop the offer", badge:"BEAUTY" },
+  { id:"beauty-product", name:"Beauty Product", category:"Product", layout:"beauty", accent:"#d96a98", bg:"#fff5f8", surface:"#ffffff", headline:"Your next beauty essential starts here.", sub:"Show the product, benefits, social proof and a direct purchase action.", cta:"Shop the offer", badge:"BEAUTY" },
   { id:"tech-product", name:"Tech Product", category:"Product", layout:"tech", accent:"#4db8ff", bg:"#071019", surface:"#0d1924", headline:"Smarter technology. Clearer results.", sub:"Built for tech products, gadgets, devices and software-enabled offers.", cta:"See it in action", badge:"TECH" },
 
-  { id:"local-service", name:"Local Service", category:"Service", layout:"service", accent:"#59d7a4", bg:"#08100d", surface:"#0f1a16", headline:"A trusted local service, ready when you need it.", sub:"Turn local ad traffic into calls, quotes and WhatsApp conversations.", cta:"Get a quote", badge:"LOCAL" },
+  { id:"local-service", name:"Local Service", category:"Service", layout:"service", accent:"#328e68", bg:"#f3fbf7", surface:"#ffffff", headline:"A trusted local service, ready when you need it.", sub:"Turn local ad traffic into calls, quotes and WhatsApp conversations.", cta:"Get a quote", badge:"LOCAL" },
   { id:"emergency-service", name:"Emergency Service", category:"Service", layout:"urgent", accent:"#ff675f", bg:"#130a09", surface:"#1c1110", headline:"Need help now? We are ready.", sub:"A direct-response layout for urgent services and high-intent customers.", cta:"Call now", badge:"FAST RESPONSE" },
   { id:"consulting", name:"Consulting Service", category:"Service", layout:"consult", accent:"#8b7cff", bg:"#0b0b13", surface:"#151421", headline:"Turn expertise into a clear next step.", sub:"Explain the problem you solve, your approach and how customers can start.", cta:"Book a consultation", badge:"EXPERT" },
-  { id:"cleaning", name:"Cleaning Service", category:"Service", layout:"clean", accent:"#57c6e1", bg:"#071116", surface:"#0e1b20", headline:"A cleaner space without the hassle.", sub:"Perfect for residential, office and specialized cleaning campaigns.", cta:"Request a quote", badge:"SERVICE" },
+  { id:"cleaning", name:"Cleaning Service", category:"Service", layout:"clean", accent:"#319ab5", bg:"#f2fbfd", surface:"#ffffff", headline:"A cleaner space without the hassle.", sub:"Perfect for residential, office and specialized cleaning campaigns.", cta:"Request a quote", badge:"SERVICE" },
   { id:"repair", name:"Repair Service", category:"Service", layout:"repair", accent:"#f0a44b", bg:"#120e08", surface:"#1c160d", headline:"Fast repairs. Clear communication. No guesswork.", sub:"Show the issue you solve, service area, trust signals and direct contact.", cta:"Get help now", badge:"REPAIR" },
 
-  { id:"spa", name:"Spa & Wellness", category:"Beauty & Wellness", layout:"spa", accent:"#c79cff", bg:"#100b14", surface:"#1a1320", headline:"Make time for the reset you deserve.", sub:"A calm premium layout for spa, massage, wellness and beauty offers.", cta:"Book your session", badge:"WELLNESS" },
+  { id:"spa", name:"Spa & Wellness", category:"Beauty & Wellness", layout:"spa", accent:"#9e72c9", bg:"#fbf6ff", surface:"#ffffff", headline:"Make time for the reset you deserve.", sub:"A calm premium layout for spa, massage, wellness and beauty offers.", cta:"Book your session", badge:"WELLNESS" },
   { id:"salon", name:"Salon Promotion", category:"Beauty & Wellness", layout:"salon", accent:"#ff9ec7", bg:"#140c12", surface:"#21131b", headline:"Your next look starts with one booking.", sub:"Promote a treatment, stylist, package or first-visit offer.", cta:"Book now", badge:"SALON" },
   { id:"fitness", name:"Fitness Offer", category:"Beauty & Wellness", layout:"fitness", accent:"#a8f05a", bg:"#0a0f07", surface:"#141b0f", headline:"Start stronger. Stay consistent.", sub:"A high-energy layout for gyms, coaches, classes and transformation offers.", cta:"Start today", badge:"FITNESS" },
-  { id:"dental", name:"Dental Service", category:"Health", layout:"dental", accent:"#5fd7ff", bg:"#071116", surface:"#0e1b21", headline:"A confident smile starts with the right care.", sub:"Explain the treatment, answer common concerns and drive appointment requests.", cta:"Book an appointment", badge:"DENTAL" },
-  { id:"clinic", name:"Clinic Appointment", category:"Health", layout:"clinic", accent:"#73e0b1", bg:"#07110e", surface:"#0d1a15", headline:"Professional care with a simpler booking experience.", sub:"A clean appointment-focused page for clinics and healthcare services.", cta:"Request appointment", badge:"CARE" },
+  { id:"dental", name:"Dental Service", category:"Health", layout:"dental", accent:"#2f9fcc", bg:"#f1fbff", surface:"#ffffff", headline:"A confident smile starts with the right care.", sub:"Explain the treatment, answer common concerns and drive appointment requests.", cta:"Book an appointment", badge:"DENTAL" },
+  { id:"clinic", name:"Clinic Appointment", category:"Health", layout:"clinic", accent:"#31956c", bg:"#f4fcf8", surface:"#ffffff", headline:"Professional care with a simpler booking experience.", sub:"A clean appointment-focused page for clinics and healthcare services.", cta:"Request appointment", badge:"CARE" },
 
   { id:"restaurant", name:"Restaurant Offer", category:"Hospitality", layout:"restaurant", accent:"#ffb457", bg:"#120c07", surface:"#1d150d", headline:"One offer designed to fill more tables.", sub:"Highlight a signature dish, menu offer, event or reservation campaign.", cta:"Reserve a table", badge:"FOOD" },
-  { id:"hotel", name:"Hotel Stay", category:"Hospitality", layout:"hotel", accent:"#e4c37b", bg:"#0e0d0a", surface:"#191711", headline:"Turn the next trip into a better stay.", sub:"Show rooms, experience, location and the strongest booking reason.", cta:"Check availability", badge:"STAY" },
-  { id:"travel", name:"Travel Package", category:"Hospitality", layout:"travel", accent:"#65c9ff", bg:"#071018", surface:"#0d1923", headline:"Your next escape is closer than it feels.", sub:"Built for travel packages, tours, excursions and destination offers.", cta:"Explore the package", badge:"TRAVEL" },
+  { id:"hotel", name:"Hotel Stay", category:"Hospitality", layout:"hotel", accent:"#a67c32", bg:"#fbf7ee", surface:"#ffffff", headline:"Turn the next trip into a better stay.", sub:"Show rooms, experience, location and the strongest booking reason.", cta:"Check availability", badge:"STAY" },
+  { id:"travel", name:"Travel Package", category:"Hospitality", layout:"travel", accent:"#3f8fc2", bg:"#f2f9fd", surface:"#ffffff", headline:"Your next escape is closer than it feels.", sub:"Built for travel packages, tours, excursions and destination offers.", cta:"Explore the package", badge:"TRAVEL" },
 
-  { id:"real-estate", name:"Property Lead", category:"Real Estate", layout:"property", accent:"#cdb47a", bg:"#0c0c0a", surface:"#171611", headline:"A property worth seeing in person.", sub:"Show the property, key facts and capture qualified buyer or renter leads.", cta:"Schedule a viewing", badge:"PROPERTY" },
+  { id:"real-estate", name:"Property Lead", category:"Real Estate", layout:"property", accent:"#9d7a3d", bg:"#faf7f0", surface:"#ffffff", headline:"A property worth seeing in person.", sub:"Show the property, key facts and capture qualified buyer or renter leads.", cta:"Schedule a viewing", badge:"PROPERTY" },
   { id:"real-estate-agent", name:"Real Estate Agent", category:"Real Estate", layout:"agent", accent:"#7aa9ff", bg:"#080c13", surface:"#101824", headline:"Find the right property with a clearer process.", sub:"Position the agent, local expertise and a direct consultation path.", cta:"Talk to an agent", badge:"REAL ESTATE" },
 
   { id:"saas", name:"SaaS Conversion", category:"Digital", layout:"saas", accent:"#7c5cff", bg:"#080a12", surface:"#111523", headline:"One product. One clear reason to start.", sub:"A focused SaaS landing page for demos, trials and lead generation.", cta:"Start now", badge:"SAAS" },
   { id:"agency", name:"Agency Lead Gen", category:"Digital", layout:"agency", accent:"#ff6f91", bg:"#11090e", surface:"#1d1118", headline:"Turn your next campaign into measurable growth.", sub:"Show the service, proof, process and one strong lead-generation CTA.", cta:"Get a proposal", badge:"AGENCY" },
-  { id:"app-launch", name:"App Launch", category:"Digital", layout:"app", accent:"#65b7ff", bg:"#080d14", surface:"#101925", headline:"A better way to get the job done — now in your pocket.", sub:"Launch an app with benefits, screenshots, proof and store actions.", cta:"Get the app", badge:"APP" },
+  { id:"app-launch", name:"App Launch", category:"Digital", layout:"app", accent:"#397fc4", bg:"#f4f8fd", surface:"#ffffff", headline:"A better way to get the job done — now in your pocket.", sub:"Launch an app with benefits, screenshots, proof and store actions.", cta:"Get the app", badge:"APP" },
   { id:"webinar", name:"Webinar Registration", category:"Digital", layout:"webinar", accent:"#b184ff", bg:"#0e0914", surface:"#181022", headline:"One session. Practical answers you can use immediately.", sub:"Drive registrations with a clear topic, agenda, host and registration form.", cta:"Save my seat", badge:"LIVE" },
   { id:"course", name:"Course Enrollment", category:"Digital", layout:"course", accent:"#f0b45e", bg:"#110d07", surface:"#1d160c", headline:"Learn the skill. Apply it with confidence.", sub:"Sell a focused course with outcomes, modules, instructor proof and enrollment CTA.", cta:"Enroll now", badge:"COURSE" },
 
   { id:"event", name:"Event Registration", category:"Campaign", layout:"event", accent:"#ff6a78", bg:"#12090b", surface:"#1d1115", headline:"Make this the event people do not want to miss.", sub:"Promote a date, location, experience and registration action.", cta:"Register now", badge:"EVENT" },
-  { id:"lead-magnet", name:"Lead Magnet", category:"Campaign", layout:"lead", accent:"#66d7bb", bg:"#07110f", surface:"#0e1a17", headline:"Get the guide that makes the next step easier.", sub:"Capture leads with a downloadable guide, checklist, audit or resource.", cta:"Get the free guide", badge:"FREE" },
-  { id:"quote-request", name:"Quote Request", category:"Campaign", layout:"quote", accent:"#6da8ff", bg:"#080d14", surface:"#101824", headline:"Tell us what you need. Get a clear next step.", sub:"A simple conversion page for custom pricing and service requests.", cta:"Request my quote", badge:"QUOTE" },
+  { id:"lead-magnet", name:"Lead Magnet", category:"Campaign", layout:"lead", accent:"#3a9a83", bg:"#f2fbf8", surface:"#ffffff", headline:"Get the guide that makes the next step easier.", sub:"Capture leads with a downloadable guide, checklist, audit or resource.", cta:"Get the free guide", badge:"FREE" },
+  { id:"quote-request", name:"Quote Request", category:"Campaign", layout:"quote", accent:"#477fce", bg:"#f5f8fe", surface:"#ffffff", headline:"Tell us what you need. Get a clear next step.", sub:"A simple conversion page for custom pricing and service requests.", cta:"Request my quote", badge:"QUOTE" },
   { id:"whatsapp-offer", name:"WhatsApp Offer", category:"Campaign", layout:"whatsapp", accent:"#45d483", bg:"#07110c", surface:"#0e1b14", headline:"Interested? Continue directly on WhatsApp.", sub:"A fast mobile-first offer page designed around WhatsApp conversations.", cta:"Chat on WhatsApp", badge:"WHATSAPP" },
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
@@ -1791,6 +1954,14 @@ function landingCurrencySymbol(code) {
   return LANDING_CURRENCIES.find(([value]) => value === code)?.[1] || code;
 }
 
+function landingTextForBackground(hex) {
+  const value = String(hex || "#090b12").replace("#", "");
+  if (!/^[0-9a-f]{6}$/i.test(value)) return "#f7f8fb";
+  const r = parseInt(value.slice(0,2),16), g = parseInt(value.slice(2,4),16), b = parseInt(value.slice(4,6),16);
+  const luminance = (0.2126*r + 0.7152*g + 0.0722*b) / 255;
+  return luminance > .66 ? "#18202a" : "#f7f8fb";
+}
+
 function defaultLandingPageData(templateId = "product-launch") {
   const template = landingTemplateById(templateId);
   const c = state.company || {};
@@ -1818,7 +1989,7 @@ function defaultLandingPageData(templateId = "product-launch") {
     accent: template.accent,
     background: template.bg,
     surface: template.surface,
-    textColor: "#f7f8fb",
+    textColor: landingTextForBackground(template.bg),
     direction: "ltr",
     benefits: "Clear value proposition\nFast customer response\nSimple next step",
     testimonial: "Add a short customer quote or trust statement here.",
@@ -2021,7 +2192,7 @@ function renderLandingPagesSection() {
 
         <div id="lpb-template-grid" class="lpb-template-grid">
           ${LANDING_PAGE_TEMPLATES.map((item) => `
-            <article class="lpb-template-card" data-template-category="${escapeHtml(item.category)}">
+            <article class="lpb-template-card layout-${escapeHtml(item.layout)}" data-template-category="${escapeHtml(item.category)}">
               <div class="lpb-template-preview" style="--preview-bg:${item.bg};--preview-surface:${item.surface};--preview-accent:${item.accent}">
                 <div class="lpb-template-mini-nav"><i></i><span></span></div>
                 <div class="lpb-template-mini-body">

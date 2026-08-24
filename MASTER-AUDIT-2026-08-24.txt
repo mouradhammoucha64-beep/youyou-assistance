@@ -1,0 +1,28 @@
+YOUYOU MASTER AUDIT — 2026-08-24
+
+BASE
+- Source reviewed: full uploaded project “youyou-assistance-main (4).zip”.
+- Vite SPA + Supabase + Vercel serverless SEO audit.
+- main.js ~7.3k lines and style.css ~7.8k lines: current architecture is workable but large single-file CSS/JS increases regression risk.
+
+HIGH PRIORITY FINDINGS
+1. SEO desktop had several layers of CSS overrides from V4.13/V4.14/V4.15 and older rules. These were competing at normal browser zoom and caused oversized hero/configuration. Added a final compact/readable override rather than changing SEO logic.
+2. AI Studio route exists and renders correctly in this base. UI text was unusually small (many 6–8px labels). Increased desktop readability without changing generation logic.
+3. Landing Page Builder dedicated routes exist and are healthy:
+   /dashboard/landing-pages/new?template=...
+   /dashboard/landing-pages/edit/:id
+4. Landing template presets used many dark palettes and the gallery shared nearly identical mini layouts. Added light/pastel palettes to multiple presets, automatic contrast text, and layout-specific visual geometry.
+5. Public marketing site was English-only. Added EN / FR / AR selector, persisted in localStorage, with RTL for Arabic and translations for the major acquisition sections.
+6. Public homepage did not showcase Smart Landing Pages despite it becoming a core product pillar. Added a dedicated visual section.
+
+FUNCTIONAL / PRODUCTION GAPS STILL INTENTIONALLY OPEN
+- AI generation API is not connected yet.
+- Image / voice / final video generation APIs are not connected yet.
+- WhatsApp Business API is not connected yet.
+- Landing Page public publishing, server-side storage and analytics are not connected yet.
+- Paddle checkout/webhooks/legal verification are not connected yet.
+- Security hardening / final RLS review / rate limiting still required.
+- Full mobile QA should happen after desktop is locked.
+
+RECOMMENDED NEXT PHASE
+Functional QA -> Desktop polish -> Mobile QA -> Security -> Landing publishing backend -> AI APIs -> WhatsApp API -> Paddle -> Domain -> Production E2E -> Launch.

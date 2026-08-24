@@ -522,3 +522,15 @@ Changes:
 - Existing draft storage, currencies, WhatsApp actions, templates and HTML export retained
 - Added several light color palettes in the workspace preview controls
 - SEO and AI Studio logic were not modified
+
+
+## MASTER QA / UI CONSOLIDATION — 2026-08-24
+- Reviewed the full uploaded project as the new master base.
+- SEO compact/readability fix at 100% desktop zoom.
+- AI Studio desktop typography/readability pass; generation workflow logic unchanged.
+- Landing template gallery now includes light/pastel and dark themes with more varied visual layouts.
+- Added automatic landing-page text contrast for light templates.
+- Added public-site EN / FR / AR language switcher with Arabic RTL.
+- Added Smart Landing Pages showcase to the public homepage.
+- No SQL migration added.
+- See `MASTER-AUDIT-2026-08-24.txt` for remaining production gaps.
