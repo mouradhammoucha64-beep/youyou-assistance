@@ -534,3 +534,17 @@ Changes:
 - Added Smart Landing Pages showcase to the public homepage.
 - No SQL migration added.
 - See `MASTER-AUDIT-2026-08-24.txt` for remaining production gaps.
+
+
+## MASTER Premium Soft-Dark Theme
+Visual polish applied on the latest full-project base.
+
+Direction:
+- Deep navy / graphite instead of near-black
+- Soft violet accents
+- Warm off-white text
+- Lighter premium cards, forms and dashboard chrome
+- Landing Page customer-created themes remain independent
+
+No application logic or routes were changed.
+See `PREMIUM-THEME-AUDIT-2026-08-24.txt`.

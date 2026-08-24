@@ -7897,3 +7897,353 @@ body::-webkit-scrollbar-thumb:hover,
 
 @media(max-width:900px){.landing-pages-showcase{grid-template-columns:1fr;padding:65px 22px}.landing-pages-showcase-visuals{max-width:620px}.public-language-switch{order:3}}
 @media(max-width:560px){.landing-pages-showcase-visuals{grid-template-columns:1fr 1fr;gap:7px}.landing-mini{min-height:160px;padding:12px}.landing-mini-wellness,.landing-mini-bold{transform:none}.public-language-switch button{min-width:28px}}
+
+
+/* =========================================================
+   YOUYOU MASTER — PREMIUM SOFT DARK THEME
+   Visual-only layer.
+   Direction: deep navy + graphite + soft violet + warm white.
+   No application logic, routes, data flow or API behavior changed.
+   ========================================================= */
+
+:root{
+  --bg:#0d1320;
+  --bg-soft:#121a29;
+  --card:rgba(24,32,47,.88);
+  --card-solid:#182131;
+  --border:rgba(194,205,225,.10);
+  --border-bright:rgba(204,214,232,.18);
+  --text:#f3f5f8;
+  --muted:#9aa6b7;
+  --muted-2:#6f7b8d;
+  --accent:#8c78ff;
+  --accent-2:#6f76f4;
+  --accent-soft:rgba(140,120,255,.14);
+  --success:#43cf91;
+  --danger:#ff6f82;
+  --shadow:0 24px 70px rgba(5,10,20,.26);
+}
+
+/* Global atmosphere */
+html,
+body{
+  background:#0d1320!important;
+}
+
+body{
+  background:
+    radial-gradient(circle at 12% 4%,rgba(119,102,238,.13),transparent 31%),
+    radial-gradient(circle at 88% 10%,rgba(71,121,191,.09),transparent 27%),
+    linear-gradient(180deg,#0e1523 0%,#101827 48%,#0d1421 100%)!important;
+  color:var(--text);
+}
+
+/* Main marketing site */
+.landing{
+  background:
+    radial-gradient(circle at 14% 8%,rgba(139,115,255,.12),transparent 31%),
+    radial-gradient(circle at 88% 20%,rgba(67,116,178,.08),transparent 30%),
+    linear-gradient(180deg,#101827 0%,#121b2b 46%,#0e1624 100%)!important;
+}
+
+.landing-nav::before{
+  background:rgba(16,24,39,.82)!important;
+  border-bottom-color:rgba(203,214,232,.08)!important;
+}
+
+.hero-section,
+.features-section,
+.how-section,
+.pricing-section,
+.faq-section,
+.final-cta,
+.landing-pages-showcase{
+  position:relative;
+}
+
+.hero-visual,
+.feature-card,
+.pricing-card,
+.dashboard-card,
+.dashboard-hero,
+.settings-card,
+.billing-card,
+.ai-card,
+.seo-card,
+.rescue-card,
+.whatsapp-card,
+.knowledge-card{
+  border-color:rgba(199,210,229,.10)!important;
+  box-shadow:0 18px 55px rgba(5,10,19,.18)!important;
+}
+
+/* Dashboard shell */
+.dashboard{
+  background:
+    radial-gradient(circle at 78% 3%,rgba(118,99,229,.08),transparent 30%),
+    linear-gradient(180deg,#0f1726 0%,#111a2a 100%)!important;
+}
+
+.sidebar{
+  background:
+    linear-gradient(180deg,#141d2c 0%,#111927 100%)!important;
+  border-right-color:rgba(199,210,229,.09)!important;
+  box-shadow:14px 0 40px rgba(5,10,20,.10);
+}
+
+.dashboard-main{
+  background:transparent!important;
+}
+
+.dashboard-card,
+.dashboard-hero{
+  background:
+    linear-gradient(145deg,rgba(27,37,54,.94),rgba(22,31,47,.90))!important;
+}
+
+.dashboard-hero{
+  background:
+    radial-gradient(circle at 80% 0%,rgba(140,120,255,.15),transparent 37%),
+    linear-gradient(145deg,rgba(29,39,57,.96),rgba(22,31,47,.92))!important;
+}
+
+.dashboard-nav button:hover{
+  color:#f5f7fa!important;
+  background:rgba(218,226,239,.055)!important;
+}
+
+.dashboard-nav button.active{
+  color:#fff!important;
+  background:
+    linear-gradient(90deg,rgba(140,120,255,.16),rgba(104,111,230,.09))!important;
+  box-shadow:inset 0 0 0 1px rgba(152,137,255,.10);
+}
+
+/* Forms and controls */
+input,
+textarea,
+select{
+  border-color:rgba(200,211,230,.10)!important;
+}
+
+.dashboard input,
+.dashboard textarea,
+.dashboard select,
+.landing-builder-page input,
+.landing-builder-page textarea,
+.landing-builder-page select,
+.lpw-shell input,
+.lpw-shell textarea,
+.lpw-shell select{
+  background:#151f2e!important;
+  color:#eef2f6!important;
+  border-color:rgba(204,215,233,.11)!important;
+}
+
+.dashboard input:focus,
+.dashboard textarea:focus,
+.dashboard select:focus,
+.landing-builder-page input:focus,
+.landing-builder-page textarea:focus,
+.landing-builder-page select:focus,
+.lpw-shell input:focus,
+.lpw-shell textarea:focus,
+.lpw-shell select:focus{
+  border-color:rgba(140,120,255,.38)!important;
+  box-shadow:0 0 0 3px rgba(140,120,255,.07)!important;
+}
+
+/* Buttons */
+.primary{
+  background:linear-gradient(135deg,#8c78ff,#6873ed)!important;
+  box-shadow:0 10px 28px rgba(95,87,209,.22)!important;
+}
+
+.primary:hover{
+  box-shadow:0 14px 34px rgba(95,87,209,.30)!important;
+}
+
+.secondary,
+.lpb-secondary{
+  background:rgba(218,225,238,.045)!important;
+  border-color:rgba(206,216,233,.12)!important;
+}
+
+/* Marketing feature / pricing surfaces */
+.feature-card,
+.pricing-card{
+  background:
+    radial-gradient(circle at 88% 0%,rgba(135,116,255,.09),transparent 36%),
+    linear-gradient(145deg,rgba(29,39,57,.88),rgba(22,31,47,.85))!important;
+}
+
+.pricing-card{
+  border-color:rgba(145,129,255,.22)!important;
+  box-shadow:0 24px 70px rgba(5,10,20,.22)!important;
+}
+
+/* SEO — keep content readable, not pitch-black */
+.seo-growth-page .dashboard-card,
+.seo-keyword-lab,
+.seo-analysis-summary,
+.seo-focus-market,
+.seo-input-strip,
+.seo-website-audit{
+  background:
+    linear-gradient(145deg,rgba(27,37,54,.96),rgba(21,30,45,.94))!important;
+  border-color:rgba(199,210,229,.09)!important;
+}
+
+.seo-growth-page{
+  color:#eef2f7;
+}
+
+/* AI Studio */
+.ai-studio-page,
+.ai-studio-workspace,
+.ai-studio-shell{
+  background:transparent!important;
+}
+
+.ai-studio-page .dashboard-card,
+.ai-studio-workspace .dashboard-card,
+.ai-studio-shell .dashboard-card{
+  background:
+    linear-gradient(145deg,rgba(28,38,55,.96),rgba(22,31,47,.94))!important;
+}
+
+/* Landing Pages dashboard */
+.landing-builder-page .dashboard-card{
+  background:
+    linear-gradient(145deg,rgba(28,38,55,.96),rgba(22,31,47,.94))!important;
+}
+
+.lpb-template-card{
+  background:#182131!important;
+  border-color:rgba(199,210,229,.09)!important;
+}
+
+.lpb-template-info,
+.lpb-editor-head{
+  background:#182131!important;
+}
+
+/* Dedicated landing-page workspace chrome only.
+   User-created landing page preview keeps its own selected theme/colors. */
+.lpw-shell{
+  background:
+    radial-gradient(circle at 78% 0%,rgba(128,109,242,.08),transparent 28%),
+    linear-gradient(180deg,#101827,#121b2b)!important;
+}
+
+.lpw-topbar{
+  background:rgba(18,27,43,.95)!important;
+  border-bottom-color:rgba(202,213,231,.09)!important;
+}
+
+.lpw-editor{
+  background:#141e2d!important;
+  border-right-color:rgba(202,213,231,.08)!important;
+}
+
+.lpw-editor-intro{
+  background:
+    radial-gradient(circle at 0 0,rgba(140,120,255,.10),transparent 42%),
+    #141e2d!important;
+}
+
+.lpw-canvas{
+  background:
+    linear-gradient(rgba(219,226,238,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(219,226,238,.025) 1px,transparent 1px),
+    #101827!important;
+  background-size:24px 24px!important;
+}
+
+.lpw-canvas-toolbar{
+  background:#151f2e!important;
+  border-bottom-color:rgba(202,213,231,.08)!important;
+}
+
+.lpw-back,
+.lpw-top-actions button,
+.lpw-editor-footer button{
+  background:#182334!important;
+  border-color:rgba(203,214,232,.10)!important;
+}
+
+/* Conversation / leads / lists */
+.conversation-list,
+.conversation-panel,
+.lead-card,
+.pipeline-card,
+.saved-knowledge-card{
+  border-color:rgba(201,212,230,.09)!important;
+}
+
+/* Scrollbars */
+html,
+body,
+.dashboard,
+.dashboard-sidebar,
+.dashboard-main,
+.dashboard-content,
+.faq-page,
+.landing{
+  scrollbar-color:#536176 #151e2d!important;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.dashboard::-webkit-scrollbar-track,
+.dashboard-sidebar::-webkit-scrollbar-track,
+.dashboard-main::-webkit-scrollbar-track,
+.dashboard-content::-webkit-scrollbar-track,
+.faq-page::-webkit-scrollbar-track,
+.landing::-webkit-scrollbar-track{
+  background:#151e2d!important;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.dashboard::-webkit-scrollbar-thumb,
+.dashboard-sidebar::-webkit-scrollbar-thumb,
+.dashboard-main::-webkit-scrollbar-thumb,
+.dashboard-content::-webkit-scrollbar-thumb,
+.faq-page::-webkit-scrollbar-thumb,
+.landing::-webkit-scrollbar-thumb{
+  background:#4a586d!important;
+  border-color:#151e2d!important;
+}
+
+/* Softer white hierarchy */
+.dashboard-header h2,
+.dashboard-hero h1,
+.landing h1,
+.landing h2,
+.landing h3{
+  color:#f2f4f8;
+}
+
+.dashboard-header small,
+.dashboard-card small,
+.dashboard-hero small{
+  color:#8490a2!important;
+}
+
+/* Auth / modal-like common surfaces */
+.modal,
+.dialog,
+.auth-card,
+.login-card,
+.signup-card{
+  background:#182131!important;
+  border-color:rgba(202,213,231,.10)!important;
+}
+
+/* Mobile companion remains visually consistent; no layout redesign here */
+@media(max-width:768px){
+  .sidebar{
+    background:#141d2c!important;
+  }
+}

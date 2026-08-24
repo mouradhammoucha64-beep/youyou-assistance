@@ -1,0 +1,47 @@
+YOUYOU MASTER — PRE-FLIGHT AUDIT + PREMIUM THEME
+Date: 2026-08-24
+
+SOURCE
+- Base file: youyou-assistance-main (5).zip
+- Project root: youyou-assistance-main
+
+PRE-FLIGHT CHECKS
+- OK — Landing Pages route
+- OK — Landing Pages builder route
+- OK — AI Studio route
+- OK — SEO Growth route
+- OK — Revenue Rescue present
+- OK — WhatsApp AI present
+- OK — Starter $29 present
+- OK — Growth $59 present
+- OK — Pro $99 present
+- OK — French locale/content present
+- OK — Arabic locale/content present
+
+WHAT CHANGED IN THIS BUILD
+- Visual theme only.
+- Removed the near-black dominance from the main YOUYOU shell.
+- New direction: deep navy / graphite / soft violet / warm white.
+- Dashboard background, sidebar, cards, inputs, pricing, marketing surfaces, SEO shell,
+  AI Studio shell, Landing Pages dashboard and dedicated Landing Page Workspace chrome
+  were softened and made more premium.
+- User-created Landing Page preview colors are NOT overridden. Their own selected
+  palettes/themes remain independent.
+- No business logic, routes, database behavior, API logic, auth flow or pricing logic changed.
+
+IMPORTANT
+- This is not a redesign of functionality.
+- It is a global visual polish layer placed at the end of style.css so it safely wins
+  over older dark rules without deleting working CSS.
+- Full desktop QA is still required in the browser after deployment because this project
+  contains a large amount of historical CSS and multiple version layers.
+
+NEXT QA ITEMS
+1. Homepage visual scan at 100% zoom.
+2. Dashboard Overview / Conversations / Leads / Knowledge.
+3. SEO at 100% zoom.
+4. AI Studio readability and workspace.
+5. Landing Pages gallery + dedicated builder.
+6. Settings / Billing.
+7. EN / FR / AR visual check.
+8. Mobile companion-only check.
