@@ -1,0 +1,37 @@
+YOUYOU V4.22 — PSYCHOLOGY COLOR + SIDEBAR ICON POLISH
+Date: 2026-08-24
+
+BASE
+- YOUYOU MASTER V4.21 Premium Soft Dark
+
+WHAT CHANGED
+1. Replaced text-symbol sidebar icons with one consistent professional SVG icon family.
+2. Icons now share the same size, stroke, alignment, active state and hover behavior.
+3. Added psychology-driven color hierarchy:
+   - Deep navy / blue: trust and professionalism
+   - Soft violet: AI / creativity / premium
+   - Teal / green: success, human communication, conversion
+   - Champagne / amber: value and attention without alarm
+   - Dusty blush: subtle warmth / feminine inclusivity
+   - Warm white: visual comfort and readability
+4. Applied module identity tints carefully:
+   SEO = blue
+   AI Studio = violet
+   Landing Pages = teal
+   Revenue Rescue = amber
+   WhatsApp = green
+   Billing = champagne
+5. Kept the product neutral/unisex. Feminine warmth is intentionally subtle.
+6. Customer-created Landing Page themes remain independent and are not overwritten.
+
+DESIGN PRINCIPLE
+Approx. 80% calm neutral base + 15% brand accent + 5% semantic/emotional color.
+
+NOT CHANGED
+- Routes
+- Business logic
+- API logic
+- Database
+- Pricing
+- Auth
+- Landing Page user themes

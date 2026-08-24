@@ -548,3 +548,11 @@ Direction:
 
 No application logic or routes were changed.
 See `PREMIUM-THEME-AUDIT-2026-08-24.txt`.
+
+
+## V4.22 — Psychology Color + Sidebar Icon System
+- Unified SVG sidebar icons
+- Psychology-driven premium palette
+- Subtle module identity colors
+- Calm, premium, inclusive visual direction with restrained feminine warmth
+- Functional logic unchanged
