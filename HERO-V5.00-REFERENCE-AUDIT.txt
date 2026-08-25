@@ -1,0 +1,14 @@
+YOUYOU HERO V5.00 — APPROVED REFERENCE REBUILD
+
+Scope: HERO ONLY.
+- Rebuilt hero composition from the approved visual reference.
+- Strong full-platform hook.
+- Large integrated dashboard visual.
+- Recognizable social platform badges.
+- Clear Idea → Campaign → Landing Page → Lead → Follow-up sequence.
+- Motion follows that sequence; no random floating cards.
+- Deep navy + rose/mauve.
+- Mobile responsive.
+- Existing hero button IDs preserved.
+
+Everything after Hero remains unchanged.

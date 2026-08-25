@@ -261,94 +261,101 @@ function renderLanding() {
 
       <main>
 
-        <section class="hero-section hero-platform-v426">
+        <section class="hero-v500">
+          <div class="hero-v500-bg" aria-hidden="true"></div>
 
-          <div class="hero-copy">
-            <div class="eyebrow">
-              <span class="pulse"></span>
-              AI GROWTH PLATFORM
-            </div>
+          <div class="hero-v500-copy">
+            <div class="hero-v500-badge"><span>✦</span> ALL-IN-ONE AI GROWTH WORKSPACE</div>
+            <h1>Turn one idea into a <span>campaign, landing page and qualified lead.</span></h1>
+            <p>YOUYOU connects AI Studio, Smart Landing Pages, SEO Growth, Conversations, Revenue Rescue and WhatsApp AI in one clear workflow — from attention to follow-up.</p>
 
-            <h1>
-              Turn one idea into a
-              <span>campaign, landing page and qualified lead.</span>
-            </h1>
-
-            <p class="hero-text">
-              YOUYOU connects AI Studio, Smart Landing Pages, SEO Growth, AI Conversations,
-              Revenue Rescue and WhatsApp AI in one powerful growth workflow.
-            </p>
-
-            <div class="hero-value-promise">
-              <strong>From idea to action — without jumping between tools.</strong>
-              <span>No confusing credit packs. One predictable monthly plan.</span>
-            </div>
-
-            <div class="hero-hook-line" aria-label="YOUYOU growth workflow">
-              <span>Create</span><i>→</i><span>Launch</span><i>→</i><span>Convert</span><i>→</i><span>Follow up</span>
-            </div>
-
-            <div class="hero-buttons">
+            <div class="hero-v500-actions">
               ${state.user
-                ? `<button id="hero-dashboard" class="primary hero-btn">Open dashboard <span>→</span></button>
-                   <button id="hero-pricing" class="secondary hero-btn">View plans</button>`
-                : `<button id="hero-start" class="primary hero-btn">Start for free <span>→</span></button>
-                   <button id="hero-login" class="secondary hero-btn">See how YOUYOU works</button>`}
+                ? `<button id="hero-dashboard" class="hero-v500-primary">Open dashboard <span>→</span></button>
+                   <button id="hero-pricing" class="hero-v500-secondary">View plans</button>`
+                : `<button id="hero-start" class="hero-v500-primary">Start free <span>→</span></button>
+                   <button id="hero-login" class="hero-v500-secondary">See how it works <span class="play-dot">▶</span></button>`}
             </div>
 
-            <div class="trust">
+            <div class="hero-v500-trust">
               <span>✓ No credit card required</span>
               <span>✓ No confusing credit packs</span>
               <span>✓ One connected workspace</span>
             </div>
           </div>
 
-          <div class="hero-visual hero-growth-cockpit" aria-label="YOUYOU growth platform preview">
-            <div class="hero-cockpit-glow"></div>
-
-            <div class="hero-cockpit-shell">
-              <div class="hero-cockpit-top">
-                <div class="hero-cockpit-brand">
-                  <span class="mini-logo">Y</span>
-                  <div><strong>YOUYOU</strong><small>Growth workspace</small></div>
+          <div class="hero-v500-product" aria-label="YOUYOU product workflow preview">
+            <div class="product-frame-v500">
+              <div class="product-top-v500">
+                <div class="product-logo-v500">
+                  <span class="product-logo-mark-v500"><i></i><b></b></span>
+                  <strong>YOUYOU</strong>
                 </div>
-                <span class="hero-live-pill"><i></i> LIVE</span>
+                <div class="product-welcome-v500">
+                  <strong>Welcome back 👋</strong>
+                  <small>Here’s what’s happening with your growth today.</small>
+                </div>
+                <div class="product-status-v500"><i></i> LIVE</div>
               </div>
 
-              <div class="hero-cockpit-main">
-                <div class="hero-campaign-card">
-                  <small>01 · AI STUDIO</small>
-                  <strong>Campaign ready</strong>
-                  <p>Hook + ad + landing message</p>
-                  <div class="hero-campaign-lines"><i></i><i></i><i></i></div>
-                </div>
+              <div class="product-body-v500">
+                <aside class="product-side-v500">
+                  <span class="active"><i>⌂</i> Home</span>
+                  <span><i>✦</i> AI Studio</span>
+                  <span><i>▣</i> Landing Pages</span>
+                  <span><i>◌</i> Conversations</span>
+                  <span><i>◎</i> Leads</span>
+                  <span><i>↗</i> SEO Growth</span>
+                  <span><i>↻</i> Revenue Rescue</span>
+                </aside>
 
-                <div class="hero-landing-card">
-                  <small>02 · SMART LANDING PAGE</small>
-                  <strong>Offer ready to convert</strong>
-                  <p>Focused page · WhatsApp CTA</p>
-                  <button type="button" tabindex="-1">Get the offer →</button>
-                </div>
+                <div class="product-main-v500">
+                  <div class="product-kpis-v500">
+                    <article><small>Visitors</small><strong>24,358</strong><em>↗ 12.5%</em></article>
+                    <article><small>Leads</small><strong>1,842</strong><em>↗ 18.7%</em></article>
+                    <article><small>Conversion</small><strong>7.56%</strong><em>↗ 2.3%</em></article>
+                    <article><small>Revenue</small><strong>$18,642</strong><em>↗ 21.4%</em></article>
+                  </div>
 
-                <div class="hero-lead-card">
-                  <small>03 · NEW LEAD</small>
-                  <div><strong>High buying intent</strong><b>86 HOT</b></div>
-                  <p>Pricing + booking + contact captured</p>
-                </div>
-              </div>
+                  <section class="product-studio-v500">
+                    <div class="product-section-title-v500">
+                      <div><small>AI STUDIO</small><strong>Create for the platforms your customers use.</strong></div>
+                      <span>Campaign ready</span>
+                    </div>
+                    <div class="platform-row-v500">
+                      <div class="p-meta"><span>∞</span><small>Meta</small></div>
+                      <div class="p-facebook"><span>f</span><small>Facebook</small></div>
+                      <div class="p-instagram"><span class="ig-glyph-v500"></span><small>Instagram</small></div>
+                      <div class="p-tiktok"><span>♪</span><small>TikTok</small></div>
+                      <div class="p-youtube"><span>▶</span><small>YouTube</small></div>
+                      <div class="p-linkedin"><span>in</span><small>LinkedIn</small></div>
+                      <div class="p-x"><span>𝕏</span><small>X</small></div>
+                    </div>
+                  </section>
 
-              <div class="hero-cockpit-bottom">
-                <span><i class="seo-dot"></i> SEO action ready</span>
-                <span><i class="rescue-dot"></i> Revenue Rescue watching</span>
-                <span><i class="wa-dot"></i> WhatsApp handoff ready</span>
+                  <section class="product-flow-v500">
+                    <div class="flow-line-v500" aria-hidden="true"><i></i></div>
+                    <article class="flow-step-v500 step-1"><b>1</b><small>IDEA</small><strong>Your business goal</strong></article>
+                    <article class="flow-step-v500 step-2"><b>2</b><small>CAMPAIGN</small><strong>AI creates the ad</strong></article>
+                    <article class="flow-step-v500 step-3"><b>3</b><small>LANDING PAGE</small><strong>Focused conversion page</strong></article>
+                    <article class="flow-step-v500 step-4"><b>4</b><small>LEAD</small><strong>Intent captured</strong></article>
+                    <article class="flow-step-v500 step-5"><b>5</b><small>FOLLOW-UP</small><strong>WhatsApp / Rescue</strong></article>
+                  </section>
+                </div>
               </div>
             </div>
-
-            <div class="hero-float hero-float-studio"><b>✦</b><span><small>AI STUDIO</small><strong>3 ad angles</strong></span></div>
-            <div class="hero-float hero-float-seo"><b>↗</b><span><small>SEO GROWTH</small><strong>7 actions</strong></span></div>
-            <div class="hero-float hero-float-rescue"><b>↻</b><span><small>REVENUE RESCUE</small><strong>Lead needs follow-up</strong></span></div>
           </div>
 
+          <div class="hero-v500-platforms" aria-label="Supported campaign destinations">
+            <span class="platform-label-v500">CREATE FOR</span>
+            <span class="logo-meta-v500"><b>∞</b> Meta</span>
+            <span class="logo-facebook-v500"><b>f</b> Facebook</span>
+            <span class="logo-instagram-v500"><b class="ig-mini-v500"></b> Instagram</span>
+            <span class="logo-tiktok-v500"><b>♪</b> TikTok</span>
+            <span class="logo-youtube-v500"><b>▶</b> YouTube</span>
+            <span class="logo-linkedin-v500"><b>in</b> LinkedIn</span>
+            <span class="logo-x-v500"><b>𝕏</b></span>
+          </div>
         </section>
 
         <section class="stats-section stats-live-strip stats-compact-v426 proof-strip-v427" aria-label="YOUYOU product proof">
