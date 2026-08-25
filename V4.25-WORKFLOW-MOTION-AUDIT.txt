@@ -1,0 +1,25 @@
+YOUYOU V4.25 — CONNECTED WORKFLOW MOTION
+
+SOURCE
+- User supplied: youyou-assistance-main (6).zip
+- Motion reference: explanatory video shared in the conversation.
+
+IMPLEMENTED
+- Added a native animated workflow inside the public Landing Page / HOW IT WORKS section.
+- No heavy embedded video file.
+- Motion is built with CSS + a small IntersectionObserver hook.
+- Animation starts/stops based on viewport visibility.
+- Cards move inward toward the YOUYOU core, then return, showing:
+  AI Studio → Landing Page → AI Conversations → Revenue Rescue → WhatsApp AI.
+- Center core uses a subtle pulse/ring.
+- Connector lines pulse softly.
+- Mobile layout included.
+- Reduced-motion accessibility respected.
+
+NOT CHANGED
+- SEO workspace
+- Supabase/backend
+- API implementation
+- Paddle
+- Pricing logic
+- Dashboard routing
