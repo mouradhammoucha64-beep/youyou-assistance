@@ -369,9 +369,9 @@ function renderLanding() {
 
         <section id="how" class="section how-section how-growth-flow how-v426">
           <div class="section-heading">
-            <div class="eyebrow">ONE CONNECTED FLOW</div>
+            <div class="eyebrow">HOW YOUYOU MOVES WORK FORWARD</div>
             <h2>Build the campaign. Launch the page. <span>Capture the lead. Follow up.</span></h2>
-            <p>YOUYOU connects the steps after the click, so attention has somewhere useful to go.</p>
+            <p>One clear journey from business idea to customer action — without losing context between tools.</p>
           </div>
 
           <div class="journey-track-v426">
@@ -434,7 +434,7 @@ function renderLanding() {
           <div class="growth-platform-shell">
             <div class="growth-platform-copy">
               <div class="eyebrow"><span class="pulse"></span> YOUYOU PLATFORM</div>
-              <h2>Six focused tools.<br><span>One operating system for growth.</span></h2>
+              <h2>Six focused tools.<br><span>One connected growth system.</span></h2>
               <p>
                 Use only what you need today, while every tool stays connected to the same business context,
                 leads and next actions.
@@ -634,7 +634,7 @@ function renderLanding() {
 
         <section class="growth-showcase-section revenue-rescue-showcase">
           <div class="growth-showcase-copy">
-            <div class="eyebrow">RECOVER OPPORTUNITY</div>
+            <div class="eyebrow">REVENUE RESCUE</div>
             <h2>Good leads go quiet.<br><span>YOUYOU helps you catch them.</span></h2>
             <p>
               Instead of letting a high-intent conversation disappear in the inbox,
@@ -694,42 +694,6 @@ function renderLanding() {
           </div>
         </section>
 
-        <section class="ai-studio-showcase" id="ai-studio-showcase">
-          <div class="ai-studio-showcase-copy">
-            <div class="eyebrow">AI STUDIO</div>
-            <h2>Turn one idea into <span>a campaign people can act on.</span></h2>
-            <p>Describe what you want to sell or promote. YOUYOU helps shape the hook, ad copy, social post, email, video script and landing-page message around the same goal.</p>
-            <div class="studio-output-pills"><span>Ad Copy</span><span>Social</span><span>Email</span><span>Video Script</span><span>Landing Copy</span></div>
-            <div class="studio-platforms-v428" aria-label="Create for social platforms">
-              <small>CREATE FOR THE PLATFORMS YOUR CUSTOMERS USE</small>
-              <div class="social-logo-row-v428">
-                <span class="social-logo-chip meta-chip" title="Meta">
-                  <svg viewBox="0 0 64 40" aria-hidden="true"><path d="M7 31c4-13 10-23 16-23 8 0 14 24 18 24 5 0 8-8 12-22" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M57 31C53 18 47 8 41 8c-8 0-14 24-18 24-5 0-8-8-12-22" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
-                  <b>Meta</b>
-                </span>
-                <span class="social-logo-chip facebook-chip" title="Facebook"><span class="fb-mark">f</span><b>Facebook</b></span>
-                <span class="social-logo-chip instagram-chip" title="Instagram"><span class="ig-mark"></span><b>Instagram</b></span>
-                <span class="social-logo-chip tiktok-chip" title="TikTok"><span class="tt-mark">♪</span><b>TikTok</b></span>
-                <span class="social-logo-chip youtube-chip" title="YouTube"><span class="yt-mark">▶</span><b>YouTube</b></span>
-                <span class="social-logo-chip linkedin-chip" title="LinkedIn"><span class="in-mark">in</span><b>LinkedIn</b></span>
-                <span class="social-logo-chip x-chip" title="X"><span class="x-mark">𝕏</span><b>X</b></span>
-              </div>
-            </div>
-          </div>
-          </div>
-          <div class="studio-ad-stage" aria-label="AI Studio campaign output example">
-            <div class="studio-ad-card">
-              <div class="studio-ad-top"><span>CAMPAIGN PREVIEW</span><b>AI STUDIO</b></div>
-              <div class="studio-ad-visual"><i></i><span>YOUR PRODUCT / SERVICE</span></div>
-              <small>HOOK</small>
-              <h3>Make the next click feel worth it.</h3>
-              <p>A focused message, one clear benefit and a CTA built around the customer’s intent.</p>
-              <button type="button" tabindex="-1">Discover the offer →</button>
-            </div>
-            <div class="studio-floating-output studio-output-one"><b>✦</b><span><small>AD COPY</small><strong>3 variants ready</strong></span></div>
-            <div class="studio-floating-output studio-output-two"><b>▶</b><span><small>VIDEO SCRIPT</small><strong>Hook · Scenes · CTA</strong></span></div>
-          </div>
-        </section>
 
         <section class="landing-pages-showcase" id="landing-pages-showcase">
           <div class="landing-pages-showcase-copy">
@@ -769,6 +733,12 @@ function renderLanding() {
             <article><b>02</b><strong>Real conversion actions</strong><span>Landing pages can lead to Buy, Book, Quote or WhatsApp actions.</span></article>
             <article><b>03</b><strong>Real lead workflow</strong><span>Conversations, lead intent and follow-up live in the same workspace.</span></article>
           </div>
+        </section>
+
+        <section class="landing-proof-bar-v501" aria-label="YOUYOU product advantages">
+          <article><span>01</span><div><strong>One workflow</strong><small>Campaign, page, lead and follow-up stay connected.</small></div></article>
+          <article><span>02</span><div><strong>No credit packs</strong><small>Simple plan-based usage without constant top-ups.</small></div></article>
+          <article><span>03</span><div><strong>Built for action</strong><small>Every major tool leads to a clear next step.</small></div></article>
         </section>
 
         <section id="pricing" class="pricing-section pricing-v45 pricing-v424">
