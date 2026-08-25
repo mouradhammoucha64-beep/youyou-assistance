@@ -9607,3 +9607,165 @@ body{overflow-x:hidden}
     animation:none!important;
   }
 }
+
+
+/* =========================================================
+   YOUYOU V4.28 — APPROVED REFERENCE LANDING
+   Deep navy + rose/mauve, living SaaS UI and clear growth flow.
+   ========================================================= */
+
+.landing{
+  --yy428-navy:#071225;
+  --yy428-panel:#111d36;
+  --yy428-rose:#f33b95;
+  --yy428-pink:#ff5aad;
+  --yy428-mauve:#a65cf4;
+  --yy428-violet:#745df4;
+  background:
+    radial-gradient(circle at 14% 4%,rgba(243,59,149,.14),transparent 24%),
+    radial-gradient(circle at 86% 13%,rgba(166,92,244,.11),transparent 27%),
+    radial-gradient(circle at 50% 70%,rgba(116,93,244,.08),transparent 34%),
+    linear-gradient(180deg,#071225 0%,#09152a 45%,#071225 100%)!important;
+}
+.landing::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.18;
+  background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:linear-gradient(to bottom,#000,transparent 88%);
+}
+.landing main,.landing-nav{position:relative;z-index:1}
+.landing-nav{
+  background:rgba(7,18,37,.90)!important;
+  border-bottom:1px solid rgba(255,90,173,.10)!important;
+  box-shadow:0 12px 38px rgba(0,0,0,.14)!important;
+}
+
+/* YOUYOU logo */
+.brand-v428{display:flex!important;align-items:center!important;gap:10px!important;position:relative}
+.brand-loop-v428{position:relative;display:block;width:34px;height:25px}
+.brand-loop-v428 i,.brand-loop-v428 b{
+  position:absolute;top:3px;width:17px;height:17px;border:4px solid var(--yy428-pink);
+  border-radius:10px 4px 10px 4px;transform:rotate(45deg);
+  box-shadow:0 0 16px rgba(243,59,149,.22)
+}
+.brand-loop-v428 i{left:2px}
+.brand-loop-v428 b{right:2px;border-color:var(--yy428-mauve)}
+.brand-word-v428{color:#f7f4fa!important;font-size:23px;font-weight:900;letter-spacing:-.045em}
+.brand-spark-v428{width:7px;height:7px;border-radius:50%;background:#54e6a7;box-shadow:0 0 14px rgba(84,230,167,.65);animation:yy428Spark 3.6s ease-in-out infinite}
+@keyframes yy428Spark{0%,100%{transform:translateY(-5px);opacity:.75}50%{transform:translateY(3px);opacity:1}}
+
+/* Hero */
+.hero-platform-v426{
+  background:
+    radial-gradient(circle at 20% 30%,rgba(243,59,149,.095),transparent 31%),
+    radial-gradient(circle at 83% 26%,rgba(166,92,244,.13),transparent 31%)!important;
+}
+.hero-platform-v426 h1{color:#f9f7fb!important;max-width:760px!important}
+.hero-platform-v426 h1 span{
+  background:linear-gradient(100deg,#ff79bd 0%,#f33b95 42%,#b16df2 100%)!important;
+  -webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;
+}
+.hero-value-promise{
+  border-color:rgba(243,59,149,.16)!important;
+  background:linear-gradient(90deg,rgba(243,59,149,.065),rgba(166,92,244,.035))!important
+}
+.primary,.pricing-plan-btn-primary{
+  background:linear-gradient(110deg,#f33b95 0%,#e744aa 48%,#9e59f3 100%)!important;
+  box-shadow:0 14px 34px rgba(243,59,149,.20),0 0 28px rgba(166,92,244,.08)!important;
+}
+
+/* Product cockpit */
+.hero-cockpit-shell{
+  border-color:rgba(243,59,149,.20)!important;
+  background:radial-gradient(circle at 82% 3%,rgba(243,59,149,.12),transparent 27%),
+             linear-gradient(145deg,rgba(17,29,54,.985),rgba(8,17,34,.99))!important;
+  box-shadow:0 32px 90px rgba(0,0,0,.40),0 0 38px rgba(243,59,149,.07),inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+.hero-campaign-card,.hero-landing-card,.hero-lead-card{
+  border-color:rgba(243,59,149,.13)!important;
+  background:linear-gradient(145deg,rgba(34,25,54,.74),rgba(13,23,42,.72))!important;
+}
+.hero-campaign-lines i{background:linear-gradient(90deg,rgba(243,59,149,.62),rgba(166,92,244,.13))!important}
+.hero-float{border-color:rgba(243,59,149,.16)!important;background:rgba(19,27,49,.96)!important}
+.hero-float>b{background:linear-gradient(145deg,rgba(243,59,149,.16),rgba(166,92,244,.10))!important;color:#ff79bd!important}
+
+/* Workflow */
+.journey-progress-v426{
+  background:linear-gradient(90deg,rgba(243,59,149,.10),rgba(243,59,149,.34),rgba(166,92,244,.18),rgba(243,59,149,.10))!important;
+}
+.journey-progress-v426 i{
+  width:8px!important;height:8px!important;top:-3px!important;background:#ff5aad!important;
+  box-shadow:0 0 20px rgba(255,90,173,.95),0 0 34px rgba(166,92,244,.45)!important;
+}
+.journey-step-v426{border-color:rgba(243,59,149,.12)!important}
+.journey-step-v426:hover{border-color:rgba(243,59,149,.28)!important;box-shadow:0 16px 34px rgba(243,59,149,.08)!important}
+
+/* Recognizable social platform badges */
+.studio-platforms-v428{margin-top:22px}
+.studio-platforms-v428>small{display:block;margin-bottom:10px;color:#7f8ca1!important;font-size:8px;font-weight:850;letter-spacing:.14em}
+.social-logo-row-v428{display:flex;flex-wrap:wrap;gap:8px}
+.social-logo-chip{
+  min-height:41px;display:flex;align-items:center;gap:8px;padding:7px 11px;
+  border:1px solid rgba(194,205,224,.10);border-radius:11px;background:rgba(255,255,255,.022);
+  color:#cbd3df!important;transition:.2s ease
+}
+.social-logo-chip:hover{transform:translateY(-2px);border-color:rgba(243,59,149,.22);background:rgba(243,59,149,.035)}
+.social-logo-chip b{font-size:9px;font-weight:750}
+.social-logo-chip svg{width:28px;height:18px;color:#5b8def}
+.fb-mark,.ig-mark,.tt-mark,.yt-mark,.in-mark,.x-mark{width:26px;height:26px;display:grid;place-items:center;border-radius:7px;font-weight:900}
+.fb-mark{background:#1877f2;color:#fff;font-size:21px;font-family:Arial}
+.ig-mark{position:relative;border-radius:8px;background:radial-gradient(circle at 70% 70%,#ffd467 0 18%,#f33b95 38%,#9e59f3 70%,#5865ef 100%)}
+.ig-mark::before{content:"";width:12px;height:12px;border:2px solid #fff;border-radius:4px}
+.ig-mark::after{content:"";position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;right:6px;top:6px}
+.tt-mark{background:#0d1118;color:#fff;text-shadow:-2px 0 #24f0df,2px 0 #fe2c55;font-size:19px}
+.yt-mark{background:#ff0000;color:#fff;font-size:12px}
+.in-mark{background:#0a66c2;color:#fff;font-size:13px;font-family:Arial}
+.x-mark{background:#060606;color:#fff;font-size:18px}
+
+/* Smart Landing Page examples */
+.landing-examples-v426 .landing-mini{border-color:rgba(243,59,149,.10)!important;box-shadow:0 18px 46px rgba(0,0,0,.15)!important}
+.landing-examples-v426 .landing-mini:hover{transform:translateY(-4px)!important;border-color:rgba(243,59,149,.23)!important}
+.landing-mini-clean button{background:linear-gradient(110deg,#f29abb,#f05d9d)!important;color:#351021!important}
+.landing-mini-luxury button{background:linear-gradient(110deg,#d6b473,#a96cec)!important}
+.landing-mini-wellness button{background:linear-gradient(110deg,#56c99f,#77dac0)!important}
+.landing-mini-bold button{background:linear-gradient(110deg,#f04b9b,#905ef0)!important}
+
+/* Benefits */
+.benefits-strip-v428{
+  width:min(1360px,calc(100% - 48px));margin:34px auto 52px;display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid rgba(243,59,149,.13);
+  border-radius:20px;background:radial-gradient(circle at 50% 0%,rgba(243,59,149,.055),transparent 30%),rgba(15,26,48,.82);overflow:hidden
+}
+.benefits-strip-v428 article{display:flex;align-items:center;gap:12px;min-height:88px;padding:16px 18px;border-right:1px solid rgba(194,205,224,.07)}
+.benefits-strip-v428 article:last-child{border-right:0}
+.benefits-strip-v428 article>span{flex:0 0 34px;display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:rgba(243,59,149,.08);color:#ff62ad!important;font-size:17px}
+.benefits-strip-v428 strong,.benefits-strip-v428 small{display:block}
+.benefits-strip-v428 strong{color:#eef1f6!important;font-size:11px}
+.benefits-strip-v428 small{margin-top:4px;color:#7e8ba0!important;font-size:8px;line-height:1.4}
+
+/* Pricing & comparison same visual system */
+.pricing-growth,.pricing-pro{border-color:rgba(243,59,149,.14)!important}
+.pricing-popular-badge{background:linear-gradient(110deg,#f33b95,#a65cf4)!important}
+.pricing-plan:hover{border-color:rgba(243,59,149,.24)!important;box-shadow:0 22px 55px rgba(243,59,149,.07)!important}
+.youyou-value-section{
+  border-color:rgba(243,59,149,.12)!important;
+  background:radial-gradient(circle at 13% 12%,rgba(243,59,149,.055),transparent 27%),
+             radial-gradient(circle at 88% 8%,rgba(166,92,244,.09),transparent 30%),
+             linear-gradient(145deg,rgba(17,29,54,.98),rgba(8,18,36,.985))!important;
+}
+
+@media(max-width:900px){
+  .benefits-strip-v428{grid-template-columns:1fr 1fr}
+  .benefits-strip-v428 article:nth-child(2){border-right:0}
+}
+@media(max-width:620px){
+  .brand-word-v428{font-size:20px}
+  .brand-loop-v428{transform:scale(.86);transform-origin:left center}
+  .benefits-strip-v428{grid-template-columns:1fr;width:calc(100% - 22px)}
+  .benefits-strip-v428 article{border-right:0!important;border-bottom:1px solid rgba(194,205,224,.07)}
+  .benefits-strip-v428 article:last-child{border-bottom:0}
+  .social-logo-chip b{display:none}
+  .social-logo-chip{padding:6px}
+}
+@media(prefers-reduced-motion:reduce){.brand-spark-v428{animation:none!important}}

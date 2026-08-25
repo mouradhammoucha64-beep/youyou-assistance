@@ -1,0 +1,13 @@
+YOUYOU V4.28 — APPROVED REFERENCE LANDING
+
+Implemented from the user-approved reference image:
+- Navy + rose/mauve palette
+- Lively YOUYOU logo treatment
+- Strong full-platform hero
+- Clear idea → campaign → landing page → lead → follow-up story
+- Recognizable Meta, Facebook, Instagram, TikTok, YouTube, LinkedIn and X badges
+- Clear Smart Landing Page CTAs
+- Consistent pricing/comparison visual system
+- No fake reviews, fake clients or guaranteed outcome claims
+
+Dashboard logic, SEO workspace and backend were not intentionally changed.

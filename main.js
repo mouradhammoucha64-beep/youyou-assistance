@@ -231,9 +231,10 @@ function renderLanding() {
 
       <header class="landing-nav">
         <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-          <span class="brand-wordmark" aria-label="YOUYOU">
-            <span class="brand-symbol" aria-hidden="true"><i></i><b>Y</b></span>
-            <span class="brand-text"><span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span></span>
+          <span class="brand-wordmark brand-v428" aria-label="YOUYOU">
+            <span class="brand-loop-v428" aria-hidden="true"><i></i><b></b></span>
+            <span class="brand-word-v428">YOUYOU</span>
+            <span class="brand-spark-v428" aria-hidden="true"></span>
           </span>
         </a>
 
@@ -269,17 +270,17 @@ function renderLanding() {
             </div>
 
             <h1>
-              From idea to lead.
-              <span>One connected growth workspace.</span>
+              Turn one idea into a
+              <span>campaign, landing page and qualified lead.</span>
             </h1>
 
             <p class="hero-text">
-              Create the campaign, launch the page, capture the lead and keep the follow-up moving —
-              with AI Studio, Smart Landing Pages, SEO Growth, AI Conversations, Revenue Rescue and WhatsApp AI.
+              YOUYOU connects AI Studio, Smart Landing Pages, SEO Growth, AI Conversations,
+              Revenue Rescue and WhatsApp AI in one powerful growth workflow.
             </p>
 
             <div class="hero-value-promise">
-              <strong>Stop stitching together separate growth tools.</strong>
+              <strong>From idea to action — without jumping between tools.</strong>
               <span>No confusing credit packs. One predictable monthly plan.</span>
             </div>
 
@@ -316,21 +317,21 @@ function renderLanding() {
 
               <div class="hero-cockpit-main">
                 <div class="hero-campaign-card">
-                  <small>AI STUDIO</small>
+                  <small>01 · AI STUDIO</small>
                   <strong>Campaign ready</strong>
                   <p>Hook + ad + landing message</p>
                   <div class="hero-campaign-lines"><i></i><i></i><i></i></div>
                 </div>
 
                 <div class="hero-landing-card">
-                  <small>SMART LANDING PAGE</small>
-                  <strong>Summer service offer</strong>
+                  <small>02 · SMART LANDING PAGE</small>
+                  <strong>Offer ready to convert</strong>
                   <p>Focused page · WhatsApp CTA</p>
                   <button type="button" tabindex="-1">Get the offer →</button>
                 </div>
 
                 <div class="hero-lead-card">
-                  <small>NEW LEAD</small>
+                  <small>03 · NEW LEAD</small>
                   <div><strong>High buying intent</strong><b>86 HOT</b></div>
                   <p>Pricing + booking + contact captured</p>
                 </div>
@@ -692,17 +693,22 @@ function renderLanding() {
             <h2>Turn one idea into <span>a campaign people can act on.</span></h2>
             <p>Describe what you want to sell or promote. YOUYOU helps shape the hook, ad copy, social post, email, video script and landing-page message around the same goal.</p>
             <div class="studio-output-pills"><span>Ad Copy</span><span>Social</span><span>Email</span><span>Video Script</span><span>Landing Copy</span></div>
-            <div class="studio-platforms-v426" aria-label="Campaign platforms">
-              <small>CREATE FOR</small>
-              <div>
-                <span class="platform-meta">Meta</span>
-                <span class="platform-instagram">Instagram</span>
-                <span class="platform-tiktok">TikTok</span>
-                <span class="platform-youtube">YouTube</span>
-                <span class="platform-linkedin">LinkedIn</span>
-                <span class="platform-x">X</span>
+            <div class="studio-platforms-v428" aria-label="Create for social platforms">
+              <small>CREATE FOR THE PLATFORMS YOUR CUSTOMERS USE</small>
+              <div class="social-logo-row-v428">
+                <span class="social-logo-chip meta-chip" title="Meta">
+                  <svg viewBox="0 0 64 40" aria-hidden="true"><path d="M7 31c4-13 10-23 16-23 8 0 14 24 18 24 5 0 8-8 12-22" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M57 31C53 18 47 8 41 8c-8 0-14 24-18 24-5 0-8-8-12-22" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+                  <b>Meta</b>
+                </span>
+                <span class="social-logo-chip facebook-chip" title="Facebook"><span class="fb-mark">f</span><b>Facebook</b></span>
+                <span class="social-logo-chip instagram-chip" title="Instagram"><span class="ig-mark"></span><b>Instagram</b></span>
+                <span class="social-logo-chip tiktok-chip" title="TikTok"><span class="tt-mark">♪</span><b>TikTok</b></span>
+                <span class="social-logo-chip youtube-chip" title="YouTube"><span class="yt-mark">▶</span><b>YouTube</b></span>
+                <span class="social-logo-chip linkedin-chip" title="LinkedIn"><span class="in-mark">in</span><b>LinkedIn</b></span>
+                <span class="social-logo-chip x-chip" title="X"><span class="x-mark">𝕏</span><b>X</b></span>
               </div>
             </div>
+          </div>
           </div>
           <div class="studio-ad-stage" aria-label="AI Studio campaign output example">
             <div class="studio-ad-card">
@@ -905,6 +911,13 @@ function renderLanding() {
           <p class="youyou-value-fineprint">
             Fair-use limits protect service quality and infrastructure costs. Comparison language describes common market patterns, not every competing product.
           </p>
+        </section>
+
+        <section class="benefits-strip-v428" aria-label="YOUYOU advantages">
+          <article><span>⚡</span><div><strong>Launch in minutes</strong><small>From business idea to live campaign flow.</small></div></article>
+          <article><span>◎</span><div><strong>Built to convert</strong><small>Pages, conversations and follow-up share one goal.</small></div></article>
+          <article><span>◈</span><div><strong>One workspace</strong><small>Keep your tools, leads and context connected.</small></div></article>
+          <article><span>$</span><div><strong>Predictable pricing</strong><small>No confusing credit packs to keep buying.</small></div></article>
         </section>
 
         <section class="final-cta">
