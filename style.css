@@ -8547,3 +8547,124 @@ body,
     min-height:50px;
   }
 }
+
+
+/* =========================================================
+   YOUYOU V4.23 — LANDING FIXATION + LIGHTER PREMIUM SYSTEM
+   Landing-only structural fixes; SEO workspace layout untouched.
+   ========================================================= */
+
+/* Slightly lighter premium base without turning the product bright. */
+body,
+.dashboard,
+.landing{
+  background:
+    radial-gradient(circle at 14% 2%,rgba(127,114,238,.12),transparent 29%),
+    radial-gradient(circle at 91% 13%,rgba(91,141,239,.075),transparent 30%),
+    radial-gradient(circle at 68% 89%,rgba(201,143,166,.04),transparent 26%),
+    linear-gradient(180deg,#151f31 0%,#172338 50%,#141e30 100%)!important;
+}
+
+.sidebar{
+  background:linear-gradient(180deg,#1a2940 0%,#172338 100%)!important;
+}
+
+/* Full-bleed top bar: removes the dark side strips revealed by the lighter palette. */
+.landing-nav{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding-left:max(28px,calc((100vw - 1220px)/2))!important;
+  padding-right:max(28px,calc((100vw - 1220px)/2))!important;
+  box-sizing:border-box!important;
+  background:rgba(23,35,56,.92)!important;
+  border-bottom:1px solid rgba(216,224,237,.075)!important;
+  backdrop-filter:blur(18px)!important;
+}
+.landing-nav::before{inset:0!important;width:100%!important;left:0!important;right:0!important;opacity:.45!important}
+.landing{overflow-x:hidden!important}
+
+/* New living wordmark: text-first, compact, professional, subtle motion. */
+.brand-wordmark{align-items:center!important;gap:9px!important;letter-spacing:0!important;overflow:visible!important}
+.brand-text{display:inline-flex;align-items:baseline;letter-spacing:-.072em;white-space:nowrap}
+.brand-symbol{
+  position:relative;display:grid;place-items:center;width:29px;height:29px;flex:0 0 29px;
+  border:1px solid rgba(172,164,255,.28);border-radius:10px;
+  background:linear-gradient(145deg,rgba(127,114,238,.24),rgba(91,141,239,.12));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 8px 24px rgba(65,70,160,.14);
+  color:#f6f3ff;font-size:13px;line-height:1;font-weight:900;letter-spacing:-.04em;
+}
+.brand-symbol b{font:inherit;color:inherit;position:relative;z-index:2}
+.brand-symbol i{position:absolute;width:5px;height:5px;border-radius:50%;background:#73d8c2;box-shadow:0 0 11px rgba(115,216,194,.7);top:4px;right:4px;animation:yyBrandPulse 2.8s ease-in-out infinite}
+@keyframes yyBrandPulse{0%,100%{transform:scale(.85);opacity:.72}50%{transform:scale(1.15);opacity:1}}
+@media(prefers-reduced-motion:reduce){.brand-symbol i{animation:none}}
+.side-logo .brand-symbol{width:27px;height:27px;flex-basis:27px;border-radius:9px}.side-logo .brand-wordmark{gap:8px!important}
+.auth-logo .brand-symbol{width:31px;height:31px;flex-basis:31px}
+
+/* Headline clipping fix for lower-case g/y/p/q across landing headings. */
+.landing .section-heading,
+.landing .section-heading h2,
+.landing .section-heading h2 span,
+.landing .final-cta,
+.landing .final-cta h2,
+.landing .final-cta h2 span,
+.landing .growth-platform-copy h2,
+.landing .growth-platform-copy h2 span{
+  overflow:visible!important;
+}
+.landing .section-heading h2,
+.landing .final-cta h2,
+.landing .growth-platform-copy h2{
+  line-height:1.12!important;
+  padding-bottom:.12em!important;
+}
+
+/* Live value strip: subtle movement, no noisy counters. */
+.stats-live-strip{position:relative;isolation:isolate}
+.stats-live-strip::before{content:"";position:absolute;left:8%;right:8%;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(143,131,245,.34),rgba(79,184,165,.24),transparent);animation:yyStatSweep 6s ease-in-out infinite;z-index:-1}
+.stat-live-item{position:relative;transition:transform .2s ease,background .2s ease}
+.stat-live-item:hover{transform:translateY(-3px);background:rgba(255,255,255,.018)}
+.stat-live-item strong{background:linear-gradient(115deg,#f7f4ff,#b7b0ff 54%,#8fd5c7);-webkit-background-clip:text;background-clip:text;color:transparent}
+@keyframes yyStatSweep{0%,100%{opacity:.28;transform:scaleX(.72)}50%{opacity:1;transform:scaleX(1)}}
+
+/* Six engines: 3 x 2 on wide screens. */
+.growth-engine-grid-six{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.engine-studio{background:radial-gradient(circle at 88% 0%,rgba(127,114,238,.10),transparent 34%),rgba(255,255,255,.018)!important}
+.engine-pages{background:radial-gradient(circle at 88% 0%,rgba(79,184,165,.09),transparent 34%),rgba(255,255,255,.018)!important}
+.engine-studio .growth-engine-icon{color:#c9c0ff}.engine-pages .growth-engine-icon{color:#8ed6c7}
+
+/* New how-it-works flow. */
+.how-growth-flow .section-heading>p{max-width:700px;margin:16px auto 0;color:#9ba7b8}
+.growth-steps{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important}
+.growth-steps .step{min-height:220px;padding:24px 20px!important;position:relative}
+.growth-steps .step::after{content:"";position:absolute;top:42px;right:-9px;width:16px;height:1px;background:linear-gradient(90deg,rgba(138,127,239,.55),transparent)}
+.growth-steps .step:last-child::after{display:none}
+.growth-steps .step h3{font-size:16px;line-height:1.25}.growth-steps .step p{font-size:12px;line-height:1.65}
+
+/* AI Studio public showcase — visual proof of what the client can create. */
+.ai-studio-showcase{width:min(1180px,calc(100% - 40px));margin:0 auto 88px;display:grid;grid-template-columns:.92fr 1.08fr;gap:48px;align-items:center;padding:54px;border:1px solid rgba(211,220,234,.085);border-radius:28px;background:radial-gradient(circle at 87% 12%,rgba(127,114,238,.10),transparent 31%),linear-gradient(145deg,rgba(31,44,67,.90),rgba(24,35,54,.94));box-shadow:0 28px 80px rgba(4,9,18,.16)}
+.ai-studio-showcase-copy h2{margin:14px 0 16px;font-size:clamp(34px,4vw,50px);line-height:1.1;padding-bottom:.1em;overflow:visible}.ai-studio-showcase-copy h2 span{color:#b8afff}.ai-studio-showcase-copy p{max-width:560px;color:#a6b0bf;line-height:1.75;font-size:15px}
+.studio-output-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}.studio-output-pills span{padding:8px 11px;border:1px solid rgba(173,163,255,.14);border-radius:999px;background:rgba(127,114,238,.055);color:#c7c1e7;font-size:11px;font-weight:800}
+.studio-ad-stage{position:relative;min-height:430px;display:grid;place-items:center}.studio-ad-card{width:min(390px,88%);padding:18px;border:1px solid rgba(255,255,255,.10);border-radius:22px;background:linear-gradient(180deg,#f5f1eb,#eee8df);color:#202636;box-shadow:0 34px 80px rgba(3,7,14,.28);transform:rotate(1deg)}
+.studio-ad-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;font-size:9px;font-weight:900;letter-spacing:.08em}.studio-ad-top b{color:#6f61d9}.studio-ad-visual{height:150px;display:grid;place-items:center;border-radius:15px;background:radial-gradient(circle at 70% 28%,rgba(127,114,238,.45),transparent 26%),radial-gradient(circle at 30% 70%,rgba(79,184,165,.36),transparent 30%),linear-gradient(135deg,#25324a,#151d2c);overflow:hidden;position:relative;color:#f5f6fb;font-size:11px;font-weight:900;letter-spacing:.12em}.studio-ad-visual i{position:absolute;width:92px;height:92px;border:1px solid rgba(255,255,255,.26);border-radius:28px;transform:rotate(35deg);animation:yyAdFloat 5s ease-in-out infinite}.studio-ad-card>small{display:block;margin-top:18px;color:#7f72ee;font-size:9px;font-weight:950;letter-spacing:.1em}.studio-ad-card h3{margin:6px 0 8px;font-size:25px;line-height:1.05}.studio-ad-card p{margin:0;color:#657083;font-size:11px;line-height:1.55}.studio-ad-card button{margin-top:16px;padding:10px 13px;border:0;border-radius:9px;background:#252d41;color:#fff;font-size:10px;font-weight:900}
+.studio-floating-output{position:absolute;display:flex;align-items:center;gap:9px;padding:11px 13px;border:1px solid rgba(207,216,231,.10);border-radius:13px;background:rgba(22,33,52,.94);box-shadow:0 18px 45px rgba(2,7,14,.24);animation:yyStudioFloat 4.6s ease-in-out infinite}.studio-floating-output b{display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:rgba(127,114,238,.13);color:#c6bdff}.studio-floating-output span{display:block}.studio-floating-output small{display:block;color:#7f8a9c;font-size:7px;font-weight:900;letter-spacing:.1em}.studio-floating-output strong{display:block;margin-top:2px;color:#e7eaf0;font-size:10px}.studio-output-one{left:-7px;top:73px}.studio-output-two{right:-11px;bottom:66px;animation-delay:-2.1s}
+@keyframes yyStudioFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}@keyframes yyAdFloat{0%,100%{transform:rotate(35deg) translateY(0)}50%{transform:rotate(40deg) translateY(-6px)}}
+
+/* Pricing: clearer comparison and fair-use message. */
+.pricing-feature-list li{align-items:flex-start!important;line-height:1.45!important}.pricing-feature-list li span{margin-top:1px}.pricing-pro .pricing-plan-note{color:#cbbf96!important}
+
+/* CTA clipping fix and updated breathing room. */
+.final-cta{padding-bottom:58px!important}.final-cta h2{margin-bottom:17px!important}.final-cta>p{max-width:760px!important}
+
+@media(max-width:1100px){
+  .growth-engine-grid-six{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .growth-steps{grid-template-columns:repeat(2,minmax(0,1fr))!important}.growth-steps .step::after{display:none}
+  .ai-studio-showcase{grid-template-columns:1fr;gap:30px}.studio-ad-stage{min-height:390px}
+}
+@media(max-width:720px){
+  .landing-nav{padding-left:18px!important;padding-right:18px!important}
+  .growth-engine-grid-six,.growth-steps{grid-template-columns:1fr!important}
+  .ai-studio-showcase{width:min(100% - 24px,1180px);padding:26px 18px;border-radius:22px}.studio-ad-stage{min-height:360px}.studio-floating-output{display:none}
+  .brand-symbol{width:26px;height:26px;flex-basis:26px}.brand-wordmark{gap:7px!important}
+}
+@media(prefers-reduced-motion:reduce){.stats-live-strip::before,.studio-floating-output,.studio-ad-visual i{animation:none!important}}

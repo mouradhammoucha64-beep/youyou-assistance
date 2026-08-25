@@ -1,0 +1,23 @@
+YOUYOU V4.23 — LANDING + PRICING FIXATION
+
+Base: V4.22 Psychology Color + Pro Icons
+
+Implemented:
+- Lighter premium navy/graphite palette while preserving calm premium tone.
+- Landing navbar full-bleed edge fix (removes visible side strips).
+- New living YOUYOU wordmark mark using CSS/SVG-free HTML styling; subtle pulse only.
+- Fixed landing heading clipping for descenders such as g/y/p/q.
+- Rebuilt stat strip around current platform: 24/7 AI, 6 tools, 30 templates, 1 workspace.
+- Expanded 4 growth engines to 6: Conversations, SEO, AI Studio, Landing Pages, Revenue Rescue, WhatsApp AI.
+- Rebuilt feature carousel with current platform modules.
+- Rebuilt How It Works around setup -> AI Studio -> Landing Page -> AI conversion -> Rescue/WhatsApp.
+- Added AI Studio public showcase with an ad/campaign preview (HTML/CSS, no generated image).
+- Kept Smart Landing Pages showcase.
+- Updated landing pricing and dashboard Billing to $29 / $59 / $99 with plan-specific feature scope.
+- Pro is shown as Unlimited for normal business use with Fair Use safeguard.
+- SEO workspace structure/functionality was not changed in this version.
+
+Important production notes:
+- WhatsApp API remains a production integration task.
+- Public landing-page publishing/backend remains a production integration task.
+- Paddle checkout remains a production integration task.
