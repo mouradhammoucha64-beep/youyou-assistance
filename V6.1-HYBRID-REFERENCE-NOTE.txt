@@ -1,0 +1,9 @@
+YOUYOU V6.1 — HYBRID REFERENCE LANDING
+
+- Keeps the approved reference visual as the hero.
+- Extracts real product visual crops from that approved reference.
+- Adds a dedicated product dashboard section.
+- Adds a dedicated AI Studio/social platforms image section.
+- Adds a dedicated Smart Landing Pages image section.
+- Keeps agreed pricing $29/$59/$99 with users/WhatsApp/support/API wording.
+- No image generation used.

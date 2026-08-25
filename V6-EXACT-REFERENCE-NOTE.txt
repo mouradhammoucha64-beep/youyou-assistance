@@ -1,0 +1,15 @@
+YOUYOU V6 — EXACT APPROVED REFERENCE LANDING
+
+This build uses the exact user-approved reference artwork as the public landing page,
+so the visible images, composition, colors, cards, pricing area, comparison area and
+overall finish match the reference itself rather than approximating it with CSS.
+
+Functional transparent hotspots are layered over the reference for:
+- Login / Start / Dashboard / Billing
+- Features / How it works / Pricing navigation
+- Starter / Growth / Pro selection
+- Final CTA / Footer login
+
+The dashboard, authentication, Supabase code and other project files remain present.
+
+No image generation was used.

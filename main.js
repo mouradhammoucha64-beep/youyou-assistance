@@ -227,728 +227,105 @@ function applyPublicSiteLanguage(language = getPublicSiteLanguage()) {
 
 function renderLanding() {
   app.innerHTML = `
-    <div class="landing">
-
-      <header class="landing-nav">
-        <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-          <span class="brand-wordmark brand-v428" aria-label="YOUYOU">
-            <span class="brand-loop-v428" aria-hidden="true"><i></i><b></b></span>
-            <span class="brand-word-v428">YOUYOU</span>
-            <span class="brand-spark-v428" aria-hidden="true"></span>
-          </span>
-        </a>
-
-        <nav class="landing-links">
-          <a href="/" data-scroll-section="features">Features</a>
-          <a href="/" data-scroll-section="how">How it works</a>
-          <a href="/" data-scroll-section="pricing">Pricing</a>
-          <a href="/faq">FAQ</a>
-        </nav>
-
-        <div class="nav-actions">
-          <div class="public-language-switch" aria-label="Website language">
-            <button type="button" data-public-language="en">EN</button>
-            <button type="button" data-public-language="fr">FR</button>
-            <button type="button" data-public-language="ar">AR</button>
-          </div>
+    <div class="landing landing-v61">
+      <section class="v61-hero">
+        <img
+          src="/assets/youyou-landing-exact-reference.png"
+          alt="YOUYOU AI Growth Platform"
+          class="v61-hero-reference"
+          draggable="false"
+        />
+        <div class="v61-hero-actions">
           ${state.user
-            ? `<button id="nav-dashboard" class="nav-login">Open dashboard</button>
-               <button id="nav-billing" class="primary small">Plans & billing</button>`
-            : `<button id="nav-login" class="nav-login">Log in</button>
-               <button id="nav-start" class="primary small">Start free</button>`}
+            ? `<button id="hero-dashboard" class="v61-hotspot v61-hero-main" aria-label="Open dashboard"></button>`
+            : `<button id="hero-start" class="v61-hotspot v61-hero-main" aria-label="Start free"></button>`}
+          ${state.user
+            ? `<button id="hero-pricing" class="v61-hotspot v61-hero-secondary" aria-label="View plans"></button>`
+            : `<button id="hero-login" class="v61-hotspot v61-hero-secondary" aria-label="See how it works"></button>`}
         </div>
-      </header>
+      </section>
 
-      <main>
-
-        <section class="hero-v500">
-          <div class="hero-v500-bg" aria-hidden="true"></div>
-
-          <div class="hero-v500-copy">
-            <div class="hero-v500-badge"><span>✦</span> ALL-IN-ONE AI GROWTH WORKSPACE</div>
-            <h1>Turn one idea into a <span>campaign, landing page and qualified lead.</span></h1>
-            <p>YOUYOU connects AI Studio, Smart Landing Pages, SEO Growth, Conversations, Revenue Rescue and WhatsApp AI in one clear workflow — from attention to follow-up.</p>
-
-            <div class="hero-v500-actions">
-              ${state.user
-                ? `<button id="hero-dashboard" class="hero-v500-primary">Open dashboard <span>→</span></button>
-                   <button id="hero-pricing" class="hero-v500-secondary">View plans</button>`
-                : `<button id="hero-start" class="hero-v500-primary">Start free <span>→</span></button>
-                   <button id="hero-login" class="hero-v500-secondary">See how it works <span class="play-dot">▶</span></button>`}
-            </div>
-
-            <div class="hero-v500-trust">
-              <span>✓ No credit card required</span>
-              <span>✓ No confusing credit packs</span>
-              <span>✓ One connected workspace</span>
-            </div>
+      <section id="features" class="v61-showcase v61-product-section">
+        <div class="v61-copy">
+          <div class="v61-eyebrow">THE PRODUCT</div>
+          <h2>See the whole growth workflow in one place.</h2>
+          <p>Campaign creation, landing pages, leads, SEO, Revenue Rescue and WhatsApp AI stay connected inside one workspace.</p>
+          <div class="v61-pills">
+            <span>AI Studio</span><span>Landing Pages</span><span>Leads</span><span>SEO</span><span>Revenue Rescue</span><span>WhatsApp AI</span>
           </div>
-
-          <div class="hero-v500-product" aria-label="YOUYOU product workflow preview">
-            <div class="product-frame-v500">
-              <div class="product-top-v500">
-                <div class="product-logo-v500">
-                  <span class="product-logo-mark-v500"><i></i><b></b></span>
-                  <strong>YOUYOU</strong>
-                </div>
-                <div class="product-welcome-v500">
-                  <strong>Welcome back 👋</strong>
-                  <small>Here’s what’s happening with your growth today.</small>
-                </div>
-                <div class="product-status-v500"><i></i> LIVE</div>
-              </div>
-
-              <div class="product-body-v500">
-                <aside class="product-side-v500">
-                  <span class="active"><i>⌂</i> Home</span>
-                  <span><i>✦</i> AI Studio</span>
-                  <span><i>▣</i> Landing Pages</span>
-                  <span><i>◌</i> Conversations</span>
-                  <span><i>◎</i> Leads</span>
-                  <span><i>↗</i> SEO Growth</span>
-                  <span><i>↻</i> Revenue Rescue</span>
-                </aside>
-
-                <div class="product-main-v500">
-                  <div class="product-kpis-v500">
-                    <article><small>Visitors</small><strong>24,358</strong><em>↗ 12.5%</em></article>
-                    <article><small>Leads</small><strong>1,842</strong><em>↗ 18.7%</em></article>
-                    <article><small>Conversion</small><strong>7.56%</strong><em>↗ 2.3%</em></article>
-                    <article><small>Revenue</small><strong>$18,642</strong><em>↗ 21.4%</em></article>
-                  </div>
-
-                  <section class="product-studio-v500">
-                    <div class="product-section-title-v500">
-                      <div><small>AI STUDIO</small><strong>Create for the platforms your customers use.</strong></div>
-                      <span>Campaign ready</span>
-                    </div>
-                    <div class="platform-row-v500">
-                      <div class="p-meta"><span>∞</span><small>Meta</small></div>
-                      <div class="p-facebook"><span>f</span><small>Facebook</small></div>
-                      <div class="p-instagram"><span class="ig-glyph-v500"></span><small>Instagram</small></div>
-                      <div class="p-tiktok"><span>♪</span><small>TikTok</small></div>
-                      <div class="p-youtube"><span>▶</span><small>YouTube</small></div>
-                      <div class="p-linkedin"><span>in</span><small>LinkedIn</small></div>
-                      <div class="p-x"><span>𝕏</span><small>X</small></div>
-                    </div>
-                  </section>
-
-                  <section class="product-flow-v500">
-                    <div class="flow-line-v500" aria-hidden="true"><i></i></div>
-                    <article class="flow-step-v500 step-1"><b>1</b><small>IDEA</small><strong>Your business goal</strong></article>
-                    <article class="flow-step-v500 step-2"><b>2</b><small>CAMPAIGN</small><strong>AI creates the ad</strong></article>
-                    <article class="flow-step-v500 step-3"><b>3</b><small>LANDING PAGE</small><strong>Focused conversion page</strong></article>
-                    <article class="flow-step-v500 step-4"><b>4</b><small>LEAD</small><strong>Intent captured</strong></article>
-                    <article class="flow-step-v500 step-5"><b>5</b><small>FOLLOW-UP</small><strong>WhatsApp / Rescue</strong></article>
-                  </section>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="hero-v500-platforms" aria-label="Supported campaign destinations">
-            <span class="platform-label-v500">CREATE FOR</span>
-            <span class="logo-meta-v500"><b>∞</b> Meta</span>
-            <span class="logo-facebook-v500"><b>f</b> Facebook</span>
-            <span class="logo-instagram-v500"><b class="ig-mini-v500"></b> Instagram</span>
-            <span class="logo-tiktok-v500"><b>♪</b> TikTok</span>
-            <span class="logo-youtube-v500"><b>▶</b> YouTube</span>
-            <span class="logo-linkedin-v500"><b>in</b> LinkedIn</span>
-            <span class="logo-x-v500"><b>𝕏</b></span>
-          </div>
-        </section>
-
-        <section class="stats-section stats-live-strip stats-compact-v426 proof-strip-v427" aria-label="YOUYOU product proof">
-          <div class="stat-live-item"><strong>6</strong><span>connected growth tools</span></div>
-          <div class="stat-live-item"><strong>30</strong><span>campaign-ready landing templates</span></div>
-          <div class="stat-live-item"><strong>24/7</strong><span>website AI availability</span></div>
-          <div class="stat-live-item"><strong>No packs</strong><span>predictable plan-based usage</span></div>
-        </section>
-
-
-
-        <section id="how" class="section how-section how-growth-flow how-v426">
-          <div class="section-heading">
-            <div class="eyebrow">HOW YOUYOU MOVES WORK FORWARD</div>
-            <h2>Build the campaign. Launch the page. <span>Capture the lead. Follow up.</span></h2>
-            <p>One clear journey from business idea to customer action — without losing context between tools.</p>
-          </div>
-
-          <div class="journey-track-v426">
-            <div class="journey-progress-v426" aria-hidden="true"><i></i></div>
-
-            <article class="journey-step-v426">
-              <span>01</span><b>✦</b>
-              <small>CREATE</small>
-              <h3>Shape the campaign</h3>
-              <p>Use AI Studio for the hook, ad, social content, email and campaign message.</p>
-            </article>
-
-            <article class="journey-step-v426">
-              <span>02</span><b>▦</b>
-              <small>LAUNCH</small>
-              <h3>Build the conversion page</h3>
-              <p>Send the click to a focused landing page with Buy, Book, Lead or WhatsApp actions.</p>
-            </article>
-
-            <article class="journey-step-v426">
-              <span>03</span><b>◌</b>
-              <small>CONVERT</small>
-              <h3>Capture real intent</h3>
-              <p>Website AI answers questions, identifies intent and turns interest into a qualified lead.</p>
-            </article>
-
-            <article class="journey-step-v426">
-              <span>04</span><b>↻</b>
-              <small>KEEP MOVING</small>
-              <h3>Follow up before intent fades</h3>
-              <p>Revenue Rescue and WhatsApp keep the opportunity visible and ready for the next action.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="industry-marquee-v426" aria-label="Example businesses that can use YOUYOU">
-          <div class="industry-marquee-label">
-            <small>BUILT FOR REAL BUSINESS WORKFLOWS</small>
-            <strong>One platform. Different ways to grow.</strong>
-          </div>
-          <div class="industry-marquee-window">
-            <div class="industry-marquee-track">
-              <span><i>✦</i><b>Beauty & Wellness</b><small>Campaign → Booking</small></span>
-              <span><i>⌂</i><b>Real Estate</b><small>Ad → Qualified enquiry</small></span>
-              <span><i>◈</i><b>Agencies</b><small>Offer → Lead → Follow-up</small></span>
-              <span><i>+</i><b>Health Services</b><small>Search → Landing page</small></span>
-              <span><i>▣</i><b>Hospitality</b><small>Promotion → WhatsApp</small></span>
-              <span><i>◆</i><b>Local Services</b><small>SEO → Customer intent</small></span>
-              <span aria-hidden="true"><i>✦</i><b>Beauty & Wellness</b><small>Campaign → Booking</small></span>
-              <span aria-hidden="true"><i>⌂</i><b>Real Estate</b><small>Ad → Qualified enquiry</small></span>
-              <span aria-hidden="true"><i>◈</i><b>Agencies</b><small>Offer → Lead → Follow-up</small></span>
-              <span aria-hidden="true"><i>+</i><b>Health Services</b><small>Search → Landing page</small></span>
-              <span aria-hidden="true"><i>▣</i><b>Hospitality</b><small>Promotion → WhatsApp</small></span>
-              <span aria-hidden="true"><i>◆</i><b>Local Services</b><small>SEO → Customer intent</small></span>
-            </div>
-          </div>
-        </section>
-
-        <section class="growth-platform-section" id="features">
-          <div class="growth-platform-shell">
-            <div class="growth-platform-copy">
-              <div class="eyebrow"><span class="pulse"></span> YOUYOU PLATFORM</div>
-              <h2>Six focused tools.<br><span>One connected growth system.</span></h2>
-              <p>
-                Use only what you need today, while every tool stays connected to the same business context,
-                leads and next actions.
-              </p>
-              <div class="growth-flow-line" aria-label="YOUYOU growth flow">
-                <span>CREATE</span><i>→</i><span>ATTRACT</span><i>→</i><span>CONVERT</span><i>→</i><span>FOLLOW UP</span>
-              </div>
-            </div>
-
-            <div class="growth-engine-grid growth-engine-grid-six">
-              <article class="growth-engine-card engine-conversations">
-                <div class="growth-engine-icon">◌</div><small>01 · WEBSITE AI</small>
-                <h3>AI Conversations</h3>
-                <p>Answer visitors 24/7, capture buying intent and turn questions into qualified opportunities.</p>
-                <span class="engine-status">CONVERT</span>
-              </article>
-              <article class="growth-engine-card engine-seo">
-                <div class="growth-engine-icon">↗</div><small>02 · SEARCH GROWTH</small>
-                <h3>SEO Growth</h3>
-                <p>Audit real pages and turn SEO problems into clear actions, page ideas and practical fixes.</p>
-                <span class="engine-status">GET FOUND</span>
-              </article>
-              <article class="growth-engine-card engine-studio">
-                <div class="growth-engine-icon">✦</div><small>03 · CONTENT ENGINE</small>
-                <h3>AI Studio</h3>
-                <p>Create campaign ideas, ad copy, social posts, emails, scripts and landing-page messaging from your business context.</p>
-                <span class="engine-status">CREATE</span>
-              </article>
-              <article class="growth-engine-card engine-pages">
-                <div class="growth-engine-icon">▦</div><small>04 · CAMPAIGN PAGES</small>
-                <h3>Smart Landing Pages</h3>
-                <p>Build focused product, service and campaign pages with templates, lead capture and WhatsApp actions.</p>
-                <span class="engine-status">30 TEMPLATES</span>
-              </article>
-              <article class="growth-engine-card engine-rescue">
-                <div class="growth-engine-icon">↻</div><small>05 · LEAD RECOVERY</small>
-                <h3>Revenue Rescue</h3>
-                <p>Spot high-intent leads that went quiet and surface the next action before the opportunity disappears.</p>
-                <span class="engine-status">RECOVER</span>
-              </article>
-              <article class="growth-engine-card engine-whatsapp">
-                <div class="growth-engine-icon">◉</div><small>06 · CONTINUITY</small>
-                <h3>WhatsApp AI</h3>
-                <p>Continue conversations on WhatsApp with shared business context, lead handoff and human takeover readiness.</p>
-                <span class="engine-status">CONTINUE</span>
-              </article>
-            </div>
-          </div>
-        </section>
-
-
-        <section class="landing-knowledge-section">
-
-          <div class="landing-knowledge-shell">
-
-            <div class="landing-knowledge-copy">
-              <div class="eyebrow knowledge-eyebrow">
-                <span class="knowledge-new-dot"></span>
-                BUSINESS KNOWLEDGE IMPORT
-              </div>
-
-              <h2>
-                Train your AI in
-                <span>minutes, not weeks.</span>
-              </h2>
-
-              <p>
-                Drop in the documents your business already uses. YOUYOU extracts
-                the useful information and turns it into knowledge your AI can use
-                when speaking with customers.
-              </p>
-
-              <div class="knowledge-format-row">
-                <span>PDF</span>
-                <span>DOCX</span>
-                <span>XLSX</span>
-                <span>CSV</span>
-                <span>TXT</span>
-              </div>
-
-              <div class="knowledge-benefits">
-                <div>
-                  <span class="knowledge-check">✓</span>
-                  <div>
-                    <strong>Use the files you already have</strong>
-                    <small>Pricing, services, FAQs, policies and internal business info.</small>
-                  </div>
-                </div>
-
-                <div>
-                  <span class="knowledge-check">✓</span>
-                  <div>
-                    <strong>Review before you save</strong>
-                    <small>Extracted content stays editable before it enters your Knowledge Base.</small>
-                  </div>
-                </div>
-
-                <div>
-                  <span class="knowledge-check">✓</span>
-                  <div>
-                    <strong>Built for real businesses</strong>
-                    <small>Long documents can be split into clean knowledge entries automatically.</small>
-                  </div>
-                </div>
-              </div>
-
-              <button id="knowledge-start" class="primary hero-btn knowledge-cta">
-                Train my AI →
-              </button>
-            </div>
-
-            <div class="knowledge-demo-card" aria-label="Business knowledge import demo">
-
-              <div class="knowledge-demo-top">
-                <div>
-                  <small>YOUYOU BUSINESS BRAIN</small>
-                  <strong>Knowledge import</strong>
-                </div>
-                <span class="knowledge-demo-live">● READY</span>
-              </div>
-
-              <div class="knowledge-drop-demo">
-                <div class="knowledge-drop-demo-icon">⇧</div>
-                <strong>Drop your business files here</strong>
-                <span>YOUYOU reads the useful content for you.</span>
-              </div>
-
-              <div class="knowledge-demo-files">
-                <div class="knowledge-demo-file file-one">
-                  <span class="file-type pdf">PDF</span>
-                  <div>
-                    <strong>pricing-guide.pdf</strong>
-                    <small>Pricing & packages</small>
-                  </div>
-                  <span class="file-state">✓</span>
-                </div>
-
-                <div class="knowledge-demo-file file-two">
-                  <span class="file-type xlsx">XLS</span>
-                  <div>
-                    <strong>services.xlsx</strong>
-                    <small>Services & details</small>
-                  </div>
-                  <span class="file-state">✓</span>
-                </div>
-
-                <div class="knowledge-demo-file file-three">
-                  <span class="file-type docx">DOC</span>
-                  <div>
-                    <strong>customer-faq.docx</strong>
-                    <small>Questions & answers</small>
-                  </div>
-                  <span class="file-state">✓</span>
-                </div>
-              </div>
-
-              <div class="knowledge-processing">
-                <div class="knowledge-processing-head">
-                  <span>Building business knowledge</span>
-                  <strong>100%</strong>
-                </div>
-                <div class="knowledge-progress-track">
-                  <span></span>
-                </div>
-              </div>
-
-              <div class="knowledge-result-grid">
-                <div>
-                  <small>CHARACTERS</small>
-                  <strong>12,480</strong>
-                </div>
-                <div>
-                  <small>FILES READ</small>
-                  <strong>3</strong>
-                </div>
-                <div>
-                  <small>STATUS</small>
-                  <strong class="knowledge-ready-text">READY</strong>
-                </div>
-              </div>
-
-              <div class="knowledge-ai-ready-row">
-                <div class="knowledge-ai-pulse">Y</div>
-                <div>
-                  <small>BUSINESS KNOWLEDGE READY</small>
-                  <strong>Your AI now has context to work with.</strong>
-                </div>
-                <span>✦</span>
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <section class="growth-showcase-section revenue-rescue-showcase">
-          <div class="growth-showcase-copy">
-            <div class="eyebrow">REVENUE RESCUE</div>
-            <h2>Good leads go quiet.<br><span>YOUYOU helps you catch them.</span></h2>
-            <p>
-              Instead of letting a high-intent conversation disappear in the inbox,
-              YOUYOU highlights stalled opportunities, contact availability and the next action to take.
-            </p>
-            <div class="showcase-points">
-              <span>✓ Intent scoring</span>
-              <span>✓ Stalled lead detection</span>
-              <span>✓ Suggested next action</span>
-            </div>
-          </div>
-
-          <div class="rescue-demo-card">
-            <div class="rescue-demo-top"><small>REVENUE RESCUE</small><span>● WATCHING</span></div>
-            <div class="rescue-lead-row">
-              <div><strong>Website visitor</strong><small>Asked for pricing + demo</small></div>
-              <b>86 HOT</b>
-            </div>
-            <div class="rescue-timeline">
-              <span class="done">Conversation</span><i></i><span class="done">Qualified</span><i></i><span class="stalled">Went quiet</span><i></i><span class="next">Follow up</span>
-            </div>
-            <div class="rescue-next-action">
-              <small>NEXT BEST ACTION</small>
-              <strong>Follow up while intent is still high.</strong>
-              <p>Contact details are available. Keep the conversation moving instead of losing the opportunity.</p>
-            </div>
-          </div>
-        </section>
-
-        <section class="growth-showcase-section whatsapp-showcase">
-          <div class="whatsapp-demo-stage">
-            <div class="whatsapp-phone">
-              <div class="whatsapp-phone-head"><span class="wa-avatar">Y</span><div><strong>YOUYOU AI</strong><small>WhatsApp · Online</small></div><span>•••</span></div>
-              <div class="wa-chat-body">
-                <div class="wa-bubble incoming">Hi — can you help me choose the right plan?</div>
-                <div class="wa-bubble outgoing">Absolutely. Tell me what you want to automate and I’ll guide you.</div>
-                <div class="wa-bubble incoming">I need website leads and follow-up.</div>
-                <div class="wa-bubble outgoing">Growth is a strong fit. I can also capture your details for the team.</div>
-              </div>
-              <div class="wa-compose"><span>Message</span><b>➤</b></div>
-            </div>
-            <div class="wa-bridge-pill">Website → WhatsApp → Dashboard</div>
-          </div>
-
-          <div class="growth-showcase-copy">
-            <div class="eyebrow whatsapp-eyebrow">WHATSAPP AI</div>
-            <h2>Don’t lose the customer<br><span>when they leave your website.</span></h2>
-            <p>
-              Prepare a smooth path from your website to WhatsApp. When the official WhatsApp Business API
-              is connected, YOUYOU can use the same business context to support conversations there too.
-            </p>
-            <div class="showcase-points">
-              <span>✓ Continue on WhatsApp</span>
-              <span>✓ Shared business context</span>
-              <span>✓ Human takeover ready</span>
-            </div>
-          </div>
-        </section>
-
-
-        <section class="landing-pages-showcase" id="landing-pages-showcase">
-          <div class="landing-pages-showcase-copy">
-            <div class="eyebrow">SMART LANDING PAGES</div>
-            <h2>Send every ad click to <span>a page built to convert.</span></h2>
-            <p>Choose a professional template, add your product or service, connect WhatsApp or lead capture, then publish a focused campaign page.</p>
-            <div class="landing-pages-showcase-badges"><span>30 templates</span><span>Live editor</span><span>WhatsApp ready</span></div>
-            <button id="landing-pages-showcase-cta" class="primary" type="button">Explore landing pages →</button>
-          </div>
-          <div class="landing-pages-showcase-visuals landing-examples-v426" aria-label="Landing page examples">
-            <article class="landing-mini landing-mini-clean">
-              <small>PRODUCT</small><h4>New collection</h4><p>One clear offer. One next step.</p><button type="button" tabindex="-1">Buy now</button>
-            </article>
-            <article class="landing-mini landing-mini-luxury">
-              <small>PREMIUM SERVICE</small><h4>Private consultation</h4><p>Build confidence before the call.</p><button type="button" tabindex="-1">Book now</button>
-            </article>
-            <article class="landing-mini landing-mini-wellness">
-              <small>WHATSAPP</small><h4>Ask before you book</h4><p>Move interested visitors into conversation.</p><button type="button" tabindex="-1">WhatsApp</button>
-            </article>
-            <article class="landing-mini landing-mini-bold">
-              <small>LEAD CAMPAIGN</small><h4>Get your quote</h4><p>Capture the contact and the intent.</p><button type="button" tabindex="-1">Get quote</button>
-            </article>
-          </div>
-        </section>
-
-        <section class="truth-proof-v427" aria-label="Why YOUYOU is different">
-          <div class="truth-proof-copy">
-            <div class="eyebrow">BUILT TO BE USED, NOT JUST DEMOED</div>
-            <h2>Product proof before social proof.</h2>
-            <p>
-              YOUYOU is being built around real workflows: create a campaign, launch a focused page,
-              capture intent, follow up and keep the business context connected.
-            </p>
-          </div>
-          <div class="truth-proof-grid">
-            <article><b>01</b><strong>Real page audits</strong><span>SEO recommendations start from an actual website page.</span></article>
-            <article><b>02</b><strong>Real conversion actions</strong><span>Landing pages can lead to Buy, Book, Quote or WhatsApp actions.</span></article>
-            <article><b>03</b><strong>Real lead workflow</strong><span>Conversations, lead intent and follow-up live in the same workspace.</span></article>
-          </div>
-        </section>
-
-        <section class="landing-proof-bar-v501" aria-label="YOUYOU product advantages">
-          <article><span>01</span><div><strong>One workflow</strong><small>Campaign, page, lead and follow-up stay connected.</small></div></article>
-          <article><span>02</span><div><strong>No credit packs</strong><small>Simple plan-based usage without constant top-ups.</small></div></article>
-          <article><span>03</span><div><strong>Built for action</strong><small>Every major tool leads to a clear next step.</small></div></article>
-        </section>
-
-        <section id="pricing" class="pricing-section pricing-v45 pricing-v424">
-          <div class="section-heading pricing-heading">
-            <div class="eyebrow">SIMPLE MONTHLY PRICING</div>
-            <h2>Pick the plan. <span>Know what you get.</span></h2>
-            <p>Clear team limits, WhatsApp capacity and support levels — with no confusing credit packs to buy every time you use the product.</p>
-          </div>
-
-          <div class="pricing-grid">
-            <article class="pricing-plan pricing-starter">
-              <div class="pricing-plan-top">
-                <div class="pricing-plan-name">STARTER</div>
-                <p class="pricing-plan-tagline">For a small team launching its first connected AI growth workflow.</p>
-                <div class="pricing-price"><span class="pricing-currency">$</span><strong>29</strong><span class="pricing-period">/month</span></div>
-              </div>
-
-              <div class="pricing-essentials" aria-label="Starter plan limits">
-                <div><small>TEAM</small><strong>2 users</strong></div>
-                <div><small>WHATSAPP</small><strong>2 numbers</strong></div>
-                <div><small>SUPPORT</small><strong>Standard</strong></div>
-                <div><small>API</small><strong>No access</strong></div>
-              </div>
-
-              <div class="pricing-divider"></div>
-              <ul class="pricing-feature-list">
-                <li><span>✓</span> AI Conversations + Website Widget</li>
-                <li><span>✓</span> Knowledge Base + business file import</li>
-                <li><span>✓</span> Conversations inbox + basic lead capture</li>
-                <li><span>✓</span> AI Control Center</li>
-                <li><span>✓</span> Smart Landing Pages · starter usage</li>
-                <li><span>✓</span> AI Studio · core text creation</li>
-                <li><span>✓</span> No credit packs · plan fair-use applies</li>
-              </ul>
-              <button id="pricing-starter" class="pricing-plan-btn pricing-plan-btn-ghost" type="button">Start free →</button>
-              <small class="pricing-plan-note">Best for solo operators and small teams</small>
-            </article>
-
-            <article class="pricing-plan pricing-growth">
-              <div class="pricing-popular-badge">MOST POPULAR</div>
-              <div class="pricing-plan-top">
-                <div class="pricing-plan-name">GROWTH</div>
-                <p class="pricing-plan-tagline">For teams creating campaigns, qualifying leads and recovering more revenue.</p>
-                <div class="pricing-price"><span class="pricing-currency">$</span><strong>59</strong><span class="pricing-period">/month</span></div>
-              </div>
-
-              <div class="pricing-essentials" aria-label="Growth plan limits">
-                <div><small>TEAM</small><strong>5 users</strong></div>
-                <div><small>WHATSAPP</small><strong>5 numbers</strong></div>
-                <div><small>SUPPORT</small><strong>Priority</strong></div>
-                <div><small>API</small><strong>Basic*</strong></div>
-              </div>
-
-              <div class="pricing-divider"></div>
-              <ul class="pricing-feature-list">
-                <li><span>✓</span> Everything in Starter</li>
-                <li><span>✓</span> Lead qualification + intent scoring</li>
-                <li><span>✓</span> Revenue Rescue + follow-up workflows</li>
-                <li><span>✓</span> Website SEO audit + growth actions</li>
-                <li><span>✓</span> More Smart Landing Pages</li>
-                <li><span>✓</span> AI Studio · ads, social, email & campaigns</li>
-                <li><span>✓</span> Growth analytics + WhatsApp handoff readiness</li>
-                <li><span>✓</span> No credit packs · plan fair-use applies</li>
-              </ul>
-              <button id="pricing-growth" class="pricing-plan-btn pricing-plan-btn-primary" type="button">Start free →</button>
-              <small class="pricing-plan-note">Best for businesses actively acquiring leads</small>
-            </article>
-
-            <article class="pricing-plan pricing-pro">
-              <div class="pricing-plan-top">
-                <div class="pricing-plan-name">PRO</div>
-                <p class="pricing-plan-tagline">For growing companies that want the full YOUYOU platform and higher operating limits.</p>
-                <div class="pricing-price"><span class="pricing-currency">$</span><strong>99</strong><span class="pricing-period">/month</span></div>
-              </div>
-
-              <div class="pricing-essentials" aria-label="Pro plan limits">
-                <div><small>TEAM</small><strong>15 users</strong></div>
-                <div><small>WHATSAPP</small><strong>10 numbers</strong></div>
-                <div><small>SUPPORT</small><strong>Dedicated</strong></div>
-                <div><small>API</small><strong>Advanced*</strong></div>
-              </div>
-
-              <div class="pricing-divider"></div>
-              <ul class="pricing-feature-list">
-                <li><span>✓</span> Everything in Growth</li>
-                <li><span>✓</span> Full SEO Growth Center + advanced insights</li>
-                <li><span>✓</span> WhatsApp AI integration</li>
-                <li><span>✓</span> AI Studio · full workflow + video-ready creation</li>
-                <li><span>✓</span> Smart Landing Pages · unlimited normal business use</li>
-                <li><span>✓</span> Advanced AI controls + priority workflows</li>
-                <li><span>✓</span> Unlimited normal business use · Fair Use</li>
-              </ul>
-              <button id="pricing-pro" class="pricing-plan-btn pricing-plan-btn-ghost" type="button">Start free →</button>
-              <small class="pricing-plan-note">Full platform · Fair Use safeguard</small>
-            </article>
-          </div>
-
-          <div class="pricing-bottom-note">
-            <span>✓ Start free</span>
-            <span>✓ No credit card required</span>
-            <span>✓ No credit packs</span>
-            <span>✓ Cancel anytime</span>
-          </div>
-
-          <p class="pricing-api-disclaimer">
-            * API access is shown as the planned plan tier and must only be activated once production API keys, permissions, rate limits and plan enforcement are live.
-          </p>
-        </section>
-
-        <section class="youyou-value-section" aria-labelledby="youyou-value-title">
-          <div class="youyou-value-head">
-            <div>
-              <div class="eyebrow">WHY YOUYOU</div>
-              <h2 id="youyou-value-title">More growth tools. <span>Less subscription chaos.</span></h2>
-            </div>
-            <p>Instead of stitching together separate tools and worrying about usage credits, YOUYOU brings the core growth workflow into one connected workspace.</p>
-          </div>
-
-          <div class="youyou-value-grid">
-            <div class="youyou-value-table" role="table" aria-label="YOUYOU value comparison">
-              <div class="youyou-value-row youyou-value-header" role="row">
-                <span role="columnheader">WHAT YOU NEED</span>
-                <strong role="columnheader">YOUYOU</strong>
-                <em role="columnheader">Typical credit-based stack</em>
-              </div>
-              <div class="youyou-value-row" role="row"><span>Monthly pricing</span><strong>Predictable plan</strong><em>Can vary with usage</em></div>
-              <div class="youyou-value-row" role="row"><span>AI Conversations</span><strong>Included</strong><em>Often metered</em></div>
-              <div class="youyou-value-row" role="row"><span>SEO Growth</span><strong>Included by plan</strong><em>Often another tool</em></div>
-              <div class="youyou-value-row" role="row"><span>AI Studio</span><strong>Included by plan</strong><em>Often another subscription</em></div>
-              <div class="youyou-value-row" role="row"><span>Smart Landing Pages</span><strong>Included by plan</strong><em>Often another builder</em></div>
-              <div class="youyou-value-row" role="row"><span>Revenue Rescue</span><strong>Connected workflow</strong><em>Often an add-on</em></div>
-              <div class="youyou-value-row" role="row"><span>WhatsApp AI</span><strong>Plan-based capacity</strong><em>Often separate setup/add-on</em></div>
-              <div class="youyou-value-row" role="row"><span>Credit packs</span><strong>No confusing packs</strong><em>Common in usage-based tools</em></div>
-            </div>
-
-            <aside class="youyou-value-card">
-              <div class="youyou-value-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
-              <small>ONE CONNECTED PLATFORM</small>
-              <h3>Create → Convert → Follow up → Grow</h3>
-              <p>AI Studio creates the campaign. Smart Landing Pages capture demand. AI Conversations qualify visitors. Revenue Rescue and WhatsApp keep valuable leads moving.</p>
-              <div class="youyou-value-pills">
-                <span>AI Studio</span><span>Landing Pages</span><span>SEO</span><span>Revenue Rescue</span><span>WhatsApp AI</span>
-              </div>
-            </aside>
-          </div>
-
-          <p class="youyou-value-fineprint">
-            Fair-use limits protect service quality and infrastructure costs. Comparison language describes common market patterns, not every competing product.
-          </p>
-        </section>
-
-        <section class="benefits-strip-v428" aria-label="YOUYOU advantages">
-          <article><span>⚡</span><div><strong>Launch in minutes</strong><small>From business idea to live campaign flow.</small></div></article>
-          <article><span>◎</span><div><strong>Built to convert</strong><small>Pages, conversations and follow-up share one goal.</small></div></article>
-          <article><span>◈</span><div><strong>One workspace</strong><small>Keep your tools, leads and context connected.</small></div></article>
-          <article><span>$</span><div><strong>Predictable pricing</strong><small>No confusing credit packs to keep buying.</small></div></article>
-        </section>
-
-        <section class="final-cta">
-
-          <div class="cta-glow"></div>
-
-          <div class="eyebrow">READY TO START?</div>
-
-          <h2>
-            Ready to turn more attention
-            <span>into a next action?</span>
-          </h2>
-
-          <p>
-            Start with the workflow your business needs today. Add the rest when you are ready —
-            without rebuilding your stack from scratch.
-          </p>
-
-          <button id="final-start" class="primary hero-btn">
-            Create your free account →
-          </button>
-
-        </section>
-
-      </main>
-
-      <footer>
-
-        <div class="footer-brand">
-          <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-            <span class="brand-wordmark" aria-label="YOUYOU">
-            <span class="brand-symbol" aria-hidden="true"><i></i><b>Y</b></span>
-            <span class="brand-text"><span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span></span>
-          </span>
-          </a>
-
-          <p>
-            AI Growth Platform for modern businesses.
-          </p>
         </div>
-
-        <div class="footer-links">
-          <a href="/" data-scroll-section="features">Features</a>
-          <a href="/" data-scroll-section="how">How it works</a>
-          <a href="/" data-scroll-section="pricing">Pricing</a>
-          <button id="footer-login">Login</button>
+        <div class="v61-image-card">
+          <img src="/assets/youyou-product-dashboard.png" alt="YOUYOU product dashboard preview" />
         </div>
+      </section>
 
-        <div class="copyright">
-          © 2026 YOUYOU. All rights reserved.
+      <section class="v61-showcase v61-studio-section">
+        <div class="v61-image-card">
+          <img src="/assets/youyou-ai-studio-platforms.png" alt="YOUYOU AI Studio social platform preview" />
         </div>
+        <div class="v61-copy">
+          <div class="v61-eyebrow">AI STUDIO</div>
+          <h2>Create content for the channels your customers already use.</h2>
+          <p>Build ad concepts and campaign content for Meta, Facebook, Instagram, TikTok, YouTube, LinkedIn and X.</p>
+          <div class="v61-social-row" aria-label="Supported channels">
+            <span>Meta</span><span>Facebook</span><span>Instagram</span><span>TikTok</span><span>YouTube</span><span>LinkedIn</span><span>X</span>
+          </div>
+        </div>
+      </section>
 
-      </footer>
+      <section id="how" class="v61-showcase v61-landing-pages-section">
+        <div class="v61-copy">
+          <div class="v61-eyebrow">SMART LANDING PAGES</div>
+          <h2>Simple pages with one clear next action.</h2>
+          <p>Use focused layouts for products, services and campaigns with Buy Now, Book Now, WhatsApp and Get Quote actions.</p>
+          <div class="v61-cta-pills">
+            <span>Buy now</span><span>Book now</span><span>WhatsApp</span><span>Get quote</span>
+          </div>
+        </div>
+        <div class="v61-image-card v61-image-card-landings">
+          <img src="/assets/youyou-simple-landing-pages.png" alt="YOUYOU simple landing page examples" />
+        </div>
+      </section>
 
+      <section id="pricing" class="v61-pricing">
+        <div class="v61-pricing-head">
+          <div class="v61-eyebrow">SIMPLE PRICING</div>
+          <h2>One predictable monthly plan.</h2>
+          <p>No confusing credit packs.</p>
+        </div>
+        <div class="v61-pricing-grid">
+          <article>
+            <small>STARTER</small><h3>$29<span>/mo</span></h3>
+            <p>2 users · 2 WhatsApp numbers</p>
+            <ul><li>AI Conversations</li><li>Website Widget</li><li>Smart Landing Pages</li><li>Core AI Studio</li><li>Standard support</li><li>No API access</li></ul>
+            <button id="pricing-starter" type="button">Start free</button>
+          </article>
+          <article class="featured">
+            <b>MOST POPULAR</b><small>GROWTH</small><h3>$59<span>/mo</span></h3>
+            <p>5 users · 5 WhatsApp numbers</p>
+            <ul><li>Everything in Starter</li><li>Revenue Rescue</li><li>SEO Growth</li><li>AI Studio campaigns</li><li>Priority support</li><li>Basic API*</li></ul>
+            <button id="pricing-growth" type="button">Start free</button>
+          </article>
+          <article>
+            <small>PRO</small><h3>$99<span>/mo</span></h3>
+            <p>15 users · 10 WhatsApp numbers</p>
+            <ul><li>Everything in Growth</li><li>WhatsApp AI</li><li>Advanced SEO</li><li>Full AI Studio</li><li>Dedicated support</li><li>Advanced API*</li></ul>
+            <button id="pricing-pro" type="button">Start free</button>
+          </article>
+        </div>
+        <p class="v61-api-note">* API access should only be activated once production API keys, permissions, rate limits and plan enforcement are live.</p>
+      </section>
+
+      <section class="v61-final">
+        <div>
+          <div class="v61-eyebrow">ONE CONNECTED PLATFORM</div>
+          <h2>Build the campaign. Launch the page. Capture the lead. Follow up.</h2>
+          <p>YOUYOU keeps the growth workflow connected from the first idea to the next customer action.</p>
+        </div>
+        ${state.user
+          ? `<button id="nav-dashboard" type="button">Open dashboard →</button>`
+          : `<button id="nav-start" type="button">Create your free account →</button>`}
+      </section>
     </div>
   `;
 
