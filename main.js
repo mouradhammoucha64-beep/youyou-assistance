@@ -260,138 +260,176 @@ function renderLanding() {
 
       <main>
 
-        <section class="hero-section">
+        <section class="hero-section hero-platform-v426">
 
           <div class="hero-copy">
-
             <div class="eyebrow">
               <span class="pulse"></span>
               AI GROWTH PLATFORM
             </div>
 
             <h1>
-              Turn more visitors into
-              <span>customers and growth.</span>
+              From idea to lead.
+              <span>One connected growth workspace.</span>
             </h1>
 
             <p class="hero-text">
-              YOUYOU connects AI conversations, SEO Growth, AI Studio, Smart Landing Pages,
-              Revenue Rescue and WhatsApp AI in one focused growth workspace.
+              Create the campaign, launch the page, capture the lead and keep the follow-up moving —
+              with AI Studio, Smart Landing Pages, SEO Growth, AI Conversations, Revenue Rescue and WhatsApp AI.
             </p>
+
+            <div class="hero-value-promise">
+              <strong>Stop stitching together separate growth tools.</strong>
+              <span>No confusing credit packs. One predictable monthly plan.</span>
+            </div>
+
+            <div class="hero-hook-line" aria-label="YOUYOU growth workflow">
+              <span>Create</span><i>→</i><span>Launch</span><i>→</i><span>Convert</span><i>→</i><span>Follow up</span>
+            </div>
 
             <div class="hero-buttons">
               ${state.user
                 ? `<button id="hero-dashboard" class="primary hero-btn">Open dashboard <span>→</span></button>
                    <button id="hero-pricing" class="secondary hero-btn">View plans</button>`
                 : `<button id="hero-start" class="primary hero-btn">Start for free <span>→</span></button>
-                   <button id="hero-login" class="secondary hero-btn">Log in</button>`}
+                   <button id="hero-login" class="secondary hero-btn">See how YOUYOU works</button>`}
             </div>
 
             <div class="trust">
               <span>✓ No credit card required</span>
-              <span>✓ Setup in minutes</span>
-              <span>✓ Available 24/7</span>
+              <span>✓ No confusing credit packs</span>
+              <span>✓ One connected workspace</span>
             </div>
-
           </div>
 
-          <div class="hero-visual">
+          <div class="hero-visual hero-growth-cockpit" aria-label="YOUYOU growth platform preview">
+            <div class="hero-cockpit-glow"></div>
 
-            <div class="glow glow-one"></div>
-            <div class="glow glow-two"></div>
-
-            <div class="ai-window">
-
-              <div class="window-top">
-                <div class="window-brand">
+            <div class="hero-cockpit-shell">
+              <div class="hero-cockpit-top">
+                <div class="hero-cockpit-brand">
                   <span class="mini-logo">Y</span>
-                  <div>
-                    <strong>YOUYOU AI</strong>
-                    <small>Online now</small>
-                  </div>
+                  <div><strong>YOUYOU</strong><small>Growth workspace</small></div>
                 </div>
-
-                <span class="online-dot"></span>
+                <span class="hero-live-pill"><i></i> LIVE</span>
               </div>
 
-              <div class="chat-area">
-
-                <div class="message customer">
-                  Hi! I have a question about your service.
+              <div class="hero-cockpit-main">
+                <div class="hero-campaign-card">
+                  <small>AI STUDIO</small>
+                  <strong>Campaign ready</strong>
+                  <p>Hook + ad + landing message</p>
+                  <div class="hero-campaign-lines"><i></i><i></i><i></i></div>
                 </div>
 
-                <div class="message ai">
-                  Hey! 👋 I'm YOUYOU, your AI assistant.
-                  How can I help you today?
+                <div class="hero-landing-card">
+                  <small>SMART LANDING PAGE</small>
+                  <strong>Summer service offer</strong>
+                  <p>Focused page · WhatsApp CTA</p>
+                  <button type="button" tabindex="-1">Get the offer →</button>
                 </div>
 
-                <div class="message customer">
-                  How much does it cost?
+                <div class="hero-lead-card">
+                  <small>NEW LEAD</small>
+                  <div><strong>High buying intent</strong><b>86 HOT</b></div>
+                  <p>Pricing + booking + contact captured</p>
                 </div>
-
-                <div class="message ai">
-                  We have plans starting at
-                  <strong>$29/month</strong>.
-                  I can also help you choose the right plan.
-                </div>
-
-                <div class="typing">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-
               </div>
 
-              <div class="chat-input">
-                <span>Ask YOUYOU anything...</span>
-                <button>↑</button>
-              </div>
-
-            </div>
-
-            <div class="floating-card live-card">
-              <span class="live-dot"></span>
-              <div>
-                <small>AI AGENT</small>
-                <strong>Working 24/7</strong>
+              <div class="hero-cockpit-bottom">
+                <span><i class="seo-dot"></i> SEO action ready</span>
+                <span><i class="rescue-dot"></i> Revenue Rescue watching</span>
+                <span><i class="wa-dot"></i> WhatsApp handoff ready</span>
               </div>
             </div>
 
+            <div class="hero-float hero-float-studio"><b>✦</b><span><small>AI STUDIO</small><strong>3 ad angles</strong></span></div>
+            <div class="hero-float hero-float-seo"><b>↗</b><span><small>SEO GROWTH</small><strong>7 actions</strong></span></div>
+            <div class="hero-float hero-float-rescue"><b>↻</b><span><small>REVENUE RESCUE</small><strong>Lead needs follow-up</strong></span></div>
           </div>
 
         </section>
 
-
-        <section class="stats-section stats-live-strip">
-          <div class="stat-live-item">
-            <strong>24/7</strong>
-            <span>AI conversations</span>
-          </div>
-          <div class="stat-live-item">
-            <strong>6</strong>
-            <span>Connected growth tools</span>
-          </div>
-          <div class="stat-live-item">
-            <strong>30</strong>
-            <span>Landing templates</span>
-          </div>
-          <div class="stat-live-item">
-            <strong>1</strong>
-            <span>Unified workspace</span>
-          </div>
+        <section class="stats-section stats-live-strip stats-compact-v426 proof-strip-v427" aria-label="YOUYOU product proof">
+          <div class="stat-live-item"><strong>6</strong><span>connected growth tools</span></div>
+          <div class="stat-live-item"><strong>30</strong><span>campaign-ready landing templates</span></div>
+          <div class="stat-live-item"><strong>24/7</strong><span>website AI availability</span></div>
+          <div class="stat-live-item"><strong>No packs</strong><span>predictable plan-based usage</span></div>
         </section>
 
 
 
-        <section class="growth-platform-section" id="growth-platform">
+        <section id="how" class="section how-section how-growth-flow how-v426">
+          <div class="section-heading">
+            <div class="eyebrow">ONE CONNECTED FLOW</div>
+            <h2>Build the campaign. Launch the page. <span>Capture the lead. Follow up.</span></h2>
+            <p>YOUYOU connects the steps after the click, so attention has somewhere useful to go.</p>
+          </div>
+
+          <div class="journey-track-v426">
+            <div class="journey-progress-v426" aria-hidden="true"><i></i></div>
+
+            <article class="journey-step-v426">
+              <span>01</span><b>✦</b>
+              <small>CREATE</small>
+              <h3>Shape the campaign</h3>
+              <p>Use AI Studio for the hook, ad, social content, email and campaign message.</p>
+            </article>
+
+            <article class="journey-step-v426">
+              <span>02</span><b>▦</b>
+              <small>LAUNCH</small>
+              <h3>Build the conversion page</h3>
+              <p>Send the click to a focused landing page with Buy, Book, Lead or WhatsApp actions.</p>
+            </article>
+
+            <article class="journey-step-v426">
+              <span>03</span><b>◌</b>
+              <small>CONVERT</small>
+              <h3>Capture real intent</h3>
+              <p>Website AI answers questions, identifies intent and turns interest into a qualified lead.</p>
+            </article>
+
+            <article class="journey-step-v426">
+              <span>04</span><b>↻</b>
+              <small>KEEP MOVING</small>
+              <h3>Follow up before intent fades</h3>
+              <p>Revenue Rescue and WhatsApp keep the opportunity visible and ready for the next action.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="industry-marquee-v426" aria-label="Example businesses that can use YOUYOU">
+          <div class="industry-marquee-label">
+            <small>BUILT FOR REAL BUSINESS WORKFLOWS</small>
+            <strong>One platform. Different ways to grow.</strong>
+          </div>
+          <div class="industry-marquee-window">
+            <div class="industry-marquee-track">
+              <span><i>✦</i><b>Beauty & Wellness</b><small>Campaign → Booking</small></span>
+              <span><i>⌂</i><b>Real Estate</b><small>Ad → Qualified enquiry</small></span>
+              <span><i>◈</i><b>Agencies</b><small>Offer → Lead → Follow-up</small></span>
+              <span><i>+</i><b>Health Services</b><small>Search → Landing page</small></span>
+              <span><i>▣</i><b>Hospitality</b><small>Promotion → WhatsApp</small></span>
+              <span><i>◆</i><b>Local Services</b><small>SEO → Customer intent</small></span>
+              <span aria-hidden="true"><i>✦</i><b>Beauty & Wellness</b><small>Campaign → Booking</small></span>
+              <span aria-hidden="true"><i>⌂</i><b>Real Estate</b><small>Ad → Qualified enquiry</small></span>
+              <span aria-hidden="true"><i>◈</i><b>Agencies</b><small>Offer → Lead → Follow-up</small></span>
+              <span aria-hidden="true"><i>+</i><b>Health Services</b><small>Search → Landing page</small></span>
+              <span aria-hidden="true"><i>▣</i><b>Hospitality</b><small>Promotion → WhatsApp</small></span>
+              <span aria-hidden="true"><i>◆</i><b>Local Services</b><small>SEO → Customer intent</small></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="growth-platform-section" id="features">
           <div class="growth-platform-shell">
             <div class="growth-platform-copy">
               <div class="eyebrow"><span class="pulse"></span> YOUYOU PLATFORM</div>
-              <h2>Six growth tools.<br><span>One connected platform.</span></h2>
+              <h2>Six focused tools.<br><span>One operating system for growth.</span></h2>
               <p>
-                Create campaigns, get discovered, convert visitors, capture leads and keep valuable
-                opportunities moving — without jumping between disconnected tools.
+                Use only what you need today, while every tool stays connected to the same business context,
+                leads and next actions.
               </p>
               <div class="growth-flow-line" aria-label="YOUYOU growth flow">
                 <span>CREATE</span><i>→</i><span>ATTRACT</span><i>→</i><span>CONVERT</span><i>→</i><span>FOLLOW UP</span>
@@ -439,46 +477,6 @@ function renderLanding() {
           </div>
         </section>
 
-        <section id="features" class="section landing-feature-section">
-          <div class="section-heading">
-            <div class="eyebrow">WHY YOUYOU</div>
-            <h2>One platform. <span>More ways to grow.</span></h2>
-            <p>Bring customer conversations, campaign creation, landing pages, search growth and lead follow-up into one connected workspace.</p>
-          </div>
-
-          <div class="feature-carousel-shell">
-            <button class="feature-carousel-arrow feature-carousel-prev" type="button" aria-label="Previous feature">←</button>
-            <div class="feature-grid" id="feature-carousel">
-              <article class="feature-card"><div class="feature-icon">◌</div><h3>AI Conversations</h3><p>Answer questions instantly, capture intent and qualify opportunities around the clock.</p></article>
-              <article class="feature-card"><div class="feature-icon">✦</div><h3>AI Studio</h3><p>Create ads, social posts, emails, campaign ideas and video-ready scripts from your business context.</p></article>
-              <article class="feature-card"><div class="feature-icon">▦</div><h3>Smart Landing Pages</h3><p>Turn campaigns into focused pages with templates, live editing, lead capture and WhatsApp actions.</p></article>
-              <article class="feature-card"><div class="feature-icon">↗</div><h3>SEO Growth</h3><p>Audit your website and get clear problems, fixes, page ideas and practical SEO actions.</p></article>
-              <article class="feature-card"><div class="feature-icon">↻</div><h3>Revenue Rescue</h3><p>Catch high-intent leads that went quiet and keep the next follow-up action visible.</p></article>
-              <article class="feature-card"><div class="feature-icon">◉</div><h3>WhatsApp AI</h3><p>Continue conversations beyond the website with shared context and human handoff readiness.</p></article>
-              <article class="feature-card"><div class="feature-icon">▤</div><h3>Business Knowledge</h3><p>Import business files and give YOUYOU the context it needs to support customers and campaigns.</p></article>
-              <article class="feature-card"><div class="feature-icon">◇</div><h3>Website Widget</h3><p>Put YOUYOU directly on your website and connect visitor conversations with your growth workflow.</p></article>
-            </div>
-            <button class="feature-carousel-arrow feature-carousel-next" type="button" aria-label="Next feature">→</button>
-          </div>
-          <div class="feature-carousel-dots" aria-label="Feature carousel navigation">
-            ${Array.from({length:8},(_,i)=>`<button class="feature-dot ${i===0?'is-active':''}" type="button" aria-label="Feature group ${i+1}"></button>`).join('')}
-          </div>
-        </section>
-
-        <section id="how" class="section how-section how-growth-flow">
-          <div class="section-heading">
-            <div class="eyebrow">HOW IT WORKS</div>
-            <h2>From idea to <span>campaign, lead and follow-up.</span></h2>
-            <p>YOUYOU connects the steps that normally live in separate tools.</p>
-          </div>
-          <div class="steps growth-steps">
-            <div class="step"><div class="step-number">01</div><h3>Set up your business</h3><p>Add your website, services, goals and business knowledge once.</p></div>
-            <div class="step"><div class="step-number">02</div><h3>Create with AI Studio</h3><p>Turn an idea into ad copy, social content, emails, scripts and a campaign message.</p></div>
-            <div class="step"><div class="step-number">03</div><h3>Build a landing page</h3><p>Choose a template, add the offer, visuals and a clear lead or WhatsApp action.</p></div>
-            <div class="step"><div class="step-number">04</div><h3>Convert the visitor</h3><p>Let website AI answer questions, capture intent and turn interest into a qualified lead.</p></div>
-            <div class="step"><div class="step-number">05</div><h3>Keep the lead moving</h3><p>Use Revenue Rescue and WhatsApp workflows to follow up while intent is still high.</p></div>
-          </div>
-        </section>
 
         <section class="landing-knowledge-section">
 
@@ -628,7 +626,7 @@ function renderLanding() {
 
         <section class="growth-showcase-section revenue-rescue-showcase">
           <div class="growth-showcase-copy">
-            <div class="eyebrow">REVENUE RESCUE</div>
+            <div class="eyebrow">RECOVER OPPORTUNITY</div>
             <h2>Good leads go quiet.<br><span>YOUYOU helps you catch them.</span></h2>
             <p>
               Instead of letting a high-intent conversation disappear in the inbox,
@@ -694,6 +692,17 @@ function renderLanding() {
             <h2>Turn one idea into <span>a campaign people can act on.</span></h2>
             <p>Describe what you want to sell or promote. YOUYOU helps shape the hook, ad copy, social post, email, video script and landing-page message around the same goal.</p>
             <div class="studio-output-pills"><span>Ad Copy</span><span>Social</span><span>Email</span><span>Video Script</span><span>Landing Copy</span></div>
+            <div class="studio-platforms-v426" aria-label="Campaign platforms">
+              <small>CREATE FOR</small>
+              <div>
+                <span class="platform-meta">Meta</span>
+                <span class="platform-instagram">Instagram</span>
+                <span class="platform-tiktok">TikTok</span>
+                <span class="platform-youtube">YouTube</span>
+                <span class="platform-linkedin">LinkedIn</span>
+                <span class="platform-x">X</span>
+              </div>
+            </div>
           </div>
           <div class="studio-ad-stage" aria-label="AI Studio campaign output example">
             <div class="studio-ad-card">
@@ -717,19 +726,43 @@ function renderLanding() {
             <div class="landing-pages-showcase-badges"><span>30 templates</span><span>Live editor</span><span>WhatsApp ready</span></div>
             <button id="landing-pages-showcase-cta" class="primary" type="button">Explore landing pages →</button>
           </div>
-          <div class="landing-pages-showcase-visuals" aria-label="Landing page examples">
-            <article class="landing-mini landing-mini-clean"><i></i><b></b><strong></strong><span></span><button></button></article>
-            <article class="landing-mini landing-mini-luxury"><i></i><b></b><strong></strong><span></span><button></button></article>
-            <article class="landing-mini landing-mini-wellness"><i></i><b></b><strong></strong><span></span><button></button></article>
-            <article class="landing-mini landing-mini-bold"><i></i><b></b><strong></strong><span></span><button></button></article>
+          <div class="landing-pages-showcase-visuals landing-examples-v426" aria-label="Landing page examples">
+            <article class="landing-mini landing-mini-clean">
+              <small>PRODUCT</small><h4>New collection</h4><p>One clear offer. One next step.</p><button type="button" tabindex="-1">Buy now</button>
+            </article>
+            <article class="landing-mini landing-mini-luxury">
+              <small>PREMIUM SERVICE</small><h4>Private consultation</h4><p>Build confidence before the call.</p><button type="button" tabindex="-1">Book now</button>
+            </article>
+            <article class="landing-mini landing-mini-wellness">
+              <small>WHATSAPP</small><h4>Ask before you book</h4><p>Move interested visitors into conversation.</p><button type="button" tabindex="-1">WhatsApp</button>
+            </article>
+            <article class="landing-mini landing-mini-bold">
+              <small>LEAD CAMPAIGN</small><h4>Get your quote</h4><p>Capture the contact and the intent.</p><button type="button" tabindex="-1">Get quote</button>
+            </article>
+          </div>
+        </section>
+
+        <section class="truth-proof-v427" aria-label="Why YOUYOU is different">
+          <div class="truth-proof-copy">
+            <div class="eyebrow">BUILT TO BE USED, NOT JUST DEMOED</div>
+            <h2>Product proof before social proof.</h2>
+            <p>
+              YOUYOU is being built around real workflows: create a campaign, launch a focused page,
+              capture intent, follow up and keep the business context connected.
+            </p>
+          </div>
+          <div class="truth-proof-grid">
+            <article><b>01</b><strong>Real page audits</strong><span>SEO recommendations start from an actual website page.</span></article>
+            <article><b>02</b><strong>Real conversion actions</strong><span>Landing pages can lead to Buy, Book, Quote or WhatsApp actions.</span></article>
+            <article><b>03</b><strong>Real lead workflow</strong><span>Conversations, lead intent and follow-up live in the same workspace.</span></article>
           </div>
         </section>
 
         <section id="pricing" class="pricing-section pricing-v45 pricing-v424">
           <div class="section-heading pricing-heading">
             <div class="eyebrow">SIMPLE MONTHLY PRICING</div>
-            <h2>One predictable price. <span>No credit-pack anxiety.</span></h2>
-            <p>Choose the team size and growth level that fits your business. YOUYOU is built around clear monthly plans, not confusing packs of credits.</p>
+            <h2>Pick the plan. <span>Know what you get.</span></h2>
+            <p>Clear team limits, WhatsApp capacity and support levels — with no confusing credit packs to buy every time you use the product.</p>
           </div>
 
           <div class="pricing-grid">
@@ -881,13 +914,13 @@ function renderLanding() {
           <div class="eyebrow">READY TO START?</div>
 
           <h2>
-            One platform to
-            <span>create, convert and grow.</span>
+            Ready to turn more attention
+            <span>into a next action?</span>
           </h2>
 
           <p>
-            Build campaigns with AI Studio, launch focused landing pages, convert visitors with AI,
-            grow through SEO and keep valuable leads moving with Revenue Rescue and WhatsApp AI.
+            Start with the workflow your business needs today. Add the rest when you are ready —
+            without rebuilding your stack from scratch.
           </p>
 
           <button id="final-start" class="primary hero-btn">
@@ -1035,7 +1068,7 @@ function renderFaqPage() {
                 <span>What is YOUYOU?</span><span class="faq-toggle">−</span>
               </button>
               <div class="landing-faq-answer">
-                <p>YOUYOU is an AI customer agent workspace designed to help businesses answer visitors, capture leads, qualify opportunities and manage customer conversations from one place.</p>
+                <p>YOUYOU is an AI Growth Platform that connects campaign creation, landing pages, SEO actions, website conversations, lead capture and follow-up workflows in one business workspace.</p>
               </div>
             </article>
 
@@ -1646,7 +1679,8 @@ function setupLandingMotion() {
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
     revealTargets.forEach((node) => observer.observe(node));
-  }}
+  }
+}
 
 
 function knowledgePanelToggleInit() {

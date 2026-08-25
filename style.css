@@ -9029,3 +9029,581 @@ body,
 @media(prefers-reduced-motion:reduce){
   .youyou-value-orbit{animation:none!important}
 }
+
+
+/* =========================================================
+   YOUYOU V4.26 — LANDING INFORMATION ARCHITECTURE REWORK
+   Hero-first value, less repetition, tighter spacing, living workflow.
+   ========================================================= */
+
+.hero-platform-v426{
+  min-height:auto!important;
+  padding:clamp(86px,8vw,128px) clamp(26px,5.5vw,86px) 58px!important;
+  overflow:hidden!important;
+}
+
+.hero-platform-v426 .hero-copy{
+  max-width:720px;
+  padding:20px 0 26px!important;
+}
+
+.hero-platform-v426 h1{
+  max-width:760px;
+  font-size:clamp(48px,5.7vw,86px)!important;
+  line-height:1.01!important;
+  letter-spacing:-.055em!important;
+  padding-bottom:.09em!important;
+  overflow:visible!important;
+}
+
+.hero-platform-v426 .hero-text{
+  max-width:690px;
+  font-size:clamp(16px,1.28vw,20px)!important;
+  line-height:1.68!important;
+}
+
+.hero-hook-line{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin:24px 0 2px;
+}
+
+.hero-hook-line span{
+  padding:7px 10px;
+  border:1px solid rgba(160,174,204,.10);
+  border-radius:999px;
+  background:rgba(255,255,255,.025);
+  color:#c7cfdb!important;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.hero-hook-line i{
+  color:#756be3;
+  font-style:normal;
+  font-size:12px;
+}
+
+.hero-growth-cockpit{
+  position:relative!important;
+  width:min(690px,100%)!important;
+  min-height:540px!important;
+  display:grid!important;
+  place-items:center!important;
+  overflow:visible!important;
+}
+
+.hero-cockpit-glow{
+  position:absolute;
+  inset:11% 9%;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(112,100,232,.15),rgba(91,141,239,.05) 38%,transparent 70%);
+  filter:blur(16px);
+  animation:yyCockpitGlow 5.2s ease-in-out infinite;
+}
+
+.hero-cockpit-shell{
+  position:relative;
+  z-index:2;
+  width:min(575px,88%);
+  padding:18px;
+  border:1px solid rgba(175,187,211,.12);
+  border-radius:25px;
+  background:
+    radial-gradient(circle at 86% 5%,rgba(126,113,238,.12),transparent 25%),
+    linear-gradient(145deg,rgba(27,39,59,.98),rgba(17,27,44,.98));
+  box-shadow:0 34px 90px rgba(3,7,17,.32),inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.hero-cockpit-top,
+.hero-cockpit-brand,
+.hero-cockpit-bottom,
+.hero-lead-card>div{
+  display:flex;
+  align-items:center;
+}
+
+.hero-cockpit-top{justify-content:space-between;margin-bottom:13px}
+.hero-cockpit-brand{gap:9px}
+.hero-cockpit-brand strong,.hero-cockpit-brand small{display:block}
+.hero-cockpit-brand strong{font-size:12px;color:#f4f5f8}
+.hero-cockpit-brand small{font-size:9px;color:#7f8ca1;margin-top:2px}
+
+.hero-live-pill{
+  display:flex;align-items:center;gap:6px;padding:6px 9px;
+  border:1px solid rgba(83,201,153,.14);border-radius:999px;
+  color:#7bd5ad!important;font-size:8px;font-weight:850;letter-spacing:.12em;
+}
+.hero-live-pill i{width:5px;height:5px;border-radius:50%;background:#56cc97;box-shadow:0 0 10px rgba(86,204,151,.65)}
+
+.hero-cockpit-main{display:grid;grid-template-columns:1fr 1.05fr;gap:10px}
+.hero-campaign-card,.hero-landing-card,.hero-lead-card{
+  border:1px solid rgba(175,187,211,.09);border-radius:15px;background:rgba(8,15,28,.30);padding:14px;
+}
+.hero-campaign-card small,.hero-landing-card small,.hero-lead-card small{display:block;color:#7f8ca1!important;font-size:8px;font-weight:850;letter-spacing:.12em}
+.hero-campaign-card strong,.hero-landing-card strong,.hero-lead-card strong{display:block;margin:7px 0 4px;color:#f0f2f6!important;font-size:13px}
+.hero-campaign-card p,.hero-landing-card p,.hero-lead-card p{margin:0;color:#8693a7!important;font-size:9px;line-height:1.5}
+.hero-campaign-lines{display:grid;gap:5px;margin-top:13px}
+.hero-campaign-lines i{height:5px;border-radius:99px;background:linear-gradient(90deg,rgba(127,114,238,.34),rgba(91,141,239,.08))}
+.hero-campaign-lines i:nth-child(2){width:78%}.hero-campaign-lines i:nth-child(3){width:54%}
+.hero-landing-card{grid-row:span 2}
+.hero-landing-card button{
+  margin-top:16px;padding:8px 10px;border:0;border-radius:8px;
+  background:linear-gradient(135deg,#8173ef,#617fe5);color:#fff;font-size:9px;font-weight:750;
+}
+.hero-lead-card b{margin-left:auto;padding:5px 7px;border-radius:8px;background:rgba(84,203,151,.10);color:#71d4aa;font-size:9px}
+.hero-cockpit-bottom{gap:6px;flex-wrap:wrap;margin-top:10px}
+.hero-cockpit-bottom span{
+  display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:9px;background:rgba(255,255,255,.018);
+  color:#8290a4!important;font-size:8px;font-weight:650;
+}
+.hero-cockpit-bottom i{width:5px;height:5px;border-radius:50%}
+.seo-dot{background:#6695ef}.rescue-dot{background:#d2a35f}.wa-dot{background:#4fc995}
+
+.hero-float{
+  position:absolute;z-index:4;display:flex;align-items:center;gap:9px;
+  min-width:152px;padding:10px 11px;border:1px solid rgba(182,194,217,.11);border-radius:13px;
+  background:rgba(22,32,50,.94);box-shadow:0 18px 42px rgba(3,8,18,.24);
+  animation:yyFloatSoft 5.5s ease-in-out infinite;
+}
+.hero-float>b{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(126,113,238,.11);color:#b5a9ff;font-size:13px}
+.hero-float small,.hero-float strong{display:block}.hero-float small{color:#69778c!important;font-size:7px;letter-spacing:.1em}.hero-float strong{margin-top:2px;color:#e9edf4!important;font-size:9px}
+.hero-float-studio{left:0;top:19%}
+.hero-float-seo{right:-1%;top:28%;animation-delay:-1.7s}
+.hero-float-rescue{right:4%;bottom:12%;animation-delay:-3.2s}
+
+@keyframes yyFloatSoft{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes yyCockpitGlow{0%,100%{opacity:.7;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
+
+/* Compact proof strip — removes the large dead space. */
+.stats-compact-v426{
+  width:min(1180px,calc(100% - 48px))!important;
+  margin:0 auto 58px!important;
+  padding:12px 14px!important;
+  min-height:auto!important;
+  border-radius:16px!important;
+}
+.stats-compact-v426 .stat-live-item{min-height:54px!important;padding:5px 18px!important}
+.stats-compact-v426 .stat-live-item strong{font-size:23px!important}
+.stats-compact-v426 .stat-live-item span{font-size:9px!important}
+
+/* Main tools are now the single canonical feature grid. */
+.growth-platform-section{padding-top:62px!important;padding-bottom:62px!important}
+.growth-platform-shell{gap:34px!important}
+.growth-engine-grid-six{gap:12px!important}
+.growth-engine-card{min-height:198px!important;padding:19px!important}
+.growth-engine-card h3{font-size:17px!important}
+.growth-engine-card p{font-size:11px!important;line-height:1.55!important}
+
+/* Four-stage journey — dynamic but not decorative chaos. */
+.how-v426{padding-top:68px!important;padding-bottom:58px!important}
+.how-v426 .section-heading{margin-bottom:32px!important}
+.journey-track-v426{
+  position:relative;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;
+  width:min(1180px,calc(100% - 42px));margin:0 auto;
+}
+.journey-progress-v426{
+  position:absolute;left:7%;right:7%;top:31px;height:1px;background:rgba(135,148,173,.12);z-index:0;
+}
+.journey-progress-v426 i{
+  position:absolute;top:-2px;left:0;width:5px;height:5px;border-radius:50%;
+  background:#8b7df1;box-shadow:0 0 13px rgba(139,125,241,.65);
+  animation:yyJourneyProgress 9s ease-in-out infinite;
+}
+@keyframes yyJourneyProgress{0%{left:0}45%{left:99%}55%{left:99%}100%{left:0}}
+.journey-step-v426{
+  position:relative;z-index:1;padding:18px 17px 19px;border:1px solid rgba(175,187,211,.08);
+  border-radius:18px;background:linear-gradient(145deg,rgba(28,39,58,.9),rgba(19,28,45,.91));
+  transition:transform .2s ease,border-color .2s ease,background .2s ease;
+}
+.journey-step-v426:hover{transform:translateY(-4px);border-color:rgba(141,129,240,.18);background:linear-gradient(145deg,rgba(31,43,64,.96),rgba(20,30,48,.95))}
+.journey-step-v426>span{
+  position:absolute;right:13px;top:12px;color:#657187!important;font-size:9px;font-weight:800;
+}
+.journey-step-v426>b{
+  display:grid;place-items:center;width:28px;height:28px;margin-bottom:14px;border-radius:9px;
+  background:rgba(126,113,238,.10);color:#a89af7;font-size:12px;
+}
+.journey-step-v426 small{color:#76839a!important;font-size:8px;font-weight:850;letter-spacing:.13em}
+.journey-step-v426 h3{margin:6px 0 7px;color:#eef1f5!important;font-size:15px;line-height:1.25}
+.journey-step-v426 p{margin:0;color:#8794a7!important;font-size:10px;line-height:1.6}
+
+/* Living industry strip. These are scenarios, not client claims. */
+.industry-marquee-v426{
+  width:min(1320px,calc(100% - 34px));margin:16px auto 72px;padding:20px 0;
+  border:1px solid rgba(177,189,213,.08);border-radius:20px;
+  background:radial-gradient(circle at 15% 50%,rgba(201,143,166,.035),transparent 20%),rgba(18,27,44,.70);
+  overflow:hidden;
+}
+.industry-marquee-label{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:0 22px 15px}
+.industry-marquee-label small{color:#7c899f!important;font-size:8px;font-weight:850;letter-spacing:.14em}
+.industry-marquee-label strong{color:#dce1e9!important;font-size:12px}
+.industry-marquee-window{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.industry-marquee-track{display:flex;width:max-content;gap:9px;animation:yyIndustryMarquee 28s linear infinite}
+.industry-marquee-track>span{
+  display:grid;grid-template-columns:34px auto;grid-template-rows:auto auto;column-gap:9px;
+  min-width:210px;padding:11px 13px;border:1px solid rgba(177,189,213,.08);border-radius:13px;background:rgba(255,255,255,.022);
+}
+.industry-marquee-track i{grid-row:1/3;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(126,113,238,.09);color:#a99bf7;font-style:normal}
+.industry-marquee-track b{align-self:end;color:#e6eaf0;font-size:10px}.industry-marquee-track small{align-self:start;margin-top:2px;color:#76849a!important;font-size:8px}
+@keyframes yyIndustryMarquee{to{transform:translateX(calc(-50% - 4.5px))}}
+
+/* AI Studio channel destination strip */
+.studio-platforms-v426{margin-top:20px}
+.studio-platforms-v426>small{display:block;margin-bottom:8px;color:#727f94!important;font-size:8px;font-weight:850;letter-spacing:.13em}
+.studio-platforms-v426>div{display:flex;flex-wrap:wrap;gap:7px}
+.studio-platforms-v426 span{
+  padding:7px 10px;border:1px solid rgba(179,190,214,.09);border-radius:9px;background:rgba(255,255,255,.02);
+  color:#c7ced9!important;font-size:9px;font-weight:750;
+}
+.platform-meta{box-shadow:inset 0 -1px 0 rgba(90,132,244,.35)}
+.platform-instagram{box-shadow:inset 0 -1px 0 rgba(201,143,166,.38)}
+.platform-tiktok{box-shadow:inset 0 -1px 0 rgba(79,184,165,.33)}
+.platform-youtube{box-shadow:inset 0 -1px 0 rgba(213,92,92,.30)}
+.platform-linkedin{box-shadow:inset 0 -1px 0 rgba(91,141,239,.35)}
+.platform-x{box-shadow:inset 0 -1px 0 rgba(210,216,225,.24)}
+
+/* Make Landing Page examples communicate the CTA at a glance. */
+.landing-examples-v426 .landing-mini{
+  display:flex!important;flex-direction:column!important;align-items:flex-start!important;
+  justify-content:flex-end!important;min-height:226px!important;padding:18px!important;overflow:hidden!important;
+}
+.landing-examples-v426 .landing-mini::before{
+  content:"";position:absolute;inset:0 0 auto 0;height:42%;background:radial-gradient(circle at 75% 20%,rgba(255,255,255,.12),transparent 35%);
+}
+.landing-examples-v426 .landing-mini small,
+.landing-examples-v426 .landing-mini h4,
+.landing-examples-v426 .landing-mini p,
+.landing-examples-v426 .landing-mini button{position:relative;z-index:2}
+.landing-examples-v426 .landing-mini small{font-size:7px;font-weight:850;letter-spacing:.13em;opacity:.68}
+.landing-examples-v426 .landing-mini h4{margin:7px 0 5px;font-size:15px;line-height:1.15}
+.landing-examples-v426 .landing-mini p{margin:0 0 13px;font-size:9px;line-height:1.45;opacity:.72}
+.landing-examples-v426 .landing-mini button{
+  width:auto!important;height:auto!important;padding:8px 11px!important;border:0!important;border-radius:8px!important;
+  background:#f3f1ee!important;color:#121827!important;font-size:8px!important;font-weight:800!important;
+}
+.landing-mini-wellness button{background:#65c8ad!important;color:#10221e!important}
+.landing-mini-luxury button{background:#d3b88c!important;color:#231d16!important}
+.landing-mini-bold button{background:#8a79ef!important;color:#fff!important}
+
+@media(max-width:980px){
+  .hero-platform-v426{grid-template-columns:1fr!important}
+  .hero-growth-cockpit{margin:0 auto}
+  .journey-track-v426{grid-template-columns:1fr 1fr}
+  .journey-progress-v426{display:none}
+}
+@media(max-width:640px){
+  .hero-platform-v426{padding-left:18px!important;padding-right:18px!important}
+  .hero-platform-v426 h1{font-size:46px!important}
+  .hero-growth-cockpit{min-height:470px!important}
+  .hero-float{display:none}
+  .hero-cockpit-main{grid-template-columns:1fr}
+  .hero-landing-card{grid-row:auto}
+  .stats-compact-v426{grid-template-columns:1fr 1fr!important;width:calc(100% - 24px)!important;margin-bottom:40px!important}
+  .journey-track-v426{grid-template-columns:1fr;width:calc(100% - 24px)}
+  .industry-marquee-label{display:block}
+  .industry-marquee-label strong{display:block;margin-top:5px}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-cockpit-glow,.hero-float,.journey-progress-v426 i,.industry-marquee-track{animation:none!important}
+}
+
+
+/* =========================================================
+   YOUYOU V4.27 — LANDING FINAL POLISH
+   Final structure + spacing + hooks + clipping + responsive QA layer
+   ========================================================= */
+
+/* Slightly lighter overall landing without losing premium depth */
+.landing{
+  --v427-bg:#172236;
+  --v427-bg-deep:#121c2d;
+  --v427-surface:#1e2d45;
+  --v427-surface-2:#24344d;
+  --v427-border:rgba(205,216,235,.10);
+  --v427-text:#f4f5f7;
+  --v427-muted:#9eabbd;
+  background:
+    radial-gradient(circle at 14% 3%,rgba(129,116,239,.11),transparent 27%),
+    radial-gradient(circle at 86% 7%,rgba(91,141,239,.07),transparent 28%),
+    linear-gradient(180deg,#172236 0%,#152033 52%,#121c2d 100%)!important;
+}
+
+/* Header truly spans edge to edge. Inner content stays centered. */
+.landing-nav{
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  background:rgba(21,31,49,.93)!important;
+  border-bottom:1px solid rgba(208,218,234,.08)!important;
+  box-shadow:0 10px 30px rgba(4,9,18,.10)!important;
+  backdrop-filter:blur(18px);
+}
+.landing-nav>*{min-width:0}
+body{overflow-x:hidden}
+
+/* Logo: subtle, alive, never gimmicky */
+.brand-symbol{
+  position:relative;
+  overflow:visible!important;
+  transform-origin:center;
+}
+.brand-symbol i{
+  animation:yyBrandOrbitV427 8s linear infinite;
+}
+.brand-symbol b{
+  animation:yyBrandPulseV427 4.8s ease-in-out infinite;
+}
+@keyframes yyBrandOrbitV427{to{transform:rotate(360deg)}}
+@keyframes yyBrandPulseV427{0%,100%{opacity:.9}50%{opacity:1;text-shadow:0 0 14px rgba(147,135,247,.22)}}
+
+/* Prevent descenders (g,y,p,q) and gradient text from clipping */
+.landing h1,
+.landing h2,
+.landing h3,
+.landing .section-heading h2,
+.landing .growth-platform-copy h2,
+.landing .final-cta h2,
+.landing .youyou-value-head h2{
+  line-height:1.08!important;
+  padding-bottom:.12em!important;
+  overflow:visible!important;
+  text-wrap:balance;
+}
+.landing h1 span,
+.landing h2 span,
+.landing h3 span{
+  padding-bottom:.04em;
+  -webkit-box-decoration-break:clone;
+  box-decoration-break:clone;
+}
+
+/* Hero gets more value, less empty height */
+.hero-platform-v426{
+  min-height:650px!important;
+  padding-top:104px!important;
+  padding-bottom:42px!important;
+}
+.hero-value-promise{
+  max-width:660px;
+  margin:20px 0 2px;
+  padding:12px 14px;
+  border:1px solid rgba(164,178,204,.10);
+  border-radius:13px;
+  background:linear-gradient(90deg,rgba(127,114,238,.055),rgba(91,141,239,.025));
+}
+.hero-value-promise strong,
+.hero-value-promise span{display:block}
+.hero-value-promise strong{color:#e9edf4!important;font-size:12px;font-weight:760}
+.hero-value-promise span{margin-top:4px;color:#8f9caf!important;font-size:10px;line-height:1.45}
+
+/* Proof strip is compact and reads like proof, not decoration */
+.proof-strip-v427{
+  border-color:rgba(191,204,226,.10)!important;
+  background:
+    linear-gradient(90deg,rgba(126,113,238,.035),rgba(255,255,255,.018),rgba(79,184,165,.025))!important;
+}
+.proof-strip-v427 .stat-live-item strong{
+  white-space:nowrap;
+  color:#f1f3f6!important;
+}
+.proof-strip-v427 .stat-live-item:last-child strong{
+  font-size:15px!important;
+  letter-spacing:-.01em!important;
+}
+
+/* One spacing rhythm for the full public landing */
+.hero-platform-v426 + .stats-section{margin-top:0!important}
+.how-v426,
+.growth-platform-section,
+.landing-knowledge-section,
+.growth-showcase-section,
+.ai-studio-showcase,
+.landing-pages-showcase,
+.truth-proof-v427,
+.pricing-section,
+.youyou-value-section,
+.final-cta{
+  scroll-margin-top:88px;
+}
+.how-v426{padding-top:54px!important;padding-bottom:46px!important}
+.growth-platform-section{padding-top:54px!important;padding-bottom:58px!important}
+.landing-knowledge-section{padding-top:62px!important;padding-bottom:62px!important}
+.growth-showcase-section{padding-top:58px!important;padding-bottom:58px!important}
+.ai-studio-showcase,
+.landing-pages-showcase{padding-top:62px!important;padding-bottom:62px!important}
+.pricing-section{padding-top:68px!important;padding-bottom:48px!important}
+.final-cta{margin-top:58px!important;margin-bottom:52px!important}
+
+/* Industry strip remains lively, but calm */
+.industry-marquee-v426{
+  margin-top:4px!important;
+  margin-bottom:48px!important;
+  background:
+    radial-gradient(circle at 18% 50%,rgba(201,143,166,.035),transparent 20%),
+    linear-gradient(90deg,rgba(25,37,57,.85),rgba(22,33,52,.82))!important;
+}
+.industry-marquee-track{animation-duration:34s!important}
+.industry-marquee-v426:hover .industry-marquee-track{animation-play-state:paused}
+
+/* Core features: denser and easier to scan */
+.growth-platform-copy{max-width:760px!important}
+.growth-engine-grid-six{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+.growth-engine-card{
+  min-height:178px!important;
+  padding:17px!important;
+}
+.growth-engine-card p{max-width:32ch}
+
+/* Unique proof section: truthful replacement for fake testimonials */
+.truth-proof-v427{
+  width:min(1280px,calc(100% - 48px));
+  margin:26px auto 10px;
+  padding:38px;
+  border:1px solid var(--v427-border);
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 84% 2%,rgba(79,184,165,.055),transparent 26%),
+    linear-gradient(145deg,rgba(29,43,65,.92),rgba(21,32,51,.94));
+}
+.truth-proof-copy{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(320px,.72fr);
+  align-items:end;
+  gap:42px;
+  margin-bottom:22px;
+}
+.truth-proof-copy h2{
+  margin:8px 0 0;
+  color:#f1f3f6!important;
+  font-size:clamp(32px,3.8vw,54px);
+  letter-spacing:-.04em;
+}
+.truth-proof-copy p{
+  margin:0;
+  color:#9ca9bb!important;
+  font-size:13px;
+  line-height:1.7;
+}
+.truth-proof-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.truth-proof-grid article{
+  position:relative;
+  min-height:132px;
+  padding:16px;
+  border:1px solid rgba(196,208,229,.08);
+  border-radius:15px;
+  background:rgba(255,255,255,.018);
+}
+.truth-proof-grid b{
+  position:absolute;right:12px;top:10px;
+  color:#65738a;font-size:9px
+}
+.truth-proof-grid strong,
+.truth-proof-grid span{display:block}
+.truth-proof-grid strong{
+  color:#e9edf3!important;
+  font-size:13px;
+  margin-bottom:7px;
+}
+.truth-proof-grid span{
+  color:#8794a8!important;
+  font-size:10px;
+  line-height:1.55;
+}
+
+/* Pricing cards aligned in height and information hierarchy */
+.pricing-grid{align-items:stretch!important}
+.pricing-plan{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100%!important;
+}
+.pricing-feature-list{flex:1}
+.pricing-plan-btn{margin-top:auto!important}
+.pricing-essentials strong{white-space:normal!important;line-height:1.25}
+
+/* Comparison stays calm, not combative */
+.youyou-value-section{
+  margin-top:34px!important;
+  margin-bottom:54px!important;
+}
+.youyou-value-row>em{opacity:.86}
+.youyou-value-fineprint{max-width:980px}
+
+/* Gentle on-scroll polish, no distracting motion */
+.landing .section-heading,
+.landing .growth-platform-copy,
+.landing .growth-engine-card,
+.landing .journey-step-v426,
+.landing .truth-proof-grid article,
+.landing .pricing-plan{
+  transform:translateY(0);
+}
+
+/* Desktop readability at 100% */
+@media(min-width:1180px){
+  .landing main{overflow:visible!important}
+  .hero-platform-v426{
+    grid-template-columns:minmax(0,1.02fr) minmax(520px,.98fr)!important;
+    gap:clamp(44px,5vw,82px)!important;
+  }
+}
+
+/* Tablet */
+@media(max-width:980px){
+  .growth-engine-grid-six{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .truth-proof-copy{grid-template-columns:1fr;gap:12px}
+  .truth-proof-grid{grid-template-columns:1fr 1fr}
+}
+
+/* Mobile companion / marketing landing */
+@media(max-width:700px){
+  .landing-nav{padding-left:14px!important;padding-right:14px!important}
+  .landing-links{display:none!important}
+  .hero-platform-v426{
+    min-height:auto!important;
+    padding-top:88px!important;
+    padding-bottom:28px!important;
+  }
+  .hero-platform-v426 h1{font-size:42px!important;line-height:1.04!important}
+  .hero-hook-line{gap:6px}
+  .hero-hook-line i{display:none}
+  .hero-value-promise{margin-top:16px}
+  .proof-strip-v427{
+    grid-template-columns:1fr 1fr!important;
+    gap:0!important;
+    margin-bottom:34px!important;
+  }
+  .proof-strip-v427 .stat-live-item{
+    border-bottom:1px solid rgba(196,208,229,.06);
+  }
+  .growth-engine-grid-six{grid-template-columns:1fr!important}
+  .truth-proof-v427{
+    width:calc(100% - 22px);
+    padding:24px 16px;
+    border-radius:20px;
+  }
+  .truth-proof-grid{grid-template-columns:1fr}
+  .pricing-section{padding-left:12px!important;padding-right:12px!important}
+  .youyou-value-section{width:calc(100% - 20px)!important}
+}
+
+/* Reduced motion */
+@media(prefers-reduced-motion:reduce){
+  .brand-symbol i,
+  .brand-symbol b,
+  .industry-marquee-track{
+    animation:none!important;
+  }
+}
