@@ -1,0 +1,16 @@
+YOUYOU V4.25 — WORKFLOW MOTION ROLLBACK
+
+Removed the connected-workflow animation added in the previous V4.25 build.
+Reason: design did not match the requested reference/quality.
+
+Restored:
+- Original HOW IT WORKS section structure
+- Original reveal targets
+- No extra workflow animation CSS/JS
+
+No changes made to:
+- SEO
+- Pricing
+- Supabase/backend
+- Routes
+- Paddle

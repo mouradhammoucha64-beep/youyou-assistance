@@ -471,49 +471,6 @@ function renderLanding() {
             <h2>From idea to <span>campaign, lead and follow-up.</span></h2>
             <p>YOUYOU connects the steps that normally live in separate tools.</p>
           </div>
-
-          <div class="growth-motion-stage" aria-label="YOUYOU connected growth workflow">
-            <div class="growth-motion-grid" aria-hidden="true"></div>
-
-            <div class="growth-motion-center">
-              <div class="growth-motion-core">
-                <span class="growth-motion-core-ring"></span>
-                <span class="growth-motion-core-mark">Y</span>
-              </div>
-              <small>YOUYOU WORKFLOW</small>
-              <strong>One connected growth loop</strong>
-            </div>
-
-            <article class="growth-motion-node motion-studio">
-              <span class="growth-motion-icon">✦</span>
-              <div><small>CREATE</small><strong>AI Studio</strong><em>Campaign idea</em></div>
-            </article>
-
-            <article class="growth-motion-node motion-pages">
-              <span class="growth-motion-icon">▦</span>
-              <div><small>LAUNCH</small><strong>Landing Page</strong><em>Focused offer</em></div>
-            </article>
-
-            <article class="growth-motion-node motion-conversations">
-              <span class="growth-motion-icon">◌</span>
-              <div><small>CONVERT</small><strong>AI Conversations</strong><em>Qualified intent</em></div>
-            </article>
-
-            <article class="growth-motion-node motion-rescue">
-              <span class="growth-motion-icon">↻</span>
-              <div><small>FOLLOW UP</small><strong>Revenue Rescue</strong><em>Lead recovered</em></div>
-            </article>
-
-            <article class="growth-motion-node motion-whatsapp">
-              <span class="growth-motion-icon">◉</span>
-              <div><small>CONTINUE</small><strong>WhatsApp AI</strong><em>Human-ready handoff</em></div>
-            </article>
-
-            <div class="growth-motion-flowline flow-a" aria-hidden="true"></div>
-            <div class="growth-motion-flowline flow-b" aria-hidden="true"></div>
-            <div class="growth-motion-flowline flow-c" aria-hidden="true"></div>
-          </div>
-
           <div class="steps growth-steps">
             <div class="step"><div class="step-number">01</div><h3>Set up your business</h3><p>Add your website, services, goals and business knowledge once.</p></div>
             <div class="step"><div class="step-number">02</div><h3>Create with AI Studio</h3><p>Turn an idea into ad copy, social content, emails, scripts and a campaign message.</p></div>
@@ -1676,7 +1633,7 @@ function setupLandingMotion() {
   }
 
   const revealTargets = document.querySelectorAll(
-    ".stats-section, .growth-platform-shell, .section-heading, .feature-carousel-shell, .growth-motion-stage, .steps, .landing-knowledge-shell, .growth-showcase-section, .pricing-grid, .final-cta"
+    ".stats-section, .growth-platform-shell, .section-heading, .feature-carousel-shell, .steps, .landing-knowledge-shell, .growth-showcase-section, .pricing-grid, .final-cta"
   );
 
   if ("IntersectionObserver" in window && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -1689,24 +1646,7 @@ function setupLandingMotion() {
       });
     }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
     revealTargets.forEach((node) => observer.observe(node));
-  }
-
-  const growthMotionStage = document.querySelector(".growth-motion-stage");
-  if (growthMotionStage) {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      growthMotionStage.classList.add("is-running");
-    } else if ("IntersectionObserver" in window) {
-      const motionObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          growthMotionStage.classList.toggle("is-running", entry.isIntersecting);
-        });
-      }, { threshold: 0.34 });
-      motionObserver.observe(growthMotionStage);
-    } else {
-      growthMotionStage.classList.add("is-running");
-    }
-  }
-}
+  }}
 
 
 function knowledgePanelToggleInit() {
