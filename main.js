@@ -725,15 +725,28 @@ function renderLanding() {
           </div>
         </section>
 
-        <section id="pricing" class="pricing-section pricing-v45">
+        <section id="pricing" class="pricing-section pricing-v45 pricing-v424">
           <div class="section-heading pricing-heading">
             <div class="eyebrow">SIMPLE MONTHLY PRICING</div>
-            <h2>Start focused. <span>Grow without changing platforms.</span></h2>
-            <p>Three clear plans for the same connected growth platform. Upgrade when your workflow needs more automation and reach.</p>
+            <h2>One predictable price. <span>No credit-pack anxiety.</span></h2>
+            <p>Choose the team size and growth level that fits your business. YOUYOU is built around clear monthly plans, not confusing packs of credits.</p>
           </div>
+
           <div class="pricing-grid">
             <article class="pricing-plan pricing-starter">
-              <div class="pricing-plan-top"><div class="pricing-plan-name">STARTER</div><p class="pricing-plan-tagline">Launch your AI customer and content foundation.</p><div class="pricing-price"><span class="pricing-currency">$</span><strong>29</strong><span class="pricing-period">/month</span></div></div>
+              <div class="pricing-plan-top">
+                <div class="pricing-plan-name">STARTER</div>
+                <p class="pricing-plan-tagline">For a small team launching its first connected AI growth workflow.</p>
+                <div class="pricing-price"><span class="pricing-currency">$</span><strong>29</strong><span class="pricing-period">/month</span></div>
+              </div>
+
+              <div class="pricing-essentials" aria-label="Starter plan limits">
+                <div><small>TEAM</small><strong>2 users</strong></div>
+                <div><small>WHATSAPP</small><strong>2 numbers</strong></div>
+                <div><small>SUPPORT</small><strong>Standard</strong></div>
+                <div><small>API</small><strong>No access</strong></div>
+              </div>
+
               <div class="pricing-divider"></div>
               <ul class="pricing-feature-list">
                 <li><span>✓</span> AI Conversations + Website Widget</li>
@@ -742,14 +755,27 @@ function renderLanding() {
                 <li><span>✓</span> AI Control Center</li>
                 <li><span>✓</span> Smart Landing Pages · starter usage</li>
                 <li><span>✓</span> AI Studio · core text creation</li>
+                <li><span>✓</span> No credit packs · plan fair-use applies</li>
               </ul>
               <button id="pricing-starter" class="pricing-plan-btn pricing-plan-btn-ghost" type="button">Start free →</button>
-              <small class="pricing-plan-note">Best for launching your first AI growth workflow</small>
+              <small class="pricing-plan-note">Best for solo operators and small teams</small>
             </article>
 
             <article class="pricing-plan pricing-growth">
               <div class="pricing-popular-badge">MOST POPULAR</div>
-              <div class="pricing-plan-top"><div class="pricing-plan-name">GROWTH</div><p class="pricing-plan-tagline">Create campaigns and convert more of the demand you already have.</p><div class="pricing-price"><span class="pricing-currency">$</span><strong>59</strong><span class="pricing-period">/month</span></div></div>
+              <div class="pricing-plan-top">
+                <div class="pricing-plan-name">GROWTH</div>
+                <p class="pricing-plan-tagline">For teams creating campaigns, qualifying leads and recovering more revenue.</p>
+                <div class="pricing-price"><span class="pricing-currency">$</span><strong>59</strong><span class="pricing-period">/month</span></div>
+              </div>
+
+              <div class="pricing-essentials" aria-label="Growth plan limits">
+                <div><small>TEAM</small><strong>5 users</strong></div>
+                <div><small>WHATSAPP</small><strong>5 numbers</strong></div>
+                <div><small>SUPPORT</small><strong>Priority</strong></div>
+                <div><small>API</small><strong>Basic*</strong></div>
+              </div>
+
               <div class="pricing-divider"></div>
               <ul class="pricing-feature-list">
                 <li><span>✓</span> Everything in Starter</li>
@@ -759,13 +785,26 @@ function renderLanding() {
                 <li><span>✓</span> More Smart Landing Pages</li>
                 <li><span>✓</span> AI Studio · ads, social, email & campaigns</li>
                 <li><span>✓</span> Growth analytics + WhatsApp handoff readiness</li>
+                <li><span>✓</span> No credit packs · plan fair-use applies</li>
               </ul>
               <button id="pricing-growth" class="pricing-plan-btn pricing-plan-btn-primary" type="button">Start free →</button>
               <small class="pricing-plan-note">Best for businesses actively acquiring leads</small>
             </article>
 
             <article class="pricing-plan pricing-pro">
-              <div class="pricing-plan-top"><div class="pricing-plan-name">PRO</div><p class="pricing-plan-tagline">The full YOUYOU growth platform for serious daily use.</p><div class="pricing-price"><span class="pricing-currency">$</span><strong>99</strong><span class="pricing-period">/month</span></div></div>
+              <div class="pricing-plan-top">
+                <div class="pricing-plan-name">PRO</div>
+                <p class="pricing-plan-tagline">For growing companies that want the full YOUYOU platform and higher operating limits.</p>
+                <div class="pricing-price"><span class="pricing-currency">$</span><strong>99</strong><span class="pricing-period">/month</span></div>
+              </div>
+
+              <div class="pricing-essentials" aria-label="Pro plan limits">
+                <div><small>TEAM</small><strong>15 users</strong></div>
+                <div><small>WHATSAPP</small><strong>10 numbers</strong></div>
+                <div><small>SUPPORT</small><strong>Dedicated</strong></div>
+                <div><small>API</small><strong>Advanced*</strong></div>
+              </div>
+
               <div class="pricing-divider"></div>
               <ul class="pricing-feature-list">
                 <li><span>✓</span> Everything in Growth</li>
@@ -777,10 +816,62 @@ function renderLanding() {
                 <li><span>✓</span> Unlimited normal business use · Fair Use</li>
               </ul>
               <button id="pricing-pro" class="pricing-plan-btn pricing-plan-btn-ghost" type="button">Start free →</button>
-              <small class="pricing-plan-note">Unlimited for normal business use · Fair Use safeguard</small>
+              <small class="pricing-plan-note">Full platform · Fair Use safeguard</small>
             </article>
           </div>
-          <div class="pricing-bottom-note"><span>✓ Start free</span><span>✓ No credit card required</span><span>✓ Cancel anytime</span></div>
+
+          <div class="pricing-bottom-note">
+            <span>✓ Start free</span>
+            <span>✓ No credit card required</span>
+            <span>✓ No credit packs</span>
+            <span>✓ Cancel anytime</span>
+          </div>
+
+          <p class="pricing-api-disclaimer">
+            * API access is shown as the planned plan tier and must only be activated once production API keys, permissions, rate limits and plan enforcement are live.
+          </p>
+        </section>
+
+        <section class="youyou-value-section" aria-labelledby="youyou-value-title">
+          <div class="youyou-value-head">
+            <div>
+              <div class="eyebrow">WHY YOUYOU</div>
+              <h2 id="youyou-value-title">More growth tools. <span>Less subscription chaos.</span></h2>
+            </div>
+            <p>Instead of stitching together separate tools and worrying about usage credits, YOUYOU brings the core growth workflow into one connected workspace.</p>
+          </div>
+
+          <div class="youyou-value-grid">
+            <div class="youyou-value-table" role="table" aria-label="YOUYOU value comparison">
+              <div class="youyou-value-row youyou-value-header" role="row">
+                <span role="columnheader">WHAT YOU NEED</span>
+                <strong role="columnheader">YOUYOU</strong>
+                <em role="columnheader">Typical credit-based stack</em>
+              </div>
+              <div class="youyou-value-row" role="row"><span>Monthly pricing</span><strong>Predictable plan</strong><em>Can vary with usage</em></div>
+              <div class="youyou-value-row" role="row"><span>AI Conversations</span><strong>Included</strong><em>Often metered</em></div>
+              <div class="youyou-value-row" role="row"><span>SEO Growth</span><strong>Included by plan</strong><em>Often another tool</em></div>
+              <div class="youyou-value-row" role="row"><span>AI Studio</span><strong>Included by plan</strong><em>Often another subscription</em></div>
+              <div class="youyou-value-row" role="row"><span>Smart Landing Pages</span><strong>Included by plan</strong><em>Often another builder</em></div>
+              <div class="youyou-value-row" role="row"><span>Revenue Rescue</span><strong>Connected workflow</strong><em>Often an add-on</em></div>
+              <div class="youyou-value-row" role="row"><span>WhatsApp AI</span><strong>Plan-based capacity</strong><em>Often separate setup/add-on</em></div>
+              <div class="youyou-value-row" role="row"><span>Credit packs</span><strong>No confusing packs</strong><em>Common in usage-based tools</em></div>
+            </div>
+
+            <aside class="youyou-value-card">
+              <div class="youyou-value-orbit" aria-hidden="true"><i></i><i></i><i></i></div>
+              <small>ONE CONNECTED PLATFORM</small>
+              <h3>Create → Convert → Follow up → Grow</h3>
+              <p>AI Studio creates the campaign. Smart Landing Pages capture demand. AI Conversations qualify visitors. Revenue Rescue and WhatsApp keep valuable leads moving.</p>
+              <div class="youyou-value-pills">
+                <span>AI Studio</span><span>Landing Pages</span><span>SEO</span><span>Revenue Rescue</span><span>WhatsApp AI</span>
+              </div>
+            </aside>
+          </div>
+
+          <p class="youyou-value-fineprint">
+            Fair-use limits protect service quality and infrastructure costs. Comparison language describes common market patterns, not every competing product.
+          </p>
         </section>
 
         <section class="final-cta">

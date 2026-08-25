@@ -1,0 +1,59 @@
+YOUYOU V4.24 — PRICING + VALUE POSITIONING
+
+BASE
+- YOUYOU MASTER V4.23 Landing + Pricing Final
+
+LANDING PRICING APPLIED
+Starter — $29/month
+- 2 users
+- 2 WhatsApp numbers
+- Standard support
+- No API access
+- Core AI Conversations, Widget, Knowledge, Leads, AI Control
+- Starter Smart Landing Pages
+- Core AI Studio text creation
+- No credit packs; plan fair-use applies
+
+Growth — $59/month
+- 5 users
+- 5 WhatsApp numbers
+- Priority support
+- Basic API tier reserved
+- Everything in Starter
+- Lead qualification / intent scoring
+- Revenue Rescue
+- Website SEO audit / growth actions
+- More Landing Pages
+- AI Studio ads/social/email/campaigns
+- No credit packs; plan fair-use applies
+
+Pro — $99/month
+- 15 users
+- 10 WhatsApp numbers
+- Dedicated support
+- Advanced API tier reserved
+- Full SEO Growth Center
+- WhatsApp AI
+- Full AI Studio / video-ready workflow
+- Smart Landing Pages unlimited for normal business use
+- Fair Use safeguard
+
+IMPORTANT API TRUTHFULNESS
+- Basic / Advanced API are visually shown with an asterisk.
+- Landing explicitly states they must only activate once production API keys,
+  permissions, rate limits and plan enforcement are live.
+- This avoids falsely claiming an API is already operational.
+
+NEW VALUE SECTION UNDER PRICING
+- "More growth tools. Less subscription chaos."
+- Compares YOUYOU with typical credit-based stacks without naming competitors.
+- Emphasizes predictable monthly plans, no confusing credit packs, one connected workflow.
+- Adds subtle orbit animation and responsive professional comparison table.
+
+NOT CHANGED
+- SEO workspace
+- Auth
+- Supabase policies
+- API backend
+- Paddle
+- Core dashboard routes
