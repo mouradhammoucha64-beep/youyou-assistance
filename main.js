@@ -227,105 +227,42 @@ function applyPublicSiteLanguage(language = getPublicSiteLanguage()) {
 
 function renderLanding() {
   app.innerHTML = `
-    <div class="landing landing-v61">
-      <section class="v61-hero">
+    <div class="landing landing-exact-v6">
+      <div class="landing-exact-canvas-v6">
         <img
           src="/assets/youyou-landing-exact-reference.png"
-          alt="YOUYOU AI Growth Platform"
-          class="v61-hero-reference"
+          alt="YOUYOU AI Growth Platform landing page"
+          class="landing-exact-image-v6"
           draggable="false"
         />
-        <div class="v61-hero-actions">
+
+        <div class="landing-exact-hotspots-v6" aria-label="Landing page navigation">
           ${state.user
-            ? `<button id="hero-dashboard" class="v61-hotspot v61-hero-main" aria-label="Open dashboard"></button>`
-            : `<button id="hero-start" class="v61-hotspot v61-hero-main" aria-label="Start free"></button>`}
-          ${state.user
-            ? `<button id="hero-pricing" class="v61-hotspot v61-hero-secondary" aria-label="View plans"></button>`
-            : `<button id="hero-login" class="v61-hotspot v61-hero-secondary" aria-label="See how it works"></button>`}
-        </div>
-      </section>
+            ? `<button id="nav-dashboard" class="v6-hotspot hs-nav-main-v6" aria-label="Open dashboard"></button>
+               <button id="nav-billing" class="v6-hotspot hs-nav-cta-v6" aria-label="Plans and billing"></button>
+               <button id="hero-dashboard" class="v6-hotspot hs-hero-main-v6" aria-label="Open dashboard"></button>
+               <button id="hero-pricing" class="v6-hotspot hs-hero-secondary-v6" aria-label="View plans"></button>`
+            : `<button id="nav-login" class="v6-hotspot hs-nav-login-v6" aria-label="Log in"></button>
+               <button id="nav-start" class="v6-hotspot hs-nav-cta-v6" aria-label="Start free"></button>
+               <button id="hero-start" class="v6-hotspot hs-hero-main-v6" aria-label="Start free"></button>
+               <button id="hero-login" class="v6-hotspot hs-hero-secondary-v6" aria-label="See how it works"></button>`}
 
-      <section id="features" class="v61-showcase v61-product-section">
-        <div class="v61-copy">
-          <div class="v61-eyebrow">THE PRODUCT</div>
-          <h2>See the whole growth workflow in one place.</h2>
-          <p>Campaign creation, landing pages, leads, SEO, Revenue Rescue and WhatsApp AI stay connected inside one workspace.</p>
-          <div class="v61-pills">
-            <span>AI Studio</span><span>Landing Pages</span><span>Leads</span><span>SEO</span><span>Revenue Rescue</span><span>WhatsApp AI</span>
-          </div>
-        </div>
-        <div class="v61-image-card">
-          <img src="/assets/youyou-product-dashboard.png" alt="YOUYOU product dashboard preview" />
-        </div>
-      </section>
+          <a href="/" data-scroll-section="features" class="v6-hotspot hs-features-v6" aria-label="Features"></a>
+          <a href="/" data-scroll-section="how" class="v6-hotspot hs-how-v6" aria-label="How it works"></a>
+          <a href="/" data-scroll-section="pricing" class="v6-hotspot hs-pricing-v6" aria-label="Pricing"></a>
 
-      <section class="v61-showcase v61-studio-section">
-        <div class="v61-image-card">
-          <img src="/assets/youyou-ai-studio-platforms.png" alt="YOUYOU AI Studio social platform preview" />
-        </div>
-        <div class="v61-copy">
-          <div class="v61-eyebrow">AI STUDIO</div>
-          <h2>Create content for the channels your customers already use.</h2>
-          <p>Build ad concepts and campaign content for Meta, Facebook, Instagram, TikTok, YouTube, LinkedIn and X.</p>
-          <div class="v61-social-row" aria-label="Supported channels">
-            <span>Meta</span><span>Facebook</span><span>Instagram</span><span>TikTok</span><span>YouTube</span><span>LinkedIn</span><span>X</span>
-          </div>
-        </div>
-      </section>
+          <button id="pricing-starter" class="v6-hotspot hs-starter-v6" aria-label="Choose Starter"></button>
+          <button id="pricing-growth" class="v6-hotspot hs-growth-v6" aria-label="Choose Growth"></button>
+          <button id="pricing-pro" class="v6-hotspot hs-pro-v6" aria-label="Choose Pro"></button>
 
-      <section id="how" class="v61-showcase v61-landing-pages-section">
-        <div class="v61-copy">
-          <div class="v61-eyebrow">SMART LANDING PAGES</div>
-          <h2>Simple pages with one clear next action.</h2>
-          <p>Use focused layouts for products, services and campaigns with Buy Now, Book Now, WhatsApp and Get Quote actions.</p>
-          <div class="v61-cta-pills">
-            <span>Buy now</span><span>Book now</span><span>WhatsApp</span><span>Get quote</span>
-          </div>
+          <button id="final-start" class="v6-hotspot hs-final-v6" aria-label="Create your free account"></button>
+          <button id="footer-login" class="v6-hotspot hs-footer-login-v6" aria-label="Login"></button>
         </div>
-        <div class="v61-image-card v61-image-card-landings">
-          <img src="/assets/youyou-simple-landing-pages.png" alt="YOUYOU simple landing page examples" />
-        </div>
-      </section>
 
-      <section id="pricing" class="v61-pricing">
-        <div class="v61-pricing-head">
-          <div class="v61-eyebrow">SIMPLE PRICING</div>
-          <h2>One predictable monthly plan.</h2>
-          <p>No confusing credit packs.</p>
-        </div>
-        <div class="v61-pricing-grid">
-          <article>
-            <small>STARTER</small><h3>$29<span>/mo</span></h3>
-            <p>2 users · 2 WhatsApp numbers</p>
-            <ul><li>AI Conversations</li><li>Website Widget</li><li>Smart Landing Pages</li><li>Core AI Studio</li><li>Standard support</li><li>No API access</li></ul>
-            <button id="pricing-starter" type="button">Start free</button>
-          </article>
-          <article class="featured">
-            <b>MOST POPULAR</b><small>GROWTH</small><h3>$59<span>/mo</span></h3>
-            <p>5 users · 5 WhatsApp numbers</p>
-            <ul><li>Everything in Starter</li><li>Revenue Rescue</li><li>SEO Growth</li><li>AI Studio campaigns</li><li>Priority support</li><li>Basic API*</li></ul>
-            <button id="pricing-growth" type="button">Start free</button>
-          </article>
-          <article>
-            <small>PRO</small><h3>$99<span>/mo</span></h3>
-            <p>15 users · 10 WhatsApp numbers</p>
-            <ul><li>Everything in Growth</li><li>WhatsApp AI</li><li>Advanced SEO</li><li>Full AI Studio</li><li>Dedicated support</li><li>Advanced API*</li></ul>
-            <button id="pricing-pro" type="button">Start free</button>
-          </article>
-        </div>
-        <p class="v61-api-note">* API access should only be activated once production API keys, permissions, rate limits and plan enforcement are live.</p>
-      </section>
-
-      <section class="v61-final">
-        <div>
-          <div class="v61-eyebrow">ONE CONNECTED PLATFORM</div>
-          <h2>Build the campaign. Launch the page. Capture the lead. Follow up.</h2>
-          <p>YOUYOU keeps the growth workflow connected from the first idea to the next customer action.</p>
-        </div>
-        ${state.user
-          ? `<button id="nav-dashboard" type="button">Open dashboard →</button>`
-          : `<button id="nav-start" type="button">Create your free account →</button>`}
-      </section>
+        <span id="features" class="v6-anchor v6-anchor-features" aria-hidden="true"></span>
+        <span id="how" class="v6-anchor v6-anchor-how" aria-hidden="true"></span>
+        <span id="pricing" class="v6-anchor v6-anchor-pricing" aria-hidden="true"></span>
+      </div>
     </div>
   `;
 
