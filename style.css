@@ -9908,3 +9908,267 @@ body{overflow-x:hidden}
   .product-flow-v500{grid-template-columns:1fr}.hero-v500-platforms .platform-label-v500{width:100%;text-align:center}
 }
 @media(prefers-reduced-motion:reduce){.flow-line-v500 i,.flow-step-v500{animation:none!important}}
+
+
+/* =========================================================
+   YOUYOU V5.02 — LANDING CLEANUP + HERO THEME CONTINUITY
+   Goal: Hero V5.00 remains the visual source of truth.
+   ========================================================= */
+
+.landing{
+  --v502-bg:#061022;
+  --v502-bg2:#09172c;
+  --v502-card:#0d1c33;
+  --v502-line:rgba(243,59,149,.13);
+  --v502-line-soft:rgba(214,223,238,.08);
+  --v502-text:#f6f2f8;
+  --v502-muted:#9ba8ba;
+  --v502-pink:#f33b95;
+  --v502-rose:#ef459f;
+  --v502-mauve:#9d5cf3;
+  background:
+    radial-gradient(circle at 12% 13%,rgba(243,59,149,.07),transparent 24%),
+    radial-gradient(circle at 88% 28%,rgba(157,92,243,.06),transparent 26%),
+    linear-gradient(180deg,var(--v502-bg) 0%,#071327 48%,var(--v502-bg) 100%)!important;
+  color:var(--v502-text);
+}
+
+/* Keep all important lower sections inside the same premium canvas rhythm */
+.landing .how-v426,
+.landing .growth-platform-section,
+.landing .landing-knowledge-section,
+.landing .growth-showcase-section,
+.landing .landing-pages-showcase,
+.landing .pricing-section,
+.landing .youyou-value-section,
+.landing .final-cta{
+  width:min(1220px,calc(100% - 44px))!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+
+/* Hero-style eyebrow treatment everywhere */
+.landing .eyebrow{
+  color:#ff78ba!important;
+  letter-spacing:.13em!important;
+  font-weight:850!important;
+}
+
+/* Shared section headings */
+.landing .section-heading h2,
+.landing .growth-platform-copy h2,
+.landing .landing-knowledge-copy h2,
+.landing .growth-showcase-copy h2,
+.landing .landing-pages-showcase-copy h2,
+.landing .pricing-heading h2,
+.landing .youyou-value-head h2,
+.landing .final-cta h2{
+  color:var(--v502-text)!important;
+  letter-spacing:-.045em!important;
+}
+
+.landing .section-heading h2 span,
+.landing .growth-platform-copy h2 span,
+.landing .landing-knowledge-copy h2 span,
+.landing .growth-showcase-copy h2 span,
+.landing .landing-pages-showcase-copy h2 span,
+.landing .pricing-heading h2 span,
+.landing .youyou-value-head h2 span,
+.landing .final-cta h2 span{
+  color:#ff69ae!important;
+}
+
+/* Shared body copy */
+.landing .section-heading p,
+.landing .growth-platform-copy>p,
+.landing .landing-knowledge-copy>p,
+.landing .growth-showcase-copy>p,
+.landing .landing-pages-showcase-copy>p,
+.landing .pricing-heading p,
+.landing .youyou-value-head>p,
+.landing .final-cta>p{
+  color:var(--v502-muted)!important;
+}
+
+/* Compact "what YOUYOU does" strip directly under Hero */
+.landing .proof-strip-v427{
+  width:min(1220px,calc(100% - 44px))!important;
+  margin:26px auto 22px!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,1fr)!important;
+  border:1px solid var(--v502-line)!important;
+  border-radius:18px!important;
+  overflow:hidden!important;
+  background:linear-gradient(135deg,rgba(14,29,53,.82),rgba(7,18,36,.92))!important;
+  box-shadow:0 22px 65px rgba(0,0,0,.16)!important;
+}
+.landing .proof-strip-v427 .stat-live-item{
+  min-height:88px!important;
+  padding:17px 18px!important;
+  border-right:1px solid var(--v502-line-soft)!important;
+  background:transparent!important;
+}
+.landing .proof-strip-v427 .stat-live-item:last-child{border-right:0!important}
+.landing .proof-strip-v427 strong{
+  color:#ff75b8!important;
+  font-size:11px!important;
+  letter-spacing:.12em!important;
+}
+.landing .proof-strip-v427 span{
+  color:#c3cbd7!important;
+  font-size:10px!important;
+  line-height:1.45!important;
+}
+
+/* How it works: same card language as Hero product frame */
+.landing .journey-track-v426{
+  border:1px solid var(--v502-line)!important;
+  border-radius:24px!important;
+  background:linear-gradient(145deg,rgba(14,29,52,.94),rgba(8,19,37,.96))!important;
+  box-shadow:0 26px 70px rgba(0,0,0,.20)!important;
+}
+.landing .journey-step-v426{
+  background:transparent!important;
+}
+.landing .journey-step-v426 b{
+  color:#ff72b5!important;
+}
+.landing .journey-progress-v426{
+  background:rgba(243,59,149,.09)!important;
+}
+.landing .journey-progress-v426 i{
+  background:linear-gradient(90deg,var(--v502-pink),var(--v502-mauve))!important;
+}
+
+/* Industry ribbon */
+.landing .industry-marquee-v426{
+  border-top:1px solid rgba(243,59,149,.09)!important;
+  border-bottom:1px solid rgba(243,59,149,.09)!important;
+  background:linear-gradient(90deg,transparent,rgba(243,59,149,.025),transparent)!important;
+}
+.landing .industry-marquee-track span{
+  border-color:var(--v502-line)!important;
+  background:rgba(13,28,51,.68)!important;
+}
+
+/* Feature cards */
+.landing .growth-platform-shell{
+  border:1px solid var(--v502-line)!important;
+  border-radius:28px!important;
+  padding:34px!important;
+  background:
+    radial-gradient(circle at 82% 8%,rgba(157,92,243,.07),transparent 24%),
+    linear-gradient(145deg,rgba(13,28,51,.94),rgba(7,18,35,.97))!important;
+  box-shadow:0 30px 80px rgba(0,0,0,.22)!important;
+}
+.landing .growth-engine-card{
+  border-color:rgba(243,59,149,.11)!important;
+  background:linear-gradient(145deg,rgba(17,33,58,.86),rgba(9,21,40,.94))!important;
+  box-shadow:none!important;
+}
+.landing .growth-engine-card:hover{
+  border-color:rgba(243,59,149,.27)!important;
+  transform:translateY(-3px)!important;
+}
+.landing .growth-engine-icon,
+.landing .engine-status{
+  color:#ff78ba!important;
+}
+
+/* Product-detail showcases */
+.landing .landing-knowledge-shell,
+.landing .rescue-demo-card,
+.landing .whatsapp-phone,
+.landing .landing-pages-showcase-visuals{
+  border-color:var(--v502-line)!important;
+  box-shadow:0 28px 74px rgba(0,0,0,.22)!important;
+}
+.landing .landing-knowledge-shell,
+.landing .rescue-demo-card{
+  background:linear-gradient(145deg,rgba(13,29,53,.96),rgba(7,18,36,.98))!important;
+}
+
+.landing .showcase-points span,
+.landing .knowledge-format-row span,
+.landing .landing-pages-showcase-badges span{
+  border-color:rgba(243,59,149,.13)!important;
+  background:rgba(243,59,149,.035)!important;
+  color:#cbd2dd!important;
+}
+
+/* Smart landing page examples: align CTA accents with Hero */
+.landing .landing-mini{
+  border:1px solid rgba(243,59,149,.12)!important;
+  background:linear-gradient(145deg,#10213c,#09172c)!important;
+}
+.landing .landing-mini button{
+  color:white!important;
+  background:linear-gradient(112deg,var(--v502-pink),var(--v502-mauve))!important;
+}
+
+/* Pricing */
+.landing .pricing-plan{
+  border-color:rgba(214,223,238,.09)!important;
+  background:linear-gradient(145deg,rgba(16,31,55,.96),rgba(8,19,37,.98))!important;
+  box-shadow:0 24px 68px rgba(0,0,0,.18)!important;
+}
+.landing .pricing-plan.pricing-growth{
+  border-color:rgba(243,59,149,.30)!important;
+  box-shadow:0 28px 80px rgba(243,59,149,.08)!important;
+}
+.landing .pricing-plan-btn,
+.landing .primary,
+.landing .hero-btn{
+  border:0!important;
+  color:white!important;
+  background:linear-gradient(112deg,var(--v502-pink),var(--v502-rose) 48%,var(--v502-mauve))!important;
+}
+
+/* Why YOUYOU comparison */
+.landing .youyou-value-section{
+  border:1px solid var(--v502-line)!important;
+  border-radius:28px!important;
+  padding:38px!important;
+  background:
+    radial-gradient(circle at 90% 10%,rgba(157,92,243,.07),transparent 24%),
+    linear-gradient(145deg,rgba(13,28,51,.93),rgba(7,18,35,.97))!important;
+}
+.landing .youyou-value-row,
+.landing .youyou-value-card{
+  border-color:rgba(243,59,149,.10)!important;
+}
+.landing .youyou-value-card{
+  background:linear-gradient(145deg,rgba(17,33,58,.88),rgba(9,21,40,.95))!important;
+}
+
+/* Final CTA becomes the visual finish of the Hero theme */
+.landing .final-cta{
+  position:relative!important;
+  overflow:hidden!important;
+  border:1px solid rgba(243,59,149,.19)!important;
+  border-radius:30px!important;
+  padding:54px 36px!important;
+  background:
+    radial-gradient(circle at 18% 45%,rgba(243,59,149,.13),transparent 28%),
+    radial-gradient(circle at 82% 48%,rgba(157,92,243,.10),transparent 30%),
+    linear-gradient(145deg,rgba(15,30,54,.97),rgba(7,18,36,.99))!important;
+  box-shadow:0 30px 90px rgba(0,0,0,.24)!important;
+}
+
+/* Footer uses the same logo language as header */
+.landing footer{
+  border-top:1px solid rgba(243,59,149,.09)!important;
+  background:#061022!important;
+}
+
+@media(max-width:900px){
+  .landing .proof-strip-v427{grid-template-columns:1fr 1fr!important}
+  .landing .proof-strip-v427 .stat-live-item:nth-child(2){border-right:0!important}
+  .landing .growth-platform-shell,
+  .landing .youyou-value-section{padding:24px!important}
+}
+@media(max-width:560px){
+  .landing .proof-strip-v427{grid-template-columns:1fr!important}
+  .landing .proof-strip-v427 .stat-live-item{border-right:0!important;border-bottom:1px solid var(--v502-line-soft)!important}
+  .landing .proof-strip-v427 .stat-live-item:last-child{border-bottom:0!important}
+}

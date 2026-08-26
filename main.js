@@ -358,11 +358,11 @@ function renderLanding() {
           </div>
         </section>
 
-        <section class="stats-section stats-live-strip stats-compact-v426 proof-strip-v427" aria-label="YOUYOU product proof">
-          <div class="stat-live-item"><strong>6</strong><span>connected growth tools</span></div>
-          <div class="stat-live-item"><strong>30</strong><span>campaign-ready landing templates</span></div>
-          <div class="stat-live-item"><strong>24/7</strong><span>website AI availability</span></div>
-          <div class="stat-live-item"><strong>No packs</strong><span>predictable plan-based usage</span></div>
+        <section class="stats-section stats-live-strip stats-compact-v426 proof-strip-v427" aria-label="What YOUYOU helps you do">
+          <div class="stat-live-item"><strong>CREATE</strong><span>campaigns and content with AI Studio</span></div>
+          <div class="stat-live-item"><strong>LAUNCH</strong><span>focused landing pages for each offer</span></div>
+          <div class="stat-live-item"><strong>CAPTURE</strong><span>visitor intent and qualified leads</span></div>
+          <div class="stat-live-item"><strong>FOLLOW UP</strong><span>keep valuable opportunities moving</span></div>
         </section>
 
 
@@ -694,43 +694,6 @@ function renderLanding() {
           </div>
         </section>
 
-        <section class="ai-studio-showcase" id="ai-studio-showcase">
-          <div class="ai-studio-showcase-copy">
-            <div class="eyebrow">AI STUDIO</div>
-            <h2>Turn one idea into <span>a campaign people can act on.</span></h2>
-            <p>Describe what you want to sell or promote. YOUYOU helps shape the hook, ad copy, social post, email, video script and landing-page message around the same goal.</p>
-            <div class="studio-output-pills"><span>Ad Copy</span><span>Social</span><span>Email</span><span>Video Script</span><span>Landing Copy</span></div>
-            <div class="studio-platforms-v428" aria-label="Create for social platforms">
-              <small>CREATE FOR THE PLATFORMS YOUR CUSTOMERS USE</small>
-              <div class="social-logo-row-v428">
-                <span class="social-logo-chip meta-chip" title="Meta">
-                  <svg viewBox="0 0 64 40" aria-hidden="true"><path d="M7 31c4-13 10-23 16-23 8 0 14 24 18 24 5 0 8-8 12-22" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M57 31C53 18 47 8 41 8c-8 0-14 24-18 24-5 0-8-8-12-22" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
-                  <b>Meta</b>
-                </span>
-                <span class="social-logo-chip facebook-chip" title="Facebook"><span class="fb-mark">f</span><b>Facebook</b></span>
-                <span class="social-logo-chip instagram-chip" title="Instagram"><span class="ig-mark"></span><b>Instagram</b></span>
-                <span class="social-logo-chip tiktok-chip" title="TikTok"><span class="tt-mark">♪</span><b>TikTok</b></span>
-                <span class="social-logo-chip youtube-chip" title="YouTube"><span class="yt-mark">▶</span><b>YouTube</b></span>
-                <span class="social-logo-chip linkedin-chip" title="LinkedIn"><span class="in-mark">in</span><b>LinkedIn</b></span>
-                <span class="social-logo-chip x-chip" title="X"><span class="x-mark">𝕏</span><b>X</b></span>
-              </div>
-            </div>
-          </div>
-          </div>
-          <div class="studio-ad-stage" aria-label="AI Studio campaign output example">
-            <div class="studio-ad-card">
-              <div class="studio-ad-top"><span>CAMPAIGN PREVIEW</span><b>AI STUDIO</b></div>
-              <div class="studio-ad-visual"><i></i><span>YOUR PRODUCT / SERVICE</span></div>
-              <small>HOOK</small>
-              <h3>Make the next click feel worth it.</h3>
-              <p>A focused message, one clear benefit and a CTA built around the customer’s intent.</p>
-              <button type="button" tabindex="-1">Discover the offer →</button>
-            </div>
-            <div class="studio-floating-output studio-output-one"><b>✦</b><span><small>AD COPY</small><strong>3 variants ready</strong></span></div>
-            <div class="studio-floating-output studio-output-two"><b>▶</b><span><small>VIDEO SCRIPT</small><strong>Hook · Scenes · CTA</strong></span></div>
-          </div>
-        </section>
-
         <section class="landing-pages-showcase" id="landing-pages-showcase">
           <div class="landing-pages-showcase-copy">
             <div class="eyebrow">SMART LANDING PAGES</div>
@@ -752,22 +715,6 @@ function renderLanding() {
             <article class="landing-mini landing-mini-bold">
               <small>LEAD CAMPAIGN</small><h4>Get your quote</h4><p>Capture the contact and the intent.</p><button type="button" tabindex="-1">Get quote</button>
             </article>
-          </div>
-        </section>
-
-        <section class="truth-proof-v427" aria-label="Why YOUYOU is different">
-          <div class="truth-proof-copy">
-            <div class="eyebrow">BUILT TO BE USED, NOT JUST DEMOED</div>
-            <h2>Product proof before social proof.</h2>
-            <p>
-              YOUYOU is being built around real workflows: create a campaign, launch a focused page,
-              capture intent, follow up and keep the business context connected.
-            </p>
-          </div>
-          <div class="truth-proof-grid">
-            <article><b>01</b><strong>Real page audits</strong><span>SEO recommendations start from an actual website page.</span></article>
-            <article><b>02</b><strong>Real conversion actions</strong><span>Landing pages can lead to Buy, Book, Quote or WhatsApp actions.</span></article>
-            <article><b>03</b><strong>Real lead workflow</strong><span>Conversations, lead intent and follow-up live in the same workspace.</span></article>
           </div>
         </section>
 
@@ -920,13 +867,6 @@ function renderLanding() {
           </p>
         </section>
 
-        <section class="benefits-strip-v428" aria-label="YOUYOU advantages">
-          <article><span>⚡</span><div><strong>Launch in minutes</strong><small>From business idea to live campaign flow.</small></div></article>
-          <article><span>◎</span><div><strong>Built to convert</strong><small>Pages, conversations and follow-up share one goal.</small></div></article>
-          <article><span>◈</span><div><strong>One workspace</strong><small>Keep your tools, leads and context connected.</small></div></article>
-          <article><span>$</span><div><strong>Predictable pricing</strong><small>No confusing credit packs to keep buying.</small></div></article>
-        </section>
-
         <section class="final-cta">
 
           <div class="cta-glow"></div>
@@ -934,13 +874,13 @@ function renderLanding() {
           <div class="eyebrow">READY TO START?</div>
 
           <h2>
-            Ready to turn more attention
-            <span>into a next action?</span>
+            One idea. One connected workflow.
+            <span>More chances to convert.</span>
           </h2>
 
           <p>
-            Start with the workflow your business needs today. Add the rest when you are ready —
-            without rebuilding your stack from scratch.
+            Create the campaign, launch the landing page, capture the lead and follow up —
+            without stitching together five different tools.
           </p>
 
           <button id="final-start" class="primary hero-btn">
@@ -955,10 +895,11 @@ function renderLanding() {
 
         <div class="footer-brand">
           <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-            <span class="brand-wordmark" aria-label="YOUYOU">
-            <span class="brand-symbol" aria-hidden="true"><i></i><b>Y</b></span>
-            <span class="brand-text"><span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span></span>
-          </span>
+            <span class="brand-wordmark brand-v428" aria-label="YOUYOU">
+              <span class="brand-loop-v428" aria-hidden="true"><i></i><b></b></span>
+              <span class="brand-word-v428">YOUYOU</span>
+              <span class="brand-spark-v428" aria-hidden="true"></span>
+            </span>
           </a>
 
           <p>
