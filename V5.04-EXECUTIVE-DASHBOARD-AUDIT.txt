@@ -1,0 +1,11 @@
+YOUYOU V5.04 — EXECUTIVE DASHBOARD
+
+{
+  "base": "V5.03",
+  "logo_replacements": 6,
+  "logo_direction": "text-first YOUYOU + small AI GROWTH descriptor; decorative symbol removed",
+  "theme_direction": "restrained executive navy with mauve/rose accents",
+  "business_logic_changed": false,
+  "routes_changed": false,
+  "auth_or_data_changed": false
+}

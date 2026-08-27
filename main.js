@@ -231,9 +231,9 @@ function renderLanding() {
 
       <header class="landing-nav">
         <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-          <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
-  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
-  <span class="brand-name-v503">YOUYOU</span>
+          <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
+  <span class="brand-name-v504">YOUYOU</span>
+  <span class="brand-tag-v504">AI GROWTH</span>
 </span>
         </a>
 
@@ -894,9 +894,9 @@ function renderLanding() {
 
         <div class="footer-brand">
           <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-            <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
-  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
-  <span class="brand-name-v503">YOUYOU</span>
+            <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
+  <span class="brand-name-v504">YOUYOU</span>
+  <span class="brand-tag-v504">AI GROWTH</span>
 </span>
           </a>
 
@@ -995,9 +995,9 @@ function renderFaqPage() {
     <div class="landing faq-page">
       <header class="landing-nav">
         <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-          <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
-  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
-  <span class="brand-name-v503">YOUYOU</span>
+          <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
+  <span class="brand-name-v504">YOUYOU</span>
+  <span class="brand-tag-v504">AI GROWTH</span>
 </span>
         </a>
         <nav class="landing-links">
@@ -1100,9 +1100,9 @@ function renderFaqPage() {
       <footer>
         <div class="footer-brand">
           <a class="logo" href="/">
-            <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
-  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
-  <span class="brand-name-v503">YOUYOU</span>
+            <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
+  <span class="brand-name-v504">YOUYOU</span>
+  <span class="brand-tag-v504">AI GROWTH</span>
 </span>
           </a>
           <p>AI customer agent for modern businesses.</p>
@@ -1150,9 +1150,9 @@ function renderAuth() {
       <div class="auth-card">
 
         <div class="auth-logo">
-          <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
-  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
-  <span class="brand-name-v503">YOUYOU</span>
+          <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
+  <span class="brand-name-v504">YOUYOU</span>
+  <span class="brand-tag-v504">AI GROWTH</span>
 </span>
         </div>
 
@@ -1401,9 +1401,9 @@ function dashboardShell(content) {
 
         <div>
           <div class="side-logo">
-            <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
-  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
-  <span class="brand-name-v503">YOUYOU</span>
+            <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
+  <span class="brand-name-v504">YOUYOU</span>
+  <span class="brand-tag-v504">AI GROWTH</span>
 </span>
           </div>
 
