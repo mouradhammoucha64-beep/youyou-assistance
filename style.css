@@ -10172,3 +10172,254 @@ body{overflow-x:hidden}
   .landing .proof-strip-v427 .stat-live-item{border-right:0!important;border-bottom:1px solid var(--v502-line-soft)!important}
   .landing .proof-strip-v427 .stat-live-item:last-child{border-bottom:0!important}
 }
+
+
+/* =========================================================
+   YOUYOU V5.03 — DASHBOARD THEME ALIGNMENT
+   Visual-only layer. No business logic/routes/data changed.
+   Hero V5.00 is the design source of truth.
+   ========================================================= */
+
+:root{
+  --yy-bg:#061022;
+  --yy-bg-2:#08172b;
+  --yy-bg-3:#0b1b31;
+  --yy-card:#0d1f37;
+  --yy-card-2:#10243f;
+  --yy-border:rgba(236,75,154,.14);
+  --yy-border-soft:rgba(205,218,235,.08);
+  --yy-text:#f6f3f8;
+  --yy-muted:#9aa8ba;
+  --yy-muted-2:#708096;
+  --yy-pink:#f33b95;
+  --yy-rose:#ea4f9f;
+  --yy-mauve:#9b63f0;
+  --yy-success:#49c78f;
+  --yy-danger:#f06b7b;
+}
+
+.brand-v503{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-width:0;
+}
+.brand-mark-v503{
+  position:relative!important;
+  width:34px!important;
+  height:24px!important;
+  flex:0 0 34px!important;
+}
+.brand-mark-v503::before,
+.brand-mark-v503::after,
+.brand-mark-v503 i,
+.brand-mark-v503 b{
+  content:"";
+  position:absolute;
+  top:4px;
+  width:16px;
+  height:16px;
+  border:2px solid transparent;
+  border-radius:999px;
+  transform:rotate(-12deg);
+  box-sizing:border-box;
+}
+.brand-mark-v503::before,
+.brand-mark-v503 i{
+  left:1px;
+  border-color:var(--yy-pink);
+  box-shadow:0 0 14px rgba(243,59,149,.22);
+}
+.brand-mark-v503::after,
+.brand-mark-v503 b{
+  right:1px;
+  border-color:var(--yy-mauve);
+  box-shadow:0 0 14px rgba(155,99,240,.18);
+}
+.brand-mark-v503 i{clip-path:inset(0 0 50% 0)}
+.brand-mark-v503 b{clip-path:inset(50% 0 0 0)}
+.brand-name-v503{
+  color:#fff!important;
+  font-weight:900!important;
+  letter-spacing:-.035em!important;
+  font-size:18px!important;
+  line-height:1!important;
+}
+
+body,
+.app,
+.dashboard,
+.dashboard-shell,
+.dashboard-page,
+.app-shell{
+  background:
+    radial-gradient(circle at 12% 8%,rgba(243,59,149,.045),transparent 24%),
+    radial-gradient(circle at 88% 16%,rgba(155,99,240,.045),transparent 28%),
+    linear-gradient(180deg,var(--yy-bg),#071427 46%,var(--yy-bg))!important;
+  color:var(--yy-text)!important;
+}
+
+.sidebar{
+  background:linear-gradient(180deg,rgba(7,20,39,.985),rgba(5,15,30,.995))!important;
+  border-right:1px solid var(--yy-border)!important;
+  box-shadow:14px 0 40px rgba(0,0,0,.12)!important;
+}
+.sidebar .logo,
+.sidebar-brand,
+.sidebar-header{
+  border-color:var(--yy-border-soft)!important;
+}
+.sidebar a,
+.sidebar button,
+.nav-item,
+.sidebar-nav-item{
+  color:#a9b5c5!important;
+  border:1px solid transparent!important;
+  transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease!important;
+}
+.sidebar a:hover,
+.sidebar button:hover,
+.nav-item:hover,
+.sidebar-nav-item:hover{
+  color:#fff!important;
+  background:rgba(243,59,149,.05)!important;
+  border-color:rgba(243,59,149,.10)!important;
+  transform:translateX(1px);
+}
+.sidebar .active,
+.nav-item.active,
+.sidebar-nav-item.active,
+.sidebar a[aria-current="page"]{
+  color:#fff!important;
+  background:linear-gradient(90deg,rgba(243,59,149,.13),rgba(155,99,240,.08))!important;
+  border-color:rgba(243,59,149,.18)!important;
+  box-shadow:inset 3px 0 0 var(--yy-pink),0 8px 30px rgba(0,0,0,.10)!important;
+}
+
+.topbar,
+.dashboard-header,
+.app-header,
+.page-header,
+.workspace-header{
+  background:rgba(7,20,39,.80)!important;
+  border-color:var(--yy-border-soft)!important;
+  backdrop-filter:blur(16px)!important;
+}
+
+.card,
+.panel,
+.metric-card,
+.stat-card,
+.dashboard-card,
+.widget-card,
+.settings-card,
+.conversation-card,
+.lead-card,
+.knowledge-card,
+.ai-control-card,
+.billing-card,
+.feature-card,
+.section-card{
+  background:linear-gradient(145deg,rgba(15,33,58,.94),rgba(9,23,42,.97))!important;
+  border:1px solid var(--yy-border-soft)!important;
+  box-shadow:0 18px 54px rgba(0,0,0,.15)!important;
+}
+.card:hover,
+.metric-card:hover,
+.stat-card:hover,
+.dashboard-card:hover{
+  border-color:rgba(243,59,149,.16)!important;
+}
+
+input,textarea,select{
+  background:#091a30!important;
+  color:var(--yy-text)!important;
+  border-color:rgba(205,218,235,.10)!important;
+}
+input:focus,textarea:focus,select:focus{
+  border-color:rgba(243,59,149,.34)!important;
+  box-shadow:0 0 0 3px rgba(243,59,149,.07)!important;
+}
+
+button.primary,
+.btn-primary,
+.primary-btn,
+.save-btn,
+.cta-button{
+  color:white!important;
+  background:linear-gradient(110deg,var(--yy-pink),var(--yy-rose) 48%,var(--yy-mauve))!important;
+  border:0!important;
+  box-shadow:0 10px 28px rgba(243,59,149,.16)!important;
+}
+
+button.secondary,
+.btn-secondary,
+.secondary-btn{
+  color:#e6e8ee!important;
+  background:#0b1d34!important;
+  border-color:rgba(243,59,149,.12)!important;
+}
+
+.badge,
+.status-badge,
+.tag,
+.pill{
+  border-color:rgba(243,59,149,.10)!important;
+  background:rgba(243,59,149,.045)!important;
+  color:#d6d9e1!important;
+}
+
+th{
+  color:#dfe5ee!important;
+  border-color:var(--yy-border-soft)!important;
+}
+td{
+  color:#b8c2d0!important;
+  border-color:rgba(205,218,235,.055)!important;
+}
+tr:hover td{
+  background:rgba(243,59,149,.025)!important;
+}
+
+.overview-flow-v503{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin:0 0 18px;
+}
+.overview-flow-v503>div{
+  min-height:74px;
+  padding:15px 16px;
+  border:1px solid var(--yy-border-soft);
+  border-radius:16px;
+  background:linear-gradient(145deg,rgba(14,31,55,.80),rgba(8,22,40,.90));
+}
+.overview-flow-v503 strong{
+  display:block;
+  color:#ff79ba;
+  font-size:10px;
+  letter-spacing:.11em;
+  margin-bottom:7px;
+}
+.overview-flow-v503 span{
+  color:#b9c2cf;
+  font-size:10px;
+  line-height:1.4;
+}
+
+.landing-builder,
+.seo-workspace,
+.ai-studio-workspace,
+.revenue-rescue-workspace,
+.whatsapp-ai-workspace{
+  background:var(--yy-bg)!important;
+}
+
+@media(max-width:900px){
+  .sidebar{box-shadow:none!important}
+  .overview-flow-v503{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .overview-flow-v503{grid-template-columns:1fr}
+  .brand-name-v503{font-size:17px!important}
+}

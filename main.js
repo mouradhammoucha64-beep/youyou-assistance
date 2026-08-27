@@ -231,11 +231,10 @@ function renderLanding() {
 
       <header class="landing-nav">
         <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-          <span class="brand-wordmark brand-v428" aria-label="YOUYOU">
-            <span class="brand-loop-v428" aria-hidden="true"><i></i><b></b></span>
-            <span class="brand-word-v428">YOUYOU</span>
-            <span class="brand-spark-v428" aria-hidden="true"></span>
-          </span>
+          <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
+  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
+  <span class="brand-name-v503">YOUYOU</span>
+</span>
         </a>
 
         <nav class="landing-links">
@@ -895,11 +894,10 @@ function renderLanding() {
 
         <div class="footer-brand">
           <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-            <span class="brand-wordmark brand-v428" aria-label="YOUYOU">
-              <span class="brand-loop-v428" aria-hidden="true"><i></i><b></b></span>
-              <span class="brand-word-v428">YOUYOU</span>
-              <span class="brand-spark-v428" aria-hidden="true"></span>
-            </span>
+            <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
+  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
+  <span class="brand-name-v503">YOUYOU</span>
+</span>
           </a>
 
           <p>
@@ -997,10 +995,10 @@ function renderFaqPage() {
     <div class="landing faq-page">
       <header class="landing-nav">
         <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-          <span class="brand-wordmark" aria-label="YOUYOU">
-            <span class="brand-symbol" aria-hidden="true"><i></i><b>Y</b></span>
-            <span class="brand-text"><span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span></span>
-          </span>
+          <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
+  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
+  <span class="brand-name-v503">YOUYOU</span>
+</span>
         </a>
         <nav class="landing-links">
           <a href="/">Home</a>
@@ -1102,10 +1100,10 @@ function renderFaqPage() {
       <footer>
         <div class="footer-brand">
           <a class="logo" href="/">
-            <span class="brand-wordmark" aria-label="YOUYOU">
-              <span class="brand-symbol" aria-hidden="true"><i></i><b>Y</b></span>
-              <span class="brand-text"><span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span></span>
-            </span>
+            <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
+  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
+  <span class="brand-name-v503">YOUYOU</span>
+</span>
           </a>
           <p>AI customer agent for modern businesses.</p>
         </div>
@@ -1152,10 +1150,10 @@ function renderAuth() {
       <div class="auth-card">
 
         <div class="auth-logo">
-          <span class="brand-wordmark" aria-label="YOUYOU">
-            <span class="brand-symbol" aria-hidden="true"><i></i><b>Y</b></span>
-            <span class="brand-text"><span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span></span>
-          </span>
+          <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
+  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
+  <span class="brand-name-v503">YOUYOU</span>
+</span>
         </div>
 
         <div class="eyebrow">
@@ -1403,10 +1401,10 @@ function dashboardShell(content) {
 
         <div>
           <div class="side-logo">
-            <span class="brand-wordmark" aria-label="YOUYOU">
-            <span class="brand-symbol" aria-hidden="true"><i></i><b>Y</b></span>
-            <span class="brand-text"><span class="brand-you brand-you-first">YOU</span><span class="brand-you brand-you-second">YOU</span></span>
-          </span>
+            <span class="brand-wordmark brand-v503" aria-label="YOUYOU">
+  <span class="brand-mark-v503" aria-hidden="true"><i></i><b></b></span>
+  <span class="brand-name-v503">YOUYOU</span>
+</span>
           </div>
 
           <div class="side-label">
@@ -1439,6 +1437,13 @@ function dashboardShell(content) {
       </aside>
 
       <main class="dashboard-main">
+        <div class="overview-flow-v503" aria-label="YOUYOU workflow">
+          <div><strong>CREATE</strong><span>Build campaign ideas and content</span></div>
+          <div><strong>LAUNCH</strong><span>Publish focused landing experiences</span></div>
+          <div><strong>CAPTURE</strong><span>Collect intent and qualified leads</span></div>
+          <div><strong>MANAGE</strong><span>Keep opportunities organized</span></div>
+        </div>
+
 
         <header class="dashboard-header">
 

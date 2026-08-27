@@ -1,0 +1,15 @@
+YOUYOU V5.03 — DASHBOARD THEME ALIGNMENT
+
+{
+  "base": "youyou-assistance-main (9).zip",
+  "logo_markup_replacements": 6,
+  "overview_flow_inserted": true,
+  "logic_changed": false,
+  "routes_changed": false,
+  "database_or_auth_changed": false,
+  "landing_structure_changed": false,
+  "theme": "deep navy + rose/pink + mauve aligned to Hero V5.00"
+}
+
+Visual scope only: logo, sidebar, headers, cards, controls, tables, workspace surfaces and responsive polish.
+No business logic, routes, auth/data calls, SEO logic, Revenue Rescue logic, WhatsApp logic or builder logic intentionally changed.
