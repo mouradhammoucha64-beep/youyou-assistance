@@ -10940,3 +10940,192 @@ tr:hover td{background:rgba(255,255,255,.018)!important}
   .lpb-dashboard-tools-v509{grid-template-columns:1fr}
   .lpb-dashboard-tools-v509 .lpb-tool-card-v509:last-child{grid-column:auto}
 }
+
+
+/* =========================================================
+   YOUYOU V5.10 — PREMIUM VISIBLE SLIDER POLISH
+   3 cards visible + clear fourth-card peek + selected state.
+   ========================================================= */
+
+.lpb-panel[data-lpb-panel="templates"]{
+  overflow:visible!important;
+}
+
+.lpb-slider-shell-v509{
+  grid-template-columns:48px minmax(0,1fr) 48px!important;
+  gap:14px!important;
+  position:relative!important;
+}
+
+.lpb-template-slider-v509{
+  gap:16px!important;
+  padding:6px 22px 16px 2px!important;
+  scroll-padding-left:2px!important;
+  mask-image:linear-gradient(90deg,#000 0%,#000 95%,transparent 100%);
+  -webkit-mask-image:linear-gradient(90deg,#000 0%,#000 95%,transparent 100%);
+}
+
+/* On wide screens: 3 complete cards, with the 4th peeking in from the right. */
+@media(min-width:1280px){
+  .lpb-template-card-v509{
+    flex:0 0 calc((100% - 58px)/3)!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  .lpb-template-slider-v509{
+    padding-right:90px!important;
+  }
+}
+
+/* More generous card size for international SaaS feel */
+.lpb-template-card-v509{
+  position:relative!important;
+  border:1px solid rgba(255,255,255,.075)!important;
+  border-radius:18px!important;
+  overflow:hidden!important;
+  background:#0b1829!important;
+  box-shadow:0 16px 42px rgba(0,0,0,.16)!important;
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease!important;
+}
+.lpb-template-card-v509:hover{
+  transform:translateY(-3px)!important;
+  border-color:rgba(198,109,224,.22)!important;
+  box-shadow:0 24px 60px rgba(0,0,0,.21)!important;
+}
+.lpb-template-card-v509.is-selected-v510{
+  border-color:rgba(216,111,184,.45)!important;
+  box-shadow:
+    0 0 0 1px rgba(216,111,184,.08),
+    0 24px 65px rgba(0,0,0,.23),
+    0 0 28px rgba(182,108,255,.08)!important;
+}
+.lpb-template-card-v509.is-selected-v510::after{
+  content:"SELECTED";
+  position:absolute;
+  top:12px;
+  right:12px;
+  z-index:6;
+  padding:5px 8px;
+  border-radius:999px;
+  background:linear-gradient(110deg,#df6da9,#aa72ee);
+  color:#fff;
+  font-size:7px;
+  font-weight:850;
+  letter-spacing:.08em;
+  box-shadow:0 8px 24px rgba(182,108,255,.18);
+}
+
+.lpb-template-info{
+  padding:14px 14px 15px!important;
+  align-items:center!important;
+}
+.lpb-template-info strong{
+  font-size:12px!important;
+  color:#f2f5fa!important;
+}
+.lpb-template-info small{
+  color:#8390a3!important;
+  font-size:8px!important;
+  letter-spacing:.06em!important;
+}
+.lpb-template-info button{
+  min-height:34px!important;
+  padding:0 12px!important;
+  border-radius:9px!important;
+  font-size:8px!important;
+  font-weight:800!important;
+}
+
+.lpb-slider-arrow-v509{
+  width:48px!important;
+  height:48px!important;
+  font-size:20px!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.18)!important;
+}
+.lpb-slider-arrow-v509.next{
+  border-color:rgba(198,109,224,.22)!important;
+}
+.lpb-slider-arrow-v509.next::after{
+  content:"MORE";
+  position:absolute;
+  margin-top:74px;
+  font-size:6px;
+  letter-spacing:.12em;
+  color:#778497;
+}
+
+.lpb-slider-dots-v509{
+  margin-top:4px!important;
+  margin-bottom:32px!important;
+}
+
+/* Header polish for gallery */
+.lpb-gallery-head{
+  align-items:end!important;
+}
+.lpb-gallery-head h2{
+  max-width:720px!important;
+  font-size:clamp(26px,2.3vw,38px)!important;
+  letter-spacing:-.04em!important;
+}
+.lpb-gallery-head p{
+  max-width:720px!important;
+}
+
+/* Quick-workspace cards feel like one unified product area */
+.lpb-dashboard-tools-v509{
+  margin-top:14px!important;
+}
+.lpb-tool-card-v509{
+  border-color:rgba(255,255,255,.075)!important;
+  border-radius:16px!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.15)!important;
+}
+.lpb-tool-card-v509:hover{
+  border-color:rgba(182,108,255,.15)!important;
+}
+
+/* Strong visual cue for image/video/link areas */
+.lpb-template-image-v509{
+  background:
+    radial-gradient(circle at 25% 25%,rgba(223,109,169,.08),transparent 28%),
+    radial-gradient(circle at 75% 60%,rgba(159,119,232,.08),transparent 32%),
+    rgba(255,255,255,.025)!important;
+}
+.lpb-video-demo-v509{
+  min-height:182px!important;
+}
+.lpb-link-row-v509 input{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace!important;
+  font-size:9px!important;
+}
+
+/* Tablet: 2 full cards + clear third peek */
+@media(min-width:821px) and (max-width:1279px){
+  .lpb-template-card-v509{
+    flex:0 0 calc((100% - 34px)/2)!important;
+    min-width:0!important;
+  }
+  .lpb-template-slider-v509{
+    padding-right:76px!important;
+  }
+}
+
+/* Mobile: 1 card + next-card peek */
+@media(max-width:820px){
+  .lpb-slider-shell-v509{
+    grid-template-columns:34px minmax(0,1fr) 34px!important;
+    gap:8px!important;
+  }
+  .lpb-template-slider-v509{
+    padding-right:54px!important;
+  }
+  .lpb-template-card-v509{
+    flex:0 0 calc(100% - 34px)!important;
+    min-width:0!important;
+  }
+  .lpb-slider-arrow-v509{
+    width:34px!important;height:34px!important;font-size:16px!important;
+  }
+  .lpb-slider-arrow-v509.next::after{display:none}
+}

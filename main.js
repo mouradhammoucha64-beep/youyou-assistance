@@ -2223,7 +2223,8 @@ function renderLandingPagesSection() {
             ${LANDING_PAGE_TEMPLATES.map((item, index) => `
               <article class="lpb-template-card lpb-template-card-v509 layout-${escapeHtml(item.layout)}"
                        data-template-category="${escapeHtml(item.category)}"
-                       data-template-index="${index}">
+                       data-template-index="${index}"
+                       data-template-id="${escapeHtml(item.id)}">
                 <div class="lpb-template-preview lpb-template-preview-v509"
                      style="--preview-bg:${item.bg};--preview-surface:${item.surface};--preview-accent:${item.accent}">
                   <div class="lpb-template-mini-nav"><i></i><span></span><em></em></div>
@@ -2858,7 +2859,14 @@ function initLandingPages() {
     if (name) name.textContent = current.name || "Untitled landing page";
   };
 
+  const setSelectedTemplateV510 = (templateId) => {
+    root.querySelectorAll(".lpb-template-card-v509").forEach((card) => {
+      card.classList.toggle("is-selected-v510", card.dataset.templateId === templateId);
+    });
+  };
+
   const openTemplate = (templateId) => {
+    setSelectedTemplateV510(templateId);
     openLandingBuilder({ templateId });
   };
 
@@ -3057,6 +3065,7 @@ function initLandingPages() {
   hydrateFields();
   renderPreview();
   renderSaved();
+  setSelectedTemplateV510(LANDING_PAGE_TEMPLATES[0]?.id || "");
 }
 
 

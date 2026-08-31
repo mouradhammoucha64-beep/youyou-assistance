@@ -1,0 +1,14 @@
+YOUYOU V5.10 — PREMIUM LANDING PAGE SLIDER
+
+{
+  "base": "V5.09 FULLPROJECT LANDING PAGES PRO",
+  "slider_visibility": "3 cards + fourth peek on desktop; 2 + third peek tablet; 1 + next peek mobile",
+  "selected_template_state": true,
+  "arrows_more_visible": true,
+  "dots_kept": true,
+  "image_area_emphasized": true,
+  "video_panel_emphasized": true,
+  "public_link_emphasized": true,
+  "builder_logic_changed": false,
+  "other_app_logic_changed": false
+}
