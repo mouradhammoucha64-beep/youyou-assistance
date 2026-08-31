@@ -2216,27 +2216,125 @@ function renderLandingPagesSection() {
           </label>
         </div>
 
-        <div id="lpb-template-grid" class="lpb-template-grid">
-          ${LANDING_PAGE_TEMPLATES.map((item) => `
-            <article class="lpb-template-card layout-${escapeHtml(item.layout)}" data-template-category="${escapeHtml(item.category)}">
-              <div class="lpb-template-preview" style="--preview-bg:${item.bg};--preview-surface:${item.surface};--preview-accent:${item.accent}">
-                <div class="lpb-template-mini-nav"><i></i><span></span></div>
-                <div class="lpb-template-mini-body">
-                  <div>
-                    <small>${escapeHtml(item.badge)}</small>
-                    <b></b><b class="short"></b><p></p>
-                    <button></button>
+        <div class="lpb-slider-shell-v509">
+          <button type="button" class="lpb-slider-arrow-v509 prev" data-lpb-slider="-1" aria-label="Previous templates">←</button>
+
+          <div id="lpb-template-grid" class="lpb-template-slider-v509">
+            ${LANDING_PAGE_TEMPLATES.map((item, index) => `
+              <article class="lpb-template-card lpb-template-card-v509 layout-${escapeHtml(item.layout)}"
+                       data-template-category="${escapeHtml(item.category)}"
+                       data-template-index="${index}">
+                <div class="lpb-template-preview lpb-template-preview-v509"
+                     style="--preview-bg:${item.bg};--preview-surface:${item.surface};--preview-accent:${item.accent}">
+                  <div class="lpb-template-mini-nav"><i></i><span></span><em></em></div>
+
+                  <div class="lpb-template-mini-body-v509">
+                    <div class="lpb-template-copy-v509">
+                      <small>${escapeHtml(item.badge)}</small>
+                      <strong>${escapeHtml(item.headline)}</strong>
+                      <p>${escapeHtml(item.sub)}</p>
+                      <button>${escapeHtml(item.cta)}</button>
+                    </div>
+
+                    <aside class="lpb-template-image-v509">
+                      <span>▧</span>
+                      <b>IMAGE AREA</b>
+                      <small>Your photo / product visual</small>
+                    </aside>
                   </div>
-                  <aside></aside>
+
+                  <div class="lpb-template-mini-row-v509">
+                    <span>Benefit</span><span>Proof</span><span>CTA</span>
+                  </div>
                 </div>
-                <div class="lpb-template-mini-row"><span></span><span></span><span></span></div>
+
+                <div class="lpb-template-info">
+                  <div><small>${escapeHtml(item.category)}</small><strong>${escapeHtml(item.name)}</strong></div>
+                  <button type="button" data-lpb-open-builder="${item.id}">Use template →</button>
+                </div>
+              </article>
+            `).join("")}
+          </div>
+
+          <button type="button" class="lpb-slider-arrow-v509 next" data-lpb-slider="1" aria-label="Next templates">→</button>
+        </div>
+
+        <div class="lpb-slider-dots-v509" aria-hidden="true">
+          <i class="is-active"></i><i></i><i></i><i></i><i></i>
+        </div>
+
+        <div class="lpb-dashboard-tools-v509">
+          <section class="dashboard-card lpb-tool-card-v509">
+            <div class="lpb-tool-head-v509">
+              <div>
+                <small>HERO VIDEO</small>
+                <h3>Video area is clear and ready.</h3>
               </div>
-              <div class="lpb-template-info">
-                <div><small>${escapeHtml(item.category)}</small><strong>${escapeHtml(item.name)}</strong></div>
-                <button type="button" data-lpb-open-builder="${item.id}">Use template →</button>
+              <span>OPTIONAL</span>
+            </div>
+
+            <div class="lpb-video-demo-v509">
+              <span>▶</span>
+              <b>VIDEO PREVIEW</b>
+              <small>YouTube · Vimeo · Hosted URL</small>
+            </div>
+
+            <label class="lpb-tool-field-v509">
+              <span>Video URL</span>
+              <input id="lpb-dashboard-video-url" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+            </label>
+
+            <button type="button" class="lpb-secondary" data-lpb-open-builder="product-launch">Open builder & add video</button>
+          </section>
+
+          <section class="dashboard-card lpb-tool-card-v509">
+            <div class="lpb-tool-head-v509">
+              <div>
+                <small>PUBLIC PAGE LINK</small>
+                <h3>Know exactly where your page will live.</h3>
               </div>
-            </article>
-          `).join("")}
+              <span>DRAFT</span>
+            </div>
+
+            <label class="lpb-tool-field-v509">
+              <span>Page URL</span>
+              <div class="lpb-link-row-v509">
+                <input id="lpb-public-page-link" readonly value="${location.origin}/lp/your-page" />
+                <button type="button" id="lpb-copy-preview-link">Copy</button>
+              </div>
+            </label>
+
+            <div class="lpb-link-actions-v509">
+              <button type="button" class="lpb-secondary" data-lpb-open-builder="product-launch">Preview / Edit</button>
+              <button type="button" class="primary" data-lpb-open-builder="product-launch">Prepare page →</button>
+            </div>
+
+            <p class="lpb-note-v509">
+              Real public publishing will activate when the publishing backend is connected.
+              Preview and HTML export remain available now.
+            </p>
+          </section>
+
+          <section class="dashboard-card lpb-tool-card-v509">
+            <div class="lpb-tool-head-v509">
+              <div>
+                <small>PAGE CONTENT</small>
+                <h3>Everything the client needs to edit.</h3>
+              </div>
+              <span>CONTROL</span>
+            </div>
+
+            <div class="lpb-control-grid-v509">
+              <div><b>Text</b><small>Headline, description, benefits</small></div>
+              <div><b>Images</b><small>Image URL or local upload</small></div>
+              <div><b>Video</b><small>YouTube / Vimeo / hosted</small></div>
+              <div><b>CTA</b><small>Form, WhatsApp, call, email</small></div>
+              <div><b>Colors</b><small>Accent, background, surface, text</small></div>
+              <div><b>Preview</b><small>Desktop and mobile</small></div>
+            </div>
+
+            <button type="button" class="primary lpb-open-builder-v509" data-lpb-open-builder="product-launch">Open visual builder →</button>
+          </section>
         </div>
       </div>
 
@@ -2834,11 +2932,51 @@ function initLandingPages() {
     button.addEventListener("click", () => openTemplate(button.dataset.lpbOpenBuilder));
   });
 
+  const templateSliderV509 = document.querySelector("#lpb-template-grid");
+
+  const updateTemplateDotsV509 = () => {
+    if (!templateSliderV509) return;
+    const maxScroll = Math.max(1, templateSliderV509.scrollWidth - templateSliderV509.clientWidth);
+    const progress = Math.max(0, Math.min(1, templateSliderV509.scrollLeft / maxScroll));
+    const dots = [...root.querySelectorAll(".lpb-slider-dots-v509 i")];
+    const active = Math.min(dots.length - 1, Math.round(progress * (dots.length - 1)));
+    dots.forEach((dot, index) => dot.classList.toggle("is-active", index === active));
+  };
+
+  root.querySelectorAll("[data-lpb-slider]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (!templateSliderV509) return;
+      const direction = Number(button.dataset.lpbSlider || 1);
+      templateSliderV509.scrollBy({
+        left: direction * Math.max(320, templateSliderV509.clientWidth * .78),
+        behavior:"smooth"
+      });
+      setTimeout(updateTemplateDotsV509, 350);
+    });
+  });
+
+  templateSliderV509?.addEventListener("scroll", updateTemplateDotsV509, { passive:true });
+
+  document.querySelector("#lpb-copy-preview-link")?.addEventListener("click", async (event) => {
+    const input = document.querySelector("#lpb-public-page-link");
+    if (!input) return;
+    try {
+      await navigator.clipboard.writeText(input.value);
+      event.currentTarget.textContent = "Copied";
+      setTimeout(() => { event.currentTarget.textContent = "Copy"; }, 1200);
+    } catch {
+      input.select();
+      document.execCommand?.("copy");
+    }
+  });
+
   document.querySelector("#lpb-template-category")?.addEventListener("change", (event) => {
     const value = event.currentTarget.value;
     root.querySelectorAll(".lpb-template-card").forEach((card) => {
       card.hidden = value !== "all" && card.dataset.templateCategory !== value;
     });
+    templateSliderV509?.scrollTo({ left:0, behavior:"smooth" });
+    setTimeout(updateTemplateDotsV509, 250);
   });
 
   Object.values(fieldMap).forEach((id) => {
