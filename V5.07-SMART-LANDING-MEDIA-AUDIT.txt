@@ -1,0 +1,22 @@
+YOUYOU V5.07 — Smart Landing Pages Media & Content Control
+Date: 2026-08-31
+
+Changes added to the Smart Landing Page workspace:
+- Every template now renders a built-in demo visual when the customer has not added media yet.
+- Real video preview support for YouTube, Vimeo and direct MP4/WebM/OGG URLs.
+- Media slider/gallery field (up to 8 image/video URLs; horizontal swipe/scroll).
+- User-controlled media position: Right, Left, Top/full-width, Bottom/full-width.
+- Media width range control (35–65%).
+- Media height range control (240–620px).
+- Optional custom text block with editable section title/body.
+- Custom text position: after hero, after benefits, or before contact.
+- Existing image upload preview preserved.
+- Exported HTML receives the same media positioning, video, slider and text-block rendering.
+- Old saved landing page drafts are normalized with the new V5.07 defaults.
+
+Validation:
+- main.js Node syntax check: PASS
+- public/widget.js Node syntax check: PASS
+- Full Vite build not run because node_modules are not present in the working archive.
+
+No Supabase schema or existing conversation/lead/widget logic was changed.
