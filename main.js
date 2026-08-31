@@ -1982,64 +1982,88 @@ function landingMediaItemMarkup(url, label = "Landing page media") {
   return `<div class="lp-live-media-slide"><img src="${escapeHtml(raw)}" alt="${escapeHtml(label)}" loading="lazy" /></div>`;
 }
 
-function landingMediaMarkup(data) {
-  const gallery = String(data.mediaGallery || "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .slice(0, 8);
+function landingImageSliderMarkup(data) {
+  const urls = [
+    String(data.imageUrl || "").trim(),
+    ...String(data.mediaGallery || "").split("\n").map((item) => item.trim())
+  ].filter(Boolean).slice(0, 8);
 
-  const manual = [data.imageUrl, data.videoUrl]
-    .map((item) => String(item || "").trim())
+  const images = urls.filter((url) => !landingVideoSource(url));
+
+  let slides = images
+    .map((url) => `<div class="lp-image-slide"><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")}" loading="lazy" /></div>`)
     .filter(Boolean);
 
-  const items = [...manual, ...gallery].filter((item, index, arr) => arr.indexOf(item) === index);
-
-  let slides = items
-    .map((url) => landingMediaItemMarkup(url, data.name || "Landing page visual"))
-    .filter(Boolean);
-
-  // Make the slider visually obvious even before the client uploads media.
   if (!slides.length) {
     const demo = landingTemplateDemoVisual(data.templateId);
     slides = [
-      landingMediaItemMarkup(demo, `${data.name || "Landing page"} product image`),
-      `<div class="lp-live-media-slide lp-live-empty-slide">
-        <span class="lp-empty-icon">▧</span>
-        <strong>PRODUCT IMAGE 2</strong>
-        <small>Add another image URL or upload it in the editor.</small>
-      </div>`,
-      `<div class="lp-live-media-slide lp-live-empty-slide lp-live-video-slot">
-        <span class="lp-empty-icon">▶</span>
-        <strong>PRODUCT VIDEO</strong>
-        <small>Paste a YouTube, Vimeo or hosted video URL.</small>
-      </div>`
-    ].filter(Boolean);
+      `<div class="lp-image-slide"><img src="${escapeHtml(demo)}" alt="Demo product image" /></div>`,
+      `<div class="lp-image-slide lp-image-empty"><span>▧</span><strong>ADD IMAGE</strong><small>Your second product image appears here.</small></div>`,
+      `<div class="lp-image-slide lp-image-empty"><span>＋</span><strong>ADD MORE IMAGES</strong><small>Up to 8 images for this product slider.</small></div>`
+    ];
   }
 
-  const dotButtons = slides.map((_, index) =>
-    `<button type="button" class="${index === 0 ? "is-active" : ""}" aria-label="Show media ${index + 1}"
-      onclick="const t=this.closest('.lp-live-media').querySelector('.lp-live-media-track');t.scrollTo({left:t.clientWidth*${index},behavior:'smooth'});this.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('is-active',i===${index}));"></button>`
-  ).join("");
+  if (data.sliderEnabled === "off") return "";
 
-  return `<div class="lp-live-media has-slider">
-    <div class="lp-live-media-track">
-      ${slides.join("")}
+  const arrows = data.sliderArrows !== "off"
+    ? `<button type="button" class="lp-image-arrow prev" aria-label="Previous image"
+         onclick="const t=this.parentElement.querySelector('.lp-image-track');t.scrollBy({left:-t.clientWidth,behavior:'smooth'});">‹</button>
+       <button type="button" class="lp-image-arrow next" aria-label="Next image"
+         onclick="const t=this.parentElement.querySelector('.lp-image-track');t.scrollBy({left:t.clientWidth,behavior:'smooth'});">›</button>`
+    : "";
+
+  const dots = data.sliderDots !== "off"
+    ? `<div class="lp-image-dots">${slides.map((_, index) =>
+        `<button type="button" class="${index === 0 ? "is-active" : ""}" aria-label="Show image ${index + 1}"
+          onclick="const t=this.closest('.lp-image-slider').querySelector('.lp-image-track');t.scrollTo({left:t.clientWidth*${index},behavior:'smooth'});this.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('is-active',i===${index}));"></button>`
+      ).join("")}</div>`
+    : "";
+
+  const autoplay = data.sliderAutoplay !== "off" && slides.length > 1
+    ? `data-autoplay="true" data-speed="${Math.max(2000, Math.min(9000, Number(data.sliderSpeed) || 4000))}"`
+    : "";
+
+  return `<section class="lp-live-section lp-product-gallery" data-block="image-slider">
+    <div class="lp-block-head">
+      <div><small>PRODUCT GALLERY</small><h2>${escapeHtml(data.sliderTitle || "See it from every angle.")}</h2></div>
+      <span>${slides.length} IMAGES</span>
     </div>
-
-    <button type="button" class="lp-live-slider-arrow prev" aria-label="Previous media"
-      onclick="const t=this.parentElement.querySelector('.lp-live-media-track');t.scrollBy({left:-t.clientWidth,behavior:'smooth'});">‹</button>
-
-    <button type="button" class="lp-live-slider-arrow next" aria-label="Next media"
-      onclick="const t=this.parentElement.querySelector('.lp-live-media-track');t.scrollBy({left:t.clientWidth,behavior:'smooth'});">›</button>
-
-    <div class="lp-live-slider-dots">${dotButtons}</div>
-
-    <div class="lp-live-media-hint">
-      <span>PRODUCT MEDIA</span>
-      <small>Images + video · swipe or use arrows</small>
+    <div class="lp-image-slider" ${autoplay}>
+      <div class="lp-image-track">${slides.join("")}</div>
+      ${arrows}
+      ${dots}
     </div>
-  </div>`;
+  </section>`;
+}
+
+function landingVideoBlockMarkup(data) {
+  if (data.videoEnabled === "off") return "";
+  const raw = String(data.videoUrl || "").trim();
+  const source = landingVideoSource(raw);
+
+  let media = "";
+  if (source?.type === "iframe") {
+    media = `<iframe src="${escapeHtml(source.src)}" title="${escapeHtml(data.videoTitle || "Product video")}" loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+  } else if (source?.type === "video") {
+    media = `<video src="${escapeHtml(source.src)}" controls playsinline preload="metadata"></video>`;
+  } else if (raw.startsWith("blob:") || raw.startsWith("data:video/")) {
+    media = `<video src="${escapeHtml(raw)}" controls playsinline preload="metadata"></video>`;
+  } else {
+    media = `<div class="lp-video-empty"><span>▶</span><strong>ADD YOUR PRODUCT VIDEO</strong><small>Upload a video or paste YouTube / Vimeo / hosted URL.</small></div>`;
+  }
+
+  return `<section class="lp-live-section lp-product-video" data-block="video">
+    <div class="lp-block-head">
+      <div><small>PRODUCT VIDEO · OPTIONAL</small><h2>${escapeHtml(data.videoTitle || "Show how it works.")}</h2></div>
+      <span>${raw ? "VIDEO READY" : "ADD VIDEO"}</span>
+    </div>
+    <div class="lp-video-frame">${media}</div>
+  </section>`;
+}
+
+function landingMediaMarkup(data) {
+  return landingImageSliderMarkup(data);
 }
 
 function defaultLandingPageData(templateId = "product-launch") {
@@ -2067,6 +2091,16 @@ function defaultLandingPageData(templateId = "product-launch") {
     imageUrl: "",
     videoUrl: "",
     mediaGallery: "",
+    videoEnabled: "on",
+    videoTitle: "See the product in action.",
+    videoPosition: "after-hero",
+    sliderEnabled: "on",
+    sliderTitle: "See it from every angle.",
+    sliderPosition: "after-video",
+    sliderAutoplay: "on",
+    sliderSpeed: "4000",
+    sliderArrows: "on",
+    sliderDots: "on",
     mediaPosition: "right",
     mediaWidth: "46",
     mediaHeight: "380",
@@ -2124,7 +2158,8 @@ function landingPreviewMarkup(data, compact = false) {
   const mediaPosition = ["right","left","top","bottom"].includes(data.mediaPosition) ? data.mediaPosition : "right";
   const mediaWidth = Math.min(65, Math.max(35, Number(data.mediaWidth) || 46));
   const mediaHeight = Math.min(620, Math.max(240, Number(data.mediaHeight) || 380));
-  const media = landingMediaMarkup(data);
+  const videoBlock = landingVideoBlockMarkup(data);
+  const sliderBlock = landingImageSliderMarkup(data);
   const extraSection = String(data.extraText || "").trim()
     ? `<section class="lp-live-section lp-live-extra"><small>${escapeHtml(data.extraTitle || "MORE ABOUT THIS OFFER")}</small><div class="lp-live-extra-copy">${escapeHtml(data.extraText).replace(/\n/g,"<br>")}</div></section>`
     : "";
@@ -2141,7 +2176,6 @@ function landingPreviewMarkup(data, compact = false) {
           </div>
           <div class="lp-live-trust"><span>✓ Clear offer</span><span>✓ Direct response</span><span>✓ Mobile ready</span></div>
         </div>
-        ${media}
       </section>`;
 
   const benefitsSection = `<section class="lp-live-section lp-live-benefits">
@@ -2160,11 +2194,40 @@ function landingPreviewMarkup(data, compact = false) {
       </section>`;
 
   const bodySections = [hero];
-  if (data.extraTextPosition === "after-hero" && extraSection) bodySections.push(extraSection);
+
+  const pushExtraIf = (position) => {
+    if (data.extraTextPosition === position && extraSection) bodySections.push(extraSection);
+  };
+  const pushVideoIf = (position) => {
+    if ((data.videoPosition || "after-hero") === position && videoBlock) bodySections.push(videoBlock);
+  };
+  const pushSliderIf = (position) => {
+    if ((data.sliderPosition || "after-video") === position && sliderBlock) bodySections.push(sliderBlock);
+  };
+
+  pushVideoIf("after-hero");
+  pushSliderIf("after-hero");
+  pushExtraIf("after-hero");
+
+  if ((data.sliderPosition || "after-video") === "after-video") {
+    if ((data.videoPosition || "after-hero") !== "after-hero") pushVideoIf("after-video");
+    if (sliderBlock) bodySections.push(sliderBlock);
+  } else {
+    pushVideoIf("after-slider");
+  }
+
   bodySections.push(benefitsSection);
+
+  pushVideoIf("after-benefits");
+  pushSliderIf("after-benefits");
   if ((data.extraTextPosition || "after-benefits") === "after-benefits" && extraSection) bodySections.push(extraSection);
+
   bodySections.push(proofSection, faqSection);
-  if (data.extraTextPosition === "before-contact" && extraSection) bodySections.push(extraSection);
+
+  pushVideoIf("before-contact");
+  pushSliderIf("before-contact");
+  pushExtraIf("before-contact");
+
   bodySections.push(contactSection);
 
   return `
@@ -2619,25 +2682,78 @@ function renderLandingPageWorkspace() {
             </div>
           </div>
 
-          <div class="lpb-editor-section">
-            <small>MEDIA · IMAGE / VIDEO / SLIDER</small>
-            <label>Image URL<input id="lpb-image-url" type="text" inputmode="url" placeholder="https://..." /></label>
-            <label>Video URL<input id="lpb-video-url" type="text" inputmode="url" placeholder="YouTube / Vimeo / .mp4" /></label>
-            <label>Product media slider <span>One image or video URL per line · up to 8</span>
-              <textarea id="lpb-media-gallery" rows="7" placeholder="IMAGE 1: https://...product-front.jpg&#10;IMAGE 2: https://...product-side.jpg&#10;IMAGE 3: https://...product-detail.jpg&#10;VIDEO: https://youtu.be/..."></textarea>
-            </label>
-            <p class="lpb-media-help lpb-media-help-strong">The slider is part of the customer landing page itself. Add several product images and/or one video here; arrows and dots stay visible in the page preview.</p>
-            <div class="lpb-two">
-              <label>Media position
-                <select id="lpb-media-position"><option value="right">Right</option><option value="left">Left</option><option value="top">Top / full width</option><option value="bottom">Below text / full width</option></select>
-              </label>
-              <label>Media width <span id="lpb-media-width-value">46%</span><input id="lpb-media-width" type="range" min="35" max="65" step="1" /></label>
+          <div class="lpb-editor-section lpb-media-pro-section">
+            <small>VIDEO BLOCK · OPTIONAL</small>
+            <div class="lpb-media-toggle-row">
+              <div><strong>Product video</strong><span>Keep video separate from the image slider.</span></div>
+              <select id="lpb-video-enabled"><option value="on">Enabled</option><option value="off">Hidden</option></select>
             </div>
-            <label>Media height <span id="lpb-media-height-value">380px</span><input id="lpb-media-height" type="range" min="240" max="620" step="10" /></label>
-            <label class="lpb-upload-label">Or preview a local image
-              <input id="lpb-image-file" type="file" accept="image/*" />
+            <label>Video section title<input id="lpb-video-title" placeholder="See the product in action." /></label>
+            <label>Video URL<input id="lpb-video-url" type="text" inputmode="url" placeholder="YouTube / Vimeo / .mp4 URL" /></label>
+            <label class="lpb-upload-label lpb-upload-pro">
+              Upload video
+              <input id="lpb-video-file" type="file" accept="video/mp4,video/webm,video/ogg,video/*" />
+              <span>MP4 / WebM / OGG · local preview</span>
             </label>
-            <p class="lpb-media-help">Every template starts with a demo visual, so customers always see how the section works before adding their own media.</p>
+            <label>Video position
+              <select id="lpb-video-position">
+                <option value="after-hero">After hero</option>
+                <option value="after-benefits">After benefits</option>
+                <option value="before-contact">Before final CTA</option>
+              </select>
+            </label>
+            <p class="lpb-media-help">Uploaded videos preview instantly. Permanent online video hosting will be connected with the publishing backend.</p>
+          </div>
+
+          <div class="lpb-editor-section lpb-media-pro-section">
+            <small>IMAGE SLIDER</small>
+            <div class="lpb-media-toggle-row">
+              <div><strong>Product image slider</strong><span>Images only. No video mixed inside.</span></div>
+              <select id="lpb-slider-enabled"><option value="on">Enabled</option><option value="off">Hidden</option></select>
+            </div>
+            <label>Slider title<input id="lpb-slider-title" placeholder="See it from every angle." /></label>
+            <label>First image URL<input id="lpb-image-url" type="text" inputmode="url" placeholder="https://...product-front.jpg" /></label>
+
+            <label class="lpb-upload-label lpb-upload-pro">
+              Add images
+              <input id="lpb-image-files" type="file" accept="image/*" multiple />
+              <span>Select several images at once · up to 8</span>
+            </label>
+
+            <label>Image list <span>One image URL per line · up to 8</span>
+              <textarea id="lpb-media-gallery" rows="8" placeholder="https://...front.jpg&#10;https://...side.jpg&#10;https://...detail.jpg"></textarea>
+            </label>
+
+            <div class="lpb-slider-settings-pro">
+              <label>Auto-play
+                <select id="lpb-slider-autoplay"><option value="on">On</option><option value="off">Off</option></select>
+              </label>
+              <label>Speed
+                <select id="lpb-slider-speed">
+                  <option value="2500">2.5 sec</option>
+                  <option value="4000">4 sec</option>
+                  <option value="5500">5.5 sec</option>
+                  <option value="7000">7 sec</option>
+                </select>
+              </label>
+              <label>Arrows
+                <select id="lpb-slider-arrows"><option value="on">Show</option><option value="off">Hide</option></select>
+              </label>
+              <label>Dots
+                <select id="lpb-slider-dots"><option value="on">Show</option><option value="off">Hide</option></select>
+              </label>
+            </div>
+
+            <label>Slider position
+              <select id="lpb-slider-position">
+                <option value="after-video">Directly under video</option>
+                <option value="after-hero">After hero</option>
+                <option value="after-benefits">After benefits</option>
+                <option value="before-contact">Before final CTA</option>
+              </select>
+            </label>
+
+            <p class="lpb-media-help lpb-media-help-strong">Add Image is always available. The image slider stays independent from video and can autoplay with premium arrows + dots.</p>
           </div>
 
           <div class="lpb-editor-section">
@@ -2722,7 +2838,11 @@ function initLandingPageWorkspace() {
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
     ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", whatsapp:"lpb-whatsapp",
     phone:"lpb-phone", email:"lpb-email", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
-    mediaGallery:"lpb-media-gallery", mediaPosition:"lpb-media-position", mediaWidth:"lpb-media-width", mediaHeight:"lpb-media-height",
+    videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
+    mediaGallery:"lpb-media-gallery", sliderEnabled:"lpb-slider-enabled", sliderTitle:"lpb-slider-title",
+    sliderPosition:"lpb-slider-position", sliderAutoplay:"lpb-slider-autoplay", sliderSpeed:"lpb-slider-speed",
+    sliderArrows:"lpb-slider-arrows", sliderDots:"lpb-slider-dots",
+    mediaPosition:"lpb-media-position", mediaWidth:"lpb-media-width", mediaHeight:"lpb-media-height",
     extraTitle:"lpb-extra-title", extraText:"lpb-extra-text", extraTextPosition:"lpb-extra-text-position",
     accent:"lpb-accent", background:"lpb-background", surface:"lpb-surface",
     textColor:"lpb-text-color", testimonial:"lpb-testimonial",
@@ -2747,7 +2867,21 @@ function initLandingPageWorkspace() {
     readFields();
     const preview = document.querySelector("#lpb-live-preview");
     const name = document.querySelector("#lpw-document-name");
-    if (preview) preview.innerHTML = landingPreviewMarkup(current);
+    if (preview) {
+      preview.innerHTML = landingPreviewMarkup(current);
+
+      preview.querySelectorAll(".lp-image-slider[data-autoplay='true']").forEach((slider) => {
+        const track = slider.querySelector(".lp-image-track");
+        if (!track || track.children.length < 2) return;
+        const speed = Math.max(2000, Number(slider.dataset.speed) || 4000);
+        const timer = setInterval(() => {
+          if (!document.body.contains(slider)) return clearInterval(timer);
+          const max = Math.max(0, track.scrollWidth - track.clientWidth);
+          const next = track.scrollLeft + track.clientWidth >= max - 4 ? 0 : track.scrollLeft + track.clientWidth;
+          track.scrollTo({ left:next, behavior:"smooth" });
+        }, speed);
+      });
+    }
     if (name) name.textContent = current.name || "Untitled page";
     const widthValue = document.querySelector("#lpb-media-width-value");
     const heightValue = document.querySelector("#lpb-media-height-value");
@@ -2762,9 +2896,19 @@ function initLandingPageWorkspace() {
 
     const drafts = loadLandingDrafts();
     const index = drafts.findIndex((item) => item.id === current.id);
-    if (index >= 0) drafts[index] = { ...current };
-    else drafts.unshift({ ...current });
-    saveLandingDrafts(drafts);
+    const safeCurrent = {
+      ...current,
+      videoUrl: String(current.videoUrl || "").startsWith("blob:") ? "" : current.videoUrl
+    };
+    if (index >= 0) drafts[index] = { ...safeCurrent };
+    else drafts.unshift({ ...safeCurrent });
+    try {
+      saveLandingDrafts(drafts);
+    } catch (error) {
+      const stateEl = document.querySelector("#lpw-save-state");
+      if (stateEl) stateEl.textContent = "Draft too large — use hosted image URLs for permanent save";
+      return;
+    }
 
     const nextPath = landingBuilderRoute({ pageId: current.id });
     if (window.location.pathname !== nextPath) {
@@ -2810,24 +2954,56 @@ function initLandingPageWorkspace() {
     el?.addEventListener("change", renderPreview);
   });
 
-  document.querySelector("#lpb-image-file")?.addEventListener("change", (event) => {
-    const file = event.currentTarget.files?.[0];
-    if (!file) return;
+  document.querySelector("#lpb-image-files")?.addEventListener("change", async (event) => {
+    const files = [...(event.currentTarget.files || [])].slice(0, 8);
+    if (!files.length) return;
 
-    if (file.size > 1_500_000) {
+    const accepted = files.filter((file) => file.type.startsWith("image/") && file.size <= 1_500_000);
+    if (!accepted.length) {
       const status = document.querySelector("#lpw-save-state");
-      if (status) status.textContent = "Image too large for local preview";
+      if (status) status.textContent = "Use images under 1.5 MB each";
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      current.imageUrl = String(reader.result || "");
-      const imageUrlInput = document.querySelector("#lpb-image-url");
-      if (imageUrlInput) imageUrlInput.value = current.imageUrl;
-      renderPreview();
-    };
-    reader.readAsDataURL(file);
+    const readAsDataUrl = (file) => new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.readAsDataURL(file);
+    });
+
+    const dataUrls = await Promise.all(accepted.map(readAsDataUrl));
+    const existing = String(current.mediaGallery || "").split("\n").map((x) => x.trim()).filter(Boolean);
+    current.mediaGallery = [...existing, ...dataUrls].slice(0, 8).join("\n");
+
+    const galleryInput = document.querySelector("#lpb-media-gallery");
+    if (galleryInput) galleryInput.value = current.mediaGallery;
+    renderPreview();
+  });
+
+  document.querySelector("#lpb-video-file")?.addEventListener("change", (event) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("video/")) return;
+
+    if (file.size > 80_000_000) {
+      const status = document.querySelector("#lpw-save-state");
+      if (status) status.textContent = "Video too large for browser preview";
+      return;
+    }
+
+    if (window.__youyouLocalVideoUrl) URL.revokeObjectURL(window.__youyouLocalVideoUrl);
+    window.__youyouLocalVideoUrl = URL.createObjectURL(file);
+    current.videoUrl = window.__youyouLocalVideoUrl;
+    current.videoEnabled = "on";
+
+    const videoInput = document.querySelector("#lpb-video-url");
+    const enabledInput = document.querySelector("#lpb-video-enabled");
+    if (videoInput) videoInput.value = current.videoUrl;
+    if (enabledInput) enabledInput.value = "on";
+    renderPreview();
+
+    const status = document.querySelector("#lpw-save-state");
+    if (status) status.textContent = "Video loaded for local preview";
   });
 
   document.querySelectorAll("[data-lpb-palette]").forEach((button) => {

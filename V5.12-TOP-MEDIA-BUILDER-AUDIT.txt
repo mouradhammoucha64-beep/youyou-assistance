@@ -1,0 +1,21 @@
+YOUYOU V5.12 — TOP MEDIA BUILDER
+
+{
+  "base": "V5.11",
+  "video_separate_from_slider": true,
+  "video_url": true,
+  "video_upload": true,
+  "video_toggle": true,
+  "video_position_control": true,
+  "image_slider_images_only": true,
+  "multi_image_upload": true,
+  "image_url_list": true,
+  "slider_toggle": true,
+  "autoplay_toggle": true,
+  "speed_control": true,
+  "arrows_toggle": true,
+  "dots_toggle": true,
+  "slider_position_control": true,
+  "editor_full_length_kept": true,
+  "other_app_logic_changed": false
+}
