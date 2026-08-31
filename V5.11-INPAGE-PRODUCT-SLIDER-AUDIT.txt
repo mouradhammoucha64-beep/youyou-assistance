@@ -1,0 +1,17 @@
+YOUYOU V5.11 — IN-PAGE PRODUCT SLIDER
+
+{
+  "base": "V5.10 Premium Landing Slider",
+  "clarified_user_request": "slider inside the actual client/product landing page, not only template chooser",
+  "in_page_media_slider": true,
+  "slider_visible_by_default": true,
+  "default_demo_slides": 3,
+  "arrows_visible": true,
+  "dots_visible": true,
+  "supports_multiple_images_and_video_urls": true,
+  "editor_full_length": true,
+  "editor_no_internal_height_trap": true,
+  "preview_sticky_desktop": true,
+  "export_html_slider_styling": true,
+  "other_business_logic_changed": false
+}

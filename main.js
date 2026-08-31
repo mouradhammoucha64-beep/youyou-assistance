@@ -1984,16 +1984,61 @@ function landingMediaItemMarkup(url, label = "Landing page media") {
 
 function landingMediaMarkup(data) {
   const gallery = String(data.mediaGallery || "")
-    .split("\n").map((item) => item.trim()).filter(Boolean).slice(0, 8);
-  const manual = [data.videoUrl, data.imageUrl].map((item) => String(item || "").trim()).filter(Boolean);
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+
+  const manual = [data.imageUrl, data.videoUrl]
+    .map((item) => String(item || "").trim())
+    .filter(Boolean);
+
   const items = [...manual, ...gallery].filter((item, index, arr) => arr.indexOf(item) === index);
-  const fallback = landingTemplateDemoVisual(data.templateId);
-  const slides = (items.length ? items : [fallback])
+
+  let slides = items
     .map((url) => landingMediaItemMarkup(url, data.name || "Landing page visual"))
     .filter(Boolean);
-  return `<div class="lp-live-media ${slides.length > 1 ? "has-slider" : "is-demo"}">
-    <div class="lp-live-media-track">${slides.join("")}</div>
-    ${slides.length > 1 ? `<div class="lp-live-media-hint"><span>↔</span> Swipe / scroll media</div>` : (!items.length ? `<div class="lp-live-demo-note">DEMO VISUAL · replace it anytime</div>` : "")}
+
+  // Make the slider visually obvious even before the client uploads media.
+  if (!slides.length) {
+    const demo = landingTemplateDemoVisual(data.templateId);
+    slides = [
+      landingMediaItemMarkup(demo, `${data.name || "Landing page"} product image`),
+      `<div class="lp-live-media-slide lp-live-empty-slide">
+        <span class="lp-empty-icon">▧</span>
+        <strong>PRODUCT IMAGE 2</strong>
+        <small>Add another image URL or upload it in the editor.</small>
+      </div>`,
+      `<div class="lp-live-media-slide lp-live-empty-slide lp-live-video-slot">
+        <span class="lp-empty-icon">▶</span>
+        <strong>PRODUCT VIDEO</strong>
+        <small>Paste a YouTube, Vimeo or hosted video URL.</small>
+      </div>`
+    ].filter(Boolean);
+  }
+
+  const dotButtons = slides.map((_, index) =>
+    `<button type="button" class="${index === 0 ? "is-active" : ""}" aria-label="Show media ${index + 1}"
+      onclick="const t=this.closest('.lp-live-media').querySelector('.lp-live-media-track');t.scrollTo({left:t.clientWidth*${index},behavior:'smooth'});this.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('is-active',i===${index}));"></button>`
+  ).join("");
+
+  return `<div class="lp-live-media has-slider">
+    <div class="lp-live-media-track">
+      ${slides.join("")}
+    </div>
+
+    <button type="button" class="lp-live-slider-arrow prev" aria-label="Previous media"
+      onclick="const t=this.parentElement.querySelector('.lp-live-media-track');t.scrollBy({left:-t.clientWidth,behavior:'smooth'});">‹</button>
+
+    <button type="button" class="lp-live-slider-arrow next" aria-label="Next media"
+      onclick="const t=this.parentElement.querySelector('.lp-live-media-track');t.scrollBy({left:t.clientWidth,behavior:'smooth'});">›</button>
+
+    <div class="lp-live-slider-dots">${dotButtons}</div>
+
+    <div class="lp-live-media-hint">
+      <span>PRODUCT MEDIA</span>
+      <small>Images + video · swipe or use arrows</small>
+    </div>
   </div>`;
 }
 
@@ -2144,7 +2189,7 @@ function landingExportHtml(data) {
 .lp-live-page{--lp-accent:${data.accent};--lp-bg:${data.background};--lp-surface:${data.surface};--lp-text:${data.textColor};max-width:1180px;margin:auto;background:var(--lp-bg);color:var(--lp-text);min-height:100vh}
 .lp-live-nav,.lp-live-footer{display:flex;justify-content:space-between;padding:22px 5%;border-bottom:1px solid #ffffff14}
 .lp-live-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,var(--lp-media-width));gap:36px;padding:70px 5%;align-items:center}.media-left .lp-live-copy{order:2}.media-left .lp-live-media{order:1}.media-top .lp-live-hero,.media-bottom .lp-live-hero{grid-template-columns:1fr}.media-top .lp-live-media{order:-1}.media-bottom .lp-live-media{order:2}.lp-live-copy h1{font-size:56px;line-height:1.02;margin:18px 0}.lp-live-sub{font-size:18px;line-height:1.6;color:#b8bdc9}.lp-live-badge{padding:7px 10px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 16%,transparent);color:var(--lp-accent);font-weight:700;font-size:12px}.lp-live-price{display:flex;gap:12px;align-items:baseline;margin:24px 0}.lp-live-price strong{font-size:34px}.lp-live-price del{opacity:.45}.lp-live-actions{display:flex;gap:10px;flex-wrap:wrap}.lp-live-actions a{padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:700}.lp-live-primary{background:var(--lp-accent);color:#080808}.lp-live-secondary{border:1px solid #ffffff25;color:var(--lp-text)}.lp-live-media{min-height:var(--lp-media-height);border-radius:24px;background:var(--lp-surface);overflow:hidden;position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:var(--lp-media-height);scrollbar-width:thin}.lp-live-media-slide{min-width:100%;height:100%;scroll-snap-align:start}.lp-live-media img,.lp-live-media video,.lp-live-media iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}.lp-live-media-hint,.lp-live-demo-note{position:absolute;left:14px;bottom:14px;padding:7px 10px;border-radius:999px;background:#0009;color:#fff;font-size:11px}.lp-live-section{padding:55px 5%;border-top:1px solid #ffffff10}.lp-live-section>small{color:var(--lp-accent);font-weight:800}.lp-live-section h2{font-size:34px;max-width:780px}.lp-live-extra-copy{max-width:850px;font-size:18px;line-height:1.75}.lp-live-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.lp-live-benefit-grid div{padding:20px;background:var(--lp-surface);border-radius:14px}.lp-live-benefit-grid span{display:block;color:var(--lp-accent);font-size:12px;margin-bottom:10px}.lp-live-proof blockquote{font-size:28px;max-width:780px;margin:20px 0}.lp-live-contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}.lp-live-contact form{display:grid;gap:10px}.lp-live-contact input,.lp-live-contact textarea{width:100%;padding:13px;border:1px solid #ffffff18;border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-live-contact button{padding:14px;border:0;border-radius:9px;background:var(--lp-accent);font-weight:800}
-.lp-live-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;font-size:12px;opacity:.65}.lp-live-footer{border-top:1px solid #ffffff14;border-bottom:0}
+.lp-live-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;font-size:12px;opacity:.65}.lp-live-footer{border-top:1px solid #ffffff14;border-bottom:0}.lp-live-media{position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}.lp-live-media-track::-webkit-scrollbar{display:none}.lp-live-media-slide{position:relative;flex:0 0 100%;min-width:100%;height:100%;scroll-snap-align:start}.lp-live-empty-slide{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:28px;text-align:center}.lp-empty-icon{font-size:28px}.lp-live-slider-arrow{position:absolute;z-index:8;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid #ffffff4a;background:#080c16aa;color:#fff;font-size:27px;cursor:pointer}.lp-live-slider-arrow.prev{left:14px}.lp-live-slider-arrow.next{right:14px}.lp-live-slider-dots{position:absolute;z-index:9;left:50%;bottom:17px;transform:translateX(-50%);display:flex;gap:7px;padding:7px 10px;border-radius:999px;background:#080c1690}.lp-live-slider-dots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#ffffff7a}.lp-live-slider-dots button.is-active{width:22px;background:var(--lp-accent)}.lp-live-media-hint{position:absolute;z-index:7;left:16px;top:16px;bottom:auto;background:#080c16a3;color:#fff;padding:8px 10px;border-radius:10px;display:flex;flex-direction:column}.lp-live-media-hint span{font-size:8px;font-weight:800}.lp-live-media-hint small{font-size:7px;opacity:.7}
 @media(max-width:760px){.lp-live-hero,.lp-live-contact{grid-template-columns:1fr}.media-left .lp-live-copy,.media-left .lp-live-media{order:initial}.lp-live-copy h1{font-size:38px}.lp-live-benefit-grid{grid-template-columns:1fr}.lp-live-media-track{height:min(var(--lp-media-height),360px)}}
 </style>
 </head>
@@ -2578,7 +2623,10 @@ function renderLandingPageWorkspace() {
             <small>MEDIA · IMAGE / VIDEO / SLIDER</small>
             <label>Image URL<input id="lpb-image-url" type="text" inputmode="url" placeholder="https://..." /></label>
             <label>Video URL<input id="lpb-video-url" type="text" inputmode="url" placeholder="YouTube / Vimeo / .mp4" /></label>
-            <label>Media slider <span>One image or video URL per line · up to 8</span><textarea id="lpb-media-gallery" rows="4" placeholder="https://...image.jpg\nhttps://youtu.be/...\nhttps://...video.mp4"></textarea></label>
+            <label>Product media slider <span>One image or video URL per line · up to 8</span>
+              <textarea id="lpb-media-gallery" rows="7" placeholder="IMAGE 1: https://...product-front.jpg&#10;IMAGE 2: https://...product-side.jpg&#10;IMAGE 3: https://...product-detail.jpg&#10;VIDEO: https://youtu.be/..."></textarea>
+            </label>
+            <p class="lpb-media-help lpb-media-help-strong">The slider is part of the customer landing page itself. Add several product images and/or one video here; arrows and dots stay visible in the page preview.</p>
             <div class="lpb-two">
               <label>Media position
                 <select id="lpb-media-position"><option value="right">Right</option><option value="left">Left</option><option value="top">Top / full width</option><option value="bottom">Below text / full width</option></select>
