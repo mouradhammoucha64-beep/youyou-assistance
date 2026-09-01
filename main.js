@@ -1983,6 +1983,8 @@ function landingMediaItemMarkup(url, label = "Landing page media") {
 }
 
 function landingImageSliderMarkup(data) {
+  if (data.sliderEnabled === "off") return "";
+
   const urls = [
     String(data.imageUrl || "").trim(),
     ...String(data.mediaGallery || "").split("\n").map((item) => item.trim())
@@ -1990,43 +1992,35 @@ function landingImageSliderMarkup(data) {
 
   const images = urls.filter((url) => !landingVideoSource(url));
 
-  let slides = images
-    .map((url) => `<div class="lp-image-slide"><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")}" loading="lazy" /></div>`)
-    .filter(Boolean);
+  // Public/preview pages must never leak builder controls. With no real image,
+  // show one polished sample visual only; arrows/dots appear only for 2+ images.
+  const hasRealImages = images.length > 0;
+  const visualUrls = hasRealImages ? images : [landingTemplateDemoVisual(data.templateId)];
+  const slides = visualUrls.map((url) => `<div class="lp-image-slide${hasRealImages ? "" : " is-demo"}"><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")}" loading="lazy" />${hasRealImages ? "" : '<span class="lp-gallery-demo-note">SAMPLE VISUAL · ADD IMAGES IN BUILDER</span>'}</div>`);
+  const interactive = slides.length > 1;
 
-  if (!slides.length) {
-    const demo = landingTemplateDemoVisual(data.templateId);
-    slides = [
-      `<div class="lp-image-slide"><img src="${escapeHtml(demo)}" alt="Demo product image" /></div>`,
-      `<div class="lp-image-slide lp-image-empty"><span>▧</span><strong>ADD IMAGE</strong><small>Your second product image appears here.</small></div>`,
-      `<div class="lp-image-slide lp-image-empty"><span>＋</span><strong>ADD MORE IMAGES</strong><small>Up to 8 images for this product slider.</small></div>`
-    ];
-  }
-
-  if (data.sliderEnabled === "off") return "";
-
-  const arrows = data.sliderArrows !== "off"
+  const arrows = interactive && data.sliderArrows !== "off"
     ? `<button type="button" class="lp-image-arrow prev" aria-label="Previous image"
          onclick="const t=this.parentElement.querySelector('.lp-image-track');t.scrollBy({left:-t.clientWidth,behavior:'smooth'});">‹</button>
        <button type="button" class="lp-image-arrow next" aria-label="Next image"
          onclick="const t=this.parentElement.querySelector('.lp-image-track');t.scrollBy({left:t.clientWidth,behavior:'smooth'});">›</button>`
     : "";
 
-  const dots = data.sliderDots !== "off"
+  const dots = interactive && data.sliderDots !== "off"
     ? `<div class="lp-image-dots">${slides.map((_, index) =>
         `<button type="button" class="${index === 0 ? "is-active" : ""}" aria-label="Show image ${index + 1}"
           onclick="const t=this.closest('.lp-image-slider').querySelector('.lp-image-track');t.scrollTo({left:t.clientWidth*${index},behavior:'smooth'});this.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('is-active',i===${index}));"></button>`
       ).join("")}</div>`
     : "";
 
-  const autoplay = data.sliderAutoplay !== "off" && slides.length > 1
+  const autoplay = interactive && data.sliderAutoplay !== "off"
     ? `data-autoplay="true" data-speed="${Math.max(2000, Math.min(9000, Number(data.sliderSpeed) || 4000))}"`
     : "";
 
-  return `<section class="lp-live-section lp-product-gallery" data-block="image-slider">
+  return `<section class="lp-live-section lp-product-gallery${hasRealImages ? "" : " is-demo-gallery"}" data-block="image-slider">
     <div class="lp-block-head">
       <div><small>PRODUCT GALLERY</small><h2>${escapeHtml(data.sliderTitle || "See it from every angle.")}</h2></div>
-      <span>${slides.length} IMAGES</span>
+      <span>${hasRealImages ? `${slides.length} IMAGE${slides.length > 1 ? "S" : ""}` : "ADD YOUR IMAGES"}</span>
     </div>
     <div class="lp-image-slider" ${autoplay}>
       <div class="lp-image-track">${slides.join("")}</div>
@@ -2050,10 +2044,10 @@ function landingVideoBlockMarkup(data) {
   } else if (raw.startsWith("blob:") || raw.startsWith("data:video/")) {
     media = `<video src="${escapeHtml(raw)}" controls playsinline preload="metadata"></video>`;
   } else {
-    media = `<div class="lp-video-empty"><span>▶</span><strong>ADD YOUR PRODUCT VIDEO</strong><small>Upload a video or paste YouTube / Vimeo / hosted URL.</small></div>`;
+    media = `<div class="lp-video-empty"><span>▶</span><strong>VIDEO SPACE READY</strong><small>Add a video in the builder to show it here.</small></div>`;
   }
 
-  return `<section class="lp-live-section lp-product-video" data-block="video">
+  return `<section class="lp-live-section lp-product-video${raw ? "" : " is-empty-video"}" data-block="video">
     <div class="lp-block-head">
       <div><small>PRODUCT VIDEO · OPTIONAL</small><h2>${escapeHtml(data.videoTitle || "Show how it works.")}</h2></div>
       <span>${raw ? "VIDEO READY" : "ADD VIDEO"}</span>
@@ -2091,10 +2085,10 @@ function defaultLandingPageData(templateId = "product-launch") {
     imageUrl: "",
     videoUrl: "",
     mediaGallery: "",
-    videoEnabled: "on",
+    videoEnabled: "off",
     videoTitle: "See the product in action.",
     videoPosition: "after-hero",
-    sliderEnabled: "on",
+    sliderEnabled: "off",
     sliderTitle: "See it from every angle.",
     sliderPosition: "after-video",
     sliderAutoplay: "on",
@@ -2343,6 +2337,7 @@ function landingExportHtml(data) {
 .lp-live-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,var(--lp-media-width));gap:36px;padding:70px 5%;align-items:center}.media-left .lp-live-copy{order:2}.media-left .lp-live-media{order:1}.media-top .lp-live-hero,.media-bottom .lp-live-hero{grid-template-columns:1fr}.media-top .lp-live-media{order:-1}.media-bottom .lp-live-media{order:2}.lp-live-copy h1{font-size:56px;line-height:1.02;margin:18px 0}.lp-live-sub{font-size:18px;line-height:1.6;color:#b8bdc9}.lp-live-badge{padding:7px 10px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 16%,transparent);color:var(--lp-accent);font-weight:700;font-size:12px}.lp-live-price{display:flex;gap:12px;align-items:baseline;margin:24px 0}.lp-live-price strong{font-size:34px}.lp-live-price del{opacity:.45}.lp-live-actions{display:flex;gap:10px;flex-wrap:wrap}.lp-live-actions a{padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:700}.lp-live-primary{background:var(--lp-accent);color:#080808}.lp-live-secondary{border:1px solid #ffffff25;color:var(--lp-text)}.lp-live-media{min-height:var(--lp-media-height);border-radius:24px;background:var(--lp-surface);overflow:hidden;position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:var(--lp-media-height);scrollbar-width:thin}.lp-live-media-slide{min-width:100%;height:100%;scroll-snap-align:start}.lp-live-media img,.lp-live-media video,.lp-live-media iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}.lp-live-media-hint,.lp-live-demo-note{position:absolute;left:14px;bottom:14px;padding:7px 10px;border-radius:999px;background:#0009;color:#fff;font-size:11px}.lp-live-section{padding:55px 5%;border-top:1px solid #ffffff10}.lp-live-section>small{color:var(--lp-accent);font-weight:800}.lp-live-section h2{font-size:34px;max-width:780px}.lp-live-extra-copy{max-width:850px;font-size:18px;line-height:1.75}.lp-live-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.lp-live-benefit-grid div{padding:20px;background:var(--lp-surface);border-radius:14px}.lp-live-benefit-grid span{display:block;color:var(--lp-accent);font-size:12px;margin-bottom:10px}.lp-live-proof blockquote{font-size:28px;max-width:780px;margin:20px 0}.lp-live-contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}.lp-live-contact form{display:grid;gap:10px}.lp-live-contact input,.lp-live-contact textarea{width:100%;padding:13px;border:1px solid #ffffff18;border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-live-contact button{padding:14px;border:0;border-radius:9px;background:var(--lp-accent);font-weight:800}
 .lp-live-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;font-size:12px;opacity:.65}.lp-live-footer{border-top:1px solid #ffffff14;border-bottom:0}.lp-live-media{position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}.lp-live-media-track::-webkit-scrollbar{display:none}.lp-live-media-slide{position:relative;flex:0 0 100%;min-width:100%;height:100%;scroll-snap-align:start}.lp-live-empty-slide{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:28px;text-align:center}.lp-empty-icon{font-size:28px}.lp-live-slider-arrow{position:absolute;z-index:8;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid #ffffff4a;background:#080c16aa;color:#fff;font-size:27px;cursor:pointer}.lp-live-slider-arrow.prev{left:14px}.lp-live-slider-arrow.next{right:14px}.lp-live-slider-dots{position:absolute;z-index:9;left:50%;bottom:17px;transform:translateX(-50%);display:flex;gap:7px;padding:7px 10px;border-radius:999px;background:#080c1690}.lp-live-slider-dots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#ffffff7a}.lp-live-slider-dots button.is-active{width:22px;background:var(--lp-accent)}.lp-live-media-hint{position:absolute;z-index:7;left:16px;top:16px;bottom:auto;background:#080c16a3;color:#fff;padding:8px 10px;border-radius:10px;display:flex;flex-direction:column}.lp-live-media-hint span{font-size:8px;font-weight:800}.lp-live-media-hint small{font-size:7px;opacity:.7}
 @media(max-width:760px){.lp-live-hero,.lp-live-contact{grid-template-columns:1fr}.media-left .lp-live-copy,.media-left .lp-live-media{order:initial}.lp-live-copy h1{font-size:38px}.lp-live-benefit-grid{grid-template-columns:1fr}.lp-live-media-track{height:min(var(--lp-media-height),360px)}}
+html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hidden}.lp-product-video,.lp-product-gallery{padding-top:56px;padding-bottom:56px}.lp-video-frame{width:100%;aspect-ratio:16/9;min-height:0;border-radius:22px;overflow:hidden;background:var(--lp-surface)}.lp-video-frame iframe,.lp-video-frame video{width:100%;height:100%;aspect-ratio:16/9;display:block;object-fit:cover}.lp-video-empty{min-height:260px}.lp-image-slider{width:100%;overflow:hidden;border-radius:22px}.lp-image-track{width:100%;overflow-x:auto}.lp-image-slide{flex:0 0 100%;width:100%;min-width:100%;height:clamp(320px,52vw,620px);min-height:0}.lp-image-slide img{width:100%;height:100%;min-height:0;object-fit:cover}.lp-gallery-demo-note{position:absolute;left:16px;bottom:16px;padding:7px 10px;border-radius:999px;background:#080c16bf;color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em}.is-empty-video .lp-block-head>span{opacity:.6}@media(max-width:760px){.lp-video-frame{aspect-ratio:16/9}.lp-video-empty{min-height:210px}.lp-image-slide{height:300px}.lp-block-head{align-items:flex-start;flex-direction:column;gap:10px}}
 .lp-hero-media-card{position:relative;min-height:var(--lp-media-height);border-radius:24px;overflow:hidden;box-shadow:0 30px 70px #0003}.lp-hero-media-card>img{width:100%;height:var(--lp-media-height);object-fit:cover}.lp-hero-float{position:absolute;padding:10px 12px;border-radius:14px;background:#090b12d9;color:#fff;border:1px solid #ffffff22;display:flex;flex-direction:column}.lp-hero-float-top{right:16px;top:16px}.lp-hero-float-bottom{left:16px;bottom:16px}.lp-ai-widget{position:fixed;z-index:50;bottom:24px}.lp-ai-widget.is-right{right:24px}.lp-ai-widget.is-left{left:24px}.lp-ai-launcher{width:58px;height:58px;border:0;border-radius:50%;background:var(--lp-accent);color:#fff;box-shadow:0 18px 44px #0005;font-weight:900}.lp-ai-panel{position:absolute;bottom:70px;width:330px;background:#0b0d14f5;color:#fff;border:1px solid #ffffff20;border-radius:20px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s}.is-right .lp-ai-panel{right:0}.is-left .lp-ai-panel{left:0}.lp-ai-widget.is-open .lp-ai-panel{opacity:1;pointer-events:auto;transform:none}.lp-ai-head{display:flex;justify-content:space-between;padding:14px;border-bottom:1px solid #ffffff12}.lp-ai-head>div{display:flex;gap:8px}.lp-ai-head p{margin:0}.lp-ai-head small{display:block;opacity:.6}.lp-ai-context,.lp-ai-powered{padding:8px 14px;font-size:10px;opacity:.7}.lp-ai-messages{padding:14px;display:flex;flex-direction:column;gap:8px;max-height:280px;overflow:auto}.lp-ai-msg{padding:9px 11px;border-radius:13px;max-width:85%;font-size:12px}.lp-ai-msg.bot{background:#ffffff10}.lp-ai-msg.user{align-self:flex-end;background:var(--lp-accent)}.lp-ai-suggestions{display:flex;gap:6px;flex-wrap:wrap}.lp-ai-suggestions button{border:1px solid #ffffff18;background:#ffffff08;color:#fff;border-radius:999px;padding:6px 8px}.lp-ai-form{display:flex;gap:7px;padding:12px;border-top:1px solid #ffffff12}.lp-ai-form input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid #ffffff18;background:#ffffff09;color:#fff}.lp-ai-form button{width:38px;border:0;border-radius:10px;background:var(--lp-accent);color:#fff}
 </style>
 </head>

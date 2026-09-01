@@ -1,0 +1,14 @@
+YOUYOU V6.3 — CLEAN MEDIA + PAGE-AWARE WIDGET
+
+FIXED
+- Video and image slider are optional by default on new landing pages.
+- Empty slider no longer exports ADD IMAGE / ADD MORE IMAGES builder cards.
+- If slider is enabled without images, one polished sample visual is shown; no fake arrows/dots.
+- Slider arrows/dots/autoplay appear only when 2+ real images exist.
+- Video frame constrained to responsive 16:9 and no longer creates oversized/broken layout.
+- Horizontal overflow hardened in preview/export.
+- Existing page-aware widget retained.
+
+NEXT
+- Real Publish backend + unique public URL per landing page.
+- Real OpenAI responses can later replace the local page-context responder.
