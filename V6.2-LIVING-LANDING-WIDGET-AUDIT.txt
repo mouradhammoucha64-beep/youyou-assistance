@@ -1,0 +1,29 @@
+YOUYOU V6.2 — LIVING LANDING TEMPLATES + PAGE-AWARE WIDGET
+Date: 2026-09-01
+
+Implemented:
+- Added a real visual/media card inside the landing-page hero. Previously the builder had media systems but the hero itself rendered copy only.
+- Added template-aware trust/status chips and floating offer cards to make templates feel more alive.
+- Added subtle glow, depth, hover motion and stronger conversion visual hierarchy.
+- Added AI PAGE WIDGET controls in the landing-page builder:
+  * Enable / hide
+  * Assistant name
+  * Welcome message
+  * Bottom-left / bottom-right position
+- Added a page-aware chat widget to each landing-page preview.
+- The widget currently works without a paid AI API and answers common questions from the CURRENT landing-page DOM/content:
+  * price / cost
+  * benefits / features
+  * how to start / CTA
+  * FAQ
+  * general page/offer context
+- The same page-aware widget logic is included in exported standalone HTML.
+- The current local page-context responder is deliberately structured so a real OpenAI backend can replace the reply engine later while keeping the same widget UI/context flow.
+
+Important:
+- This is NOT a real LLM/OpenAI integration yet. It is a working local page-aware preview/responder so the product flow can be tested without API billing.
+- Public publish/backend URL generation remains separate work.
+
+Validation:
+- `node --check main.js` passed.
+- Full Vite build could not be completed in this environment because dependencies were not installed and npm install exceeded the available execution window.

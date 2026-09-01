@@ -2116,6 +2116,10 @@ function defaultLandingPageData(templateId = "product-launch") {
     testimonial: "Add a short customer quote or trust statement here.",
     faqQuestion: "What should customers know before getting started?",
     faqAnswer: "Add a concise answer that removes hesitation and makes the next step easier.",
+    widgetEnabled: "on",
+    widgetGreeting: "Hi! Ask me anything about this page.",
+    widgetPosition: "right",
+    widgetName: "YOUYOU Assistant",
     createdAt: new Date().toISOString(),
     status: "Draft",
   };
@@ -2147,6 +2151,89 @@ function landingCtaHref(data) {
   return "#contact";
 }
 
+
+function landingTemplateExperience(data) {
+  const template = landingTemplateById(data.templateId);
+  const category = String(template?.category || data.pageType || "Offer");
+  const map = {
+    "Hospitality": ["★ 4.9 guest favorite", "Open today", "Instant booking"],
+    "Beauty & Wellness": ["★ 4.9 client rating", "Popular this week", "Easy booking"],
+    "Health": ["Trusted care", "Appointments available", "Fast confirmation"],
+    "Real Estate": ["Verified listing", "Viewing available", "Local expertise"],
+    "Digital": ["Built for growth", "Fast setup", "Demo ready"],
+    "Campaign": ["Limited campaign", "Mobile first", "Direct response"],
+    "Service": ["Local & trusted", "Fast response", "Quote ready"],
+    "Product": ["Featured product", "Secure checkout ready", "Fast delivery ready"]
+  };
+  return map[category] || ["Trusted offer", "Fast response", "Easy next step"];
+}
+
+function landingHeroMediaMarkup(data) {
+  const media = String(data.imageUrl || "").trim() || landingTemplateDemoVisual(data.templateId);
+  const exp = landingTemplateExperience(data);
+  return `<div class="lp-live-media lp-hero-media-card">
+    <div class="lp-hero-glow"></div>
+    <img src="${escapeHtml(media)}" alt="${escapeHtml(data.name || "Offer visual")}" loading="lazy" />
+    <div class="lp-hero-float lp-hero-float-top"><span>LIVE OFFER</span><strong>${escapeHtml(data.badge || "FEATURED")}</strong></div>
+    <div class="lp-hero-float lp-hero-float-bottom"><strong>${escapeHtml(exp[0])}</strong><small>${escapeHtml(exp[1])} · ${escapeHtml(exp[2])}</small></div>
+  </div>`;
+}
+
+function landingWidgetMarkup(data) {
+  if (data.widgetEnabled === "off") return "";
+  const pos = data.widgetPosition === "left" ? "left" : "right";
+  return `<div class="lp-ai-widget is-${pos}" data-lp-widget>
+    <button class="lp-ai-launcher" type="button" aria-label="Open AI assistant" onclick="const w=this.closest('[data-lp-widget]');w.classList.toggle('is-open')"><span>✦</span><b>AI</b></button>
+    <div class="lp-ai-panel">
+      <div class="lp-ai-head"><div><span>✦</span><p><strong>${escapeHtml(data.widgetName || "YOUYOU Assistant")}</strong><small>Understands this page</small></p></div><button type="button" onclick="this.closest('[data-lp-widget]').classList.remove('is-open')">×</button></div>
+      <div class="lp-ai-context"><span></span> Page content connected</div>
+      <div class="lp-ai-messages" data-lp-widget-messages>
+        <div class="lp-ai-msg bot">${escapeHtml(data.widgetGreeting || "Hi! Ask me anything about this page.")}</div>
+        <div class="lp-ai-suggestions">
+          <button type="button" onclick="window.youyouLandingAsk(this,'What is the price?')">Price?</button>
+          <button type="button" onclick="window.youyouLandingAsk(this,'What are the benefits?')">Benefits?</button>
+          <button type="button" onclick="window.youyouLandingAsk(this,'How can I get started?')">Get started</button>
+        </div>
+      </div>
+      <form class="lp-ai-form" onsubmit="window.youyouLandingAsk(this.querySelector('button'),this.querySelector('input').value);this.querySelector('input').value='';return false">
+        <input aria-label="Ask about this page" placeholder="Ask about this offer..." />
+        <button type="submit">➜</button>
+      </form>
+      <small class="lp-ai-powered">Page-aware preview · AI API ready</small>
+    </div>
+  </div>`;
+}
+
+window.youyouLandingAsk = function(source, forcedQuestion = "") {
+  const widget = source?.closest?.('[data-lp-widget]');
+  const page = source?.closest?.('.lp-live-page');
+  if (!widget || !page) return;
+  widget.classList.add('is-open');
+  const input = widget.querySelector('.lp-ai-form input');
+  const q = String(forcedQuestion || input?.value || '').trim();
+  if (!q) return;
+  const messages = widget.querySelector('[data-lp-widget-messages]');
+  const add = (cls, text) => { const d=document.createElement('div'); d.className=`lp-ai-msg ${cls}`; d.textContent=text; messages.appendChild(d); messages.scrollTop=messages.scrollHeight; };
+  add('user', q);
+  const text = page.innerText || '';
+  const price = page.querySelector('.lp-live-price strong')?.textContent?.trim();
+  const quote = page.querySelector('.lp-live-price.quote')?.textContent?.trim();
+  const benefits = [...page.querySelectorAll('.lp-live-benefit-grid strong')].map(x=>x.textContent.trim()).filter(Boolean);
+  const faqQ = page.querySelector('.lp-live-faq h3')?.textContent?.trim();
+  const faqA = page.querySelector('.lp-live-faq p')?.textContent?.trim();
+  const cta = page.querySelector('.lp-live-primary')?.textContent?.trim();
+  const sub = page.querySelector('.lp-live-sub')?.textContent?.trim();
+  const lower = q.toLowerCase();
+  let answer = '';
+  if (/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(lower)) answer = price ? `The current price shown on this page is ${price}.` : (quote || 'This page asks visitors to contact the business for pricing.');
+  else if (/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(lower)) answer = benefits.length ? `Main benefits: ${benefits.join(' · ')}.` : (sub || 'The key value is explained directly on this page.');
+  else if (/start|book|buy|order|contact|reserve|appointment|حجز|نتاصل|نطلب/.test(lower)) answer = cta ? `The next step is “${cta}”. You can use the main button on this page to continue.` : 'Use the main call-to-action on this page to continue.';
+  else if (faqQ && faqA && (lower.includes('faq') || lower.includes(faqQ.toLowerCase().slice(0,18)))) answer = faqA;
+  else if (/what|offer|service|product|شنو|quoi|c'est/.test(lower)) answer = sub || `This page is about: ${text.slice(0,180)}...`;
+  else answer = `Based on this page: ${sub || text.slice(0,180)}${(sub||text).length>180?'…':''}`;
+  setTimeout(()=>add('bot', answer), 180);
+};
+
 function landingPreviewMarkup(data, compact = false) {
   const benefits = String(data.benefits || "")
     .split("\n")
@@ -2174,8 +2261,9 @@ function landingPreviewMarkup(data, compact = false) {
             <a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>
             ${data.whatsapp ? `<a href="https://wa.me/${String(data.whatsapp).replace(/\D/g, "")}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}
           </div>
-          <div class="lp-live-trust"><span>✓ Clear offer</span><span>✓ Direct response</span><span>✓ Mobile ready</span></div>
+          <div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>✓ ${escapeHtml(item)}</span>`).join("")}</div>
         </div>
+        ${landingHeroMediaMarkup(data)}
       </section>`;
 
   const benefitsSection = `<section class="lp-live-section lp-live-benefits">
@@ -2236,6 +2324,7 @@ function landingPreviewMarkup(data, compact = false) {
       <nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>
       ${bodySections.join("")}
       <footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Landing page preview · Powered by YOUYOU</span></footer>
+      ${landingWidgetMarkup(data)}
     </article>`;
 }
 
@@ -2254,9 +2343,12 @@ function landingExportHtml(data) {
 .lp-live-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,var(--lp-media-width));gap:36px;padding:70px 5%;align-items:center}.media-left .lp-live-copy{order:2}.media-left .lp-live-media{order:1}.media-top .lp-live-hero,.media-bottom .lp-live-hero{grid-template-columns:1fr}.media-top .lp-live-media{order:-1}.media-bottom .lp-live-media{order:2}.lp-live-copy h1{font-size:56px;line-height:1.02;margin:18px 0}.lp-live-sub{font-size:18px;line-height:1.6;color:#b8bdc9}.lp-live-badge{padding:7px 10px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 16%,transparent);color:var(--lp-accent);font-weight:700;font-size:12px}.lp-live-price{display:flex;gap:12px;align-items:baseline;margin:24px 0}.lp-live-price strong{font-size:34px}.lp-live-price del{opacity:.45}.lp-live-actions{display:flex;gap:10px;flex-wrap:wrap}.lp-live-actions a{padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:700}.lp-live-primary{background:var(--lp-accent);color:#080808}.lp-live-secondary{border:1px solid #ffffff25;color:var(--lp-text)}.lp-live-media{min-height:var(--lp-media-height);border-radius:24px;background:var(--lp-surface);overflow:hidden;position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:var(--lp-media-height);scrollbar-width:thin}.lp-live-media-slide{min-width:100%;height:100%;scroll-snap-align:start}.lp-live-media img,.lp-live-media video,.lp-live-media iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}.lp-live-media-hint,.lp-live-demo-note{position:absolute;left:14px;bottom:14px;padding:7px 10px;border-radius:999px;background:#0009;color:#fff;font-size:11px}.lp-live-section{padding:55px 5%;border-top:1px solid #ffffff10}.lp-live-section>small{color:var(--lp-accent);font-weight:800}.lp-live-section h2{font-size:34px;max-width:780px}.lp-live-extra-copy{max-width:850px;font-size:18px;line-height:1.75}.lp-live-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.lp-live-benefit-grid div{padding:20px;background:var(--lp-surface);border-radius:14px}.lp-live-benefit-grid span{display:block;color:var(--lp-accent);font-size:12px;margin-bottom:10px}.lp-live-proof blockquote{font-size:28px;max-width:780px;margin:20px 0}.lp-live-contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}.lp-live-contact form{display:grid;gap:10px}.lp-live-contact input,.lp-live-contact textarea{width:100%;padding:13px;border:1px solid #ffffff18;border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-live-contact button{padding:14px;border:0;border-radius:9px;background:var(--lp-accent);font-weight:800}
 .lp-live-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;font-size:12px;opacity:.65}.lp-live-footer{border-top:1px solid #ffffff14;border-bottom:0}.lp-live-media{position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}.lp-live-media-track::-webkit-scrollbar{display:none}.lp-live-media-slide{position:relative;flex:0 0 100%;min-width:100%;height:100%;scroll-snap-align:start}.lp-live-empty-slide{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:28px;text-align:center}.lp-empty-icon{font-size:28px}.lp-live-slider-arrow{position:absolute;z-index:8;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid #ffffff4a;background:#080c16aa;color:#fff;font-size:27px;cursor:pointer}.lp-live-slider-arrow.prev{left:14px}.lp-live-slider-arrow.next{right:14px}.lp-live-slider-dots{position:absolute;z-index:9;left:50%;bottom:17px;transform:translateX(-50%);display:flex;gap:7px;padding:7px 10px;border-radius:999px;background:#080c1690}.lp-live-slider-dots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#ffffff7a}.lp-live-slider-dots button.is-active{width:22px;background:var(--lp-accent)}.lp-live-media-hint{position:absolute;z-index:7;left:16px;top:16px;bottom:auto;background:#080c16a3;color:#fff;padding:8px 10px;border-radius:10px;display:flex;flex-direction:column}.lp-live-media-hint span{font-size:8px;font-weight:800}.lp-live-media-hint small{font-size:7px;opacity:.7}
 @media(max-width:760px){.lp-live-hero,.lp-live-contact{grid-template-columns:1fr}.media-left .lp-live-copy,.media-left .lp-live-media{order:initial}.lp-live-copy h1{font-size:38px}.lp-live-benefit-grid{grid-template-columns:1fr}.lp-live-media-track{height:min(var(--lp-media-height),360px)}}
+.lp-hero-media-card{position:relative;min-height:var(--lp-media-height);border-radius:24px;overflow:hidden;box-shadow:0 30px 70px #0003}.lp-hero-media-card>img{width:100%;height:var(--lp-media-height);object-fit:cover}.lp-hero-float{position:absolute;padding:10px 12px;border-radius:14px;background:#090b12d9;color:#fff;border:1px solid #ffffff22;display:flex;flex-direction:column}.lp-hero-float-top{right:16px;top:16px}.lp-hero-float-bottom{left:16px;bottom:16px}.lp-ai-widget{position:fixed;z-index:50;bottom:24px}.lp-ai-widget.is-right{right:24px}.lp-ai-widget.is-left{left:24px}.lp-ai-launcher{width:58px;height:58px;border:0;border-radius:50%;background:var(--lp-accent);color:#fff;box-shadow:0 18px 44px #0005;font-weight:900}.lp-ai-panel{position:absolute;bottom:70px;width:330px;background:#0b0d14f5;color:#fff;border:1px solid #ffffff20;border-radius:20px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s}.is-right .lp-ai-panel{right:0}.is-left .lp-ai-panel{left:0}.lp-ai-widget.is-open .lp-ai-panel{opacity:1;pointer-events:auto;transform:none}.lp-ai-head{display:flex;justify-content:space-between;padding:14px;border-bottom:1px solid #ffffff12}.lp-ai-head>div{display:flex;gap:8px}.lp-ai-head p{margin:0}.lp-ai-head small{display:block;opacity:.6}.lp-ai-context,.lp-ai-powered{padding:8px 14px;font-size:10px;opacity:.7}.lp-ai-messages{padding:14px;display:flex;flex-direction:column;gap:8px;max-height:280px;overflow:auto}.lp-ai-msg{padding:9px 11px;border-radius:13px;max-width:85%;font-size:12px}.lp-ai-msg.bot{background:#ffffff10}.lp-ai-msg.user{align-self:flex-end;background:var(--lp-accent)}.lp-ai-suggestions{display:flex;gap:6px;flex-wrap:wrap}.lp-ai-suggestions button{border:1px solid #ffffff18;background:#ffffff08;color:#fff;border-radius:999px;padding:6px 8px}.lp-ai-form{display:flex;gap:7px;padding:12px;border-top:1px solid #ffffff12}.lp-ai-form input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid #ffffff18;background:#ffffff09;color:#fff}.lp-ai-form button{width:38px;border:0;border-radius:10px;background:var(--lp-accent);color:#fff}
 </style>
 </head>
-<body>${body}</body>
+<body>${body}<script>
+window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=p.querySelector('.lp-live-sub')?.textContent?.trim(),faq=p.querySelector('.lp-live-faq p')?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
+</script></body>
 </html>`;
 }
 
@@ -2783,6 +2875,18 @@ function renderLandingPageWorkspace() {
             </div>
           </div>
 
+          <div class="lpb-editor-section lpb-widget-editor">
+            <small>AI PAGE WIDGET</small>
+            <div class="lpb-media-toggle-row">
+              <div><strong>Page-aware chat</strong><span>Reads this landing page content and answers visitor questions.</span></div>
+              <select id="lpb-widget-enabled"><option value="on">Enabled</option><option value="off">Hidden</option></select>
+            </div>
+            <label>Assistant name<input id="lpb-widget-name" placeholder="YOUYOU Assistant" /></label>
+            <label>Welcome message<input id="lpb-widget-greeting" placeholder="Hi! Ask me anything about this page." /></label>
+            <label>Position<select id="lpb-widget-position"><option value="right">Bottom right</option><option value="left">Bottom left</option></select></label>
+            <p class="lpb-media-help lpb-media-help-strong">Works now as a page-context preview without a paid AI API. Later, OpenAI can replace the local responder while keeping the same widget and page context.</p>
+          </div>
+
           <div class="lpb-editor-section">
             <small>TRUST & FAQ</small>
             <label>Testimonial<textarea id="lpb-testimonial" rows="3"></textarea></label>
@@ -2847,6 +2951,7 @@ function initLandingPageWorkspace() {
     accent:"lpb-accent", background:"lpb-background", surface:"lpb-surface",
     textColor:"lpb-text-color", testimonial:"lpb-testimonial",
     faqQuestion:"lpb-faq-q", faqAnswer:"lpb-faq-a",
+    widgetEnabled:"lpb-widget-enabled", widgetGreeting:"lpb-widget-greeting", widgetPosition:"lpb-widget-position", widgetName:"lpb-widget-name",
   };
 
   const hydrateFields = () => {
