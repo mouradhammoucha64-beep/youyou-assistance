@@ -1969,6 +1969,23 @@ function landingVideoSource(url = "") {
   return null;
 }
 
+function landingHeroVideoMarkup(data, className = "") {
+  if (data.videoEnabled === "off" || (data.videoPosition || "after-hero") !== "hero") return "";
+  const raw = String(data.videoUrl || "").trim();
+  const source = landingVideoSource(raw);
+  let media = "";
+  if (source?.type === "iframe") {
+    media = `<iframe src="${escapeHtml(source.src)}" title="${escapeHtml(data.videoTitle || "Hero video")}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+  } else if (source?.type === "video") {
+    media = `<video src="${escapeHtml(source.src)}" controls playsinline preload="metadata"></video>`;
+  } else if (raw.startsWith("blob:") || raw.startsWith("data:video/")) {
+    media = `<video src="${escapeHtml(raw)}" controls playsinline preload="metadata"></video>`;
+  } else {
+    return "";
+  }
+  return `<div class="lp-hero-video ${className}">${media}</div>`;
+}
+
 function landingMediaItemMarkup(url, label = "Landing page media") {
   const raw = String(url || "").trim();
   if (!raw) return "";
@@ -1983,79 +2000,60 @@ function landingMediaItemMarkup(url, label = "Landing page media") {
 }
 
 function landingImageSliderMarkup(data) {
-  if (data.sliderEnabled === "off") return "";
+  const mode = String(data.sliderEnabled || "off");
+  if (mode === "off") return "";
 
   const urls = [
     String(data.imageUrl || "").trim(),
     ...String(data.mediaGallery || "").split("\n").map((item) => item.trim())
-  ].filter(Boolean).slice(0, 8);
-
+  ].filter(Boolean).filter((url, index, arr) => arr.indexOf(url) === index).slice(0, 8);
   const images = urls.filter((url) => !landingVideoSource(url));
+  if (!images.length) return "";
 
-  // Public/preview pages must never leak builder controls. With no real image,
-  // show one polished sample visual only; arrows/dots appear only for 2+ images.
-  const hasRealImages = images.length > 0;
-  const visualUrls = hasRealImages ? images : [landingTemplateDemoVisual(data.templateId)];
-  const slides = visualUrls.map((url) => `<div class="lp-image-slide${hasRealImages ? "" : " is-demo"}"><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")}" loading="lazy" />${hasRealImages ? "" : '<span class="lp-gallery-demo-note">SAMPLE VISUAL · ADD IMAGES IN BUILDER</span>'}</div>`);
+  if (mode === "grid") {
+    return `<section class="lp-live-section lp-product-gallery lp-static-gallery" data-block="image-gallery">
+      <div class="lp-block-head"><div><small>GALLERY</small><h2>${escapeHtml(data.sliderTitle || "Product details")}</h2></div></div>
+      <div class="lp-static-image-grid">${images.map((url,index)=>`<figure><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")} ${index+1}" loading="lazy" /></figure>`).join("")}</div>
+    </section>`;
+  }
+
+  const slides = images.map((url, index) => `<article class="lp-image-slide lp-product-slide-card"><div class="lp-product-slide-media"><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")} ${index + 1}" loading="lazy" /></div><div class="lp-product-slide-meta"><small>${escapeHtml(data.badge || "PRODUCT")}</small><strong>${escapeHtml(data.name || "Featured product")}</strong><span>${String(index + 1).padStart(2,"0")}</span></div></article>`);
   const interactive = slides.length > 1;
-
   const arrows = interactive && data.sliderArrows !== "off"
-    ? `<button type="button" class="lp-image-arrow prev" aria-label="Previous image"
-         onclick="const t=this.parentElement.querySelector('.lp-image-track');t.scrollBy({left:-t.clientWidth,behavior:'smooth'});">‹</button>
-       <button type="button" class="lp-image-arrow next" aria-label="Next image"
-         onclick="const t=this.parentElement.querySelector('.lp-image-track');t.scrollBy({left:t.clientWidth,behavior:'smooth'});">›</button>`
+    ? `<button type="button" class="lp-image-arrow prev" aria-label="Previous image" onclick="const t=this.parentElement.querySelector('.lp-image-track'),s=t.querySelector('.lp-image-slide');t.scrollBy({left:-(s?s.getBoundingClientRect().width+12:t.clientWidth*.8),behavior:'smooth'});">‹</button><button type="button" class="lp-image-arrow next" aria-label="Next image" onclick="const t=this.parentElement.querySelector('.lp-image-track'),s=t.querySelector('.lp-image-slide');t.scrollBy({left:(s?s.getBoundingClientRect().width+12:t.clientWidth*.8),behavior:'smooth'});">›</button>`
     : "";
-
   const dots = interactive && data.sliderDots !== "off"
-    ? `<div class="lp-image-dots">${slides.map((_, index) =>
-        `<button type="button" class="${index === 0 ? "is-active" : ""}" aria-label="Show image ${index + 1}"
-          onclick="const t=this.closest('.lp-image-slider').querySelector('.lp-image-track');t.scrollTo({left:t.clientWidth*${index},behavior:'smooth'});this.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('is-active',i===${index}));"></button>`
-      ).join("")}</div>`
+    ? `<div class="lp-image-dots">${slides.map((_, index) => `<button type="button" class="${index === 0 ? "is-active" : ""}" aria-label="Show image ${index + 1}" onclick="const t=this.closest('.lp-image-slider').querySelector('.lp-image-track'),s=t.children[${index}];if(s)s.scrollIntoView({behavior:'smooth',inline:'start',block:'nearest'});this.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('is-active',i===${index}));"></button>`).join("")}</div>`
     : "";
-
   const autoplay = interactive && data.sliderAutoplay !== "off"
     ? `data-autoplay="true" data-speed="${Math.max(2000, Math.min(9000, Number(data.sliderSpeed) || 4000))}"`
     : "";
 
-  return `<section class="lp-live-section lp-product-gallery${hasRealImages ? "" : " is-demo-gallery"}" data-block="image-slider">
-    <div class="lp-block-head">
-      <div><small>PRODUCT GALLERY</small><h2>${escapeHtml(data.sliderTitle || "See it from every angle.")}</h2></div>
-      <span>${hasRealImages ? `${slides.length} IMAGE${slides.length > 1 ? "S" : ""}` : "ADD YOUR IMAGES"}</span>
-    </div>
-    <div class="lp-image-slider" ${autoplay}>
-      <div class="lp-image-track">${slides.join("")}</div>
-      ${arrows}
-      ${dots}
-    </div>
+  return `<section class="lp-live-section lp-product-gallery" data-block="image-slider">
+    <div class="lp-block-head"><div><small>GALLERY</small><h2>${escapeHtml(data.sliderTitle || "See it from every angle.")}</h2></div></div>
+    <div class="lp-image-slider" ${autoplay}><div class="lp-image-track">${slides.join("")}</div>${arrows}${dots}</div>
   </section>`;
 }
-
 function landingVideoBlockMarkup(data) {
-  if (data.videoEnabled === "off") return "";
+  if (data.videoEnabled === "off" || (data.videoPosition || "after-hero") === "hero") return "";
   const raw = String(data.videoUrl || "").trim();
+  if (!raw) return "";
   const source = landingVideoSource(raw);
-
   let media = "";
   if (source?.type === "iframe") {
-    media = `<iframe src="${escapeHtml(source.src)}" title="${escapeHtml(data.videoTitle || "Product video")}" loading="lazy"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    media = `<iframe src="${escapeHtml(source.src)}" title="${escapeHtml(data.videoTitle || "Product video")}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
   } else if (source?.type === "video") {
     media = `<video src="${escapeHtml(source.src)}" controls playsinline preload="metadata"></video>`;
   } else if (raw.startsWith("blob:") || raw.startsWith("data:video/")) {
     media = `<video src="${escapeHtml(raw)}" controls playsinline preload="metadata"></video>`;
   } else {
-    media = `<div class="lp-video-empty"><span>▶</span><strong>VIDEO SPACE READY</strong><small>Add a video in the builder to show it here.</small></div>`;
+    return "";
   }
-
-  return `<section class="lp-live-section lp-product-video${raw ? "" : " is-empty-video"}" data-block="video">
-    <div class="lp-block-head">
-      <div><small>PRODUCT VIDEO · OPTIONAL</small><h2>${escapeHtml(data.videoTitle || "Show how it works.")}</h2></div>
-      <span>${raw ? "VIDEO READY" : "ADD VIDEO"}</span>
-    </div>
+  return `<section class="lp-live-section lp-product-video" data-block="video">
+    <div class="lp-block-head"><div><small>VIDEO</small><h2>${escapeHtml(data.videoTitle || "See it in action.")}</h2></div></div>
     <div class="lp-video-frame">${media}</div>
   </section>`;
 }
-
 function landingMediaMarkup(data) {
   return landingImageSliderMarkup(data);
 }
@@ -2063,6 +2061,7 @@ function landingMediaMarkup(data) {
 function defaultLandingPageData(templateId = "product-launch") {
   const template = landingTemplateById(templateId);
   const c = state.company || {};
+  const isBeautyProduct = template.id === "beauty-product";
 
   return {
     id: `lp_${Date.now()}`,
@@ -2071,7 +2070,7 @@ function defaultLandingPageData(templateId = "product-launch") {
     pageType: template.category,
     headline: template.headline,
     subheadline: template.sub,
-    description: c.business_description || "Add a short, persuasive description that explains why this offer matters and what the customer should do next.",
+    description: c.business_description || (isBeautyProduct ? "A beauty ritual designed to feel premium from the first look to the final touch." : "Add a short, persuasive description that explains why this offer matters and what the customer should do next."),
     badge: template.badge,
     price: "",
     oldPrice: "",
@@ -2082,13 +2081,15 @@ function defaultLandingPageData(templateId = "product-launch") {
     whatsapp: c.whatsapp_number || "",
     phone: c.business_phone || "",
     email: c.business_email || "",
+    heroMediaEnabled: "on",
+    heroImageUrl: "",
     imageUrl: "",
     videoUrl: "",
     mediaGallery: "",
     videoEnabled: "off",
     videoTitle: "See the product in action.",
     videoPosition: "after-hero",
-    sliderEnabled: "off",
+    sliderEnabled: isBeautyProduct ? "grid" : "off",
     sliderTitle: "See it from every angle.",
     sliderPosition: "after-video",
     sliderAutoplay: "on",
@@ -2106,10 +2107,10 @@ function defaultLandingPageData(templateId = "product-launch") {
     surface: template.surface,
     textColor: landingTextForBackground(template.bg),
     direction: "ltr",
-    benefits: "Clear value proposition\nFast customer response\nSimple next step",
-    testimonial: "Add a short customer quote or trust statement here.",
-    faqQuestion: "What should customers know before getting started?",
-    faqAnswer: "Add a concise answer that removes hesitation and makes the next step easier.",
+    benefits: isBeautyProduct ? "Visible glow without the heavy feel\nSkin-loving formula for everyday rituals\nFast, simple checkout and support" : "Clear value proposition\nFast customer response\nSimple next step",
+    testimonial: "",
+    faqQuestion: isBeautyProduct ? "Is it easy to add to a daily beauty routine?" : "What should customers know before getting started?",
+    faqAnswer: isBeautyProduct ? "Yes. The routine is designed to stay simple: use a small amount, follow your normal care steps and adjust frequency to your preference." : "Add a concise answer that removes hesitation and makes the next step easier.",
     widgetEnabled: "on",
     widgetGreeting: "Hi! Ask me anything about this page.",
     widgetPosition: "right",
@@ -2122,11 +2123,11 @@ function defaultLandingPageData(templateId = "product-launch") {
 function landingPriceMarkup(data) {
   if (data.priceMode === "hide") return "";
   if (data.priceMode === "quote") return `<div class="lp-live-price quote">Contact for price</div>`;
-
+  const value = String(data.price || "").trim();
+  if (!value) return "";
   const symbol = landingCurrencySymbol(data.currency);
-  const current = data.price?.trim() ? `${symbol} ${escapeHtml(data.price.trim())}` : "Add price";
+  const current = `${symbol} ${escapeHtml(value)}`;
   const old = data.oldPrice?.trim() ? `<del>${symbol} ${escapeHtml(data.oldPrice.trim())}</del>` : "";
-
   return `<div class="lp-live-price">${old}<strong>${current}</strong><small>${escapeHtml(data.currency)}</small></div>`;
 }
 
@@ -2150,38 +2151,38 @@ function landingTemplateExperience(data) {
   const template = landingTemplateById(data.templateId);
   const category = String(template?.category || data.pageType || "Offer");
   const map = {
-    "Hospitality": ["★ 4.9 guest favorite", "Open today", "Instant booking"],
-    "Beauty & Wellness": ["★ 4.9 client rating", "Popular this week", "Easy booking"],
-    "Health": ["Trusted care", "Appointments available", "Fast confirmation"],
-    "Real Estate": ["Verified listing", "Viewing available", "Local expertise"],
-    "Digital": ["Built for growth", "Fast setup", "Demo ready"],
-    "Campaign": ["Limited campaign", "Mobile first", "Direct response"],
-    "Service": ["Local & trusted", "Fast response", "Quote ready"],
-    "Product": ["Featured product", "Secure checkout ready", "Fast delivery ready"]
+    "Hospitality": ["Experience overview", "Booking action", "Direct contact"],
+    "Beauty & Wellness": ["Offer details", "Mobile-ready", "Clear next step"],
+    "Health": ["Service information", "Appointment action", "Contact details"],
+    "Real Estate": ["Property details", "Viewing action", "Direct enquiry"],
+    "Digital": ["Product overview", "Demo or signup", "Lead capture"],
+    "Campaign": ["Focused campaign", "Mobile-ready", "Direct response"],
+    "Service": ["Service overview", "Quote or call", "Direct contact"],
+    "Product": ["Product details", "Gallery ready", "Clear action"]
   };
-  return map[category] || ["Trusted offer", "Fast response", "Easy next step"];
+  return map[category] || ["Offer details", "Mobile-ready", "Clear next step"];
 }
 
 function landingHeroMediaMarkup(data) {
-  const media = String(data.imageUrl || "").trim() || landingTemplateDemoVisual(data.templateId);
+  if (data.heroMediaEnabled === "off") return "";
+  const heroVideo = landingHeroVideoMarkup(data, "lp-hero-video-generic");
+  const media = String(data.heroImageUrl || data.imageUrl || "").trim() || landingTemplateDemoVisual(data.templateId);
   const exp = landingTemplateExperience(data);
-  return `<div class="lp-live-media lp-hero-media-card">
+  return `<div class="lp-live-media lp-hero-media-card${heroVideo ? " has-hero-video" : ""}">
     <div class="lp-hero-glow"></div>
-    <img src="${escapeHtml(media)}" alt="${escapeHtml(data.name || "Offer visual")}" loading="lazy" />
-    <div class="lp-hero-float lp-hero-float-top"><span>LIVE OFFER</span><strong>${escapeHtml(data.badge || "FEATURED")}</strong></div>
+    ${heroVideo || `<img src="${escapeHtml(media)}" alt="${escapeHtml(data.name || "Offer visual")}" loading="lazy" />`}
+    <div class="lp-hero-float lp-hero-float-top"><span>OFFER</span><strong>${escapeHtml(data.badge || "FEATURED")}</strong></div>
     <div class="lp-hero-float lp-hero-float-bottom"><strong>${escapeHtml(exp[0])}</strong><small>${escapeHtml(exp[1])} · ${escapeHtml(exp[2])}</small></div>
   </div>`;
 }
-
 function landingWidgetMarkup(data) {
   if (data.widgetEnabled === "off") return "";
   const pos = data.widgetPosition === "left" ? "left" : "right";
   return `<div class="lp-ai-widget is-${pos}" data-lp-widget>
-    <button class="lp-ai-launcher" type="button" aria-label="Open AI assistant" onclick="const w=this.closest('[data-lp-widget]');w.classList.toggle('is-open')"><span>✦</span><b>AI</b></button>
-    <div class="lp-ai-panel">
-      <div class="lp-ai-head"><div><span>✦</span><p><strong>${escapeHtml(data.widgetName || "YOUYOU Assistant")}</strong><small>Understands this page</small></p></div><button type="button" onclick="this.closest('[data-lp-widget]').classList.remove('is-open')">×</button></div>
-      <div class="lp-ai-context"><span></span> Page content connected</div>
-      <div class="lp-ai-messages" data-lp-widget-messages>
+    <button class="lp-ai-launcher" type="button" aria-label="Open chat" onclick="const w=this.closest('[data-lp-widget]');w.classList.toggle('is-open')"><span>✦</span><b>AI</b></button>
+    <div class="lp-ai-panel" role="dialog" aria-label="${escapeHtml(data.widgetName || "Assistant")}">
+      <div class="lp-ai-head"><div><span>✦</span><p><strong>${escapeHtml(data.widgetName || "YOUYOU Assistant")}</strong><small>Ask about this offer</small></p></div><button type="button" aria-label="Close chat" onclick="this.closest('[data-lp-widget]').classList.remove('is-open')">×</button></div>
+      <div class="lp-ai-messages" data-lp-widget-messages aria-live="polite">
         <div class="lp-ai-msg bot">${escapeHtml(data.widgetGreeting || "Hi! Ask me anything about this page.")}</div>
         <div class="lp-ai-suggestions">
           <button type="button" onclick="window.youyouLandingAsk(this,'What is the price?')">Price?</button>
@@ -2190,12 +2191,126 @@ function landingWidgetMarkup(data) {
         </div>
       </div>
       <form class="lp-ai-form" onsubmit="window.youyouLandingAsk(this.querySelector('button'),this.querySelector('input').value);this.querySelector('input').value='';return false">
-        <input aria-label="Ask about this page" placeholder="Ask about this offer..." />
-        <button type="submit">➜</button>
+        <label class="sr-only" for="lp-ai-input-${escapeHtml(data.id || 'page')}">Ask about this offer</label>
+        <input id="lp-ai-input-${escapeHtml(data.id || 'page')}" aria-label="Ask about this offer" placeholder="Ask about this offer..." />
+        <button type="submit" aria-label="Send message">➜</button>
       </form>
-      <small class="lp-ai-powered">Page-aware preview · AI API ready</small>
     </div>
   </div>`;
+}
+
+
+function landingLeadFormMarkup(data, className = "") {
+  return `<form class="lp-lead-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
+    <label><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
+    <label><span>Email or phone</span><input name="contact" autocomplete="email" placeholder="you@example.com or +212..." required /></label>
+    <label><span>Message</span><textarea name="message" rows="3" placeholder="Tell us what you need"></textarea></label>
+    <button type="submit">${escapeHtml(data.ctaText || "Send request")}</button>
+    <p class="lp-lead-status" data-lp-lead-status role="status" aria-live="polite"></p>
+  </form>`;
+}
+
+async function youyouLandingPersistVisitor(page, content, visitor = {}) {
+  const companyId = page?.dataset?.companyId || state.company?.id || "";
+  if (!companyId || !SUPABASE_URL || !SUPABASE_KEY) return { ok:false, reason:"preview" };
+  const pageId = page?.dataset?.pageId || "page";
+  const sessionKey = `youyou_lp_conversation_${companyId}_${pageId}`;
+  let conversationId = sessionStorage.getItem(sessionKey) || "";
+  const headers = { "Content-Type":"application/json", apikey:SUPABASE_KEY };
+  if (!conversationId) {
+    conversationId = crypto.randomUUID();
+    const create = await fetch(`${SUPABASE_URL}/rest/v1/conversations`, {
+      method:"POST", headers:{...headers, Prefer:"return=minimal"},
+      body:JSON.stringify({
+        id:conversationId,
+        company_id:companyId,
+        visitor_name:String(visitor.name || "Landing page visitor").slice(0,120),
+        visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email || "")) ? String(visitor.email).slice(0,180) : null,
+        status:"open"
+      })
+    });
+    if (!create.ok) throw new Error(await create.text());
+    sessionStorage.setItem(sessionKey, conversationId);
+  }
+  const save = await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
+    method:"POST", headers:{...headers, Prefer:"return=minimal"},
+    body:JSON.stringify({ conversation_id:conversationId, sender:"visitor", content:String(content || "").slice(0,4000) })
+  });
+  if (!save.ok) throw new Error(await save.text());
+  return { ok:true, conversationId };
+}
+
+window.youyouLandingSubmit = function(form) {
+  if (!form) return false;
+  const page = form.closest('.lp-live-page');
+  const status = form.querySelector('[data-lp-lead-status]');
+  const button = form.querySelector('button[type="submit"]');
+  const name = String(form.elements?.name?.value || '').trim();
+  const contact = String(form.elements?.contact?.value || '').trim();
+  const message = String(form.elements?.message?.value || '').trim();
+  if (!name || !contact) { if(status) status.textContent='Please add your name and contact.'; return false; }
+  const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? contact : '';
+  const pageTitle = page?.dataset?.pageTitle || 'this offer';
+  const content = `Lead form submission. Visitor is ready to be contacted about ${pageTitle}. Contact: ${contact}. ${message ? `Request: ${message}` : 'Request: Please contact me.'}`;
+  if (button) button.disabled = true;
+  if (status) status.textContent = 'Sending…';
+  (async()=>{
+    try {
+      const result = await youyouLandingPersistVisitor(page, content, { name, email });
+      if (result.ok) {
+        if (status) status.textContent = 'Thanks — your request was sent.';
+        form.reset();
+      } else if (status) status.textContent = 'Preview ready. This form will capture leads when the page is connected.';
+    } catch (error) {
+      console.error('YOUYOU landing lead form:', error);
+      if (status) status.textContent = 'Could not send right now. Please try another contact option.';
+    } finally { if (button) button.disabled = false; }
+  })();
+  return false;
+};
+
+function initLandingCarousels(root = document) {
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  root.querySelectorAll?.('.lp-image-slider').forEach((slider) => {
+    if (slider.dataset.yyCarouselReady === '1') return;
+    slider.dataset.yyCarouselReady = '1';
+    const track = slider.querySelector('.lp-image-track');
+    const slides = [...(track?.querySelectorAll('.lp-image-slide') || [])];
+    const dots = [...slider.querySelectorAll('.lp-image-dots button')];
+    if (!track || slides.length < 2) return;
+    const updateDots = () => {
+      let active = 0, distance = Infinity;
+      slides.forEach((slide, i) => {
+        const d = Math.abs(slide.offsetLeft - track.scrollLeft);
+        if (d < distance) { distance = d; active = i; }
+      });
+      dots.forEach((dot,i)=>dot.classList.toggle('is-active', i === active));
+    };
+    let raf = 0;
+    track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(updateDots); }, { passive:true });
+    updateDots();
+    if (slider.dataset.autoplay === 'true' && !reduced) {
+      const speed = Math.max(2000, Number(slider.dataset.speed) || 4000);
+      let timer = null;
+      const play = () => {
+        clearInterval(timer);
+        timer = setInterval(() => {
+          if (!document.body.contains(slider)) return clearInterval(timer);
+          const current = dots.findIndex((dot)=>dot.classList.contains('is-active'));
+          const nextIndex = current >= slides.length - 1 ? 0 : current + 1;
+          track.scrollTo({ left:slides[nextIndex].offsetLeft, behavior:'smooth' });
+        }, speed);
+      };
+      const pause = () => clearInterval(timer);
+      slider.addEventListener('mouseenter', pause);
+      slider.addEventListener('mouseleave', play);
+      slider.addEventListener('focusin', pause);
+      slider.addEventListener('focusout', play);
+      slider.addEventListener('pointerdown', pause, { passive:true });
+      slider.addEventListener('pointerup', play, { passive:true });
+      play();
+    }
+  });
 }
 
 window.youyouLandingAsk = function(source, forcedQuestion = "") {
@@ -2212,11 +2327,12 @@ window.youyouLandingAsk = function(source, forcedQuestion = "") {
   const text = page.innerText || '';
   const price = page.querySelector('.lp-live-price strong')?.textContent?.trim();
   const quote = page.querySelector('.lp-live-price.quote')?.textContent?.trim();
-  const benefits = [...page.querySelectorAll('.lp-live-benefit-grid strong')].map(x=>x.textContent.trim()).filter(Boolean);
+  const benefits = [...page.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()).filter(Boolean);
   const faqQ = page.querySelector('.lp-live-faq h3')?.textContent?.trim();
-  const faqA = page.querySelector('.lp-live-faq p')?.textContent?.trim();
+  const faqA = (page.querySelector('.lp-live-faq p') || page.querySelector('.beauty-faq p'))?.textContent?.trim();
   const cta = page.querySelector('.lp-live-primary')?.textContent?.trim();
-  const sub = page.querySelector('.lp-live-sub')?.textContent?.trim();
+  const sub = (page.querySelector('.lp-live-sub') || page.querySelector('.beauty-copy>p'))?.textContent?.trim();
+  youyouLandingPersistVisitor(page, q).catch((error)=>console.warn('YOUYOU landing message not saved:', error));
   const lower = q.toLowerCase();
   let answer = '';
   if (/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(lower)) answer = price ? `The current price shown on this page is ${price}.` : (quote || 'This page asks visitors to contact the business for pricing.');
@@ -2228,98 +2344,109 @@ window.youyouLandingAsk = function(source, forcedQuestion = "") {
   setTimeout(()=>add('bot', answer), 180);
 };
 
-function landingPreviewMarkup(data, compact = false) {
-  const benefits = String(data.benefits || "")
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .slice(0, 6);
 
+function landingBeautyPreviewMarkup(data, compact = false) {
+  const direction = data.direction === "rtl" ? "rtl" : "ltr";
+  const genericBenefits = "Clear value proposition\nFast customer response\nSimple next step";
+  const rawBenefits = String(data.benefits || "").trim();
+  const benefits = (rawBenefits && rawBenefits !== genericBenefits
+    ? rawBenefits.split("\n").map(x=>x.trim()).filter(Boolean)
+    : ["Visible glow without the heavy feel", "Skin-loving formula for everyday rituals", "Simple product details and a clear next step"]
+  ).slice(0,6);
+  const desc = (!data.description || data.description.startsWith("Add a short, persuasive"))
+    ? "A beauty ritual designed to feel premium from the first look to the final touch."
+    : data.description;
+  const testimonial = String(data.testimonial || "").trim();
+  const faqQ = (!data.faqQuestion || data.faqQuestion.startsWith("What should customers know"))
+    ? "Is it easy to add to a daily beauty routine?"
+    : data.faqQuestion;
+  const faqA = (!data.faqAnswer || data.faqAnswer.startsWith("Add a concise answer"))
+    ? "Yes. The routine is designed to stay simple: use a small amount, follow your normal care steps and adjust frequency to your preference."
+    : data.faqAnswer;
+  const heroImage = String(data.heroImageUrl || data.imageUrl || "").trim();
+  const heroVideo = data.heroMediaEnabled === "off" ? "" : landingHeroVideoMarkup(data, "beauty-hero-video");
+  const productVisual = data.heroMediaEnabled === "off" ? "" : (heroVideo || (heroImage
+    ? `<img src="${escapeHtml(heroImage)}" alt="${escapeHtml(data.name || 'Beauty product')}" loading="lazy"/>`
+    : `<div class="beauty-product-art" aria-label="Sample product visual"><span class="beauty-orb orb-a"></span><span class="beauty-orb orb-b"></span><div class="beauty-bottle"><i></i><b>${escapeHtml((data.badge || 'BEAUTY').slice(0,12))}</b><small>product</small></div><div class="beauty-petal petal-a"></div><div class="beauty-petal petal-b"></div><div class="beauty-petal petal-c"></div></div>`));
+  const price = landingPriceMarkup(data);
+  const galleryMode = String(data.sliderEnabled || "off");
+  const galleryUrls = [String(data.imageUrl || "").trim(), ...String(data.mediaGallery || "").split("\n").map(x=>x.trim())]
+    .filter(Boolean).filter((url,index,arr)=>arr.indexOf(url)===index).filter(url=>!landingVideoSource(url)).slice(0,8);
+  let gallerySection = "";
+  if (galleryMode === "on" && galleryUrls.length) {
+    gallerySection = landingImageSliderMarkup(data);
+  } else if (galleryMode === "grid" && galleryUrls.length) {
+    gallerySection = `<section class="beauty-gallery-section" data-block="image-gallery"><div><small>02 · THE DETAILS</small><h2>${escapeHtml(data.sliderTitle || 'See it from every angle.')}</h2></div><div class="beauty-gallery">${galleryUrls.map((u,i)=>`<figure><img src="${escapeHtml(u)}" alt="${escapeHtml(data.name || 'Beauty product')} detail ${i+1}" loading="lazy"/></figure>`).join('')}</div></section>`;
+  }
+  const video = data.videoEnabled !== "off" ? landingVideoBlockMarkup(data) : "";
+  const mediaPos = ["right","left","top","bottom"].includes(data.mediaPosition) ? data.mediaPosition : "right";
+  const pageAttrs = `data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Beauty product')}"`;
+
+  const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Story</a><a href="#details">Details</a><a href="#faq">FAQ</a></div><a href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
+  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY EDIT')}</span><div class="beauty-proofline"><span>Product-focused</span><span>Mobile-ready</span><span>Clear action</span></div><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1><p>${escapeHtml(data.subheadline || '')}</p>${price}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="https://wa.me/${String(data.whatsapp).replace(/\D/g,'')}">Ask on WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}${heroVideo ? '' : `<div class="beauty-float-card"><small>${escapeHtml(data.badge || 'PRODUCT')}</small><strong>${escapeHtml(data.name || 'Featured product')}</strong><span>Replace this sample visual with your own product image.</span></div>`}</div>` : ''}</section>`;
+  const marquee = `<section class="beauty-marquee"><span>DISCOVER</span><i></i><span>DETAILS</span><i></i><span>ROUTINE</span><i></i><span>QUESTIONS</span><i></i><span>ACTION</span></section>`;
+  const story = `<section id="story" class="beauty-story"><div class="beauty-story-head"><span>01 · WHY THIS OFFER</span><h2>${escapeHtml(desc)}</h2></div><div class="beauty-benefits">${benefits.map((b,i)=>`<article><span>0${i+1}</span><div class="beauty-icon">${['✦','◌','♡','＋','◇','☼'][i]||'✦'}</div><h3>${escapeHtml(b)}</h3><p>${['Explain the value in one short, useful line.','Show how this benefit fits the customer routine.','Keep the next step easy to understand.','Add a specific product detail here.','Use this card for another benefit.','Keep the copy short for mobile visitors.'][i]||'Add a useful product detail.'}</p></article>`).join('')}</div></section>`;
+  const editorial = `<section class="beauty-editorial"><div class="beauty-editorial-card"><small>PRODUCT STORY</small><h2>Make the offer easy to understand before the customer takes action.</h2><p>${escapeHtml(data.extraText || 'Use this section for ingredients, delivery, conditions, product story or any detail that helps a visitor decide.')}</p></div><div class="beauty-stat-grid"><div><strong>01</strong><span>Offer story</span></div><div><strong>02</strong><span>Benefits</span></div><div><strong>03</strong><span>FAQ</span></div></div></section>`;
+  const review = testimonial ? `<section class="beauty-review-section"><div class="beauty-quote-mark">“</div><blockquote>${escapeHtml(testimonial)}</blockquote><div class="beauty-review-meta"><span class="beauty-avatar">C</span><div><strong>Customer feedback</strong><small>Added by the page owner</small></div></div></section>` : "";
+  const faq = `<section id="faq" class="beauty-faq"><div><small>03 · GOOD TO KNOW</small><h2>${escapeHtml(faqQ)}</h2></div><p>${escapeHtml(faqA)}</p></section>`;
+  const directCta = `<a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Continue')} <span>↗</span></a>`;
+  const finalCta = `<section id="contact" class="beauty-final-cta ${data.ctaAction === 'form' ? 'has-form' : ''}"><div><small>READY WHEN YOU ARE</small><h2>${escapeHtml(data.ctaText || 'Continue')}</h2><p>${data.ctaAction === 'form' ? 'Leave your details and the business can follow up.' : 'Use the action below to continue.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data, 'beauty-lead-form') : directCta}</section>`;
+
+  const parts = [nav, hero, marquee];
+  let videoAdded = false, galleryAdded = false;
+  const addAt = (position) => {
+    if (!videoAdded && video && (data.videoPosition || 'after-hero') === position) {
+      parts.push(video); videoAdded = true;
+      if (!galleryAdded && gallerySection && (data.sliderPosition || 'after-video') === 'after-video') { parts.push(gallerySection); galleryAdded = true; }
+    }
+    if (!galleryAdded && gallerySection && (data.sliderPosition || 'after-video') === position) { parts.push(gallerySection); galleryAdded = true; }
+  };
+  addAt('after-hero');
+  parts.push(story);
+  addAt('after-benefits');
+  parts.push(editorial);
+  if (review) parts.push(review);
+  parts.push(faq);
+  addAt('before-contact');
+  if (!videoAdded && video) { parts.push(video); videoAdded = true; }
+  if (!galleryAdded && gallerySection) { parts.push(gallerySection); galleryAdded = true; }
+  parts.push(finalCta, `<footer class="beauty-footer"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><span>Built with YOUYOU</span></footer>`, landingWidgetMarkup(data));
+
+  return `<article class="lp-live-page beauty-wow ${compact ? 'is-compact' : ''} media-${mediaPos}" dir="${direction}" ${pageAttrs} style="--lp-accent:${escapeHtml(data.accent)};--lp-bg:${escapeHtml(data.background)};--lp-surface:${escapeHtml(data.surface)};--lp-text:${escapeHtml(data.textColor)}">${parts.join('')}</article>`;
+}
+
+function landingPreviewMarkup(data, compact = false) {
+  if (data.templateId === "beauty-product") return landingBeautyPreviewMarkup(data, compact);
+  const benefits = String(data.benefits || "").split("\n").map((item) => item.trim()).filter(Boolean).slice(0, 6);
   const direction = data.direction === "rtl" ? "rtl" : "ltr";
   const mediaPosition = ["right","left","top","bottom"].includes(data.mediaPosition) ? data.mediaPosition : "right";
   const mediaWidth = Math.min(65, Math.max(35, Number(data.mediaWidth) || 46));
   const mediaHeight = Math.min(620, Math.max(240, Number(data.mediaHeight) || 380));
   const videoBlock = landingVideoBlockMarkup(data);
   const sliderBlock = landingImageSliderMarkup(data);
-  const extraSection = String(data.extraText || "").trim()
-    ? `<section class="lp-live-section lp-live-extra"><small>${escapeHtml(data.extraTitle || "MORE ABOUT THIS OFFER")}</small><div class="lp-live-extra-copy">${escapeHtml(data.extraText).replace(/\n/g,"<br>")}</div></section>`
-    : "";
-
-  const hero = `<section class="lp-live-hero">
-        <div class="lp-live-copy">
-          <span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span>
-          <h1>${escapeHtml(data.headline || "Your headline goes here")}</h1>
-          <p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>
-          ${landingPriceMarkup(data)}
-          <div class="lp-live-actions">
-            <a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>
-            ${data.whatsapp ? `<a href="https://wa.me/${String(data.whatsapp).replace(/\D/g, "")}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}
-          </div>
-          <div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>✓ ${escapeHtml(item)}</span>`).join("")}</div>
-        </div>
-        ${landingHeroMediaMarkup(data)}
-      </section>`;
-
-  const benefitsSection = `<section class="lp-live-section lp-live-benefits">
-        <small>WHY THIS OFFER</small>
-        <h2>${escapeHtml(data.description || "Explain the value clearly.")}</h2>
-        <div class="lp-live-benefit-grid">
-          ${benefits.map((item, index) => `<div><span>0${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}
-        </div>
-      </section>`;
-
-  const proofSection = `<section class="lp-live-section lp-live-proof"><small>TRUST</small><blockquote>“${escapeHtml(data.testimonial || "Add a customer quote here.")}”</blockquote></section>`;
+  const extraSection = String(data.extraText || "").trim() ? `<section class="lp-live-section lp-live-extra"><small>${escapeHtml(data.extraTitle || "MORE ABOUT THIS OFFER")}</small><div class="lp-live-extra-copy">${escapeHtml(data.extraText).replace(/\n/g,"<br>")}</div></section>` : "";
+  const heroMedia = landingHeroMediaMarkup(data);
+  const template = landingTemplateById(data.templateId);
+  const hero = `<section class="lp-live-hero${heroMedia ? '' : ' no-hero-media'}"><div class="lp-live-copy"><span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span><h1>${escapeHtml(data.headline || "Your headline goes here")}</h1><p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>${landingPriceMarkup(data)}<div class="lp-live-actions"><a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>${data.whatsapp ? `<a href="https://wa.me/${String(data.whatsapp).replace(/\D/g, "")}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}</div><div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>${heroMedia}</section>`;
+  const benefitsSection = `<section class="lp-live-section lp-live-benefits"><small>WHY THIS OFFER</small><h2>${escapeHtml(data.description || "Explain the value clearly.")}</h2><div class="lp-live-benefit-grid">${benefits.map((item, index) => `<div><span>0${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}</div></section>`;
+  const testimonial = String(data.testimonial || "").trim();
+  const proofSection = testimonial ? `<section class="lp-live-section lp-live-proof"><small>CUSTOMER FEEDBACK</small><blockquote>“${escapeHtml(testimonial)}”</blockquote></section>` : "";
   const faqSection = `<section class="lp-live-section lp-live-faq"><small>FAQ</small><h3>${escapeHtml(data.faqQuestion || "Common customer question")}</h3><p>${escapeHtml(data.faqAnswer || "Add the answer here.")}</p></section>`;
-  const contactSection = `<section id="contact" class="lp-live-section lp-live-contact">
-        <div><small>READY TO CONVERT</small><h2>${escapeHtml(data.ctaText || "Get started")}</h2><p>Give visitors one clear next step: a lead form, WhatsApp, call or email.</p></div>
-        <form onsubmit="return false"><input placeholder="Name" /><input placeholder="Email or phone" /><textarea rows="3" placeholder="Tell us what you need"></textarea><button type="button">${escapeHtml(data.ctaText || "Send request")}</button></form>
-      </section>`;
-
+  const directCta = `<a href="${landingCtaHref(data)}" class="lp-live-primary lp-direct-contact">${escapeHtml(data.ctaText || 'Continue')} ↗</a>`;
+  const contactSection = `<section id="contact" class="lp-live-section lp-live-contact"><div><small>${data.ctaAction === 'form' ? 'CONTACT' : 'NEXT STEP'}</small><h2>${escapeHtml(data.ctaText || "Get started")}</h2><p>${data.ctaAction === 'form' ? 'Leave your details and the business can follow up.' : 'Continue using the selected contact option.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data) : `<div class="lp-direct-contact-wrap">${directCta}</div>`}</section>`;
   const bodySections = [hero];
-
-  const pushExtraIf = (position) => {
-    if (data.extraTextPosition === position && extraSection) bodySections.push(extraSection);
-  };
-  const pushVideoIf = (position) => {
-    if ((data.videoPosition || "after-hero") === position && videoBlock) bodySections.push(videoBlock);
-  };
-  const pushSliderIf = (position) => {
-    if ((data.sliderPosition || "after-video") === position && sliderBlock) bodySections.push(sliderBlock);
-  };
-
-  pushVideoIf("after-hero");
-  pushSliderIf("after-hero");
-  pushExtraIf("after-hero");
-
-  if ((data.sliderPosition || "after-video") === "after-video") {
-    if ((data.videoPosition || "after-hero") !== "after-hero") pushVideoIf("after-video");
-    if (sliderBlock) bodySections.push(sliderBlock);
-  } else {
-    pushVideoIf("after-slider");
-  }
-
+  const pushExtraIf = (position) => { if (data.extraTextPosition === position && extraSection) bodySections.push(extraSection); };
+  const pushVideoIf = (position) => { if ((data.videoPosition || "after-hero") === position && videoBlock) bodySections.push(videoBlock); };
+  const pushSliderIf = (position) => { if ((data.sliderPosition || "after-video") === position && sliderBlock) bodySections.push(sliderBlock); };
+  pushVideoIf("after-hero"); if ((data.sliderPosition||'after-video')==='after-video' && (data.videoPosition||'after-hero')==='after-hero' && videoBlock && sliderBlock) bodySections.push(sliderBlock); else pushSliderIf("after-hero"); pushExtraIf("after-hero");
   bodySections.push(benefitsSection);
-
-  pushVideoIf("after-benefits");
-  pushSliderIf("after-benefits");
-  if ((data.extraTextPosition || "after-benefits") === "after-benefits" && extraSection) bodySections.push(extraSection);
-
-  bodySections.push(proofSection, faqSection);
-
-  pushVideoIf("before-contact");
-  pushSliderIf("before-contact");
-  pushExtraIf("before-contact");
-
+  pushVideoIf("after-benefits"); if ((data.sliderPosition||'after-video')==='after-video' && (data.videoPosition||'after-hero')==='after-benefits' && videoBlock && sliderBlock) bodySections.push(sliderBlock); else pushSliderIf("after-benefits"); if ((data.extraTextPosition || "after-benefits") === "after-benefits" && extraSection) bodySections.push(extraSection);
+  if (proofSection) bodySections.push(proofSection); bodySections.push(faqSection);
+  pushVideoIf("before-contact"); if ((data.sliderPosition||'after-video')==='after-video' && (data.videoPosition||'after-hero')==='before-contact' && videoBlock && sliderBlock) bodySections.push(sliderBlock); else pushSliderIf("before-contact"); pushExtraIf("before-contact");
+  if (sliderBlock && !bodySections.includes(sliderBlock)) bodySections.splice(Math.max(1, bodySections.length-1),0,sliderBlock);
   bodySections.push(contactSection);
-
-  return `
-    <article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition}" dir="${direction}"
-      style="--lp-accent:${escapeHtml(data.accent)};--lp-bg:${escapeHtml(data.background)};--lp-surface:${escapeHtml(data.surface)};--lp-text:${escapeHtml(data.textColor)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px">
-      <nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>
-      ${bodySections.join("")}
-      <footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Landing page preview · Powered by YOUYOU</span></footer>
-      ${landingWidgetMarkup(data)}
-    </article>`;
+  const slugClass = `layout-${String(template?.layout || 'standard').replace(/[^a-z0-9-]/gi,'-').toLowerCase()}`;
+  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="--lp-accent:${escapeHtml(data.accent)};--lp-bg:${escapeHtml(data.background)};--lp-surface:${escapeHtml(data.surface)};--lp-text:${escapeHtml(data.textColor)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
 }
 
 function landingExportHtml(data) {
@@ -2329,20 +2456,116 @@ function landingExportHtml(data) {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="description" content="${escapeHtml(String(data.subheadline || data.description || '').slice(0,180))}"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="${escapeHtml(data.name || data.headline || 'Landing Page')}"/>
+<meta property="og:description" content="${escapeHtml(String(data.subheadline || data.description || '').slice(0,180))}"/>
+${/^https?:\/\//i.test(String(data.heroImageUrl || data.imageUrl || '')) ? `<meta property="og:image" content="${escapeHtml(String(data.heroImageUrl || data.imageUrl || ''))}"/>` : ''}
+<meta name="twitter:card" content="summary_large_image"/>
 <title>${escapeHtml(data.name || "Landing Page")}</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:${data.background};font-family:Arial,sans-serif;color:${data.textColor}}
+*{box-sizing:border-box}body{margin:0;background:${data.background};font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${data.textColor}}
 .lp-live-page{--lp-accent:${data.accent};--lp-bg:${data.background};--lp-surface:${data.surface};--lp-text:${data.textColor};max-width:1180px;margin:auto;background:var(--lp-bg);color:var(--lp-text);min-height:100vh}
 .lp-live-nav,.lp-live-footer{display:flex;justify-content:space-between;padding:22px 5%;border-bottom:1px solid #ffffff14}
 .lp-live-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,var(--lp-media-width));gap:36px;padding:70px 5%;align-items:center}.media-left .lp-live-copy{order:2}.media-left .lp-live-media{order:1}.media-top .lp-live-hero,.media-bottom .lp-live-hero{grid-template-columns:1fr}.media-top .lp-live-media{order:-1}.media-bottom .lp-live-media{order:2}.lp-live-copy h1{font-size:56px;line-height:1.02;margin:18px 0}.lp-live-sub{font-size:18px;line-height:1.6;color:#b8bdc9}.lp-live-badge{padding:7px 10px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 16%,transparent);color:var(--lp-accent);font-weight:700;font-size:12px}.lp-live-price{display:flex;gap:12px;align-items:baseline;margin:24px 0}.lp-live-price strong{font-size:34px}.lp-live-price del{opacity:.45}.lp-live-actions{display:flex;gap:10px;flex-wrap:wrap}.lp-live-actions a{padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:700}.lp-live-primary{background:var(--lp-accent);color:#080808}.lp-live-secondary{border:1px solid #ffffff25;color:var(--lp-text)}.lp-live-media{min-height:var(--lp-media-height);border-radius:24px;background:var(--lp-surface);overflow:hidden;position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:var(--lp-media-height);scrollbar-width:thin}.lp-live-media-slide{min-width:100%;height:100%;scroll-snap-align:start}.lp-live-media img,.lp-live-media video,.lp-live-media iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}.lp-live-media-hint,.lp-live-demo-note{position:absolute;left:14px;bottom:14px;padding:7px 10px;border-radius:999px;background:#0009;color:#fff;font-size:11px}.lp-live-section{padding:55px 5%;border-top:1px solid #ffffff10}.lp-live-section>small{color:var(--lp-accent);font-weight:800}.lp-live-section h2{font-size:34px;max-width:780px}.lp-live-extra-copy{max-width:850px;font-size:18px;line-height:1.75}.lp-live-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.lp-live-benefit-grid div{padding:20px;background:var(--lp-surface);border-radius:14px}.lp-live-benefit-grid span{display:block;color:var(--lp-accent);font-size:12px;margin-bottom:10px}.lp-live-proof blockquote{font-size:28px;max-width:780px;margin:20px 0}.lp-live-contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}.lp-live-contact form{display:grid;gap:10px}.lp-live-contact input,.lp-live-contact textarea{width:100%;padding:13px;border:1px solid #ffffff18;border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-live-contact button{padding:14px;border:0;border-radius:9px;background:var(--lp-accent);font-weight:800}
 .lp-live-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;font-size:12px;opacity:.65}.lp-live-footer{border-top:1px solid #ffffff14;border-bottom:0}.lp-live-media{position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}.lp-live-media-track::-webkit-scrollbar{display:none}.lp-live-media-slide{position:relative;flex:0 0 100%;min-width:100%;height:100%;scroll-snap-align:start}.lp-live-empty-slide{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:28px;text-align:center}.lp-empty-icon{font-size:28px}.lp-live-slider-arrow{position:absolute;z-index:8;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid #ffffff4a;background:#080c16aa;color:#fff;font-size:27px;cursor:pointer}.lp-live-slider-arrow.prev{left:14px}.lp-live-slider-arrow.next{right:14px}.lp-live-slider-dots{position:absolute;z-index:9;left:50%;bottom:17px;transform:translateX(-50%);display:flex;gap:7px;padding:7px 10px;border-radius:999px;background:#080c1690}.lp-live-slider-dots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#ffffff7a}.lp-live-slider-dots button.is-active{width:22px;background:var(--lp-accent)}.lp-live-media-hint{position:absolute;z-index:7;left:16px;top:16px;bottom:auto;background:#080c16a3;color:#fff;padding:8px 10px;border-radius:10px;display:flex;flex-direction:column}.lp-live-media-hint span{font-size:8px;font-weight:800}.lp-live-media-hint small{font-size:7px;opacity:.7}
 @media(max-width:760px){.lp-live-hero,.lp-live-contact{grid-template-columns:1fr}.media-left .lp-live-copy,.media-left .lp-live-media{order:initial}.lp-live-copy h1{font-size:38px}.lp-live-benefit-grid{grid-template-columns:1fr}.lp-live-media-track{height:min(var(--lp-media-height),360px)}}
-html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hidden}.lp-product-video,.lp-product-gallery{padding-top:56px;padding-bottom:56px}.lp-video-frame{width:100%;aspect-ratio:16/9;min-height:0;border-radius:22px;overflow:hidden;background:var(--lp-surface)}.lp-video-frame iframe,.lp-video-frame video{width:100%;height:100%;aspect-ratio:16/9;display:block;object-fit:cover}.lp-video-empty{min-height:260px}.lp-image-slider{width:100%;overflow:hidden;border-radius:22px}.lp-image-track{width:100%;overflow-x:auto}.lp-image-slide{flex:0 0 100%;width:100%;min-width:100%;height:clamp(320px,52vw,620px);min-height:0}.lp-image-slide img{width:100%;height:100%;min-height:0;object-fit:cover}.lp-gallery-demo-note{position:absolute;left:16px;bottom:16px;padding:7px 10px;border-radius:999px;background:#080c16bf;color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em}.is-empty-video .lp-block-head>span{opacity:.6}@media(max-width:760px){.lp-video-frame{aspect-ratio:16/9}.lp-video-empty{min-height:210px}.lp-image-slide{height:300px}.lp-block-head{align-items:flex-start;flex-direction:column;gap:10px}}
+
+/* YOUYOU V6.4 — BEAUTY PRODUCT WOW TEMPLATE */
+.beauty-wow{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#fff8fb 0%,var(--lp-bg) 36%,#fff 100%);color:#161923;max-width:1240px!important;box-shadow:none!important}
+.beauty-wow:before{width:620px!important;height:620px!important;right:-220px!important;top:40px!important;background:radial-gradient(circle,color-mix(in srgb,var(--lp-accent) 22%,#fff0),transparent 68%)!important}
+.beauty-nav{height:82px;padding:0 5%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1b1b2410;position:relative;z-index:3}.beauty-nav strong{font-size:18px;letter-spacing:-.03em}.beauty-nav>div{display:flex;gap:30px;font-size:13px}.beauty-nav>a{background:#171820;color:#fff;padding:11px 16px;border-radius:999px;text-decoration:none;font-size:12px;font-weight:800}
+.beauty-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px, .9fr);gap:54px;align-items:center;padding:72px 5% 86px;min-height:680px;position:relative}.beauty-eyebrow{display:inline-flex;padding:8px 12px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 13%,#fff);color:var(--lp-accent);font-size:11px;font-weight:900;letter-spacing:.09em}.beauty-rating{display:flex;gap:10px;align-items:center;margin:20px 0 8px;font-size:12px}.beauty-rating b{color:#e7a23a;letter-spacing:2px}.beauty-rating span{opacity:.58}.beauty-copy h1{max-width:650px;margin:12px 0 20px;font-size:clamp(48px,5.7vw,82px);line-height:.94;letter-spacing:-.055em}.beauty-copy>p{max-width:570px;font-size:18px;line-height:1.7;color:#6c6e78}.beauty-wow .lp-live-price{margin:26px 0 20px}.beauty-wow .lp-live-price strong{font-size:38px}.beauty-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.beauty-wow .lp-live-primary{display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:0 24px;border-radius:14px;background:var(--lp-accent);color:#fff;text-decoration:none;font-weight:900;box-shadow:0 16px 36px color-mix(in srgb,var(--lp-accent) 28%,transparent)}.beauty-text-link{color:#171820;text-decoration:none;font-weight:800;font-size:13px}.beauty-mini-proof{display:flex;gap:17px;flex-wrap:wrap;margin-top:22px;font-size:11px;color:#666b75}
+.beauty-visual-wrap{position:relative;min-height:560px;border-radius:34px;background:linear-gradient(145deg,#fff 5%,color-mix(in srgb,var(--lp-accent) 16%,#fff) 100%);overflow:hidden;box-shadow:0 36px 90px #9f4c6e22}.beauty-visual-wrap>img{width:100%;height:560px;object-fit:cover;display:block}.beauty-product-art{height:560px;position:relative;overflow:hidden;background:radial-gradient(circle at 35% 22%,#fff 0 9%,transparent 28%),linear-gradient(150deg,#fff5f9 0%,#f4bfD3 55%,#d978a0 100%)}.beauty-orb{position:absolute;border-radius:50%;filter:blur(.2px)}.orb-a{width:340px;height:340px;right:-80px;top:-70px;background:#ffffff64}.orb-b{width:330px;height:330px;left:-120px;bottom:-110px;background:#fff0f4aa}.beauty-bottle{position:absolute;left:50%;top:50%;transform:translate(-50%,-47%);width:190px;height:330px;border-radius:80px 80px 42px 42px;background:linear-gradient(100deg,#fff9,#ffffff 42%,#f9dce8 75%,#fff8);box-shadow:0 35px 70px #7a294b35,inset -12px 0 28px #d8659126;display:flex;flex-direction:column;align-items:center;justify-content:center;text-transform:uppercase}.beauty-bottle:before{content:"";position:absolute;width:94px;height:72px;border-radius:18px 18px 9px 9px;background:#161923;top:-48px;box-shadow:0 10px 20px #0003}.beauty-bottle i{width:42px;height:2px;background:var(--lp-accent);margin-bottom:16px}.beauty-bottle b{font-size:17px;letter-spacing:.16em}.beauty-bottle small{font-size:9px;letter-spacing:.22em;margin-top:8px;color:#8c6877}.beauty-petal{position:absolute;width:90px;height:42px;border-radius:90% 10% 90% 10%;background:#fff7;transform:rotate(-28deg)}.petal-a{left:70px;top:100px}.petal-b{right:80px;bottom:110px;transform:rotate(34deg)}.petal-c{left:90px;bottom:70px;transform:rotate(70deg);width:60px}.beauty-float-card{position:absolute;left:24px;right:24px;bottom:22px;padding:16px 18px;border-radius:18px;background:#151720e8;color:#fff;backdrop-filter:blur(10px);display:grid;grid-template-columns:auto 1fr;gap:4px 18px}.beauty-float-card small{grid-row:1/3;font-size:9px;letter-spacing:.12em;color:#f2a8c5}.beauty-float-card strong{font-size:15px}.beauty-float-card span{font-size:11px;color:#ffffffa7}
+.beauty-marquee{min-height:68px;padding:0 5%;display:flex;align-items:center;justify-content:space-between;gap:16px;background:#171820;color:#fff;font-size:11px;font-weight:900;letter-spacing:.16em;overflow:hidden}.beauty-marquee i{width:5px;height:5px;border-radius:50%;background:var(--lp-accent)}
+.beauty-story{padding:92px 5%}.beauty-story-head{display:grid;grid-template-columns:.7fr 1.5fr;gap:40px;align-items:start}.beauty-story-head>span,.beauty-gallery-section>div>small,.beauty-faq small,.beauty-final-cta small{font-size:10px;font-weight:900;letter-spacing:.13em;color:var(--lp-accent)}.beauty-story-head h2{font-size:clamp(34px,4vw,58px);line-height:1.08;letter-spacing:-.045em;margin:0;max-width:850px}.beauty-benefits{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:54px}.beauty-benefits article{padding:28px;min-height:260px;border-radius:22px;background:#fff;border:1px solid #1619230c;box-shadow:0 18px 44px #5321390b;position:relative}.beauty-benefits article>span{position:absolute;right:22px;top:22px;font-size:10px;color:#a9a5aa}.beauty-icon{width:48px;height:48px;border-radius:16px;background:color-mix(in srgb,var(--lp-accent) 14%,#fff);display:grid;place-items:center;color:var(--lp-accent);font-size:20px}.beauty-benefits h3{font-size:20px;line-height:1.25;margin:28px 0 10px}.beauty-benefits p{margin:0;color:#777982;font-size:13px;line-height:1.65}
+.beauty-editorial{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;padding:0 5% 92px}.beauty-editorial-card{padding:44px;border-radius:28px;background:linear-gradient(140deg,#171820,#2a2228);color:#fff}.beauty-editorial-card small{color:#f2a8c5;font-weight:900;letter-spacing:.14em}.beauty-editorial-card h2{font-size:38px;line-height:1.12;letter-spacing:-.04em;max-width:680px}.beauty-editorial-card p{color:#ffffffad;line-height:1.7;max-width:700px}.beauty-stat-grid{display:grid;gap:12px}.beauty-stat-grid>div{padding:24px;border-radius:22px;background:color-mix(in srgb,var(--lp-accent) 11%,#fff);display:flex;align-items:end;justify-content:space-between}.beauty-stat-grid strong{font-size:34px}.beauty-stat-grid span{font-size:11px;color:#78747a}
+.beauty-gallery-section{padding:92px 5%;background:#fff}.beauty-gallery-section>div:first-child{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:32px}.beauty-gallery-section h2{font-size:38px;letter-spacing:-.04em;margin:10px 0 0}.beauty-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.beauty-gallery figure{margin:0;height:360px;border-radius:24px;overflow:hidden;background:linear-gradient(145deg,#fff1f6,#f1c6d6);position:relative}.beauty-gallery img{width:100%;height:100%;object-fit:cover}.beauty-gallery-demo figure{padding:28px;display:flex;flex-direction:column;justify-content:flex-end}.beauty-gallery-demo figure:nth-child(2){background:linear-gradient(145deg,#1d1b20,#49323d);color:#fff}.beauty-gallery-demo figure:nth-child(3){background:linear-gradient(145deg,#f4e4db,#e8b9aa)}.beauty-gallery-demo span{position:absolute;top:24px;right:24px;font-size:10px;opacity:.55}.beauty-gallery-demo strong{font-size:28px}.beauty-gallery-demo small{margin-top:7px;opacity:.65}
+.beauty-wow .lp-product-video{padding:76px 5%!important;background:#fff!important;border-top:0!important}.beauty-wow .lp-video-frame{border-radius:28px!important;box-shadow:0 20px 50px #0001}.beauty-review-section{padding:92px 12%;background:color-mix(in srgb,var(--lp-accent) 8%,#fff);text-align:center}.beauty-quote-mark{font-family:Georgia,serif;font-size:86px;line-height:.5;color:var(--lp-accent)}.beauty-review-section blockquote{font-size:clamp(28px,3.2vw,48px);line-height:1.22;letter-spacing:-.035em;max-width:930px;margin:22px auto 32px}.beauty-review-meta{display:flex;align-items:center;justify-content:center;gap:12px}.beauty-avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#171820;color:#fff}.beauty-review-meta div{text-align:left}.beauty-review-meta div strong,.beauty-review-meta div small{display:block}.beauty-review-meta div small{font-size:10px;opacity:.55;margin-top:2px}.beauty-review-meta>b{margin-left:12px;color:#e7a23a;letter-spacing:2px;font-size:11px}
+.beauty-faq{padding:82px 5%;display:grid;grid-template-columns:1fr 1fr;gap:50px;border-bottom:1px solid #16192310}.beauty-faq h2{font-size:34px;line-height:1.2;letter-spacing:-.035em}.beauty-faq p{font-size:17px;line-height:1.75;color:#70727b;max-width:620px}.beauty-final-cta{margin:76px 5%;padding:48px;border-radius:30px;background:linear-gradient(135deg,#171820 0%,#38252f 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:30px}.beauty-final-cta h2{font-size:42px;margin:10px 0}.beauty-final-cta p{color:#ffffff9b}.beauty-final-cta .lp-live-primary{flex:none}.beauty-footer{display:flex;justify-content:space-between;gap:20px;padding:28px 5%;font-size:11px;color:#777982}
+.beauty-wow .lp-ai-launcher{background:linear-gradient(145deg,var(--lp-accent),#b73d70);box-shadow:0 18px 46px color-mix(in srgb,var(--lp-accent) 35%,transparent)}
+@media(max-width:800px){.beauty-nav>div{display:none}.beauty-hero{grid-template-columns:1fr;padding-top:44px}.beauty-copy h1{font-size:52px}.beauty-visual-wrap,.beauty-product-art,.beauty-visual-wrap>img{min-height:480px;height:480px}.beauty-story-head,.beauty-editorial,.beauty-faq{grid-template-columns:1fr}.beauty-benefits,.beauty-gallery{grid-template-columns:1fr}.beauty-gallery figure{height:300px}.beauty-marquee span:nth-of-type(n+4),.beauty-marquee i:nth-of-type(n+4){display:none}.beauty-final-cta{align-items:flex-start;flex-direction:column}.beauty-footer{flex-direction:column}.beauty-review-section{padding-left:7%;padding-right:7%}}
+
+html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hidden}.lp-product-video,.lp-product-gallery{padding:48px 5%}.lp-product-video .lp-block-head,.lp-product-gallery .lp-block-head,.lp-product-video .lp-video-frame,.lp-product-gallery .lp-image-slider{max-width:980px;margin-left:auto;margin-right:auto}.lp-video-frame{width:100%;aspect-ratio:16/9;min-height:0;max-height:520px;border-radius:22px;overflow:hidden;background:var(--lp-surface)}.lp-video-frame iframe,.lp-video-frame video{width:100%;height:100%;aspect-ratio:16/9;display:block;object-fit:cover}.lp-video-empty{min-height:220px}.lp-image-slider{width:100%;max-width:980px;overflow:hidden;border-radius:22px}.lp-image-track{width:100%;overflow-x:auto}.lp-image-slide{flex:0 0 100%;width:100%;min-width:100%;height:clamp(230px,36vw,430px);min-height:0}.lp-image-slide img{width:100%;height:100%;min-height:0;object-fit:cover}.lp-gallery-demo-note{position:absolute;left:16px;bottom:16px;padding:7px 10px;border-radius:999px;background:#080c16bf;color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em}.is-empty-video .lp-block-head>span{opacity:.6}@media(max-width:760px){.lp-video-frame{aspect-ratio:16/9}.lp-video-empty{min-height:210px}.lp-image-slide{height:300px}.lp-block-head{align-items:flex-start;flex-direction:column;gap:10px}}
 .lp-hero-media-card{position:relative;min-height:var(--lp-media-height);border-radius:24px;overflow:hidden;box-shadow:0 30px 70px #0003}.lp-hero-media-card>img{width:100%;height:var(--lp-media-height);object-fit:cover}.lp-hero-float{position:absolute;padding:10px 12px;border-radius:14px;background:#090b12d9;color:#fff;border:1px solid #ffffff22;display:flex;flex-direction:column}.lp-hero-float-top{right:16px;top:16px}.lp-hero-float-bottom{left:16px;bottom:16px}.lp-ai-widget{position:fixed;z-index:50;bottom:24px}.lp-ai-widget.is-right{right:24px}.lp-ai-widget.is-left{left:24px}.lp-ai-launcher{width:58px;height:58px;border:0;border-radius:50%;background:var(--lp-accent);color:#fff;box-shadow:0 18px 44px #0005;font-weight:900}.lp-ai-panel{position:absolute;bottom:70px;width:330px;background:#0b0d14f5;color:#fff;border:1px solid #ffffff20;border-radius:20px;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s}.is-right .lp-ai-panel{right:0}.is-left .lp-ai-panel{left:0}.lp-ai-widget.is-open .lp-ai-panel{opacity:1;pointer-events:auto;transform:none}.lp-ai-head{display:flex;justify-content:space-between;padding:14px;border-bottom:1px solid #ffffff12}.lp-ai-head>div{display:flex;gap:8px}.lp-ai-head p{margin:0}.lp-ai-head small{display:block;opacity:.6}.lp-ai-context,.lp-ai-powered{padding:8px 14px;font-size:10px;opacity:.7}.lp-ai-messages{padding:14px;display:flex;flex-direction:column;gap:8px;max-height:280px;overflow:auto}.lp-ai-msg{padding:9px 11px;border-radius:13px;max-width:85%;font-size:12px}.lp-ai-msg.bot{background:#ffffff10}.lp-ai-msg.user{align-self:flex-end;background:var(--lp-accent)}.lp-ai-suggestions{display:flex;gap:6px;flex-wrap:wrap}.lp-ai-suggestions button{border:1px solid #ffffff18;background:#ffffff08;color:#fff;border-radius:999px;padding:6px 8px}.lp-ai-form{display:flex;gap:7px;padding:12px;border-top:1px solid #ffffff12}.lp-ai-form input{flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid #ffffff18;background:#ffffff09;color:#fff}.lp-ai-form button{width:38px;border:0;border-radius:10px;background:var(--lp-accent);color:#fff}
+
+/* YOUYOU V6.5 — MOBILE-FIRST MEDIA */
+.lp-hero-video{width:100%;height:100%;min-height:0;overflow:hidden;background:#111;position:relative}.lp-hero-video iframe,.lp-hero-video video{width:100%;height:100%;border:0;display:block;object-fit:cover}.lp-hero-video-empty{height:100%;min-height:300px;display:grid;place-items:center;align-content:center;gap:8px;text-align:center;background:linear-gradient(145deg,#171820,#3d2933);color:#fff}.lp-hero-video-empty span{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:var(--lp-accent);font-size:20px}.lp-hero-video-empty small{opacity:.58;max-width:260px}.beauty-visual-wrap>.lp-hero-video{height:560px}.beauty-visual-wrap>.lp-hero-video iframe,.beauty-visual-wrap>.lp-hero-video video{height:100%}.beauty-wow .lp-product-gallery{max-width:1100px;margin:auto}.beauty-wow .lp-image-slide{height:clamp(230px,34vw,400px)}
+@media(max-width:760px){body{width:100%;overflow-x:hidden}.lp-live-page{max-width:100%!important}.lp-live-hero{grid-template-columns:1fr!important;gap:24px!important;padding:32px 20px 44px!important}.lp-live-copy h1{font-size:clamp(36px,11vw,48px)!important}.lp-hero-media-card{min-height:0!important;height:auto!important;aspect-ratio:4/3}.lp-hero-media-card>img,.lp-hero-media-card>.lp-hero-video{height:100%!important;min-height:0!important}.lp-product-video,.lp-product-gallery{padding:38px 20px!important}.lp-video-frame{max-height:none!important;border-radius:16px!important}.lp-video-empty{min-height:180px!important}.lp-image-slide{height:220px!important}.lp-image-arrow{width:38px!important;height:38px!important}.lp-ai-launcher{width:52px!important;height:52px!important}.lp-ai-widget{bottom:14px!important}.lp-ai-widget.is-right{right:12px!important}.lp-ai-widget.is-left{left:12px!important}.lp-ai-panel{width:calc(100vw - 24px)!important;max-width:360px!important;max-height:72vh}.beauty-nav{height:64px;padding:0 20px}.beauty-nav>a{padding:9px 12px}.beauty-hero{grid-template-columns:1fr!important;gap:24px!important;padding:34px 20px 40px!important;min-height:0!important}.beauty-copy h1{font-size:clamp(40px,12vw,52px)!important;line-height:.98!important}.beauty-copy>p{font-size:15px!important;line-height:1.6!important}.beauty-rating{margin-top:14px}.beauty-actions{gap:12px}.beauty-wow .lp-live-primary{width:100%;min-height:50px}.beauty-text-link{width:100%;text-align:center}.beauty-mini-proof{gap:9px 14px;margin-top:17px}.beauty-visual-wrap,.beauty-product-art,.beauty-visual-wrap>img,.beauty-visual-wrap>.lp-hero-video{width:100%!important;min-height:0!important;height:auto!important;aspect-ratio:4/3!important;border-radius:24px!important}.beauty-visual-wrap>.lp-hero-video iframe,.beauty-visual-wrap>.lp-hero-video video{height:100%!important}.beauty-bottle{width:135px;height:230px}.beauty-bottle:before{width:68px;height:54px;top:-36px}.beauty-float-card{left:12px;right:12px;bottom:12px;padding:11px 12px;border-radius:14px}.beauty-marquee{min-height:54px;padding:0 20px}.beauty-story,.beauty-gallery-section,.beauty-faq{padding:48px 20px!important}.beauty-story-head{grid-template-columns:1fr!important;gap:14px}.beauty-story-head h2,.beauty-gallery-section h2{font-size:clamp(30px,9vw,40px)!important}.beauty-benefits{display:grid!important;grid-auto-flow:column;grid-auto-columns:84%;grid-template-columns:none!important;gap:12px;overflow-x:auto;padding:2px 2px 12px;scroll-snap-type:x mandatory;scrollbar-width:none}.beauty-benefits article{scroll-snap-align:start;min-height:220px;padding:22px}.beauty-editorial{grid-template-columns:1fr!important;padding:0 20px 48px!important}.beauty-editorial-card{padding:28px 22px}.beauty-editorial-card h2{font-size:30px}.beauty-stat-grid{grid-template-columns:repeat(3,1fr)}.beauty-stat-grid>div{padding:14px 10px;display:block}.beauty-stat-grid strong{font-size:24px;display:block}.beauty-gallery-section>div:first-child{display:block;margin-bottom:20px}.beauty-gallery{display:grid!important;grid-auto-flow:column;grid-auto-columns:78%;grid-template-columns:none!important;gap:12px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x mandatory;scrollbar-width:none}.beauty-gallery figure{height:220px!important;scroll-snap-align:start}.beauty-review-section{padding:58px 20px!important}.beauty-review-section blockquote{font-size:28px!important}.beauty-faq{grid-template-columns:1fr!important;gap:10px}.beauty-faq h2{font-size:28px}.beauty-faq p{font-size:15px}.beauty-final-cta{margin:44px 20px!important;padding:28px 22px!important;flex-direction:column!important;align-items:flex-start!important}.beauty-final-cta h2{font-size:32px}.beauty-footer{padding:22px 20px!important;flex-direction:column!important}.beauty-wow .lp-product-video{padding:42px 20px!important}.beauty-wow .lp-video-frame{border-radius:18px!important}}
+
+/* YOUYOU V6.6 — CLEAN PUBLIC MEDIA + REAL MOBILE FIRST */
+.lp-live-hero.no-hero-media,.beauty-hero.no-hero-media{grid-template-columns:1fr!important}.lp-live-hero.no-hero-media .lp-live-copy,.beauty-hero.no-hero-media .beauty-copy{max-width:860px}.beauty-visual-wrap.has-video{min-height:0!important;height:auto!important;aspect-ratio:16/9!important;background:#111}.beauty-visual-wrap.has-video>.lp-hero-video{width:100%!important;height:100%!important;min-height:0!important;aspect-ratio:auto!important}.beauty-visual-wrap.has-video iframe,.beauty-visual-wrap.has-video video{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;border:0!important}.lp-hero-media-card.has-hero-video{min-height:0!important;height:auto!important;aspect-ratio:16/9!important;background:#111}.lp-hero-media-card.has-hero-video>.lp-hero-video{position:absolute!important;inset:0!important;width:100%!important;height:100%!important}.lp-hero-media-card.has-hero-video iframe,.lp-hero-media-card.has-hero-video video{width:100%!important;height:100%!important;border:0!important;display:block!important}.lp-static-image-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.lp-static-image-grid figure{margin:0;aspect-ratio:4/3;border-radius:20px;overflow:hidden;background:var(--lp-surface)}.lp-static-image-grid img{width:100%;height:100%;display:block;object-fit:cover}.lp-product-gallery .lp-block-head>span{display:none!important}.lp-product-video .lp-block-head>span{display:none!important}
+@media(max-width:760px){.beauty-hero.no-hero-media,.lp-live-hero.no-hero-media{display:block!important}.beauty-visual-wrap.has-video{width:100%!important;height:auto!important;min-height:0!important;aspect-ratio:16/9!important;border-radius:18px!important}.beauty-visual-wrap.has-video>.lp-hero-video{aspect-ratio:auto!important;height:100%!important}.lp-hero-media-card.has-hero-video{aspect-ratio:16/9!important;height:auto!important;min-height:0!important;border-radius:18px!important}.lp-static-image-grid{grid-template-columns:1fr 1fr!important;gap:10px}.lp-static-image-grid figure{border-radius:14px}.lp-product-gallery{padding:32px 16px!important}.lp-product-gallery .lp-block-head{margin-bottom:14px}.lp-image-slider{border-radius:16px!important}.lp-image-slide{height:auto!important;aspect-ratio:4/3!important}.lp-image-slide img{height:100%!important}.beauty-wow .lp-product-gallery{padding:36px 16px!important}.beauty-final-cta{padding:24px 20px!important}.beauty-final-cta h2{margin-bottom:0!important}}
+
+
+/* YOUYOU V6.7 — COMPACT PREMIUM IMAGE CAROUSEL */
+.lp-product-gallery{padding-top:34px!important;padding-bottom:34px!important}
+.lp-product-gallery .lp-block-head{max-width:1120px!important;margin:0 auto 16px!important}
+.lp-product-gallery .lp-block-head h2{margin:4px 0 0!important}
+.lp-image-slider{position:relative!important;width:100%!important;max-width:1120px!important;margin:0 auto!important;overflow:hidden!important;border-radius:20px!important;background:transparent!important}
+.lp-image-track{display:flex!important;gap:12px!important;width:100%!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;scrollbar-width:none!important;padding:0 2px 4px!important}
+.lp-image-track::-webkit-scrollbar{display:none!important}
+.lp-image-slide{position:relative!important;flex:0 0 calc((100% - 24px)/3)!important;width:auto!important;min-width:0!important;height:250px!important;aspect-ratio:auto!important;scroll-snap-align:start!important;border-radius:18px!important;overflow:hidden!important;background:var(--lp-surface)!important}
+.lp-image-slide img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+.lp-image-arrow{top:50%!important;transform:translateY(-50%)!important;width:40px!important;height:40px!important;border-radius:50%!important;background:#0b0d14d9!important;color:#fff!important;border:1px solid #ffffff2b!important;box-shadow:0 8px 22px #0003!important}
+.lp-image-arrow.prev{left:10px!important}.lp-image-arrow.next{right:10px!important}
+.lp-image-dots{position:static!important;transform:none!important;justify-content:center!important;margin:12px auto 0!important;padding:0!important;background:transparent!important}
+.lp-image-dots button{background:#8d8d9560!important}.lp-image-dots button.is-active{background:var(--lp-accent)!important}
+.beauty-wow .lp-product-gallery{max-width:none!important;padding-left:5%!important;padding-right:5%!important}
+.beauty-wow .lp-image-slide{height:250px!important}
+@media(max-width:900px) and (min-width:761px){.lp-image-slide{flex-basis:calc((100% - 12px)/2)!important;height:230px!important}}
+@media(max-width:760px){
+  .lp-product-gallery,.beauty-wow .lp-product-gallery{padding:28px 16px!important}
+  .lp-product-gallery .lp-block-head{margin-bottom:12px!important}
+  .lp-image-slider{border-radius:0!important;overflow:visible!important}
+  .lp-image-track{gap:10px!important;padding:0 24px 6px 0!important}
+  .lp-image-slide,.beauty-wow .lp-image-slide{flex:0 0 82%!important;width:82%!important;min-width:82%!important;height:176px!important;aspect-ratio:auto!important;border-radius:15px!important}
+  .lp-image-arrow{display:none!important}
+  .lp-image-dots{margin-top:10px!important}
+}
+@media(max-width:390px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:86%!important;width:86%!important;min-width:86%!important;height:auto!important}}
+
+/* YOUYOU V6.8 — THREE CARD PRODUCT CAROUSEL */
+.lp-image-slider{overflow:hidden!important;border-radius:0!important}
+.lp-image-track{align-items:stretch!important;gap:16px!important;padding:4px 3px 8px!important}
+.lp-image-slide,.beauty-wow .lp-image-slide{display:flex!important;flex-direction:column!important;flex:0 0 calc((100% - 32px)/3)!important;width:calc((100% - 32px)/3)!important;min-width:0!important;height:auto!important;aspect-ratio:auto!important;border-radius:18px!important;background:var(--lp-surface)!important;border:1px solid color-mix(in srgb,var(--lp-text) 8%, transparent)!important;box-shadow:0 12px 30px rgba(10,12,20,.08)!important;overflow:hidden!important}
+.lp-product-slide-media{width:100%;aspect-ratio:4/3;overflow:hidden;background:var(--lp-surface)}
+.lp-product-slide-media img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}
+.lp-product-slide-meta{position:relative;display:grid;gap:4px;padding:13px 14px 14px;min-height:78px}
+.lp-product-slide-meta small{font-size:9px;font-weight:900;letter-spacing:.08em;color:var(--lp-accent)}
+.lp-product-slide-meta strong{font-size:14px;line-height:1.2;color:var(--lp-text)}
+.lp-product-slide-meta>span{position:absolute;right:13px;top:13px;font-size:10px;font-weight:900;opacity:.28}
+@media(max-width:900px) and (min-width:761px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:calc((100% - 16px)/2)!important;width:calc((100% - 16px)/2)!important}}
+@media(max-width:760px){
+  .lp-image-track{gap:12px!important;padding:2px 22px 6px 0!important}
+  .lp-image-slide,.beauty-wow .lp-image-slide{flex:0 0 78%!important;width:78%!important;min-width:78%!important;height:auto!important;border-radius:16px!important}
+  .lp-product-slide-media{aspect-ratio:4/3!important}
+  .lp-product-slide-meta{padding:11px 12px 12px;min-height:68px}
+  .lp-product-slide-meta strong{font-size:13px}
+}
+@media(max-width:390px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:82%!important;width:82%!important;min-width:82%!important}}
+
+
+/* YOUYOU V6.9 — QUALITY LOCK */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.lp-lead-form{display:grid;gap:12px}.lp-lead-form label{display:grid;gap:6px}.lp-lead-form label>span{font-size:11px;font-weight:800;opacity:.68}.lp-lead-form input,.lp-lead-form textarea{width:100%;padding:13px;border:1px solid color-mix(in srgb,var(--lp-text) 14%,transparent);border-radius:10px;background:var(--lp-surface);color:var(--lp-text);font:inherit}.lp-lead-form button{padding:14px 18px;border:0;border-radius:10px;background:var(--lp-accent);color:#fff;font-weight:900;cursor:pointer}.lp-lead-form button:disabled{opacity:.55;cursor:wait}.lp-lead-status{min-height:18px;margin:0;font-size:11px;opacity:.72}.lp-direct-contact-wrap{display:flex;align-items:center}.lp-direct-contact{display:inline-flex;padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:900}.lp-live-contact>div>p{opacity:.68;line-height:1.6}.lp-live-trust span{padding:7px 10px;border:1px solid color-mix(in srgb,var(--lp-text) 10%,transparent);border-radius:999px}.beauty-nav>div a{color:inherit;text-decoration:none}.beauty-proofline{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}.beauty-proofline span{padding:6px 9px;border:1px solid #16192312;border-radius:999px;font-size:10px;font-weight:800;color:#777}.beauty-final-cta.has-form{align-items:flex-start}.beauty-final-cta.has-form>div{max-width:430px}.beauty-lead-form{width:min(480px,100%)}.beauty-lead-form input,.beauty-lead-form textarea{background:#ffffff12;border-color:#ffffff20;color:#fff}.beauty-lead-form input::placeholder,.beauty-lead-form textarea::placeholder{color:#ffffff72}.beauty-review-meta>b{display:none!important}.lp-ai-context,.lp-ai-powered{display:none!important}
+.lp-image-slider{overflow:hidden!important;border-radius:0!important}.lp-image-track{display:flex!important;align-items:stretch!important;gap:16px!important;width:100%!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;scrollbar-width:none!important;padding:4px 3px 8px!important}.lp-image-track::-webkit-scrollbar{display:none!important}.lp-image-slide,.beauty-wow .lp-image-slide{display:flex!important;flex-direction:column!important;flex:0 0 calc((100% - 32px)/3)!important;width:calc((100% - 32px)/3)!important;min-width:0!important;height:auto!important;aspect-ratio:auto!important;scroll-snap-align:start!important;border-radius:18px!important;background:var(--lp-surface)!important;border:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)!important;box-shadow:0 12px 30px rgba(10,12,20,.08)!important;overflow:hidden!important}.lp-product-slide-media{width:100%;aspect-ratio:4/3;overflow:hidden;background:var(--lp-surface)}.lp-product-slide-media img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}.lp-product-slide-meta{position:relative;display:grid;gap:4px;padding:13px 14px 14px;min-height:78px}.lp-product-slide-meta small{font-size:9px;font-weight:900;letter-spacing:.08em;color:var(--lp-accent)}.lp-product-slide-meta strong{font-size:14px;line-height:1.2;color:var(--lp-text)}.lp-product-slide-meta>span{position:absolute;right:13px;top:13px;font-size:10px;font-weight:900;opacity:.28}.lp-image-dots{position:static!important;transform:none!important;display:flex!important;justify-content:center!important;gap:7px!important;margin:10px auto 0!important;background:transparent!important}.lp-image-dots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#8d8d9560}.lp-image-dots button.is-active{width:22px;background:var(--lp-accent)}
+.layout-whatsapp .lp-live-primary{background:#25d366;color:#06130a}.layout-urgent .lp-live-primary{background:#ff675f;color:#fff}.layout-luxury .lp-live-hero,.layout-hotel .lp-live-hero,.layout-property .lp-live-hero{padding-top:84px;padding-bottom:84px}.layout-saas .lp-live-media,.layout-tech .lp-live-media,.layout-app .lp-live-media{box-shadow:0 24px 70px #0005}.layout-spa .lp-live-section,.layout-salon .lp-live-section,.layout-clinic .lp-live-section,.layout-dental .lp-live-section{border-color:color-mix(in srgb,var(--lp-text) 7%,transparent)}
+@media(max-width:900px) and (min-width:761px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:calc((100% - 16px)/2)!important;width:calc((100% - 16px)/2)!important}}
+@media(max-width:760px){.lp-live-page{width:100%;overflow-x:hidden}.lp-live-nav,.lp-live-footer{padding-left:18px;padding-right:18px}.lp-live-hero,.lp-live-contact{grid-template-columns:1fr!important;padding-left:18px!important;padding-right:18px!important}.lp-live-section{padding-left:18px!important;padding-right:18px!important}.lp-image-track{gap:12px!important;padding:2px 22px 6px 0!important}.lp-image-slide,.beauty-wow .lp-image-slide{flex:0 0 78%!important;width:78%!important;min-width:78%!important;height:auto!important;border-radius:16px!important}.lp-image-arrow{display:none!important}.lp-product-slide-meta{padding:11px 12px 12px;min-height:68px}.beauty-proofline{margin-top:14px}.beauty-final-cta.has-form{display:grid!important;grid-template-columns:1fr!important}.beauty-lead-form{width:100%}.beauty-review-section{padding-left:20px!important;padding-right:20px!important}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>${body}<script>
-window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=p.querySelector('.lp-live-sub')?.textContent?.trim(),faq=p.querySelector('.lp-live-faq p')?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
+const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
+const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
+async function yyPersist(page,content,visitor={}){const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
+window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),name=String(form?.elements?.name?.value||'').trim(),contact=String(form?.elements?.contact?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();if(!name||!contact){if(status)status.textContent='Please add your name and contact.';return false}const email=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)?contact:'',title=page?.dataset?.pageTitle||'this offer',content='Lead form submission. Visitor is ready to be contacted about '+title+'. Contact: '+contact+'. '+(message?'Request: '+message:'Request: Please contact me.');if(button)button.disabled=true;if(status)status.textContent='Sending…';yyPersist(page,content,{name,email}).then(r=>{if(status)status.textContent=r.ok?'Thanks — your request was sent.':'This form needs the published page connection.';if(r.ok)form.reset()}).catch(()=>{if(status)status.textContent='Could not send right now. Please try another contact option.'}).finally(()=>{if(button)button.disabled=false});return false};
+window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
+function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dots=[...slider.querySelectorAll('.lp-image-dots button')];if(!track||slides.length<2)return;const update=()=>{let a=0,d=Infinity;slides.forEach((s,i)=>{const x=Math.abs(s.offsetLeft-track.scrollLeft);if(x<d){d=x;a=i}});dots.forEach((dot,i)=>dot.classList.toggle('is-active',i===a))};let raf=0;track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(update)},{passive:true});update();if(slider.dataset.autoplay==='true'&&!reduced){const speed=Math.max(2000,Number(slider.dataset.speed)||4000);let timer;const play=()=>{clearInterval(timer);timer=setInterval(()=>{const current=dots.findIndex(x=>x.classList.contains('is-active')),next=current>=slides.length-1?0:current+1;track.scrollTo({left:slides[next].offsetLeft,behavior:'smooth'})},speed)},pause=()=>clearInterval(timer);slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});play()}})}
+document.addEventListener('DOMContentLoaded',yyInitCarousels);yyInitCarousels();
+
 </script></body>
 </html>`;
 }
@@ -2464,14 +2687,14 @@ function renderLandingPagesSection() {
             <div class="lpb-tool-head-v509">
               <div>
                 <small>HERO VIDEO</small>
-                <h3>Video area is clear and ready.</h3>
+                <h3>Add video only when the page needs it.</h3>
               </div>
               <span>OPTIONAL</span>
             </div>
 
             <div class="lpb-video-demo-v509">
               <span>▶</span>
-              <b>VIDEO PREVIEW</b>
+              <b>OPTIONAL VIDEO</b>
               <small>YouTube · Vimeo · Hosted URL</small>
             </div>
 
@@ -2597,13 +2820,17 @@ function renderLandingPagesSection() {
               </div>
             </div>
 
-            <div class="lpb-editor-section">
-              <small>MEDIA</small>
-              <label>Image URL<input id="lpb-image-url" type="url" placeholder="https://..." /></label>
-              <label>Video URL<input id="lpb-video-url" type="url" placeholder="YouTube / Vimeo / hosted video URL" /></label>
-              <label class="lpb-upload-label">Or preview a local image
-                <input id="lpb-image-file" type="file" accept="image/*" />
+            <div class="lpb-editor-section lpb-media-pro-section">
+              <small>HERO VISUAL · OPTIONAL</small>
+              <div class="lpb-media-toggle-row">
+                <div><strong>Hero image / video area</strong><span>Show it, replace it, or remove it completely.</span></div>
+                <select id="lpb-hero-media-enabled"><option value="on">Show</option><option value="off">Hidden</option></select>
+              </div>
+              <label>Hero image URL<input id="lpb-hero-image-url" type="url" placeholder="https://...hero-image.jpg" /></label>
+              <label class="lpb-upload-label">Upload hero image
+                <input id="lpb-hero-image-file" type="file" accept="image/*" />
               </label>
+              <p class="lpb-media-help">For a hero video, enable Video below and choose “Inside hero”.</p>
             </div>
 
             <div class="lpb-editor-section">
@@ -2770,9 +2997,9 @@ function renderLandingPageWorkspace() {
           </div>
 
           <div class="lpb-editor-section lpb-media-pro-section">
-            <small>VIDEO BLOCK · OPTIONAL</small>
+            <small>VIDEO / HERO VIDEO · OPTIONAL</small>
             <div class="lpb-media-toggle-row">
-              <div><strong>Product video</strong><span>Keep video separate from the image slider.</span></div>
+              <div><strong>Product or hero video</strong><span>Place it inside the hero or as a separate section. Slider stays images-only.</span></div>
               <select id="lpb-video-enabled"><option value="on">Enabled</option><option value="off">Hidden</option></select>
             </div>
             <label>Video section title<input id="lpb-video-title" placeholder="See the product in action." /></label>
@@ -2784,34 +3011,36 @@ function renderLandingPageWorkspace() {
             </label>
             <label>Video position
               <select id="lpb-video-position">
+                <option value="hero">Inside hero · replace hero image</option>
                 <option value="after-hero">After hero</option>
                 <option value="after-benefits">After benefits</option>
                 <option value="before-contact">Before final CTA</option>
               </select>
             </label>
-            <p class="lpb-media-help">Uploaded videos preview instantly. Permanent online video hosting will be connected with the publishing backend.</p>
+            <p class="lpb-media-help">Choose “Inside hero” to make the video the main visual at the top. Uploaded videos preview instantly; permanent online hosting comes with Publish.</p>
           </div>
 
           <div class="lpb-editor-section lpb-media-pro-section">
-            <small>IMAGE SLIDER</small>
+            <small>IMAGES / GALLERY</small>
             <div class="lpb-media-toggle-row">
-              <div><strong>Product image slider</strong><span>Images only. No video mixed inside.</span></div>
-              <select id="lpb-slider-enabled"><option value="on">Enabled</option><option value="off">Hidden</option></select>
+              <div><strong>Product images</strong><span>Choose a slider, normal static images, or hide this section.</span></div>
+              <select id="lpb-slider-enabled"><option value="grid">Image gallery</option><option value="on">3-card carousel</option><option value="off">Hidden</option></select>
             </div>
-            <label>Slider title<input id="lpb-slider-title" placeholder="See it from every angle." /></label>
+            <label>Gallery title<input id="lpb-slider-title" placeholder="See it from every angle." /></label>
             <label>First image URL<input id="lpb-image-url" type="text" inputmode="url" placeholder="https://...product-front.jpg" /></label>
 
             <label class="lpb-upload-label lpb-upload-pro">
-              Add images
+              Add your images
               <input id="lpb-image-files" type="file" accept="image/*" multiple />
-              <span>Select several images at once · up to 8</span>
+              <span class="lpb-upload-button">Choose images</span>
+              <span>Select your own product photos · up to 8</span>
             </label>
 
             <label>Image list <span>One image URL per line · up to 8</span>
               <textarea id="lpb-media-gallery" rows="8" placeholder="https://...front.jpg&#10;https://...side.jpg&#10;https://...detail.jpg"></textarea>
             </label>
 
-            <div class="lpb-slider-settings-pro">
+            <div class="lpb-slider-settings-pro" data-slider-only>
               <label>Auto-play
                 <select id="lpb-slider-autoplay"><option value="on">On</option><option value="off">Off</option></select>
               </label>
@@ -2831,7 +3060,7 @@ function renderLandingPageWorkspace() {
               </label>
             </div>
 
-            <label>Slider position
+            <label data-gallery-position>Gallery position
               <select id="lpb-slider-position">
                 <option value="after-video">Directly under video</option>
                 <option value="after-hero">After hero</option>
@@ -2840,7 +3069,7 @@ function renderLandingPageWorkspace() {
               </select>
             </label>
 
-            <p class="lpb-media-help lpb-media-help-strong">Add Image is always available. The image slider stays independent from video and can autoplay with premium arrows + dots.</p>
+            <p class="lpb-media-help lpb-media-help-strong">Image gallery = normal photos. 3-card carousel = three product cards visible on desktop and swipe on mobile.</p>
           </div>
 
           <div class="lpb-editor-section">
@@ -2936,7 +3165,7 @@ function initLandingPageWorkspace() {
     description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
     ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", whatsapp:"lpb-whatsapp",
-    phone:"lpb-phone", email:"lpb-email", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
+    phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
     mediaGallery:"lpb-media-gallery", sliderEnabled:"lpb-slider-enabled", sliderTitle:"lpb-slider-title",
     sliderPosition:"lpb-slider-position", sliderAutoplay:"lpb-slider-autoplay", sliderSpeed:"lpb-slider-speed",
@@ -2963,24 +3192,24 @@ function initLandingPageWorkspace() {
     });
   };
 
+  const updateGalleryControls = () => {
+    const mode = document.getElementById("lpb-slider-enabled")?.value || "off";
+    document.querySelectorAll("[data-slider-only]").forEach((el) => {
+      el.style.display = mode === "on" ? "grid" : "none";
+    });
+    document.querySelectorAll("[data-gallery-position]").forEach((el) => {
+      el.style.display = mode === "off" ? "none" : "grid";
+    });
+  };
+
   const renderPreview = () => {
     readFields();
+    updateGalleryControls();
     const preview = document.querySelector("#lpb-live-preview");
     const name = document.querySelector("#lpw-document-name");
     if (preview) {
       preview.innerHTML = landingPreviewMarkup(current);
-
-      preview.querySelectorAll(".lp-image-slider[data-autoplay='true']").forEach((slider) => {
-        const track = slider.querySelector(".lp-image-track");
-        if (!track || track.children.length < 2) return;
-        const speed = Math.max(2000, Number(slider.dataset.speed) || 4000);
-        const timer = setInterval(() => {
-          if (!document.body.contains(slider)) return clearInterval(timer);
-          const max = Math.max(0, track.scrollWidth - track.clientWidth);
-          const next = track.scrollLeft + track.clientWidth >= max - 4 ? 0 : track.scrollLeft + track.clientWidth;
-          track.scrollTo({ left:next, behavior:"smooth" });
-        }, speed);
-      });
+      initLandingCarousels(preview);
     }
     if (name) name.textContent = current.name || "Untitled page";
     const widthValue = document.querySelector("#lpb-media-width-value");
@@ -3028,6 +3257,11 @@ function initLandingPageWorkspace() {
 
   const exportHtml = () => {
     readFields();
+    if (String(current.videoUrl || "").startsWith("blob:")) {
+      const stateEl = document.querySelector("#lpw-save-state");
+      if (stateEl) stateEl.textContent = "Local video cannot be exported — use YouTube, Vimeo or a hosted MP4 URL";
+      return;
+    }
     const html = landingExportHtml(current);
     const blob = new Blob([html], { type:"text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -3052,6 +3286,27 @@ function initLandingPageWorkspace() {
     const el = document.getElementById(id);
     el?.addEventListener("input", renderPreview);
     el?.addEventListener("change", renderPreview);
+  });
+
+  document.querySelector("#lpb-hero-image-file")?.addEventListener("change", (event) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    if (file.size > 2_000_000) {
+      const status = document.querySelector("#lpw-save-state");
+      if (status) status.textContent = "Use a hero image under 2 MB";
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      current.heroImageUrl = String(reader.result || "");
+      current.heroMediaEnabled = "on";
+      const input = document.querySelector("#lpb-hero-image-url");
+      const enabled = document.querySelector("#lpb-hero-media-enabled");
+      if (input) input.value = current.heroImageUrl;
+      if (enabled) enabled.value = "on";
+      renderPreview();
+    };
+    reader.readAsDataURL(file);
   });
 
   document.querySelector("#lpb-image-files")?.addEventListener("change", async (event) => {
@@ -3142,7 +3397,7 @@ function initLandingPages() {
     description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
     ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", whatsapp:"lpb-whatsapp",
-    phone:"lpb-phone", email:"lpb-email", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
+    phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     accent:"lpb-accent", background:"lpb-background", surface:"lpb-surface",
     textColor:"lpb-text-color", testimonial:"lpb-testimonial",
     faqQuestion:"lpb-faq-q", faqAnswer:"lpb-faq-a",

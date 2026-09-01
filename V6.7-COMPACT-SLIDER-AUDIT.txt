@@ -1,0 +1,10 @@
+YOUYOU V6.7 — COMPACT SLIDER
+
+- Based on V6.6.
+- Beauty Product defaults remain Static Images, not Slider.
+- Slider redesigned as compact carousel: 3 cards desktop, 2 tablet, 82% card mobile with next-card peek.
+- Mobile slider height reduced to 176px (164px on very small screens).
+- Desktop slider height reduced to 250px.
+- Arrows hidden on mobile in favor of native swipe.
+- Dots moved below media rather than overlaying images.
+- Arrow/autoplay scrolling now advances one card instead of one full viewport.

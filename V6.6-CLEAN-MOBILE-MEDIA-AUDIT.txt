@@ -1,0 +1,17 @@
+YOUYOU V6.6 — CLEAN MOBILE MEDIA
+
+Fixed after visual audit:
+- Hero visual can be shown or hidden independently.
+- Hero image now has its own field/upload and is no longer tied to gallery image #1.
+- Hero video renders only when a real URL/file exists; no HERO VIDEO READY placeholder leaks.
+- Hero video uses a true 16:9 container on desktop and mobile, removing the large white gap.
+- Product images support Static images / Slider / Hidden.
+- Slider only exists when selected and real images exist.
+- Static gallery lets client place images without using a slider.
+- Removed VIDEO READY / ADD VIDEO status labels from public output.
+- Removed generic 'Give visitors one clear next step...' text from public output.
+- Removed internal page-aware marketing language from Beauty final CTA.
+- Mobile gallery/video spacing tightened and media cards use deterministic aspect ratios.
+- Removed the older duplicate MEDIA controls from builder and separated Hero / Video / Gallery responsibilities.
+
+OpenAI is still not integrated; page-aware widget remains local demo logic.

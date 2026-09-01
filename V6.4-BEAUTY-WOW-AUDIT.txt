@@ -1,0 +1,16 @@
+YOUYOU V6.4 — BEAUTY PRODUCT WOW TEMPLATE
+
+Focused redesign of Beauty Product only.
+- New editorial beauty hero with product art/sample visual fallback
+- Ratings, trust row, premium CTA treatment
+- Benefits cards with icons and richer microcopy
+- Editorial story/stat section
+- Product detail/gallery section with graceful sample state
+- Optional video preserved and restyled
+- Premium customer review section
+- Cleaner FAQ and final conversion CTA
+- Page-aware YOUYOU widget preserved
+- Responsive mobile layout
+- Existing builder fields still drive copy, pricing, CTA, images, gallery and video
+
+No OpenAI API or paid service required for this preview.

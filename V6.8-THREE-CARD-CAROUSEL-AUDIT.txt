@@ -1,0 +1,9 @@
+YOUYOU V6.8 — THREE CARD PRODUCT CAROUSEL
+
+- Browser native multiple-file filename/count control hidden; builder shows a clean Choose images button instead.
+- Image mode renamed to Image gallery / 3-card carousel / Hidden.
+- Slider-only controls are hidden unless 3-card carousel is selected.
+- Static gallery remains available for clients who do not want a carousel.
+- Carousel uses product cards: 3 visible desktop, 2 tablet, 1 + next-card peek mobile.
+- Each card has image + lightweight product meta instead of a tall full-width image slide.
+- Existing page-aware widget, hero video and mobile-first behavior preserved.

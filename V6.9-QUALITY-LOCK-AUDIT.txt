@@ -1,0 +1,24 @@
+YOUYOU V6.9 — QUALITY LOCK
+
+Fixed from V6.8 audit:
+- Preview/Export three-card carousel CSS parity
+- Mobile simulator selectors corrected for lpw-preview-stage
+- Lead form submits to Supabase conversations/messages using publishable key + RLS
+- Beauty Lead Form renders when CTA action = Lead form
+- Local blob video is blocked from HTML export with a clear status message
+- Export carousel autoplay + dot synchronization + reduced-motion support
+- Beauty gallery/video positions now respect builder controls
+- Removed generated fake ratings, verified-customer language, 24/7 and secure-checkout claims
+- Removed technical widget copy from public landing pages
+- Empty price is hidden instead of showing Add price
+- Landing widget visitor questions are persisted to Conversations when Supabase is configured
+- Added basic Open Graph/Twitter metadata to exported HTML
+- Added accessible form labels/status and real Beauty nav anchors
+- Switched exported Beauty typography to a system font stack (no missing Inter dependency)
+
+Still intentionally pending:
+- Public Publish + unique URL + hosted media storage
+- OpenAI API real model responses
+- WhatsApp Business API
+- Full bespoke redesign for every one of the 30 templates (V6.9 adds some layout differentiation but Beauty remains the premium reference)
+- Large codebase refactor / legacy landing builder cleanup

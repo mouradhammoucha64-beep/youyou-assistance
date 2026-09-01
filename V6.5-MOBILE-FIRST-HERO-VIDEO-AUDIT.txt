@@ -1,0 +1,10 @@
+YOUYOU V6.5 — MOBILE-FIRST / HERO VIDEO / COMPACT SLIDER
+
+- Added a real Hero Video placement option to the existing Video builder.
+- Hero video can replace the hero image for Beauty Product and generic landing templates.
+- Standalone video block is not duplicated when video is placed in Hero.
+- Slider max width reduced and image height capped for desktop and phone.
+- Beauty mobile layout rebuilt: compact hero, 4:3 media, horizontal swipe benefit/gallery cards, tighter spacing, full-width CTA.
+- Mobile preview inside desktop builder now simulates phone layout explicitly.
+- Page-aware widget selectors expanded to understand Beauty benefits/description/FAQ.
+- Existing Supabase/Auth/Conversations/Leads core untouched.
