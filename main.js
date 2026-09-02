@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "7.5.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "7.6.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2171,6 +2171,8 @@ function defaultLandingPageData(templateId = "product-launch") {
     priceMode: "show",
     ctaText: template.cta,
     ctaAction: template.layout === "whatsapp" ? "whatsapp" : "form",
+    leadFormEnabled: "on",
+    formButtonText: "Send request",
     whatsapp: c.whatsapp_number || "",
     phone: c.business_phone || "",
     email: c.business_email || "",
@@ -2309,6 +2311,9 @@ function landingWidgetMarkup(data) {
 
 
 function landingLeadFormMarkup(data, className = "") {
+  const followHref = data.ctaAction && data.ctaAction !== "form" ? landingCtaHref(data) : "";
+  const followLabel = data.ctaAction === "whatsapp" ? "Continue on WhatsApp" : data.ctaAction === "call" ? "Call now" : data.ctaAction === "email" ? "Send an email" : "";
+  const safeFollow = followHref && followHref !== "#contact" ? `<a class="lp-lead-followup" data-lp-lead-followup href="${escapeHtml(followHref)}" ${data.ctaAction === "whatsapp" ? 'target="_blank" rel="noopener"' : ''} hidden>${escapeHtml(followLabel)} ↗</a>` : "";
   return `<form class="lp-lead-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
     <div class="lp-lead-grid">
       <label class="lp-lead-span-2"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
@@ -2318,8 +2323,11 @@ function landingLeadFormMarkup(data, className = "") {
       <label><span>Address</span><input name="address" autocomplete="street-address" placeholder="Street / area / delivery address" required /></label>
       <label class="lp-lead-span-2"><span>Message <em>Optional</em></span><textarea name="message" rows="3" placeholder="Anything else we should know?"></textarea></label>
     </div>
-    <button type="submit">${escapeHtml(data.ctaText || "Send request")}</button>
-    <p class="lp-lead-status" data-lp-lead-status role="status" aria-live="polite"></p>
+    <button type="submit">${escapeHtml(data.formButtonText || "Send request")}</button>
+    <div class="lp-lead-feedback" aria-live="polite">
+      <p class="lp-lead-status" data-lp-lead-status role="status"></p>
+      ${safeFollow}
+    </div>
   </form>`;
 }
 
@@ -2365,11 +2373,11 @@ window.youyouLandingSubmit = function(form) {
   const address = String(form.elements?.address?.value || '').trim();
   const message = String(form.elements?.message?.value || '').trim();
   if (!name || !phone || !city || !address) {
-    if (status) status.textContent = 'Please add your name, phone, city and address.';
+    if (status) { status.textContent = 'Please add your name, phone, city and address.'; status.className = 'lp-lead-status is-error'; }
     return false;
   }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    if (status) status.textContent = 'Please check the email address or leave it empty.';
+    if (status) { status.textContent = 'Please check the email address or leave it empty.'; status.className = 'lp-lead-status is-error'; }
     return false;
   }
   const pageTitle = page?.dataset?.pageTitle || 'this offer';
@@ -2382,17 +2390,19 @@ window.youyouLandingSubmit = function(form) {
   ].filter(Boolean).join(' | ');
   const content = `Lead form submission for ${pageTitle}. ${details}`;
   if (button) button.disabled = true;
-  if (status) status.textContent = 'Sending…';
+  if (status) { status.textContent = 'Sending…'; status.className = 'lp-lead-status is-sending'; }
   (async()=>{
     try {
       const result = await youyouLandingPersistVisitor(page, content, { name, email });
       if (result.ok) {
-        if (status) status.textContent = 'Thanks — your request was sent.';
-        form.reset();
-      } else if (status) status.textContent = 'Preview ready. Lead capture will activate on the connected page.';
+        if (status) { status.textContent = '✓ Request sent successfully. We received your details.'; status.className = 'lp-lead-status is-success'; }
+        const followup = form.querySelector('[data-lp-lead-followup]');
+        if (followup) followup.hidden = false;
+        form.dataset.submitted = 'true';
+      } else if (status) { status.textContent = 'Preview only — publish the page to receive real requests.'; status.className = 'lp-lead-status is-preview'; }
     } catch (error) {
       console.error('YOUYOU landing lead form:', error);
-      if (status) status.textContent = 'Could not send right now. Please try another contact option.';
+      if (status) { status.textContent = 'Could not send right now. Please try again or use another contact option.'; status.className = 'lp-lead-status is-error'; }
     } finally { if (button) button.disabled = false; }
   })();
   return false;
@@ -2539,8 +2549,9 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   const editorial = String(data.extraText || '').trim() ? `<section class="beauty-editorial"><div class="beauty-editorial-card"><small>${escapeHtml(data.extraTitle || 'PRODUCT STORY')}</small><h2>${escapeHtml(data.extraTitle || 'More about this product')}</h2><p>${escapeHtml(data.extraText).replace(/\n/g,'<br>')}</p></div></section>` : '';
   const review = data.showTestimonial !== "off" && testimonial ? `<section class="beauty-review-section"><div class="beauty-quote-mark">“</div><blockquote>${escapeHtml(testimonial)}</blockquote><div class="beauty-review-meta"><span class="beauty-avatar">C</span><div><strong>Customer feedback</strong><small>Shared by the business</small></div></div></section>` : "";
   const faq = data.showFaq !== "off" && faqQ && faqA ? `<section id="faq" class="beauty-faq"><div><small>GOOD TO KNOW</small><h2>${escapeHtml(faqQ)}</h2></div><p>${escapeHtml(faqA)}</p></section>` : '';
-  const directCta = `<a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Continue')} <span>↗</span></a>`;
-  const finalCta = data.showContact === "off" ? "" : `<section id="contact" class="beauty-final-cta ${data.ctaAction === 'form' ? 'has-form' : ''}"><div><small>READY WHEN YOU ARE</small><h2>${escapeHtml(data.ctaText || 'Continue')}</h2><p>${data.ctaAction === 'form' ? 'Share your details and the business can follow up with you.' : 'Choose the action below to continue.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data, 'beauty-lead-form') : directCta}</section>`;
+  const directCta = data.ctaAction !== 'form' ? `<a class="lp-live-primary lp-direct-contact" href="${landingCtaHref(data)}" ${data.ctaAction === 'whatsapp' ? 'target="_blank" rel="noopener"' : ''}>${escapeHtml(data.ctaText || 'Continue')} <span>↗</span></a>` : '';
+  const showLeadForm = data.leadFormEnabled !== 'off';
+  const finalCta = data.showContact === "off" ? "" : `<section id="contact" class="beauty-final-cta ${showLeadForm ? 'has-form' : ''}"><div><small>READY WHEN YOU ARE</small><h2>${escapeHtml(data.ctaText || 'Continue')}</h2><p>${showLeadForm ? 'Share your details and the business can follow up with you.' : 'Choose the action below to continue.'}</p>${directCta ? `<div class="lp-contact-direct-action">${directCta}</div>` : ''}</div>${showLeadForm ? landingLeadFormMarkup(data, 'beauty-lead-form') : ''}</section>`;
 
   const parts = [nav, hero, marquee];
   let videoAdded = false, galleryAdded = false;
@@ -2583,8 +2594,9 @@ function landingPreviewMarkup(data, compact = false) {
   const testimonial = String(data.testimonial || "").trim();
   const proofSection = data.showTestimonial !== "off" && testimonial ? `<section class="lp-live-section lp-live-proof"><small>CUSTOMER FEEDBACK</small><blockquote>“${escapeHtml(testimonial)}”</blockquote></section>` : "";
   const faqSection = data.showFaq === "off" ? "" : `<section class="lp-live-section lp-live-faq"><small>FAQ</small><h3>${escapeHtml(data.faqQuestion || "Common customer question")}</h3><p>${escapeHtml(data.faqAnswer || "Add the answer here.")}</p></section>`;
-  const directCta = `<a href="${landingCtaHref(data)}" class="lp-live-primary lp-direct-contact">${escapeHtml(data.ctaText || 'Continue')} ↗</a>`;
-  const contactSection = data.showContact === "off" ? "" : `<section id="contact" class="lp-live-section lp-live-contact"><div><small>${data.ctaAction === 'form' ? 'CONTACT' : 'NEXT STEP'}</small><h2>${escapeHtml(data.ctaText || "Get started")}</h2><p>${data.ctaAction === 'form' ? 'Leave your details and the business can follow up.' : 'Continue using the selected contact option.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data) : `<div class="lp-direct-contact-wrap">${directCta}</div>`}</section>`;
+  const directCta = data.ctaAction !== 'form' ? `<a href="${landingCtaHref(data)}" class="lp-live-primary lp-direct-contact" ${data.ctaAction === 'whatsapp' ? 'target="_blank" rel="noopener"' : ''}>${escapeHtml(data.ctaText || 'Continue')} ↗</a>` : '';
+  const showLeadForm = data.leadFormEnabled !== 'off';
+  const contactSection = data.showContact === "off" ? "" : `<section id="contact" class="lp-live-section lp-live-contact"><div><small>CONTACT</small><h2>${escapeHtml(data.ctaText || "Get started")}</h2><p>${showLeadForm ? 'Leave your details and the business can follow up.' : 'Continue using the selected contact option.'}</p>${directCta ? `<div class="lp-contact-direct-action">${directCta}</div>` : ''}</div>${showLeadForm ? landingLeadFormMarkup(data) : ''}</section>`;
   const bodySections = [hero];
   const pushExtraIf = (position) => { if (data.extraTextPosition === position && extraSection) bodySections.push(extraSection); };
   const pushVideoIf = (position) => { if ((data.videoPosition || "after-hero") === position && videoBlock) bodySections.push(videoBlock); };
@@ -2641,6 +2653,9 @@ function landingExportHtml(data, options = {}) {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="color-scheme" content="light only"/>
+<meta name="supported-color-schemes" content="light"/>
+<meta name="theme-color" content="${escapeHtml(data.background || '#ffffff')}"/>
 <meta name="description" content="${escapeHtml(String(data.subheadline || data.description || '').slice(0,180))}"/>
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="${escapeHtml(data.name || data.headline || 'Landing Page')}"/>
@@ -2650,7 +2665,7 @@ ${/^https?:\/\//i.test(String(data.heroImageUrl || data.imageUrl || '')) ? `<met
 <meta name="twitter:card" content="summary_large_image"/>
 <title>${escapeHtml(data.name || "Landing Page")}</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:${data.background};font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${data.textColor}}
+*{box-sizing:border-box}html{color-scheme:only light!important;background:${data.background}!important}body{margin:0;background:${data.background}!important;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${data.textColor}!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .lp-live-page{--lp-accent:${data.accent};--lp-bg:${data.background};--lp-surface:${data.surface};--lp-text:${data.textColor};max-width:1180px;margin:auto;background:var(--lp-bg);color:var(--lp-text);min-height:100vh}
 .lp-live-nav,.lp-live-footer{display:flex;justify-content:space-between;padding:22px 5%;border-bottom:1px solid #ffffff14}
 .lp-live-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,var(--lp-media-width));gap:36px;padding:70px 5%;align-items:center}.media-left .lp-live-copy{order:2}.media-left .lp-live-media{order:1}.media-top .lp-live-hero,.media-bottom .lp-live-hero{grid-template-columns:1fr}.media-top .lp-live-media{order:-1}.media-bottom .lp-live-media{order:2}.lp-live-copy h1{font-size:56px;line-height:1.02;margin:18px 0}.lp-live-sub{font-size:18px;line-height:1.6;color:#b8bdc9}.lp-live-badge{padding:7px 10px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 16%,transparent);color:var(--lp-accent);font-weight:700;font-size:12px}.lp-live-price{display:flex;gap:12px;align-items:baseline;margin:24px 0}.lp-live-price strong{font-size:34px}.lp-live-price del{opacity:.45}.lp-live-actions{display:flex;gap:10px;flex-wrap:wrap}.lp-live-actions a{padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:700}.lp-live-primary{background:var(--lp-accent);color:#080808}.lp-live-secondary{border:1px solid #ffffff25;color:var(--lp-text)}.lp-live-media{min-height:var(--lp-media-height);border-radius:24px;background:var(--lp-surface);overflow:hidden;position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:var(--lp-media-height);scrollbar-width:thin}.lp-live-media-slide{min-width:100%;height:100%;scroll-snap-align:start}.lp-live-media img,.lp-live-media video,.lp-live-media iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}.lp-live-media-hint,.lp-live-demo-note{position:absolute;left:14px;bottom:14px;padding:7px 10px;border-radius:999px;background:#0009;color:#fff;font-size:11px}.lp-live-section{padding:55px 5%;border-top:1px solid #ffffff10}.lp-live-section>small{color:var(--lp-accent);font-weight:800}.lp-live-section h2{font-size:34px;max-width:780px}.lp-live-extra-copy{max-width:850px;font-size:18px;line-height:1.75}.lp-live-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.lp-live-benefit-grid div{padding:20px;background:var(--lp-surface);border-radius:14px}.lp-live-benefit-grid span{display:block;color:var(--lp-accent);font-size:12px;margin-bottom:10px}.lp-live-proof blockquote{font-size:28px;max-width:780px;margin:20px 0}.lp-live-contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}.lp-live-contact form{display:grid;gap:10px}.lp-live-contact input,.lp-live-contact textarea{width:100%;padding:13px;border:1px solid #ffffff18;border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-live-contact button{padding:14px;border:0;border-radius:9px;background:var(--lp-accent);font-weight:800}
@@ -2658,7 +2673,7 @@ ${/^https?:\/\//i.test(String(data.heroImageUrl || data.imageUrl || '')) ? `<met
 @media(max-width:760px){.lp-live-hero,.lp-live-contact{grid-template-columns:1fr}.media-left .lp-live-copy,.media-left .lp-live-media{order:initial}.lp-live-copy h1{font-size:38px}.lp-live-benefit-grid{grid-template-columns:1fr}.lp-live-media-track{height:min(var(--lp-media-height),360px)}}
 
 /* YOUYOU V6.4 — BEAUTY PRODUCT WOW TEMPLATE */
-.beauty-wow{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#fff8fb 0%,var(--lp-bg) 36%,#fff 100%);color:#161923;max-width:1240px!important;box-shadow:none!important}
+.beauty-wow{font-family:var(--lp-font,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif);background:var(--lp-bg)!important;color:var(--lp-text)!important;max-width:1240px!important;box-shadow:none!important}
 .beauty-wow:before{width:620px!important;height:620px!important;right:-220px!important;top:40px!important;background:radial-gradient(circle,color-mix(in srgb,var(--lp-accent) 22%,#fff0),transparent 68%)!important}
 .beauty-nav{height:82px;padding:0 5%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1b1b2410;position:relative;z-index:3}.beauty-nav strong{font-size:18px;letter-spacing:-.03em}.beauty-nav>div{display:flex;gap:30px;font-size:13px}.beauty-nav>a{background:#171820;color:#fff;padding:11px 16px;border-radius:999px;text-decoration:none;font-size:12px;font-weight:800}
 .beauty-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px, .9fr);gap:54px;align-items:center;padding:72px 5% 86px;min-height:680px;position:relative}.beauty-eyebrow{display:inline-flex;padding:8px 12px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 13%,#fff);color:var(--lp-accent);font-size:11px;font-weight:900;letter-spacing:.09em}.beauty-rating{display:flex;gap:10px;align-items:center;margin:20px 0 8px;font-size:12px}.beauty-rating b{color:#e7a23a;letter-spacing:2px}.beauty-rating span{opacity:.58}.beauty-copy h1{max-width:650px;margin:12px 0 20px;font-size:clamp(48px,5.7vw,82px);line-height:.94;letter-spacing:-.055em}.beauty-copy>p{max-width:570px;font-size:18px;line-height:1.7;color:#6c6e78}.beauty-wow .lp-live-price{margin:26px 0 20px}.beauty-wow .lp-live-price strong{font-size:38px}.beauty-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap}.beauty-wow .lp-live-primary{display:inline-flex;align-items:center;justify-content:center;min-height:54px;padding:0 24px;border-radius:14px;background:var(--lp-accent);color:#fff;text-decoration:none;font-weight:900;box-shadow:0 16px 36px color-mix(in srgb,var(--lp-accent) 28%,transparent)}.beauty-text-link{color:#171820;text-decoration:none;font-weight:800;font-size:13px}.beauty-mini-proof{display:flex;gap:17px;flex-wrap:wrap;margin-top:22px;font-size:11px;color:#666b75}
@@ -2896,9 +2911,9 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
   .lp-image-slider{--yy-carousel-gap:10px!important;overflow:hidden!important}
   .lp-image-track{gap:10px!important;padding:3px 20% 10px 0!important;scroll-padding-left:0!important}
   .lp-image-slide,.beauty-wow .lp-image-slide{
-    flex:0 0 78%!important;
-    width:78%!important;
-    min-width:78%!important;
+    flex:0 0 82%!important;
+    width:82%!important;
+    min-width:82%!important;
     height:auto!important;
     aspect-ratio:var(--yy-carousel-ratio)!important;
     border-radius:15px!important;
@@ -2913,9 +2928,9 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 .lpw-preview-stage.is-mobile .lp-image-track{gap:10px!important;padding:3px 20% 10px 0!important}
 .lpw-preview-stage.is-mobile .lp-image-slide,
 .lpw-preview-stage.is-mobile .beauty-wow .lp-image-slide{
-  flex:0 0 78%!important;
-  width:78%!important;
-  min-width:78%!important;
+  flex:0 0 82%!important;
+  width:82%!important;
+  min-width:82%!important;
   height:auto!important;
   aspect-ratio:var(--yy-carousel-ratio)!important;
   border-radius:15px!important;
@@ -2937,6 +2952,7 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 .beauty-gallery-section,.beauty-wow .lp-product-video{background:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important}
 .beauty-review-section{background:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;color:var(--lp-text)!important}
 .beauty-avatar{background:var(--lp-accent)!important;color:#fff!important}
+.lp-lead-feedback{display:grid;gap:10px;margin-top:2px}.lp-lead-status{min-height:0;margin:0;padding:0;border-radius:12px;font-size:13px;font-weight:750;line-height:1.45;opacity:1}.lp-lead-status:not(:empty){padding:11px 13px}.lp-lead-status.is-success{background:#eaf8ef;color:#176b38;border:1px solid #bce8cb}.lp-lead-status.is-error{background:#fff0f0;color:#9f2f2f;border:1px solid #f4c4c4}.lp-lead-status.is-sending,.lp-lead-status.is-preview{background:color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface));color:var(--lp-text);border:1px solid color-mix(in srgb,var(--lp-accent) 24%,transparent)}.lp-lead-followup{display:inline-flex;justify-content:center;align-items:center;min-height:48px;padding:0 16px;border-radius:12px;background:#22c55e;color:#fff;text-decoration:none;font-weight:900}.lp-lead-followup[hidden]{display:none!important}.lp-contact-direct-action{margin-top:16px}.lp-contact-direct-action .lp-direct-contact{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px}
 @media(max-width:760px){.lp-image-slide,.beauty-wow .lp-image-slide{aspect-ratio:var(--yy-carousel-ratio)!important}}
 
 </style>
@@ -2946,7 +2962,7 @@ const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
 async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
-window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){if(status)status.textContent='Please add your name, phone, city and address.';return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){if(status)status.textContent='Please check the email address or leave it empty.';return false}const title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;if(status)status.textContent='Sending…';yyPersist(page,content,{name,email}).then(r=>{if(status)status.textContent=r.ok?'Thanks — your request was sent.':(YY_PREVIEW?'Preview only — nothing was submitted.':'Lead capture will activate on the connected page.');if(r.ok)form.reset()}).catch(()=>{if(status)status.textContent='Could not send right now. Please try another contact option.'}).finally(()=>{if(button)button.disabled=false});return false};
+window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),followup=form?.querySelector('[data-lp-lead-followup]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();const setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please check the email address or leave it empty.','is-error');return false}const title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{if(button)button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
 function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dotsHost=slider.querySelector('[data-carousel-dots]'),counter=slider.querySelector('[data-carousel-counter]'),prev=slider.querySelector('.lp-image-arrow.prev'),next=slider.querySelector('.lp-image-arrow.next');if(!track||slides.length<2)return;let positions=[],active=0,raf=0,timer=null,resizeTimer=null;const nearest=()=>{let b=0,d=Infinity;positions.forEach((p,i)=>{const x=Math.abs(p-track.scrollLeft);if(x<d){d=x;b=i}});return b},indicators=()=>{active=nearest();dotsHost?.querySelectorAll('button').forEach((dot,i)=>dot.classList.toggle('is-active',i===active));if(counter&&!counter.hidden)counter.textContent=(active+1)+' / '+positions.length},measure=()=>{const tr=track.getBoundingClientRect(),max=Math.max(0,track.scrollWidth-track.clientWidth),raw=slides.map(slide=>{const r=slide.getBoundingClientRect();return Math.max(0,Math.min(max,r.left-tr.left+track.scrollLeft))});positions=raw.filter((v,i,a)=>i===0||Math.abs(v-a[i-1])>3);if(!positions.length)positions=[0];active=Math.max(0,Math.min(active,positions.length-1));if(dotsHost){if(positions.length<=10){dotsHost.hidden=false;dotsHost.innerHTML=positions.map((_,i)=>'<button type="button" data-carousel-page="'+i+'" aria-label="Show carousel page '+(i+1)+'"></button>').join('');if(counter)counter.hidden=true}else{dotsHost.hidden=true;if(counter)counter.hidden=false}}indicators()},go=(i,b='smooth')=>{if(!positions.length)measure();const safe=((i%positions.length)+positions.length)%positions.length;track.scrollTo({left:positions[safe]||0,behavior:b});active=safe;indicators()},pause=()=>{if(timer)clearInterval(timer);timer=null},play=()=>{pause();if(slider.dataset.autoplay!=='true'||reduced||positions.length<2||document.hidden)return;timer=setInterval(()=>go(active+1),Math.max(2000,Number(slider.dataset.speed)||4000))};track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(indicators)},{passive:true});dotsHost?.addEventListener('click',e=>{const dot=e.target.closest?.('[data-carousel-page]');if(dot)go(Number(dot.dataset.carouselPage||0))});prev&&prev.addEventListener('click',()=>go(active-1));next&&next.addEventListener('click',()=>go(active+1));slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});document.addEventListener('visibilitychange',()=>document.hidden?pause():play());window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{measure();go(active,'auto')},80)},{passive:true});measure();go(0,'auto');play()})}
 document.addEventListener('DOMContentLoaded',yyInitCarousels);yyInitCarousels();
@@ -3384,9 +3400,16 @@ function renderLandingPageWorkspace() {
             <div class="lpb-two">
               <label>CTA text<input id="lpb-cta-text" placeholder="Get a quote" /></label>
               <label>CTA action
-                <select id="lpb-cta-action"><option value="form">Lead form</option><option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="email">Email</option></select>
+                <select id="lpb-cta-action"><option value="form">Scroll to lead form</option><option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="email">Email</option></select>
               </label>
             </div>
+            <div class="lpb-two">
+              <label>Lead form
+                <select id="lpb-lead-form-enabled"><option value="on">Show</option><option value="off">Hidden</option></select>
+              </label>
+              <label>Form button text<input id="lpb-form-button-text" placeholder="Send request" /></label>
+            </div>
+            <p class="lpb-media-help">CTA action controls the main button. The lead form is independent, so choosing WhatsApp, Call or Email does not remove your form.</p>
             <label>WhatsApp number<input id="lpb-whatsapp" placeholder="+212..." /></label>
             <div class="lpb-two">
               <label>Phone<input id="lpb-phone" placeholder="+1..." /></label>
@@ -3716,7 +3739,7 @@ function initLandingPageWorkspace() {
     badge:"lpb-badge", headline:"lpb-headline", subheadline:"lpb-subheadline",
     description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
-    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", whatsapp:"lpb-whatsapp",
+    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp",
     phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
     mediaGallery:"lpb-media-gallery", sliderEnabled:"lpb-slider-enabled", sliderTitle:"lpb-slider-title",

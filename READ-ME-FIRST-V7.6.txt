@@ -1,0 +1,17 @@
+YOUYOU V7.6 — QUICK TEST
+
+1. Upload this full project version to the existing GitHub repo and deploy on Vercel.
+2. NO new Supabase SQL is needed.
+3. Open your Beauty page in the Workspace.
+4. Set a clearly light background and choose CTA action = WhatsApp.
+5. Confirm Lead form = Show.
+6. Mobile Preview: form must still be visible.
+7. Click Update live design / Update live page once.
+8. Open the same /p/... URL on your phone.
+   - Light theme must stay light even if Samsung Internet/app UI uses dark mode.
+   - Carousel images should be slightly larger.
+   - Lead form must remain visible with WhatsApp CTA.
+9. Submit Name + Phone + City + Address.
+   - A visible green success message must appear.
+   - Form must remain on the page.
+   - Continue on WhatsApp should appear if a valid WhatsApp number is configured.

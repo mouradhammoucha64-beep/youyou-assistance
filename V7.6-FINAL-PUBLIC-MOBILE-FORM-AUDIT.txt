@@ -1,0 +1,40 @@
+YOUYOU V7.6 — FINAL PUBLIC MOBILE + FORM BEHAVIOR
+Date: 2026-09-02
+Base: V7.5 Final Landing Engine
+
+FIXES IN THIS BUILD
+1) Mobile theme / Samsung Internet forced-dark protection
+   - Added meta color-scheme light only + supported-color-schemes.
+   - Added CSS color-scheme: only light on exported/published pages.
+   - Published-page API now injects the color lock into older snapshots too.
+   - Client-selected dark palettes still render dark because the actual CSS variables remain authoritative; this only stops browser auto-recoloring.
+   - Renderer bumped to 7.6.0 so existing live pages can be refreshed with Update live design.
+
+2) CTA no longer controls lead-form visibility
+   - CTA action = WhatsApp / Call / Email does NOT remove the lead form anymore.
+   - New independent Lead form Show/Hidden control in Workspace.
+   - New independent Form button text field.
+   - If CTA is WhatsApp/Call/Email, the final section can show both the lead form and the direct action.
+   - Successful lead capture can reveal a Continue on WhatsApp / Call / Email follow-up link.
+
+3) Lead form success UX
+   - Prominent success/error/sending states.
+   - Success text: "Request sent successfully. We received your details."
+   - Form no longer resets/disappears after successful submission.
+   - Submitted values remain visible to the visitor.
+
+4) Mobile carousel image size
+   - Increased mobile card width from 78% to 82% (small visual increase while preserving next-card peek).
+   - Public endpoint also adds this mobile override to existing snapshots.
+
+VALIDATION
+- main.js: node --check PASS
+- api/published-page.js: node --check PASS
+- exported inline runtime JS: node --check PASS
+- mocked published-page API response: PASS (color lock injected, 82% mobile rule injected)
+
+NO NEW SQL REQUIRED.
+Existing V7.1 media storage + V7.2 publishing + V7.5 publishing security SQL remain sufficient.
+
+IMPORTANT AFTER DEPLOY
+Open each already-published landing page in the Workspace and click "Update live design" once to store the V7.6 form markup and current theme in its snapshot. The public endpoint's forced-dark protection applies immediately after deploy, but the new independent lead-form markup requires a live update.
