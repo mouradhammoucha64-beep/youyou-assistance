@@ -1,0 +1,30 @@
+YOUYOU V7.1 — MEDIA ENGINE PRO
+==============================
+
+IMPORTANT — ONE-TIME SUPABASE STEP
+Before testing a LOCAL video upload + Export HTML:
+
+1) Open Supabase -> SQL Editor.
+2) Run: supabase-v7.1-landing-media-storage.sql
+3) Deploy this V7.1 project.
+4) Open Landing Pages -> Builder.
+5) Upload a local MP4/WebM/OGG video.
+6) Wait until the top status says: "Video uploaded · Ready for export".
+7) Export HTML. The exported page now uses the permanent Supabase Storage URL.
+
+CAROUSEL TEST
+- Choose "3-card carousel".
+- Select several images in one selection OR add more images later.
+- Maximum: 20 photos.
+- Default shape: Square 1:1.
+- Optional: Portrait 4:5 / Landscape 4:3.
+- Desktop: 3 images visible at once.
+- Tablet: 2 images visible at once.
+- Mobile: 1 image + a peek of the next image.
+- Every selected image stays in the carousel; arrows/swipe/autoplay move through all carousel positions.
+
+NOTES
+- Images are automatically fitted with object-fit: cover. Recommended 1200x1200 is guidance only, not a requirement.
+- Hero/gallery images are optimized automatically before storage upload.
+- If Supabase Storage has not been configured, image preview still has a local fallback, but a local video cannot become a permanent exported asset until the storage SQL is run.
+- Publish -> unique public URL remains the next project stage after this media engine is approved.

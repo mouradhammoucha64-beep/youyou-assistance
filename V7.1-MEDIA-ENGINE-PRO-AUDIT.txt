@@ -1,0 +1,38 @@
+YOUYOU V7.1 — MEDIA ENGINE PRO
+================================
+Scope: final media cleanup before rolling the system out to all landing templates.
+
+CAROUSEL
+- Universal images-only carousel.
+- Up to 20 images, including every selected/uploaded image.
+- Desktop: 3 cards visible.
+- Tablet: 2 cards visible.
+- Mobile: 1 card + next-card peek.
+- No captions, numbers, labels or visible scrollbars under cards.
+- object-fit: cover normalizes mixed source image dimensions.
+- Image shape control: Square 1:1 (default), Portrait 4:5, Landscape 4:3.
+- Swipe, desktop arrows, optional dots, autoplay and resize recalculation.
+- More than 10 carousel pages use a compact page counter instead of a wall of dots.
+- Builder mobile simulator and exported/mobile page share the same final carousel rules.
+
+MEDIA STORAGE
+- Local video upload now immediately previews, then uploads to Supabase Storage.
+- After upload completes the builder replaces blob: with a permanent public URL.
+- Export therefore uses the permanent media URL and no longer depends on a local blob.
+- Hero/gallery images also try permanent storage after browser optimization, with a
+  local data-URL fallback if storage has not yet been configured.
+- Included: supabase-v7.1-landing-media-storage.sql (run once).
+- Storage path is scoped by auth.uid()/page/kind and upload/update/delete policies
+  restrict authenticated users to their own path.
+- Bucket file limit: 100 MB. Builder video limit: 100 MB.
+
+VALIDATION
+- main.js: node --check PASS.
+- public/widget.js: node --check PASS.
+- api/seo-audit.js: node --check PASS.
+- Export runtime script syntax: checked separately after extraction/substitution.
+
+NOT IN THIS VERSION
+- Public Publish -> unique URL is intentionally the next stage.
+- OpenAI / WhatsApp integrations are intentionally unchanged.
+- Premium redesign rollout to all templates starts after this media engine is approved.

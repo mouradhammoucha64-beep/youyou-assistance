@@ -2006,7 +2006,7 @@ function landingImageSliderMarkup(data) {
   const urls = [
     String(data.imageUrl || "").trim(),
     ...String(data.mediaGallery || "").split("\n").map((item) => item.trim())
-  ].filter(Boolean).filter((url, index, arr) => arr.indexOf(url) === index).slice(0, 8);
+  ].filter(Boolean).filter((url, index, arr) => arr.indexOf(url) === index).slice(0, 20);
   const images = urls.filter((url) => !landingVideoSource(url));
   if (!images.length) return "";
 
@@ -2022,13 +2022,16 @@ function landingImageSliderMarkup(data) {
     </section>`;
   }
 
+  const ratio = ["square","portrait","landscape"].includes(String(data.sliderRatio || "square"))
+    ? String(data.sliderRatio || "square")
+    : "square";
   const slides = images.map((url, index) => `<figure class="lp-image-slide" aria-label="${escapeHtml(data.name || "Product image")} ${index + 1}"><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")} ${index + 1}" loading="lazy" /></figure>`);
   const interactive = slides.length > 1;
   const arrows = interactive && data.sliderArrows !== "off"
-    ? `<button type="button" class="lp-image-arrow prev" aria-label="Previous image">‹</button><button type="button" class="lp-image-arrow next" aria-label="Next image">›</button>`
+    ? `<button type="button" class="lp-image-arrow prev" aria-label="Previous images">‹</button><button type="button" class="lp-image-arrow next" aria-label="Next images">›</button>`
     : "";
-  const dots = interactive && data.sliderDots !== "off"
-    ? `<div class="lp-image-dots">${slides.map((_, index) => `<button type="button" class="${index === 0 ? "is-active" : ""}" data-slide-index="${index}" aria-label="Show image ${index + 1}"></button>`).join("")}</div>`
+  const indicators = interactive && data.sliderDots !== "off"
+    ? `<div class="lp-image-dots" data-carousel-dots aria-label="Carousel pages"></div><div class="lp-image-counter" data-carousel-counter hidden></div>`
     : "";
   const autoplay = interactive && data.sliderAutoplay !== "off"
     ? `data-autoplay="true" data-speed="${Math.max(2000, Math.min(9000, Number(data.sliderSpeed) || 4000))}"`
@@ -2036,7 +2039,7 @@ function landingImageSliderMarkup(data) {
 
   return `<section id="details" class="lp-live-section lp-product-gallery" data-block="image-slider">
     ${head}
-    <div class="lp-image-slider" ${autoplay}><div class="lp-image-track">${slides.join("")}</div>${arrows}${dots}</div>
+    <div class="lp-image-slider lp-carousel-ratio-${ratio}" data-carousel-count="${slides.length}" ${autoplay}><div class="lp-image-track">${slides.join("")}</div>${arrows}${indicators}</div>
   </section>`;
 }
 function landingVideoBlockMarkup(data) {
@@ -2101,6 +2104,7 @@ function defaultLandingPageData(templateId = "product-launch") {
     sliderSpeed: "4000",
     sliderArrows: "on",
     sliderDots: "on",
+    sliderRatio: "square",
     mediaPosition: "right",
     mediaWidth: "46",
     mediaHeight: "380",
@@ -2296,92 +2300,110 @@ window.youyouLandingSubmit = function(form) {
 };
 
 function initLandingCarousels(root = document) {
-  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   root.querySelectorAll?.('.lp-image-slider').forEach((slider) => {
     if (slider.dataset.yyCarouselReady === '1') return;
     slider.dataset.yyCarouselReady = '1';
+
     const track = slider.querySelector('.lp-image-track');
     const slides = [...(track?.querySelectorAll('.lp-image-slide') || [])];
-    const dots = [...slider.querySelectorAll('.lp-image-dots button')];
+    const dotsHost = slider.querySelector('[data-carousel-dots]');
+    const counter = slider.querySelector('[data-carousel-counter]');
     const prev = slider.querySelector('.lp-image-arrow.prev');
     const next = slider.querySelector('.lp-image-arrow.next');
     if (!track || slides.length < 2) return;
 
-    let activeIndex = 0;
-    const updateDots = () => {
-      let active = 0, distance = Infinity;
-      slides.forEach((slide, i) => {
-        const d = Math.abs(slide.offsetLeft - track.scrollLeft);
-        if (d < distance) { distance = d; active = i; }
-      });
-      activeIndex = active;
-      dots.forEach((dot,i)=>dot.classList.toggle('is-active', i === active));
-    };
-    const goTo = (index) => {
-      const safe = ((index % slides.length) + slides.length) % slides.length;
-      track.scrollTo({ left:slides[safe].offsetLeft, behavior:'smooth' });
-      activeIndex = safe;
-    };
+    let positions = [];
+    let active = 0;
     let raf = 0;
-    track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(updateDots); }, { passive:true });
-    prev?.addEventListener('click', () => goTo(activeIndex - 1));
-    next?.addEventListener('click', () => goTo(activeIndex + 1));
-    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(Number(dot.dataset.slideIndex ?? i))));
-    updateDots();
+    let timer = null;
 
-    if (slider.dataset.autoplay === 'true' && !reduced) {
+    const measure = () => {
+      const trackRect = track.getBoundingClientRect();
+      const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth);
+      const raw = slides.map((slide) => {
+        const rect = slide.getBoundingClientRect();
+        return Math.max(0, Math.min(maxScroll, rect.left - trackRect.left + track.scrollLeft));
+      });
+      positions = raw.filter((value, index, arr) => index === 0 || Math.abs(value - arr[index - 1]) > 3);
+      if (!positions.length) positions = [0];
+      active = Math.max(0, Math.min(active, positions.length - 1));
+
+      if (dotsHost) {
+        if (positions.length <= 10) {
+          dotsHost.hidden = false;
+          dotsHost.innerHTML = positions.map((_, index) => `<button type="button" data-carousel-page="${index}" aria-label="Show carousel page ${index + 1}"></button>`).join('');
+          if (counter) counter.hidden = true;
+        } else {
+          dotsHost.hidden = true;
+          if (counter) counter.hidden = false;
+        }
+      }
+      updateIndicators();
+    };
+
+    const nearestIndex = () => {
+      let best = 0;
+      let distance = Infinity;
+      positions.forEach((pos, index) => {
+        const d = Math.abs(pos - track.scrollLeft);
+        if (d < distance) { distance = d; best = index; }
+      });
+      return best;
+    };
+
+    const updateIndicators = () => {
+      active = nearestIndex();
+      dotsHost?.querySelectorAll('button').forEach((dot, index) => dot.classList.toggle('is-active', index === active));
+      if (counter && !counter.hidden) counter.textContent = `${active + 1} / ${positions.length}`;
+    };
+
+    const go = (index, behavior = 'smooth') => {
+      if (!positions.length) measure();
+      const safe = ((index % positions.length) + positions.length) % positions.length;
+      track.scrollTo({ left: positions[safe] || 0, behavior });
+      active = safe;
+      updateIndicators();
+    };
+
+    track.addEventListener('scroll', () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(updateIndicators);
+    }, { passive:true });
+    dotsHost?.addEventListener('click', (event) => {
+      const dot = event.target.closest?.('[data-carousel-page]');
+      if (dot) go(Number(dot.dataset.carouselPage || 0));
+    });
+    prev?.addEventListener('click', () => go(active - 1));
+    next?.addEventListener('click', () => go(active + 1));
+
+    const pause = () => { if (timer) clearInterval(timer); timer = null; };
+    const play = () => {
+      pause();
+      if (slider.dataset.autoplay !== 'true' || reduced || positions.length < 2 || document.hidden) return;
       const speed = Math.max(2000, Number(slider.dataset.speed) || 4000);
-      let timer = null;
-      const play = () => {
-        clearInterval(timer);
-        timer = setInterval(() => {
-          if (!document.body.contains(slider)) return clearInterval(timer);
-          goTo(activeIndex + 1);
-        }, speed);
-      };
-      const pause = () => clearInterval(timer);
-      slider.addEventListener('mouseenter', pause);
-      slider.addEventListener('mouseleave', play);
-      slider.addEventListener('focusin', pause);
-      slider.addEventListener('focusout', play);
-      slider.addEventListener('pointerdown', pause, { passive:true });
-      slider.addEventListener('pointerup', play, { passive:true });
-      play();
-    }
+      timer = setInterval(() => go(active + 1), speed);
+    };
+    slider.addEventListener('mouseenter', pause);
+    slider.addEventListener('mouseleave', play);
+    slider.addEventListener('focusin', pause);
+    slider.addEventListener('focusout', play);
+    slider.addEventListener('pointerdown', pause, { passive:true });
+    slider.addEventListener('pointerup', play, { passive:true });
+    document.addEventListener('visibilitychange', () => document.hidden ? pause() : play());
+
+    let resizeTimer = null;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { measure(); go(active, 'auto'); }, 80);
+    };
+    window.addEventListener('resize', onResize, { passive:true });
+
+    measure();
+    go(0, 'auto');
+    play();
   });
 }
-
-window.youyouLandingAsk = function(source, forcedQuestion = "") {
-  const widget = source?.closest?.('[data-lp-widget]');
-  const page = source?.closest?.('.lp-live-page');
-  if (!widget || !page) return;
-  widget.classList.add('is-open');
-  const input = widget.querySelector('.lp-ai-form input');
-  const q = String(forcedQuestion || input?.value || '').trim();
-  if (!q) return;
-  const messages = widget.querySelector('[data-lp-widget-messages]');
-  const add = (cls, text) => { const d=document.createElement('div'); d.className=`lp-ai-msg ${cls}`; d.textContent=text; messages.appendChild(d); messages.scrollTop=messages.scrollHeight; };
-  add('user', q);
-  const text = page.innerText || '';
-  const price = page.querySelector('.lp-live-price strong')?.textContent?.trim();
-  const quote = page.querySelector('.lp-live-price.quote')?.textContent?.trim();
-  const benefits = [...page.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()).filter(Boolean);
-  const faqQ = page.querySelector('.lp-live-faq h3')?.textContent?.trim();
-  const faqA = (page.querySelector('.lp-live-faq p') || page.querySelector('.beauty-faq p'))?.textContent?.trim();
-  const cta = page.querySelector('.lp-live-primary')?.textContent?.trim();
-  const sub = (page.querySelector('.lp-live-sub') || page.querySelector('.beauty-copy>p'))?.textContent?.trim();
-  youyouLandingPersistVisitor(page, q).catch((error)=>console.warn('YOUYOU landing message not saved:', error));
-  const lower = q.toLowerCase();
-  let answer = '';
-  if (/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(lower)) answer = price ? `The current price shown on this page is ${price}.` : (quote || 'This page asks visitors to contact the business for pricing.');
-  else if (/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(lower)) answer = benefits.length ? `Main benefits: ${benefits.join(' · ')}.` : (sub || 'The key value is explained directly on this page.');
-  else if (/start|book|buy|order|contact|reserve|appointment|حجز|نتاصل|نطلب/.test(lower)) answer = cta ? `The next step is “${cta}”. You can use the main button on this page to continue.` : 'Use the main call-to-action on this page to continue.';
-  else if (faqQ && faqA && (lower.includes('faq') || lower.includes(faqQ.toLowerCase().slice(0,18)))) answer = faqA;
-  else if (/what|offer|service|product|شنو|quoi|c'est/.test(lower)) answer = sub || `This page is about: ${text.slice(0,180)}...`;
-  else answer = `Based on this page: ${sub || text.slice(0,180)}${(sub||text).length>180?'…':''}`;
-  setTimeout(()=>add('bot', answer), 180);
-};
-
 
 function landingBeautyPreviewMarkup(data, compact = false) {
   const direction = data.direction === "rtl" ? "rtl" : "ltr";
@@ -2399,7 +2421,7 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   const price = landingPriceMarkup(data);
   const galleryMode = String(data.sliderEnabled || "off");
   const galleryUrls = [String(data.imageUrl || "").trim(), ...String(data.mediaGallery || "").split("\n").map(x=>x.trim())]
-    .filter(Boolean).filter((url,index,arr)=>arr.indexOf(url)===index).filter(url=>!landingVideoSource(url)).slice(0,8);
+    .filter(Boolean).filter((url,index,arr)=>arr.indexOf(url)===index).filter(url=>!landingVideoSource(url)).slice(0,20);
   let gallerySection = "";
   if (galleryMode === "on" && galleryUrls.length) {
     gallerySection = landingImageSliderMarkup(data);
@@ -2609,6 +2631,161 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
   .lp-image-track{gap:10px!important;padding:2px 36px 8px 0!important}.lp-image-slide,.beauty-wow .lp-image-slide{flex:0 0 84%!important;width:84%!important;min-width:84%!important;aspect-ratio:4/3!important;height:auto!important;border-radius:16px!important}.lp-image-arrow{display:none!important}.lp-image-dots{margin-top:9px!important}
   .lp-lead-grid{grid-template-columns:1fr!important}.lp-lead-span-2{grid-column:auto}.beauty-final-cta.has-form{gap:22px!important}.beauty-final-cta.has-form>div{max-width:none!important}.beauty-lead-form{width:100%!important}
 }
+
+/* YOUYOU V7.1 — UNIVERSAL MEDIA ENGINE / FINAL CAROUSEL */
+.lp-product-gallery{overflow:hidden!important}
+.lp-image-slider{
+  --yy-carousel-gap:14px;
+  --yy-carousel-ratio:1/1;
+  position:relative!important;
+  width:100%!important;
+  max-width:1120px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  overflow:visible!important;
+  border-radius:0!important;
+}
+.lp-image-slider.lp-carousel-ratio-square{--yy-carousel-ratio:1/1}
+.lp-image-slider.lp-carousel-ratio-portrait{--yy-carousel-ratio:4/5}
+.lp-image-slider.lp-carousel-ratio-landscape{--yy-carousel-ratio:4/3}
+.lp-image-track{
+  display:flex!important;
+  align-items:stretch!important;
+  gap:var(--yy-carousel-gap)!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  padding:5px 2px 12px!important;
+  scroll-snap-type:x mandatory!important;
+  scroll-behavior:smooth!important;
+  scrollbar-width:none!important;
+  overscroll-behavior-inline:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x pan-y!important;
+}
+.lp-image-track::-webkit-scrollbar{display:none!important}
+.lp-image-slide,.beauty-wow .lp-image-slide{
+  position:relative!important;
+  flex:0 0 calc((100% - (var(--yy-carousel-gap) * 2))/3)!important;
+  width:calc((100% - (var(--yy-carousel-gap) * 2))/3)!important;
+  min-width:0!important;
+  height:auto!important;
+  aspect-ratio:var(--yy-carousel-ratio)!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  scroll-snap-align:start!important;
+  scroll-snap-stop:always!important;
+  border:0!important;
+  border-radius:18px!important;
+  background:#f3f4f6!important;
+  box-shadow:0 12px 34px rgba(16,24,40,.10)!important;
+}
+.lp-image-slide>img,.beauty-wow .lp-image-slide>img{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  object-fit:cover!important;
+  object-position:center!important;
+}
+.lp-image-arrow{
+  position:absolute!important;
+  z-index:8!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:42px!important;
+  height:42px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:0!important;
+  border:1px solid rgba(17,24,39,.10)!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.94)!important;
+  color:#111827!important;
+  box-shadow:0 10px 28px rgba(16,24,40,.16)!important;
+  cursor:pointer!important;
+  font-size:26px!important;
+  line-height:1!important;
+  backdrop-filter:blur(10px)!important;
+}
+.lp-image-arrow.prev{left:-12px!important}.lp-image-arrow.next{right:-12px!important}
+.lp-image-dots{
+  position:static!important;
+  transform:none!important;
+  display:flex!important;
+  justify-content:center!important;
+  align-items:center!important;
+  flex-wrap:nowrap!important;
+  gap:7px!important;
+  min-height:20px!important;
+  margin:8px auto 0!important;
+  padding:0!important;
+  background:transparent!important;
+}
+.lp-image-dots[hidden]{display:none!important}
+.lp-image-dots button{
+  width:7px!important;
+  height:7px!important;
+  flex:0 0 auto!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:999px!important;
+  background:#9ca3af55!important;
+  transition:width .2s ease,background .2s ease!important;
+  cursor:pointer!important;
+}
+.lp-image-dots button.is-active{width:22px!important;background:var(--lp-accent)!important}
+.lp-image-counter{
+  width:max-content!important;
+  margin:8px auto 0!important;
+  padding:5px 9px!important;
+  border-radius:999px!important;
+  background:color-mix(in srgb,var(--lp-text) 7%,transparent)!important;
+  color:var(--lp-text)!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  letter-spacing:.04em!important;
+}
+.lp-image-counter[hidden]{display:none!important}
+@media(max-width:980px) and (min-width:761px){
+  .lp-image-slide,.beauty-wow .lp-image-slide{
+    flex-basis:calc((100% - var(--yy-carousel-gap))/2)!important;
+    width:calc((100% - var(--yy-carousel-gap))/2)!important;
+  }
+}
+@media(max-width:760px){
+  .lp-image-slider{--yy-carousel-gap:10px!important;overflow:hidden!important}
+  .lp-image-track{gap:10px!important;padding:3px 20% 10px 0!important;scroll-padding-left:0!important}
+  .lp-image-slide,.beauty-wow .lp-image-slide{
+    flex:0 0 78%!important;
+    width:78%!important;
+    min-width:78%!important;
+    height:auto!important;
+    aspect-ratio:var(--yy-carousel-ratio)!important;
+    border-radius:15px!important;
+    box-shadow:0 9px 24px rgba(16,24,40,.09)!important;
+  }
+  .lp-image-arrow{display:none!important}
+  .lp-image-dots{margin-top:6px!important}
+  .lp-image-counter{margin-top:6px!important}
+}
+/* Builder mobile simulator must match a real phone even on a desktop browser. */
+.lpw-preview-stage.is-mobile .lp-image-slider{--yy-carousel-gap:10px!important;overflow:hidden!important}
+.lpw-preview-stage.is-mobile .lp-image-track{gap:10px!important;padding:3px 20% 10px 0!important}
+.lpw-preview-stage.is-mobile .lp-image-slide,
+.lpw-preview-stage.is-mobile .beauty-wow .lp-image-slide{
+  flex:0 0 78%!important;
+  width:78%!important;
+  min-width:78%!important;
+  height:auto!important;
+  aspect-ratio:var(--yy-carousel-ratio)!important;
+  border-radius:15px!important;
+}
+.lpw-preview-stage.is-mobile .lp-image-arrow{display:none!important}
 </style>
 </head>
 <body>${body}<script>
@@ -2617,7 +2794,7 @@ const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 async function yyPersist(page,content,visitor={}){const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
 window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){if(status)status.textContent='Please add your name, phone, city and address.';return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){if(status)status.textContent='Please check the email address or leave it empty.';return false}const title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;if(status)status.textContent='Sending…';yyPersist(page,content,{name,email}).then(r=>{if(status)status.textContent=r.ok?'Thanks — your request was sent.':'Lead capture will activate on the connected page.';if(r.ok)form.reset()}).catch(()=>{if(status)status.textContent='Could not send right now. Please try another contact option.'}).finally(()=>{if(button)button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
-function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dots=[...slider.querySelectorAll('.lp-image-dots button')],prev=slider.querySelector('.lp-image-arrow.prev'),next=slider.querySelector('.lp-image-arrow.next');if(!track||slides.length<2)return;let active=0;const update=()=>{let a=0,d=Infinity;slides.forEach((s,i)=>{const x=Math.abs(s.offsetLeft-track.scrollLeft);if(x<d){d=x;a=i}});active=a;dots.forEach((dot,i)=>dot.classList.toggle('is-active',i===a))},go=i=>{const safe=((i%slides.length)+slides.length)%slides.length;track.scrollTo({left:slides[safe].offsetLeft,behavior:'smooth'});active=safe};let raf=0;track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(update)},{passive:true});prev&&prev.addEventListener('click',()=>go(active-1));next&&next.addEventListener('click',()=>go(active+1));dots.forEach((dot,i)=>dot.addEventListener('click',()=>go(Number(dot.dataset.slideIndex??i))));update();if(slider.dataset.autoplay==='true'&&!reduced){const speed=Math.max(2000,Number(slider.dataset.speed)||4000);let timer;const play=()=>{clearInterval(timer);timer=setInterval(()=>go(active+1),speed)},pause=()=>clearInterval(timer);slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});play()}})}
+function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dotsHost=slider.querySelector('[data-carousel-dots]'),counter=slider.querySelector('[data-carousel-counter]'),prev=slider.querySelector('.lp-image-arrow.prev'),next=slider.querySelector('.lp-image-arrow.next');if(!track||slides.length<2)return;let positions=[],active=0,raf=0,timer=null,resizeTimer=null;const nearest=()=>{let b=0,d=Infinity;positions.forEach((p,i)=>{const x=Math.abs(p-track.scrollLeft);if(x<d){d=x;b=i}});return b},indicators=()=>{active=nearest();dotsHost?.querySelectorAll('button').forEach((dot,i)=>dot.classList.toggle('is-active',i===active));if(counter&&!counter.hidden)counter.textContent=(active+1)+' / '+positions.length},measure=()=>{const tr=track.getBoundingClientRect(),max=Math.max(0,track.scrollWidth-track.clientWidth),raw=slides.map(slide=>{const r=slide.getBoundingClientRect();return Math.max(0,Math.min(max,r.left-tr.left+track.scrollLeft))});positions=raw.filter((v,i,a)=>i===0||Math.abs(v-a[i-1])>3);if(!positions.length)positions=[0];active=Math.max(0,Math.min(active,positions.length-1));if(dotsHost){if(positions.length<=10){dotsHost.hidden=false;dotsHost.innerHTML=positions.map((_,i)=>'<button type="button" data-carousel-page="'+i+'" aria-label="Show carousel page '+(i+1)+'"></button>').join('');if(counter)counter.hidden=true}else{dotsHost.hidden=true;if(counter)counter.hidden=false}}indicators()},go=(i,b='smooth')=>{if(!positions.length)measure();const safe=((i%positions.length)+positions.length)%positions.length;track.scrollTo({left:positions[safe]||0,behavior:b});active=safe;indicators()},pause=()=>{if(timer)clearInterval(timer);timer=null},play=()=>{pause();if(slider.dataset.autoplay!=='true'||reduced||positions.length<2||document.hidden)return;timer=setInterval(()=>go(active+1),Math.max(2000,Number(slider.dataset.speed)||4000))};track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(indicators)},{passive:true});dotsHost?.addEventListener('click',e=>{const dot=e.target.closest?.('[data-carousel-page]');if(dot)go(Number(dot.dataset.carouselPage||0))});prev&&prev.addEventListener('click',()=>go(active-1));next&&next.addEventListener('click',()=>go(active+1));slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});document.addEventListener('visibilitychange',()=>document.hidden?pause():play());window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{measure();go(active,'auto')},80)},{passive:true});measure();go(0,'auto');play()})}
 document.addEventListener('DOMContentLoaded',yyInitCarousels);yyInitCarousels();
 
 </script></body>
@@ -3080,7 +3257,7 @@ function renderLandingPageWorkspace() {
               Upload video
               <input id="lpb-video-file" type="file" accept="video/mp4,video/webm,video/ogg,video/*" />
               <span class="lpb-upload-button">Choose video</span>
-              <span>MP4 / WebM / OGG · local preview</span>
+              <span>MP4 / WebM / OGG · uploaded to YOUYOU media storage for export and publish.</span>
             </label>
             <label>Video position
               <select id="lpb-video-position">
@@ -3090,7 +3267,7 @@ function renderLandingPageWorkspace() {
                 <option value="before-contact">Before final CTA</option>
               </select>
             </label>
-            <p class="lpb-media-help">Choose “Inside hero” to make the video the main visual at the top. Uploaded videos preview instantly; permanent online hosting comes with Publish.</p>
+            <p class="lpb-media-help">Choose “Inside hero” to make the video the main visual at the top. Uploaded videos preview instantly and are saved to permanent media storage so Export and Publish use the same URL.</p>
           </div>
 
           <div class="lpb-editor-section lpb-media-pro-section">
@@ -3105,7 +3282,7 @@ function renderLandingPageWorkspace() {
               Add your images
               <input id="lpb-image-files" type="file" accept="image/*" multiple />
               <span class="lpb-upload-button">Choose images</span>
-              <span>Up to 8 photos · they appear below so you can review or remove them.</span>
+              <span>Up to 20 photos · any image size is fitted automatically. Recommended: 1200 × 1200 JPG/PNG/WebP.</span>
             </label>
 
             <div id="lpb-gallery-manager" class="lpb-gallery-manager" aria-live="polite"></div>
@@ -3136,6 +3313,9 @@ function renderLandingPageWorkspace() {
               <label>Dots
                 <select id="lpb-slider-dots"><option value="on">Show</option><option value="off">Hide</option></select>
               </label>
+              <label>Image shape
+                <select id="lpb-slider-ratio"><option value="square">Square 1:1</option><option value="portrait">Portrait 4:5</option><option value="landscape">Landscape 4:3</option></select>
+              </label>
             </div>
 
             <label data-gallery-position>Gallery position
@@ -3147,7 +3327,7 @@ function renderLandingPageWorkspace() {
               </select>
             </label>
 
-            <p class="lpb-media-help lpb-media-help-strong">Image gallery = normal photos. 3-card carousel = three product cards visible on desktop and swipe on mobile.</p>
+            <p class="lpb-media-help lpb-media-help-strong">Image gallery = normal photos. 3-card carousel = 3 images visible on desktop, 1 + a peek on mobile, with every uploaded image included.</p>
           </div>
 
           <div class="lpb-editor-section">
@@ -3260,6 +3440,71 @@ async function optimizeLandingImageFile(file, maxSide = 1600, quality = 0.86) {
   }
 }
 
+
+const YOUYOU_LANDING_MEDIA_BUCKET = "landing-media";
+const YOUYOU_LANDING_MAX_IMAGES = 20;
+const YOUYOU_LANDING_MAX_VIDEO_BYTES = 100_000_000;
+
+function landingSafeFileName(name = "media") {
+  const raw = String(name || "media").toLowerCase();
+  const extMatch = raw.match(/\.[a-z0-9]{2,6}$/i);
+  const ext = extMatch ? extMatch[0] : "";
+  const stem = raw.replace(/\.[a-z0-9]{2,6}$/i, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 54) || "media";
+  return `${stem}${ext}`;
+}
+
+function landingDataUrlToBlob(dataUrl = "") {
+  const [header, body] = String(dataUrl || "").split(",", 2);
+  if (!header || !body) return null;
+  const mime = header.match(/^data:([^;]+)/)?.[1] || "application/octet-stream";
+  const binary = atob(body);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type:mime });
+}
+
+async function uploadLandingMediaFile(fileOrBlob, { pageId = "page", kind = "media", fileName = "media" } = {}) {
+  if (!supabase || !state.user?.id) throw new Error("Sign in and connect Supabase before uploading permanent media.");
+  const safePage = String(pageId || "page").replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 80) || "page";
+  const safeKind = String(kind || "media").replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 24) || "media";
+  const safeName = landingSafeFileName(fileName || "media");
+  const unique = `${Date.now()}-${crypto.randomUUID?.() || Math.random().toString(36).slice(2)}`;
+  const path = `${state.user.id}/${safePage}/${safeKind}/${unique}-${safeName}`;
+  const contentType = String(fileOrBlob?.type || "application/octet-stream");
+  const { error } = await supabase.storage.from(YOUYOU_LANDING_MEDIA_BUCKET).upload(path, fileOrBlob, {
+    cacheControl:"31536000",
+    upsert:false,
+    contentType,
+  });
+  if (error) throw error;
+  const { data } = supabase.storage.from(YOUYOU_LANDING_MEDIA_BUCKET).getPublicUrl(path);
+  const publicUrl = String(data?.publicUrl || "").trim();
+  if (!publicUrl) throw new Error("Media uploaded but no public URL was returned.");
+  return publicUrl;
+}
+
+function landingStudioStatus(text) {
+  const status = document.querySelector("#lpw-save-state");
+  if (status) status.textContent = text;
+}
+function landingStoragePathFromPublicUrl(url = "") {
+  const raw = String(url || "").trim();
+  if (!raw || !SUPABASE_URL || !state.user?.id) return "";
+  const marker = `/storage/v1/object/public/${YOUYOU_LANDING_MEDIA_BUCKET}/`;
+  const index = raw.indexOf(marker);
+  if (index < 0) return "";
+  const path = decodeURIComponent(raw.slice(index + marker.length));
+  return path.startsWith(`${state.user.id}/`) ? path : "";
+}
+
+async function deleteLandingMediaUrl(url = "") {
+  const path = landingStoragePathFromPublicUrl(url);
+  if (!path || !supabase) return;
+  const { error } = await supabase.storage.from(YOUYOU_LANDING_MEDIA_BUCKET).remove([path]);
+  if (error) console.warn("YOUYOU media cleanup:", error);
+}
+
+
 function initLandingPageWorkspace() {
   const request = landingBuilderRequest();
   const storedDrafts = loadLandingDrafts();
@@ -3280,7 +3525,7 @@ function initLandingPageWorkspace() {
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
     mediaGallery:"lpb-media-gallery", sliderEnabled:"lpb-slider-enabled", sliderTitle:"lpb-slider-title",
     sliderPosition:"lpb-slider-position", sliderAutoplay:"lpb-slider-autoplay", sliderSpeed:"lpb-slider-speed",
-    sliderArrows:"lpb-slider-arrows", sliderDots:"lpb-slider-dots",
+    sliderArrows:"lpb-slider-arrows", sliderDots:"lpb-slider-dots", sliderRatio:"lpb-slider-ratio",
     mediaPosition:"lpb-media-position", mediaWidth:"lpb-media-width", mediaHeight:"lpb-media-height",
     extraTitle:"lpb-extra-title", extraText:"lpb-extra-text", extraTextPosition:"lpb-extra-text-position",
     accent:"lpb-accent", background:"lpb-background", surface:"lpb-surface",
@@ -3318,7 +3563,7 @@ function initLandingPageWorkspace() {
       .filter(Boolean)
       .filter((url, index, arr) => arr.indexOf(url) === index)
       .filter((url) => !landingVideoSource(url))
-      .slice(0, 8);
+      .slice(0, 20);
     return urls;
   };
 
@@ -3391,7 +3636,7 @@ function initLandingPageWorkspace() {
     readFields();
     if (String(current.videoUrl || "").startsWith("blob:")) {
       const stateEl = document.querySelector("#lpw-save-state");
-      if (stateEl) stateEl.textContent = "Local video cannot be exported — use YouTube, Vimeo or a hosted MP4 URL";
+      if (stateEl) stateEl.textContent = "Video upload is not finished. Wait until it says Ready for export, then export again.";
       return;
     }
     const html = landingExportHtml(current);
@@ -3421,40 +3666,82 @@ function initLandingPageWorkspace() {
   });
 
   document.querySelector("#lpb-hero-image-file")?.addEventListener("change", async (event) => {
-    const file = event.currentTarget.files?.[0];
+    const inputEl = event.currentTarget;
+    const file = inputEl.files?.[0];
     if (!file || !file.type.startsWith("image/")) return;
-    if (file.size > 2_000_000) {
-      const status = document.querySelector("#lpw-save-state");
-      if (status) status.textContent = "Use a hero image under 2 MB";
+    if (file.size > 8_000_000) {
+      landingStudioStatus("Use a hero image under 8 MB — YOUYOU will optimize it automatically.");
+      inputEl.value = "";
       return;
     }
-    current.heroImageUrl = await optimizeLandingImageFile(file, 1800, 0.88);
+    const previousHeroUrl = String(current.heroImageUrl || "").trim();
+    landingStudioStatus("Optimizing hero image…");
+    const optimized = await optimizeLandingImageFile(file, 1800, 0.88);
+    let finalUrl = optimized;
+    try {
+      const blob = landingDataUrlToBlob(optimized);
+      if (blob) finalUrl = await uploadLandingMediaFile(blob, { pageId:current.id, kind:"hero", fileName:`${file.name.replace(/\.[^.]+$/, "")}.webp` });
+      if (previousHeroUrl && previousHeroUrl !== finalUrl) deleteLandingMediaUrl(previousHeroUrl).catch(() => {});
+      landingStudioStatus("Hero image uploaded · ready for export");
+    } catch (error) {
+      console.warn("YOUYOU hero image storage fallback:", error);
+      landingStudioStatus("Hero image ready locally · run the landing-media storage SQL for permanent hosting");
+    }
+    current.heroImageUrl = finalUrl;
     current.heroMediaEnabled = "on";
     const input = document.querySelector("#lpb-hero-image-url");
     const enabled = document.querySelector("#lpb-hero-media-enabled");
     if (input) input.value = current.heroImageUrl;
     if (enabled) enabled.value = "on";
+    inputEl.value = "";
     renderPreview();
   });
 
   document.querySelector("#lpb-image-files")?.addEventListener("change", async (event) => {
-    const files = [...(event.currentTarget.files || [])].slice(0, 8);
-    if (!files.length) return;
-
-    const accepted = files.filter((file) => file.type.startsWith("image/") && file.size <= 1_500_000);
-    if (!accepted.length) {
-      const status = document.querySelector("#lpw-save-state");
-      if (status) status.textContent = "Use images under 1.5 MB each";
+    const inputEl = event.currentTarget;
+    readFields();
+    const existing = galleryItems();
+    const remainingSlots = Math.max(0, YOUYOU_LANDING_MAX_IMAGES - existing.length);
+    const picked = [...(inputEl.files || [])];
+    const files = picked.filter((file) => file.type.startsWith("image/") && file.size <= 8_000_000).slice(0, remainingSlots);
+    if (!files.length) {
+      landingStudioStatus(remainingSlots === 0 ? `Gallery is full · maximum ${YOUYOU_LANDING_MAX_IMAGES} photos` : "Choose JPG, PNG or WebP images under 8 MB each");
+      inputEl.value = "";
       return;
     }
 
-    const dataUrls = await Promise.all(accepted.map((file) => optimizeLandingImageFile(file, 1600, 0.86)));
-    const existing = String(current.mediaGallery || "").split("\n").map((x) => x.trim()).filter(Boolean);
-    current.mediaGallery = [...existing, ...dataUrls].slice(0, 8).join("\n");
+    const uploaded = [];
+    let storageReady = true;
+    for (let index = 0; index < files.length; index += 1) {
+      const file = files[index];
+      landingStudioStatus(`Processing photo ${index + 1} of ${files.length}…`);
+      const optimized = await optimizeLandingImageFile(file, 1600, 0.86);
+      let finalUrl = optimized;
+      if (storageReady) {
+        try {
+          const blob = landingDataUrlToBlob(optimized);
+          if (blob) finalUrl = await uploadLandingMediaFile(blob, { pageId:current.id, kind:"gallery", fileName:`${file.name.replace(/\.[^.]+$/, "")}.webp` });
+        } catch (error) {
+          storageReady = false;
+          console.warn("YOUYOU gallery storage fallback:", error);
+        }
+      }
+      uploaded.push(finalUrl);
+    }
+
+    const legacyFirst = String(current.imageUrl || "").trim();
+    const galleryExisting = String(current.mediaGallery || "").split("\n").map((x) => x.trim()).filter(Boolean);
+    const merged = [...galleryExisting, ...uploaded].filter((url, index, arr) => arr.indexOf(url) === index);
+    current.mediaGallery = merged.slice(0, YOUYOU_LANDING_MAX_IMAGES - (legacyFirst ? 1 : 0)).join("\n");
 
     const galleryInput = document.querySelector("#lpb-media-gallery");
     if (galleryInput) galleryInput.value = current.mediaGallery;
+    inputEl.value = "";
     renderPreview();
+    const total = galleryItems().length;
+    landingStudioStatus(storageReady
+      ? `${total} photo${total === 1 ? "" : "s"} ready · stored for export`
+      : `${total} photo${total === 1 ? "" : "s"} ready locally · run landing-media storage SQL for permanent hosting`);
   });
 
   document.querySelector("#lpb-gallery-manager")?.addEventListener("click", (event) => {
@@ -3466,6 +3753,7 @@ function initLandingPageWorkspace() {
     const target = urls[index];
     if (!target) return;
     if (String(current.imageUrl || "").trim() === target) current.imageUrl = "";
+    deleteLandingMediaUrl(target).catch(() => {});
     const remaining = String(current.mediaGallery || "").split("\n").map((x) => x.trim()).filter(Boolean).filter((url) => url !== target);
     current.mediaGallery = remaining.join("\n");
     const firstInput = document.querySelector("#lpb-image-url");
@@ -3475,30 +3763,46 @@ function initLandingPageWorkspace() {
     renderPreview();
   });
 
-  document.querySelector("#lpb-video-file")?.addEventListener("change", (event) => {
-    const file = event.currentTarget.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("video/")) return;
+  document.querySelector("#lpb-video-file")?.addEventListener("change", async (event) => {
+    const inputEl = event.currentTarget;
+    const file = inputEl.files?.[0];
+    if (!file || !file.type.startsWith("video/")) return;
 
-    if (file.size > 80_000_000) {
-      const status = document.querySelector("#lpw-save-state");
-      if (status) status.textContent = "Video too large for browser preview";
+    if (file.size > YOUYOU_LANDING_MAX_VIDEO_BYTES) {
+      landingStudioStatus("Video is too large · use a file under 100 MB");
+      inputEl.value = "";
       return;
     }
 
+    const previousVideoUrl = String(current.videoUrl || "").trim();
     if (window.__youyouLocalVideoUrl) URL.revokeObjectURL(window.__youyouLocalVideoUrl);
     window.__youyouLocalVideoUrl = URL.createObjectURL(file);
     current.videoUrl = window.__youyouLocalVideoUrl;
     current.videoEnabled = "on";
-
     const videoInput = document.querySelector("#lpb-video-url");
     const enabledInput = document.querySelector("#lpb-video-enabled");
     if (videoInput) videoInput.value = current.videoUrl;
     if (enabledInput) enabledInput.value = "on";
     renderPreview();
+    landingStudioStatus("Uploading video to YOUYOU media storage… keep this page open");
 
-    const status = document.querySelector("#lpw-save-state");
-    if (status) status.textContent = "Video loaded for local preview";
+    try {
+      const permanentUrl = await uploadLandingMediaFile(file, { pageId:current.id, kind:"video", fileName:file.name });
+      current.videoUrl = permanentUrl;
+      if (previousVideoUrl && !previousVideoUrl.startsWith("blob:") && previousVideoUrl !== permanentUrl) deleteLandingMediaUrl(previousVideoUrl).catch(() => {});
+      if (videoInput) videoInput.value = permanentUrl;
+      if (window.__youyouLocalVideoUrl) {
+        URL.revokeObjectURL(window.__youyouLocalVideoUrl);
+        window.__youyouLocalVideoUrl = null;
+      }
+      renderPreview();
+      landingStudioStatus("Video uploaded · Ready for export");
+    } catch (error) {
+      console.error("YOUYOU video upload failed:", error);
+      landingStudioStatus("Video preview works, but permanent storage is not ready · run supabase-v7.1-landing-media-storage.sql once");
+    } finally {
+      inputEl.value = "";
+    }
   });
 
   document.querySelectorAll("[data-lpb-palette]").forEach((button) => {
