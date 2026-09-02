@@ -1,0 +1,17 @@
+YOUYOU V7.0 — FINAL PREMIUM LANDING STUDIO
+
+Focused fixes consolidated from the mobile and builder review:
+- Landing builder uses independent editor/preview scrolling; no document-wide horizontal navigation required.
+- Builder restyled to a light, high-contrast premium workspace with clear inputs, buttons, uploads and sticky actions.
+- Hero visual controls restored in the dedicated workspace. Hero can be image, hero video, or hidden.
+- Hero video wrapper is true 16:9 with no retained 4:3/min-height white gap, including simulated mobile preview.
+- Lead form fields: Name, Phone, City and Address required; Email and Message optional. Submission persists structured details in conversation message.
+- Image gallery editor no longer exposes Base64/code by default; thumbnail manager shows selected photos and supports removal. Raw URLs remain under Advanced image URLs.
+- Carousel is photo-only: no 01/02/03, BEAUTY, product-name metadata or white text area under photos. Desktop shows 3 cards; mobile shows one large image with a small next-card peek.
+- Carousel autoplay works even when dots are hidden; arrows/dots are event-driven and active dots track swipes.
+- Beauty benefits/services are a normal clean grid/stack on mobile: no visible horizontal scrollbar and no clipped second card. Placeholder explanatory copy under benefit cards removed.
+- Static gallery is a real grid (3 desktop / 2 mobile), not an accidental horizontal slider.
+- Public Beauty page removes builder/internal proof labels and sample replacement instructions. Extra story section only renders when the client actually adds extra text.
+- Preview and exported HTML both receive the same final public media/form/mobile overrides.
+
+Still intentionally pending for the next product phase: public Publish + unique URL/media storage, OpenAI API, WhatsApp Business API, and separate bespoke premium layouts for all 30 template niches.

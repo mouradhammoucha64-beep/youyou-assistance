@@ -2010,27 +2010,32 @@ function landingImageSliderMarkup(data) {
   const images = urls.filter((url) => !landingVideoSource(url));
   if (!images.length) return "";
 
+  const title = String(data.sliderTitle || "").trim();
+  const head = title
+    ? `<div class="lp-block-head"><div><small>GALLERY</small><h2>${escapeHtml(title)}</h2></div></div>`
+    : "";
+
   if (mode === "grid") {
-    return `<section class="lp-live-section lp-product-gallery lp-static-gallery" data-block="image-gallery">
-      <div class="lp-block-head"><div><small>GALLERY</small><h2>${escapeHtml(data.sliderTitle || "Product details")}</h2></div></div>
+    return `<section id="details" class="lp-live-section lp-product-gallery lp-static-gallery" data-block="image-gallery">
+      ${head}
       <div class="lp-static-image-grid">${images.map((url,index)=>`<figure><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")} ${index+1}" loading="lazy" /></figure>`).join("")}</div>
     </section>`;
   }
 
-  const slides = images.map((url, index) => `<article class="lp-image-slide lp-product-slide-card"><div class="lp-product-slide-media"><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")} ${index + 1}" loading="lazy" /></div><div class="lp-product-slide-meta"><small>${escapeHtml(data.badge || "PRODUCT")}</small><strong>${escapeHtml(data.name || "Featured product")}</strong><span>${String(index + 1).padStart(2,"0")}</span></div></article>`);
+  const slides = images.map((url, index) => `<figure class="lp-image-slide" aria-label="${escapeHtml(data.name || "Product image")} ${index + 1}"><img src="${escapeHtml(url)}" alt="${escapeHtml(data.name || "Product image")} ${index + 1}" loading="lazy" /></figure>`);
   const interactive = slides.length > 1;
   const arrows = interactive && data.sliderArrows !== "off"
-    ? `<button type="button" class="lp-image-arrow prev" aria-label="Previous image" onclick="const t=this.parentElement.querySelector('.lp-image-track'),s=t.querySelector('.lp-image-slide');t.scrollBy({left:-(s?s.getBoundingClientRect().width+12:t.clientWidth*.8),behavior:'smooth'});">‹</button><button type="button" class="lp-image-arrow next" aria-label="Next image" onclick="const t=this.parentElement.querySelector('.lp-image-track'),s=t.querySelector('.lp-image-slide');t.scrollBy({left:(s?s.getBoundingClientRect().width+12:t.clientWidth*.8),behavior:'smooth'});">›</button>`
+    ? `<button type="button" class="lp-image-arrow prev" aria-label="Previous image">‹</button><button type="button" class="lp-image-arrow next" aria-label="Next image">›</button>`
     : "";
   const dots = interactive && data.sliderDots !== "off"
-    ? `<div class="lp-image-dots">${slides.map((_, index) => `<button type="button" class="${index === 0 ? "is-active" : ""}" aria-label="Show image ${index + 1}" onclick="const t=this.closest('.lp-image-slider').querySelector('.lp-image-track'),s=t.children[${index}];if(s)s.scrollIntoView({behavior:'smooth',inline:'start',block:'nearest'});this.parentElement.querySelectorAll('button').forEach((b,i)=>b.classList.toggle('is-active',i===${index}));"></button>`).join("")}</div>`
+    ? `<div class="lp-image-dots">${slides.map((_, index) => `<button type="button" class="${index === 0 ? "is-active" : ""}" data-slide-index="${index}" aria-label="Show image ${index + 1}"></button>`).join("")}</div>`
     : "";
   const autoplay = interactive && data.sliderAutoplay !== "off"
     ? `data-autoplay="true" data-speed="${Math.max(2000, Math.min(9000, Number(data.sliderSpeed) || 4000))}"`
     : "";
 
-  return `<section class="lp-live-section lp-product-gallery" data-block="image-slider">
-    <div class="lp-block-head"><div><small>GALLERY</small><h2>${escapeHtml(data.sliderTitle || "See it from every angle.")}</h2></div></div>
+  return `<section id="details" class="lp-live-section lp-product-gallery" data-block="image-slider">
+    ${head}
     <div class="lp-image-slider" ${autoplay}><div class="lp-image-track">${slides.join("")}</div>${arrows}${dots}</div>
   </section>`;
 }
@@ -2087,7 +2092,7 @@ function defaultLandingPageData(templateId = "product-launch") {
     videoUrl: "",
     mediaGallery: "",
     videoEnabled: "off",
-    videoTitle: "See the product in action.",
+    videoTitle: "",
     videoPosition: "after-hero",
     sliderEnabled: isBeautyProduct ? "grid" : "off",
     sliderTitle: "See it from every angle.",
@@ -2202,9 +2207,14 @@ function landingWidgetMarkup(data) {
 
 function landingLeadFormMarkup(data, className = "") {
   return `<form class="lp-lead-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
-    <label><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
-    <label><span>Email or phone</span><input name="contact" autocomplete="email" placeholder="you@example.com or +212..." required /></label>
-    <label><span>Message</span><textarea name="message" rows="3" placeholder="Tell us what you need"></textarea></label>
+    <div class="lp-lead-grid">
+      <label class="lp-lead-span-2"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
+      <label><span>Phone</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+212..." required /></label>
+      <label><span>Email <em>Optional</em></span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+      <label><span>City</span><input name="city" autocomplete="address-level2" placeholder="Your city" required /></label>
+      <label><span>Address</span><input name="address" autocomplete="street-address" placeholder="Street / area / delivery address" required /></label>
+      <label class="lp-lead-span-2"><span>Message <em>Optional</em></span><textarea name="message" rows="3" placeholder="Anything else we should know?"></textarea></label>
+    </div>
     <button type="submit">${escapeHtml(data.ctaText || "Send request")}</button>
     <p class="lp-lead-status" data-lp-lead-status role="status" aria-live="polite"></p>
   </form>`;
@@ -2246,12 +2256,28 @@ window.youyouLandingSubmit = function(form) {
   const status = form.querySelector('[data-lp-lead-status]');
   const button = form.querySelector('button[type="submit"]');
   const name = String(form.elements?.name?.value || '').trim();
-  const contact = String(form.elements?.contact?.value || '').trim();
+  const phone = String(form.elements?.phone?.value || '').trim();
+  const email = String(form.elements?.email?.value || '').trim();
+  const city = String(form.elements?.city?.value || '').trim();
+  const address = String(form.elements?.address?.value || '').trim();
   const message = String(form.elements?.message?.value || '').trim();
-  if (!name || !contact) { if(status) status.textContent='Please add your name and contact.'; return false; }
-  const email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact) ? contact : '';
+  if (!name || !phone || !city || !address) {
+    if (status) status.textContent = 'Please add your name, phone, city and address.';
+    return false;
+  }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (status) status.textContent = 'Please check the email address or leave it empty.';
+    return false;
+  }
   const pageTitle = page?.dataset?.pageTitle || 'this offer';
-  const content = `Lead form submission. Visitor is ready to be contacted about ${pageTitle}. Contact: ${contact}. ${message ? `Request: ${message}` : 'Request: Please contact me.'}`;
+  const details = [
+    `Phone: ${phone}`,
+    `City: ${city}`,
+    `Address: ${address}`,
+    email ? `Email: ${email}` : '',
+    message ? `Message: ${message}` : ''
+  ].filter(Boolean).join(' | ');
+  const content = `Lead form submission for ${pageTitle}. ${details}`;
   if (button) button.disabled = true;
   if (status) status.textContent = 'Sending…';
   (async()=>{
@@ -2260,7 +2286,7 @@ window.youyouLandingSubmit = function(form) {
       if (result.ok) {
         if (status) status.textContent = 'Thanks — your request was sent.';
         form.reset();
-      } else if (status) status.textContent = 'Preview ready. This form will capture leads when the page is connected.';
+      } else if (status) status.textContent = 'Preview ready. Lead capture will activate on the connected page.';
     } catch (error) {
       console.error('YOUYOU landing lead form:', error);
       if (status) status.textContent = 'Could not send right now. Please try another contact option.';
@@ -2277,18 +2303,32 @@ function initLandingCarousels(root = document) {
     const track = slider.querySelector('.lp-image-track');
     const slides = [...(track?.querySelectorAll('.lp-image-slide') || [])];
     const dots = [...slider.querySelectorAll('.lp-image-dots button')];
+    const prev = slider.querySelector('.lp-image-arrow.prev');
+    const next = slider.querySelector('.lp-image-arrow.next');
     if (!track || slides.length < 2) return;
+
+    let activeIndex = 0;
     const updateDots = () => {
       let active = 0, distance = Infinity;
       slides.forEach((slide, i) => {
         const d = Math.abs(slide.offsetLeft - track.scrollLeft);
         if (d < distance) { distance = d; active = i; }
       });
+      activeIndex = active;
       dots.forEach((dot,i)=>dot.classList.toggle('is-active', i === active));
+    };
+    const goTo = (index) => {
+      const safe = ((index % slides.length) + slides.length) % slides.length;
+      track.scrollTo({ left:slides[safe].offsetLeft, behavior:'smooth' });
+      activeIndex = safe;
     };
     let raf = 0;
     track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(updateDots); }, { passive:true });
+    prev?.addEventListener('click', () => goTo(activeIndex - 1));
+    next?.addEventListener('click', () => goTo(activeIndex + 1));
+    dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(Number(dot.dataset.slideIndex ?? i))));
     updateDots();
+
     if (slider.dataset.autoplay === 'true' && !reduced) {
       const speed = Math.max(2000, Number(slider.dataset.speed) || 4000);
       let timer = null;
@@ -2296,9 +2336,7 @@ function initLandingCarousels(root = document) {
         clearInterval(timer);
         timer = setInterval(() => {
           if (!document.body.contains(slider)) return clearInterval(timer);
-          const current = dots.findIndex((dot)=>dot.classList.contains('is-active'));
-          const nextIndex = current >= slides.length - 1 ? 0 : current + 1;
-          track.scrollTo({ left:slides[nextIndex].offsetLeft, behavior:'smooth' });
+          goTo(activeIndex + 1);
         }, speed);
       };
       const pause = () => clearInterval(timer);
@@ -2347,22 +2385,12 @@ window.youyouLandingAsk = function(source, forcedQuestion = "") {
 
 function landingBeautyPreviewMarkup(data, compact = false) {
   const direction = data.direction === "rtl" ? "rtl" : "ltr";
-  const genericBenefits = "Clear value proposition\nFast customer response\nSimple next step";
   const rawBenefits = String(data.benefits || "").trim();
-  const benefits = (rawBenefits && rawBenefits !== genericBenefits
-    ? rawBenefits.split("\n").map(x=>x.trim()).filter(Boolean)
-    : ["Visible glow without the heavy feel", "Skin-loving formula for everyday rituals", "Simple product details and a clear next step"]
-  ).slice(0,6);
-  const desc = (!data.description || data.description.startsWith("Add a short, persuasive"))
-    ? "A beauty ritual designed to feel premium from the first look to the final touch."
-    : data.description;
+  const benefits = rawBenefits.split("\n").map(x=>x.trim()).filter(Boolean).slice(0,6);
+  const desc = String(data.description || "").trim();
   const testimonial = String(data.testimonial || "").trim();
-  const faqQ = (!data.faqQuestion || data.faqQuestion.startsWith("What should customers know"))
-    ? "Is it easy to add to a daily beauty routine?"
-    : data.faqQuestion;
-  const faqA = (!data.faqAnswer || data.faqAnswer.startsWith("Add a concise answer"))
-    ? "Yes. The routine is designed to stay simple: use a small amount, follow your normal care steps and adjust frequency to your preference."
-    : data.faqAnswer;
+  const faqQ = String(data.faqQuestion || "").trim();
+  const faqA = String(data.faqAnswer || "").trim();
   const heroImage = String(data.heroImageUrl || data.imageUrl || "").trim();
   const heroVideo = data.heroMediaEnabled === "off" ? "" : landingHeroVideoMarkup(data, "beauty-hero-video");
   const productVisual = data.heroMediaEnabled === "off" ? "" : (heroVideo || (heroImage
@@ -2376,21 +2404,22 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   if (galleryMode === "on" && galleryUrls.length) {
     gallerySection = landingImageSliderMarkup(data);
   } else if (galleryMode === "grid" && galleryUrls.length) {
-    gallerySection = `<section class="beauty-gallery-section" data-block="image-gallery"><div><small>02 · THE DETAILS</small><h2>${escapeHtml(data.sliderTitle || 'See it from every angle.')}</h2></div><div class="beauty-gallery">${galleryUrls.map((u,i)=>`<figure><img src="${escapeHtml(u)}" alt="${escapeHtml(data.name || 'Beauty product')} detail ${i+1}" loading="lazy"/></figure>`).join('')}</div></section>`;
+    const title = String(data.sliderTitle || "").trim();
+    gallerySection = `<section class="beauty-gallery-section" id="details" data-block="image-gallery">${title ? `<div class="beauty-section-heading"><small>DETAILS</small><h2>${escapeHtml(title)}</h2></div>` : ''}<div class="beauty-gallery">${galleryUrls.map((u,i)=>`<figure><img src="${escapeHtml(u)}" alt="${escapeHtml(data.name || 'Beauty product')} detail ${i+1}" loading="lazy"/></figure>`).join('')}</div></section>`;
   }
   const video = data.videoEnabled !== "off" ? landingVideoBlockMarkup(data) : "";
   const mediaPos = ["right","left","top","bottom"].includes(data.mediaPosition) ? data.mediaPosition : "right";
   const pageAttrs = `data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Beauty product')}"`;
 
-  const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Story</a><a href="#details">Details</a><a href="#faq">FAQ</a></div><a href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
-  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY EDIT')}</span><div class="beauty-proofline"><span>Product-focused</span><span>Mobile-ready</span><span>Clear action</span></div><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1><p>${escapeHtml(data.subheadline || '')}</p>${price}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="https://wa.me/${String(data.whatsapp).replace(/\D/g,'')}">Ask on WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}${heroVideo ? '' : `<div class="beauty-float-card"><small>${escapeHtml(data.badge || 'PRODUCT')}</small><strong>${escapeHtml(data.name || 'Featured product')}</strong><span>Replace this sample visual with your own product image.</span></div>`}</div>` : ''}</section>`;
-  const marquee = `<section class="beauty-marquee"><span>DISCOVER</span><i></i><span>DETAILS</span><i></i><span>ROUTINE</span><i></i><span>QUESTIONS</span><i></i><span>ACTION</span></section>`;
-  const story = `<section id="story" class="beauty-story"><div class="beauty-story-head"><span>01 · WHY THIS OFFER</span><h2>${escapeHtml(desc)}</h2></div><div class="beauty-benefits">${benefits.map((b,i)=>`<article><span>0${i+1}</span><div class="beauty-icon">${['✦','◌','♡','＋','◇','☼'][i]||'✦'}</div><h3>${escapeHtml(b)}</h3><p>${['Explain the value in one short, useful line.','Show how this benefit fits the customer routine.','Keep the next step easy to understand.','Add a specific product detail here.','Use this card for another benefit.','Keep the copy short for mobile visitors.'][i]||'Add a useful product detail.'}</p></article>`).join('')}</div></section>`;
-  const editorial = `<section class="beauty-editorial"><div class="beauty-editorial-card"><small>PRODUCT STORY</small><h2>Make the offer easy to understand before the customer takes action.</h2><p>${escapeHtml(data.extraText || 'Use this section for ingredients, delivery, conditions, product story or any detail that helps a visitor decide.')}</p></div><div class="beauty-stat-grid"><div><strong>01</strong><span>Offer story</span></div><div><strong>02</strong><span>Benefits</span></div><div><strong>03</strong><span>FAQ</span></div></div></section>`;
-  const review = testimonial ? `<section class="beauty-review-section"><div class="beauty-quote-mark">“</div><blockquote>${escapeHtml(testimonial)}</blockquote><div class="beauty-review-meta"><span class="beauty-avatar">C</span><div><strong>Customer feedback</strong><small>Added by the page owner</small></div></div></section>` : "";
-  const faq = `<section id="faq" class="beauty-faq"><div><small>03 · GOOD TO KNOW</small><h2>${escapeHtml(faqQ)}</h2></div><p>${escapeHtml(faqA)}</p></section>`;
+  const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Benefits</a>${gallerySection ? '<a href="#details">Gallery</a>' : ''}${faqQ && faqA ? '<a href="#faq">FAQ</a>' : ''}</div><a href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
+  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY')}</span><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1>${data.subheadline ? `<p>${escapeHtml(data.subheadline)}</p>` : ''}${price}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="https://wa.me/${String(data.whatsapp).replace(/\D/g,'')}">WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}</div>` : ''}</section>`;
+  const marquee = `<section class="beauty-marquee" aria-hidden="true"><span>DISCOVER</span><i></i><span>DETAILS</span><i></i><span>ROUTINE</span><i></i><span>ACTION</span></section>`;
+  const story = benefits.length || desc ? `<section id="story" class="beauty-story"><div class="beauty-story-head"><span>WHY IT STANDS OUT</span><h2>Made to be easy to understand — and easy to choose.</h2>${desc ? `<p>${escapeHtml(desc)}</p>` : ''}</div>${benefits.length ? `<div class="beauty-benefits">${benefits.map((b,i)=>`<article><div class="beauty-icon">${['✦','◌','♡','＋','◇','☼'][i]||'✦'}</div><h3>${escapeHtml(b)}</h3></article>`).join('')}</div>` : ''}</section>` : '';
+  const editorial = String(data.extraText || '').trim() ? `<section class="beauty-editorial"><div class="beauty-editorial-card"><small>${escapeHtml(data.extraTitle || 'PRODUCT STORY')}</small><h2>${escapeHtml(data.extraTitle || 'More about this product')}</h2><p>${escapeHtml(data.extraText).replace(/\n/g,'<br>')}</p></div></section>` : '';
+  const review = testimonial ? `<section class="beauty-review-section"><div class="beauty-quote-mark">“</div><blockquote>${escapeHtml(testimonial)}</blockquote><div class="beauty-review-meta"><span class="beauty-avatar">C</span><div><strong>Customer feedback</strong><small>Shared by the business</small></div></div></section>` : "";
+  const faq = faqQ && faqA ? `<section id="faq" class="beauty-faq"><div><small>GOOD TO KNOW</small><h2>${escapeHtml(faqQ)}</h2></div><p>${escapeHtml(faqA)}</p></section>` : '';
   const directCta = `<a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Continue')} <span>↗</span></a>`;
-  const finalCta = `<section id="contact" class="beauty-final-cta ${data.ctaAction === 'form' ? 'has-form' : ''}"><div><small>READY WHEN YOU ARE</small><h2>${escapeHtml(data.ctaText || 'Continue')}</h2><p>${data.ctaAction === 'form' ? 'Leave your details and the business can follow up.' : 'Use the action below to continue.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data, 'beauty-lead-form') : directCta}</section>`;
+  const finalCta = `<section id="contact" class="beauty-final-cta ${data.ctaAction === 'form' ? 'has-form' : ''}"><div><small>READY WHEN YOU ARE</small><h2>${escapeHtml(data.ctaText || 'Continue')}</h2><p>${data.ctaAction === 'form' ? 'Share your details and the business can follow up with you.' : 'Choose the action below to continue.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data, 'beauty-lead-form') : directCta}</section>`;
 
   const parts = [nav, hero, marquee];
   let videoAdded = false, galleryAdded = false;
@@ -2402,15 +2431,15 @@ function landingBeautyPreviewMarkup(data, compact = false) {
     if (!galleryAdded && gallerySection && (data.sliderPosition || 'after-video') === position) { parts.push(gallerySection); galleryAdded = true; }
   };
   addAt('after-hero');
-  parts.push(story);
+  if (story) parts.push(story);
   addAt('after-benefits');
-  parts.push(editorial);
+  if (editorial) parts.push(editorial);
   if (review) parts.push(review);
-  parts.push(faq);
+  if (faq) parts.push(faq);
   addAt('before-contact');
   if (!videoAdded && video) { parts.push(video); videoAdded = true; }
   if (!galleryAdded && gallerySection) { parts.push(gallerySection); galleryAdded = true; }
-  parts.push(finalCta, `<footer class="beauty-footer"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><span>Built with YOUYOU</span></footer>`, landingWidgetMarkup(data));
+  parts.push(finalCta, `<footer class="beauty-footer"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><span>Powered by YOUYOU</span></footer>`, landingWidgetMarkup(data));
 
   return `<article class="lp-live-page beauty-wow ${compact ? 'is-compact' : ''} media-${mediaPos}" dir="${direction}" ${pageAttrs} style="--lp-accent:${escapeHtml(data.accent)};--lp-bg:${escapeHtml(data.background)};--lp-surface:${escapeHtml(data.surface)};--lp-text:${escapeHtml(data.textColor)}">${parts.join('')}</article>`;
 }
@@ -2555,15 +2584,40 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 @media(max-width:760px){.lp-live-page{width:100%;overflow-x:hidden}.lp-live-nav,.lp-live-footer{padding-left:18px;padding-right:18px}.lp-live-hero,.lp-live-contact{grid-template-columns:1fr!important;padding-left:18px!important;padding-right:18px!important}.lp-live-section{padding-left:18px!important;padding-right:18px!important}.lp-image-track{gap:12px!important;padding:2px 22px 6px 0!important}.lp-image-slide,.beauty-wow .lp-image-slide{flex:0 0 78%!important;width:78%!important;min-width:78%!important;height:auto!important;border-radius:16px!important}.lp-image-arrow{display:none!important}.lp-product-slide-meta{padding:11px 12px 12px;min-height:68px}.beauty-proofline{margin-top:14px}.beauty-final-cta.has-form{display:grid!important;grid-template-columns:1fr!important}.beauty-lead-form{width:100%}.beauty-review-section{padding-left:20px!important;padding-right:20px!important}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
+
+/* YOUYOU V7.0 — FINAL PREMIUM LANDING / MOBILE QUALITY LOCK */
+.lp-hero-video,.lp-video-frame{position:relative!important;display:block!important;width:100%!important;height:auto!important;min-height:0!important;aspect-ratio:16/9!important;overflow:hidden!important;background:#0b0d12!important}
+.lp-hero-video iframe,.lp-hero-video video,.lp-video-frame iframe,.lp-video-frame video{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;object-fit:cover!important;border:0!important;display:block!important}
+.beauty-visual-wrap.has-video,.lp-hero-media-card.has-hero-video{display:block!important;height:auto!important;min-height:0!important;aspect-ratio:auto!important;padding:0!important;background:transparent!important}
+.beauty-visual-wrap.has-video>.lp-hero-video,.lp-hero-media-card.has-hero-video>.lp-hero-video{position:relative!important;inset:auto!important;width:100%!important;height:auto!important;aspect-ratio:16/9!important;border-radius:inherit!important}
+.beauty-proofline,.beauty-float-card,.lp-product-slide-meta{display:none!important}
+.beauty-story-head{align-items:start!important}.beauty-story-head>p{margin:14px 0 0;max-width:680px;color:#747680;font-size:16px;line-height:1.7}
+.beauty-benefits{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:initial!important;gap:16px!important;overflow:visible!important;padding:0!important}
+.beauty-benefits article{min-height:0!important;padding:24px!important;display:grid!important;align-content:start!important;gap:20px!important}.beauty-benefits article>span{display:none!important}.beauty-benefits h3{margin:0!important;font-size:20px!important;line-height:1.25!important}.beauty-benefits .beauty-icon{margin:0!important}
+.beauty-editorial{grid-template-columns:1fr!important}.beauty-editorial-card{max-width:860px}.beauty-editorial-card h2{margin-bottom:12px}
+.lp-product-gallery{overflow:hidden!important}.lp-image-slider{position:relative!important;overflow:hidden!important}.lp-image-track{display:flex!important;align-items:stretch!important;gap:16px!important;width:100%!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;scrollbar-width:none!important;padding:2px 2px 8px!important}.lp-image-track::-webkit-scrollbar{display:none!important}.lp-image-slide,.beauty-wow .lp-image-slide{margin:0!important;position:relative!important;flex:0 0 calc((100% - 32px)/3)!important;width:calc((100% - 32px)/3)!important;min-width:0!important;height:auto!important;aspect-ratio:4/3!important;border-radius:18px!important;overflow:hidden!important;scroll-snap-align:start!important;background:#f4f4f6!important;border:0!important;box-shadow:0 12px 32px rgba(16,24,40,.10)!important}.lp-image-slide>img,.beauty-wow .lp-image-slide>img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}.lp-image-arrow{top:50%!important;transform:translateY(-50%)!important}.lp-image-dots{position:static!important;transform:none!important;margin:12px auto 0!important;padding:0!important;background:transparent!important}.lp-image-dots button{background:#9ca3af55!important}.lp-image-dots button.is-active{background:var(--lp-accent)!important}
+.lp-static-image-grid,.beauty-gallery{overflow:visible!important}.beauty-gallery{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:initial!important;gap:14px!important}.beauty-gallery figure{margin:0!important;height:auto!important;aspect-ratio:4/3!important;border-radius:18px!important;overflow:hidden!important}.beauty-gallery figure img{width:100%!important;height:100%!important;object-fit:cover!important}
+.lp-lead-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.lp-lead-span-2{grid-column:1/-1}.lp-lead-form label>span{display:flex;align-items:center;justify-content:space-between}.lp-lead-form label>span em{font-style:normal;font-size:10px;font-weight:700;opacity:.5}.lp-lead-form input,.lp-lead-form textarea{min-height:50px!important;padding:13px 14px!important;border-radius:12px!important}.lp-lead-form textarea{min-height:94px!important}.lp-lead-form>button{min-height:52px;border-radius:12px!important}
+@media(max-width:760px){
+  .beauty-visual-wrap.has-video,.lp-hero-media-card.has-hero-video{height:auto!important;min-height:0!important;aspect-ratio:auto!important}
+  .beauty-visual-wrap.has-video>.lp-hero-video,.lp-hero-media-card.has-hero-video>.lp-hero-video{height:auto!important;min-height:0!important;aspect-ratio:16/9!important;border-radius:18px!important}
+  .beauty-story,.beauty-gallery-section,.beauty-faq{padding-left:18px!important;padding-right:18px!important}
+  .beauty-story-head h2{font-size:34px!important;line-height:1.02!important}.beauty-story-head>p{font-size:15px!important}
+  .beauty-benefits{grid-template-columns:1fr!important;grid-auto-columns:auto!important;grid-auto-flow:row!important;overflow:visible!important;scroll-snap-type:none!important;gap:12px!important;padding:0!important}
+  .beauty-benefits article{min-height:0!important;padding:20px!important;border-radius:18px!important;scroll-snap-align:none!important;gap:16px!important}.beauty-benefits h3{font-size:18px!important}
+  .beauty-gallery{grid-template-columns:1fr 1fr!important;grid-auto-flow:row!important;grid-auto-columns:auto!important;overflow:visible!important;gap:10px!important;padding:0!important}.beauty-gallery figure{height:auto!important;aspect-ratio:1/1!important;border-radius:14px!important}
+  .lp-image-track{gap:10px!important;padding:2px 36px 8px 0!important}.lp-image-slide,.beauty-wow .lp-image-slide{flex:0 0 84%!important;width:84%!important;min-width:84%!important;aspect-ratio:4/3!important;height:auto!important;border-radius:16px!important}.lp-image-arrow{display:none!important}.lp-image-dots{margin-top:9px!important}
+  .lp-lead-grid{grid-template-columns:1fr!important}.lp-lead-span-2{grid-column:auto}.beauty-final-cta.has-form{gap:22px!important}.beauty-final-cta.has-form>div{max-width:none!important}.beauty-lead-form{width:100%!important}
+}
 </style>
 </head>
 <body>${body}<script>
 const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 async function yyPersist(page,content,visitor={}){const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
-window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),name=String(form?.elements?.name?.value||'').trim(),contact=String(form?.elements?.contact?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();if(!name||!contact){if(status)status.textContent='Please add your name and contact.';return false}const email=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)?contact:'',title=page?.dataset?.pageTitle||'this offer',content='Lead form submission. Visitor is ready to be contacted about '+title+'. Contact: '+contact+'. '+(message?'Request: '+message:'Request: Please contact me.');if(button)button.disabled=true;if(status)status.textContent='Sending…';yyPersist(page,content,{name,email}).then(r=>{if(status)status.textContent=r.ok?'Thanks — your request was sent.':'This form needs the published page connection.';if(r.ok)form.reset()}).catch(()=>{if(status)status.textContent='Could not send right now. Please try another contact option.'}).finally(()=>{if(button)button.disabled=false});return false};
+window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){if(status)status.textContent='Please add your name, phone, city and address.';return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){if(status)status.textContent='Please check the email address or leave it empty.';return false}const title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;if(status)status.textContent='Sending…';yyPersist(page,content,{name,email}).then(r=>{if(status)status.textContent=r.ok?'Thanks — your request was sent.':'Lead capture will activate on the connected page.';if(r.ok)form.reset()}).catch(()=>{if(status)status.textContent='Could not send right now. Please try another contact option.'}).finally(()=>{if(button)button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
-function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dots=[...slider.querySelectorAll('.lp-image-dots button')];if(!track||slides.length<2)return;const update=()=>{let a=0,d=Infinity;slides.forEach((s,i)=>{const x=Math.abs(s.offsetLeft-track.scrollLeft);if(x<d){d=x;a=i}});dots.forEach((dot,i)=>dot.classList.toggle('is-active',i===a))};let raf=0;track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(update)},{passive:true});update();if(slider.dataset.autoplay==='true'&&!reduced){const speed=Math.max(2000,Number(slider.dataset.speed)||4000);let timer;const play=()=>{clearInterval(timer);timer=setInterval(()=>{const current=dots.findIndex(x=>x.classList.contains('is-active')),next=current>=slides.length-1?0:current+1;track.scrollTo({left:slides[next].offsetLeft,behavior:'smooth'})},speed)},pause=()=>clearInterval(timer);slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});play()}})}
+function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dots=[...slider.querySelectorAll('.lp-image-dots button')],prev=slider.querySelector('.lp-image-arrow.prev'),next=slider.querySelector('.lp-image-arrow.next');if(!track||slides.length<2)return;let active=0;const update=()=>{let a=0,d=Infinity;slides.forEach((s,i)=>{const x=Math.abs(s.offsetLeft-track.scrollLeft);if(x<d){d=x;a=i}});active=a;dots.forEach((dot,i)=>dot.classList.toggle('is-active',i===a))},go=i=>{const safe=((i%slides.length)+slides.length)%slides.length;track.scrollTo({left:slides[safe].offsetLeft,behavior:'smooth'});active=safe};let raf=0;track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(update)},{passive:true});prev&&prev.addEventListener('click',()=>go(active-1));next&&next.addEventListener('click',()=>go(active+1));dots.forEach((dot,i)=>dot.addEventListener('click',()=>go(Number(dot.dataset.slideIndex??i))));update();if(slider.dataset.autoplay==='true'&&!reduced){const speed=Math.max(2000,Number(slider.dataset.speed)||4000);let timer;const play=()=>{clearInterval(timer);timer=setInterval(()=>go(active+1),speed)},pause=()=>clearInterval(timer);slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});play()}})}
 document.addEventListener('DOMContentLoaded',yyInitCarousels);yyInitCarousels();
 
 </script></body>
@@ -2997,6 +3051,24 @@ function renderLandingPageWorkspace() {
           </div>
 
           <div class="lpb-editor-section lpb-media-pro-section">
+            <small>HERO VISUAL · OPTIONAL</small>
+            <div class="lpb-media-toggle-row">
+              <div><strong>Hero visual</strong><span>Use an image, use the hero video below, or hide the visual completely.</span></div>
+              <select id="lpb-hero-media-enabled"><option value="on">Show</option><option value="off">Hidden</option></select>
+            </div>
+            <details class="lpb-advanced-media" open>
+              <summary>Hero image</summary>
+              <label>Image URL<input id="lpb-hero-image-url" type="url" inputmode="url" placeholder="https://...hero-image.jpg" /></label>
+              <label class="lpb-upload-label lpb-upload-pro">
+                Upload hero image
+                <input id="lpb-hero-image-file" type="file" accept="image/*" />
+                <span class="lpb-upload-button">Choose hero image</span>
+                <span>JPG / PNG / WebP · optimized for preview</span>
+              </label>
+            </details>
+          </div>
+
+          <div class="lpb-editor-section lpb-media-pro-section">
             <small>VIDEO / HERO VIDEO · OPTIONAL</small>
             <div class="lpb-media-toggle-row">
               <div><strong>Product or hero video</strong><span>Place it inside the hero or as a separate section. Slider stays images-only.</span></div>
@@ -3007,6 +3079,7 @@ function renderLandingPageWorkspace() {
             <label class="lpb-upload-label lpb-upload-pro">
               Upload video
               <input id="lpb-video-file" type="file" accept="video/mp4,video/webm,video/ogg,video/*" />
+              <span class="lpb-upload-button">Choose video</span>
               <span>MP4 / WebM / OGG · local preview</span>
             </label>
             <label>Video position
@@ -3027,18 +3100,23 @@ function renderLandingPageWorkspace() {
               <select id="lpb-slider-enabled"><option value="grid">Image gallery</option><option value="on">3-card carousel</option><option value="off">Hidden</option></select>
             </div>
             <label>Gallery title<input id="lpb-slider-title" placeholder="See it from every angle." /></label>
-            <label>First image URL<input id="lpb-image-url" type="text" inputmode="url" placeholder="https://...product-front.jpg" /></label>
 
             <label class="lpb-upload-label lpb-upload-pro">
               Add your images
               <input id="lpb-image-files" type="file" accept="image/*" multiple />
               <span class="lpb-upload-button">Choose images</span>
-              <span>Select your own product photos · up to 8</span>
+              <span>Up to 8 photos · they appear below so you can review or remove them.</span>
             </label>
 
-            <label>Image list <span>One image URL per line · up to 8</span>
-              <textarea id="lpb-media-gallery" rows="8" placeholder="https://...front.jpg&#10;https://...side.jpg&#10;https://...detail.jpg"></textarea>
-            </label>
+            <div id="lpb-gallery-manager" class="lpb-gallery-manager" aria-live="polite"></div>
+
+            <details class="lpb-advanced-media">
+              <summary>Advanced image URLs</summary>
+              <label>First image URL<input id="lpb-image-url" type="text" inputmode="url" placeholder="https://...product-front.jpg" /></label>
+              <label>Additional image URLs <span>One per line · up to 8</span>
+                <textarea id="lpb-media-gallery" rows="5" placeholder="https://...front.jpg&#10;https://...side.jpg&#10;https://...detail.jpg"></textarea>
+              </label>
+            </details>
 
             <div class="lpb-slider-settings-pro" data-slider-only>
               <label>Auto-play
@@ -3149,6 +3227,39 @@ function renderLandingPageWorkspace() {
   `;
 }
 
+async function optimizeLandingImageFile(file, maxSide = 1600, quality = 0.86) {
+  if (!file || !String(file.type || "").startsWith("image/")) return "";
+  const original = await new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => resolve("");
+    reader.readAsDataURL(file);
+  });
+  if (!original) return "";
+  try {
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = original;
+    });
+    const width = Number(image.naturalWidth || image.width || 0);
+    const height = Number(image.naturalHeight || image.height || 0);
+    if (!width || !height) return original;
+    const scale = Math.min(1, maxSide / Math.max(width, height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(width * scale));
+    canvas.height = Math.max(1, Math.round(height * scale));
+    const ctx = canvas.getContext("2d", { alpha:true });
+    if (!ctx) return original;
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const optimized = canvas.toDataURL("image/webp", quality);
+    return optimized && optimized.length < original.length ? optimized : original;
+  } catch (_) {
+    return original;
+  }
+}
+
 function initLandingPageWorkspace() {
   const request = landingBuilderRequest();
   const storedDrafts = loadLandingDrafts();
@@ -3202,9 +3313,30 @@ function initLandingPageWorkspace() {
     });
   };
 
+  const galleryItems = () => {
+    const urls = [String(current.imageUrl || "").trim(), ...String(current.mediaGallery || "").split("\n").map((x) => x.trim())]
+      .filter(Boolean)
+      .filter((url, index, arr) => arr.indexOf(url) === index)
+      .filter((url) => !landingVideoSource(url))
+      .slice(0, 8);
+    return urls;
+  };
+
+  const renderGalleryManager = () => {
+    const manager = document.querySelector("#lpb-gallery-manager");
+    if (!manager) return;
+    const urls = galleryItems();
+    if (!urls.length) {
+      manager.innerHTML = `<div class="lpb-gallery-empty"><span>▧</span><div><strong>No product photos yet</strong><small>Choose images above or add hosted image URLs.</small></div></div>`;
+      return;
+    }
+    manager.innerHTML = `<div class="lpb-gallery-manager-head"><strong>${urls.length} photo${urls.length === 1 ? "" : "s"}</strong><small>Preview · remove any image</small></div><div class="lpb-gallery-thumbs">${urls.map((url,index)=>`<figure><img src="${escapeHtml(url)}" alt="Gallery image ${index+1}" /><button type="button" data-gallery-remove="${index}" aria-label="Remove image ${index+1}">×</button></figure>`).join("")}</div>`;
+  };
+
   const renderPreview = () => {
     readFields();
     updateGalleryControls();
+    renderGalleryManager();
     const preview = document.querySelector("#lpb-live-preview");
     const name = document.querySelector("#lpw-document-name");
     if (preview) {
@@ -3288,7 +3420,7 @@ function initLandingPageWorkspace() {
     el?.addEventListener("change", renderPreview);
   });
 
-  document.querySelector("#lpb-hero-image-file")?.addEventListener("change", (event) => {
+  document.querySelector("#lpb-hero-image-file")?.addEventListener("change", async (event) => {
     const file = event.currentTarget.files?.[0];
     if (!file || !file.type.startsWith("image/")) return;
     if (file.size > 2_000_000) {
@@ -3296,17 +3428,13 @@ function initLandingPageWorkspace() {
       if (status) status.textContent = "Use a hero image under 2 MB";
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      current.heroImageUrl = String(reader.result || "");
-      current.heroMediaEnabled = "on";
-      const input = document.querySelector("#lpb-hero-image-url");
-      const enabled = document.querySelector("#lpb-hero-media-enabled");
-      if (input) input.value = current.heroImageUrl;
-      if (enabled) enabled.value = "on";
-      renderPreview();
-    };
-    reader.readAsDataURL(file);
+    current.heroImageUrl = await optimizeLandingImageFile(file, 1800, 0.88);
+    current.heroMediaEnabled = "on";
+    const input = document.querySelector("#lpb-hero-image-url");
+    const enabled = document.querySelector("#lpb-hero-media-enabled");
+    if (input) input.value = current.heroImageUrl;
+    if (enabled) enabled.value = "on";
+    renderPreview();
   });
 
   document.querySelector("#lpb-image-files")?.addEventListener("change", async (event) => {
@@ -3320,18 +3448,30 @@ function initLandingPageWorkspace() {
       return;
     }
 
-    const readAsDataUrl = (file) => new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ""));
-      reader.readAsDataURL(file);
-    });
-
-    const dataUrls = await Promise.all(accepted.map(readAsDataUrl));
+    const dataUrls = await Promise.all(accepted.map((file) => optimizeLandingImageFile(file, 1600, 0.86)));
     const existing = String(current.mediaGallery || "").split("\n").map((x) => x.trim()).filter(Boolean);
     current.mediaGallery = [...existing, ...dataUrls].slice(0, 8).join("\n");
 
     const galleryInput = document.querySelector("#lpb-media-gallery");
     if (galleryInput) galleryInput.value = current.mediaGallery;
+    renderPreview();
+  });
+
+  document.querySelector("#lpb-gallery-manager")?.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-gallery-remove]");
+    if (!button) return;
+    readFields();
+    const urls = galleryItems();
+    const index = Number(button.dataset.galleryRemove);
+    const target = urls[index];
+    if (!target) return;
+    if (String(current.imageUrl || "").trim() === target) current.imageUrl = "";
+    const remaining = String(current.mediaGallery || "").split("\n").map((x) => x.trim()).filter(Boolean).filter((url) => url !== target);
+    current.mediaGallery = remaining.join("\n");
+    const firstInput = document.querySelector("#lpb-image-url");
+    const galleryInput = document.querySelector("#lpb-media-gallery");
+    if (firstInput) firstInput.value = current.imageUrl || "";
+    if (galleryInput) galleryInput.value = current.mediaGallery || "";
     renderPreview();
   });
 
