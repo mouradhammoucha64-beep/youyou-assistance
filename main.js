@@ -2124,6 +2124,10 @@ function defaultLandingPageData(templateId = "product-launch") {
     widgetGreeting: "Hi! Ask me anything about this page.",
     widgetPosition: "right",
     widgetName: "YOUYOU Assistant",
+    publishedSlug: "",
+    publishedUrl: "",
+    remotePageId: "",
+    publishedAt: "",
     createdAt: new Date().toISOString(),
     status: "Draft",
   };
@@ -2500,6 +2504,34 @@ function landingPreviewMarkup(data, compact = false) {
   return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="--lp-accent:${escapeHtml(data.accent)};--lp-bg:${escapeHtml(data.background)};--lp-surface:${escapeHtml(data.surface)};--lp-text:${escapeHtml(data.textColor)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
 }
 
+function landingSlugify(value = "") {
+  return String(value || "landing-page")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64) || "landing-page";
+}
+
+function landingShortToken() {
+  const source = crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`;
+  return String(source).replace(/[^a-z0-9]/gi, "").toLowerCase().slice(-5) || Math.random().toString(36).slice(2, 7);
+}
+
+function landingPublicUrl(slug = "") {
+  const safe = landingSlugify(slug);
+  return `${window.location.origin}/p/${encodeURIComponent(safe)}`;
+}
+
+function landingHasTemporaryMedia(data = {}) {
+  const urls = [
+    data.heroImageUrl, data.imageUrl, data.videoUrl,
+    ...String(data.mediaGallery || "").split("\n")
+  ].map((value) => String(value || "").trim()).filter(Boolean);
+  return urls.some((url) => url.startsWith("blob:") || url.startsWith("data:"));
+}
+
 function landingExportHtml(data) {
   const body = landingPreviewMarkup(data, false);
   return `<!doctype html>
@@ -2511,6 +2543,7 @@ function landingExportHtml(data) {
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="${escapeHtml(data.name || data.headline || 'Landing Page')}"/>
 <meta property="og:description" content="${escapeHtml(String(data.subheadline || data.description || '').slice(0,180))}"/>
+${/^https?:\/\//i.test(String(data.publicUrl || '')) ? `<meta property="og:url" content="${escapeHtml(String(data.publicUrl))}"/><link rel="canonical" href="${escapeHtml(String(data.publicUrl))}"/>` : ''}
 ${/^https?:\/\//i.test(String(data.heroImageUrl || data.imageUrl || '')) ? `<meta property="og:image" content="${escapeHtml(String(data.heroImageUrl || data.imageUrl || ''))}"/>` : ''}
 <meta name="twitter:card" content="summary_large_image"/>
 <title>${escapeHtml(data.name || "Landing Page")}</title>
@@ -2837,7 +2870,7 @@ function renderLandingPagesSection() {
       <div class="lpb-metrics">
         <div class="dashboard-card"><small>TEMPLATES</small><strong>30</strong><span>Product · Service · Campaign</span></div>
         <div class="dashboard-card"><small>SAVED PAGES</small><strong>${drafts.length}</strong><span>Local workspace drafts</span></div>
-        <div class="dashboard-card"><small>PUBLISHED</small><strong>${published}</strong><span>Publishing backend next</span></div>
+        <div class="dashboard-card"><small>PUBLISHED</small><strong>${published}</strong><span>Live publish ready</span></div>
         <div class="dashboard-card"><small>CONVERSION ACTIONS</small><strong>4</strong><span>Form · WhatsApp · Call · Email</span></div>
       </div>
 
@@ -2943,13 +2976,13 @@ function renderLandingPagesSection() {
                 <small>PUBLIC PAGE LINK</small>
                 <h3>Know exactly where your page will live.</h3>
               </div>
-              <span>DRAFT</span>
+              <span>PUBLISH</span>
             </div>
 
             <label class="lpb-tool-field-v509">
               <span>Page URL</span>
               <div class="lpb-link-row-v509">
-                <input id="lpb-public-page-link" readonly value="${location.origin}/lp/your-page" />
+                <input id="lpb-public-page-link" readonly value="${location.origin}/p/your-page" />
                 <button type="button" id="lpb-copy-preview-link">Copy</button>
               </div>
             </label>
@@ -2960,7 +2993,7 @@ function renderLandingPagesSection() {
             </div>
 
             <p class="lpb-note-v509">
-              Real public publishing will activate when the publishing backend is connected.
+              Publish from the builder to get a permanent YOUYOU link you can open on any phone or share online.
               Preview and HTML export remain available now.
             </p>
           </section>
@@ -3093,7 +3126,7 @@ function renderLandingPagesSection() {
               <button id="lpb-export-html" type="button">Export HTML</button>
               <button id="lpb-publish" type="button">Publish</button>
             </div>
-            <p class="lpb-publish-note">Drafts and HTML export work now. Public YOUYOU links + analytics will be connected to the publishing backend after the builder is approved.</p>
+            <p class="lpb-publish-note">Save drafts locally, or Publish to create a real YOUYOU URL. Export HTML remains available as an optional backup.</p>
           </aside>
 
           <div class="lpb-preview-column">
@@ -3156,11 +3189,24 @@ function renderLandingPageWorkspace() {
         </div>
 
         <div class="lpw-top-actions">
-          <span id="lpw-save-state" class="lpw-status">${request.mode === "edit" ? "Saved draft" : "New draft"}</span>
+          <span id="lpw-save-state" class="lpw-status">${current.publishedUrl ? (current.hasUnpublishedChanges ? "Changes not published" : "Published") : (request.mode === "edit" ? "Saved draft" : "New draft")}</span>
           <button id="lpw-export-top" type="button">Export HTML</button>
+          <button id="lpw-publish-top" class="lpw-publish-button" type="button">${current.publishedUrl ? "Update live page" : "Publish"}</button>
           <button id="lpw-save-top" class="primary" type="button">Save</button>
         </div>
       </header>
+
+      <div id="lpw-publish-result" class="lpw-publish-result" ${current.publishedUrl ? "" : "hidden"}>
+        <div>
+          <small>LIVE PAGE</small>
+          <strong>${current.publishedUrl ? "Your landing page is live" : "Published successfully"}</strong>
+        </div>
+        <div class="lpw-publish-link-row">
+          <input id="lpw-publish-url" readonly value="${escapeHtml(current.publishedUrl || "")}" aria-label="Published landing page URL" />
+          <button id="lpw-copy-publish-url" type="button">Copy link</button>
+          <a id="lpw-open-publish-url" href="${escapeHtml(current.publishedUrl || "#")}" target="_blank" rel="noopener">Open ↗</a>
+        </div>
+      </div>
 
       <main class="lpw-main">
         <aside class="lpw-editor">
@@ -3290,7 +3336,7 @@ function renderLandingPageWorkspace() {
             <details class="lpb-advanced-media">
               <summary>Advanced image URLs</summary>
               <label>First image URL<input id="lpb-image-url" type="text" inputmode="url" placeholder="https://...product-front.jpg" /></label>
-              <label>Additional image URLs <span>One per line · up to 8</span>
+              <label>Additional image URLs <span>One per line · up to 20</span>
                 <textarea id="lpb-media-gallery" rows="5" placeholder="https://...front.jpg&#10;https://...side.jpg&#10;https://...detail.jpg"></textarea>
               </label>
             </details>
@@ -3378,6 +3424,7 @@ function renderLandingPageWorkspace() {
 
           <div class="lpw-editor-footer">
             <button id="lpw-save-bottom" class="primary" type="button">Save draft</button>
+            <button id="lpw-publish-bottom" class="lpw-publish-button" type="button">${current.publishedUrl ? "Update live page" : "Publish"}</button>
             <button id="lpw-export-bottom" type="button">Export HTML</button>
           </div>
         </aside>
@@ -3597,7 +3644,8 @@ function initLandingPageWorkspace() {
 
   const saveDraft = () => {
     readFields();
-    current.status = "Draft";
+    current.status = current.publishedUrl ? "Published" : "Draft";
+    current.hasUnpublishedChanges = Boolean(current.publishedUrl);
     current.updatedAt = new Date().toISOString();
 
     const drafts = loadLandingDrafts();
@@ -3626,9 +3674,138 @@ function initLandingPageWorkspace() {
       stateEl.textContent = "Saved";
       stateEl.classList.add("is-saved");
       setTimeout(() => {
-        stateEl.textContent = "Saved draft";
+        stateEl.textContent = current.publishedUrl ? "Saved · update live page when ready" : "Saved draft";
         stateEl.classList.remove("is-saved");
       }, 1400);
+    }
+    setPublishUi(current.publishedUrl || "");
+  };
+
+  const persistLocalCurrent = () => {
+    const drafts = loadLandingDrafts();
+    const index = drafts.findIndex((item) => item.id === current.id);
+    const safeCurrent = {
+      ...current,
+      videoUrl: String(current.videoUrl || "").startsWith("blob:") ? "" : current.videoUrl
+    };
+    if (index >= 0) drafts[index] = { ...safeCurrent };
+    else drafts.unshift({ ...safeCurrent });
+    saveLandingDrafts(drafts);
+  };
+
+  const setPublishUi = (url = "") => {
+    const result = document.querySelector("#lpw-publish-result");
+    const input = document.querySelector("#lpw-publish-url");
+    const open = document.querySelector("#lpw-open-publish-url");
+    if (result) result.hidden = !url;
+    if (input) input.value = url;
+    if (open) open.href = url || "#";
+    document.querySelectorAll("#lpw-publish-top,#lpw-publish-bottom").forEach((button) => {
+      button.textContent = current.publishedUrl ? "Update live page" : "Publish";
+    });
+  };
+
+  const publishPage = async () => {
+    readFields();
+    if (!supabase || !state.user || !state.company?.id) {
+      landingStudioStatus("Sign in to publish this page.");
+      return;
+    }
+    if (!String(current.name || "").trim()) {
+      landingStudioStatus("Add a page name before publishing.");
+      document.querySelector("#lpb-name")?.focus();
+      return;
+    }
+    if (landingHasTemporaryMedia(current)) {
+      landingStudioStatus("Some media is still local. Re-upload it and wait until YOUYOU confirms permanent storage before publishing.");
+      return;
+    }
+
+    const buttons = [...document.querySelectorAll("#lpw-publish-top,#lpw-publish-bottom")];
+    buttons.forEach((button) => { button.disabled = true; button.textContent = "Publishing…"; });
+    landingStudioStatus(current.status === "Published" ? "Updating live page…" : "Publishing page…");
+
+    try {
+      let slug = String(current.publishedSlug || "").trim();
+      let remotePageId = String(current.remotePageId || "").trim();
+
+      if (!slug) {
+        const { data: existing, error: existingError } = await supabase
+          .from("landing_pages")
+          .select("id,slug")
+          .eq("company_id", state.company.id)
+          .eq("draft_id", current.id)
+          .maybeSingle();
+        if (existingError) throw existingError;
+        if (existing?.slug) {
+          slug = existing.slug;
+          remotePageId = existing.id || remotePageId;
+        }
+      }
+
+      if (!slug) slug = `${landingSlugify(current.name)}-${landingShortToken()}`;
+      const publicUrl = landingPublicUrl(slug);
+      const now = new Date().toISOString();
+      const publishData = {
+        ...current,
+        status:"Published",
+        publishedSlug:slug,
+        publishedUrl:publicUrl,
+        publishedAt:current.publishedAt || now,
+        hasUnpublishedChanges:false,
+        companyName:state.company?.name || "YOUR BRAND",
+      };
+      const htmlSnapshot = landingExportHtml({ ...publishData, publicUrl });
+      const payload = {
+        company_id:state.company.id,
+        draft_id:current.id,
+        slug,
+        name:String(current.name || "Landing page").trim().slice(0,160),
+        template_id:String(current.templateId || "product-launch").slice(0,80),
+        content:publishData,
+        html_snapshot:htmlSnapshot,
+        status:"published",
+        published_at:publishData.publishedAt,
+        updated_at:now,
+      };
+
+      const { data: saved, error } = await supabase
+        .from("landing_pages")
+        .upsert(payload, { onConflict:"company_id,draft_id" })
+        .select("id,slug,published_at,updated_at")
+        .single();
+      if (error) throw error;
+
+      current = {
+        ...publishData,
+        remotePageId:saved?.id || remotePageId,
+        publishedSlug:saved?.slug || slug,
+        publishedUrl:landingPublicUrl(saved?.slug || slug),
+        publishedAt:saved?.published_at || publishData.publishedAt,
+        updatedAt:saved?.updated_at || now,
+        status:"Published",
+      };
+      persistLocalCurrent();
+      setPublishUi(current.publishedUrl);
+      landingStudioStatus("Published · real URL ready");
+      const nextPath = landingBuilderRoute({ pageId:current.id });
+      if (window.location.pathname !== nextPath) {
+        window.history.replaceState({ section:"pages-builder", pageId:current.id }, "", nextPath);
+      }
+    } catch (error) {
+      console.error("YOUYOU publish error:", error);
+      const message = String(error?.message || error || "");
+      if (/landing_pages|relation .* does not exist|schema cache/i.test(message)) {
+        landingStudioStatus("Publishing database is not ready · run supabase-v7.2-published-landing-pages.sql once.");
+      } else if (/duplicate key|unique/i.test(message)) {
+        current.publishedSlug = "";
+        landingStudioStatus("That public URL was already used. Click Publish again and YOUYOU will create a new unique link.");
+      } else {
+        landingStudioStatus(`Publish failed · ${message.slice(0, 150) || "please try again"}`);
+      }
+    } finally {
+      buttons.forEach((button) => { button.disabled = false; });
+      setPublishUi(current.publishedUrl || "");
     }
   };
 
@@ -3826,6 +4003,23 @@ function initLandingPageWorkspace() {
   document.querySelector("#lpw-save-bottom")?.addEventListener("click", saveDraft);
   document.querySelector("#lpw-export-top")?.addEventListener("click", exportHtml);
   document.querySelector("#lpw-export-bottom")?.addEventListener("click", exportHtml);
+  document.querySelector("#lpw-publish-top")?.addEventListener("click", publishPage);
+  document.querySelector("#lpw-publish-bottom")?.addEventListener("click", publishPage);
+  document.querySelector("#lpw-copy-publish-url")?.addEventListener("click", async (event) => {
+    const url = String(document.querySelector("#lpw-publish-url")?.value || current.publishedUrl || "").trim();
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      event.currentTarget.textContent = "Copied";
+    } catch (_) {
+      const input = document.querySelector("#lpw-publish-url");
+      input?.select();
+      document.execCommand?.("copy");
+      event.currentTarget.textContent = "Copied";
+    }
+    setTimeout(() => { event.currentTarget.textContent = "Copy link"; }, 1400);
+  });
+  setPublishUi(current.publishedUrl || "");
 }
 
 
@@ -3915,12 +4109,13 @@ function initLandingPages() {
           <span></span><b></b><i></i>
         </div>
         <div class="lpb-saved-copy">
-          <small>${escapeHtml(item.status || "Draft")} · ${escapeHtml(item.pageType || "Landing Page")}</small>
+          <small>${escapeHtml(item.publishedUrl ? (item.hasUnpublishedChanges ? "Published · changes not live" : "Published") : (item.status || "Draft"))} · ${escapeHtml(item.pageType || "Landing Page")}</small>
           <strong>${escapeHtml(item.name || "Untitled page")}</strong>
           <span>${escapeHtml(item.headline || "")}</span>
         </div>
         <div class="lpb-saved-actions">
           <button type="button" data-lpb-edit="${escapeHtml(item.id)}">Edit</button>
+          ${item.publishedUrl ? `<a class="lpb-open-live" href="${escapeHtml(item.publishedUrl)}" target="_blank" rel="noopener">Open live ↗</a>` : ""}
           <button type="button" data-lpb-duplicate="${escapeHtml(item.id)}">Duplicate</button>
           <button type="button" data-lpb-delete="${escapeHtml(item.id)}">Delete</button>
         </div>
@@ -3940,15 +4135,50 @@ function initLandingPages() {
         const draftsNow = loadLandingDrafts();
         const item = draftsNow.find((entry) => entry.id === button.dataset.lpbDuplicate);
         if (!item) return;
-        const copy = { ...item, id:`lp_${Date.now()}`, name:`${item.name} Copy`, status:"Draft", createdAt:new Date().toISOString() };
+        const copy = {
+          ...item,
+          id:`lp_${Date.now()}`,
+          name:`${item.name} Copy`,
+          status:"Draft",
+          publishedSlug:"",
+          publishedUrl:"",
+          remotePageId:"",
+          publishedAt:"",
+          hasUnpublishedChanges:false,
+          createdAt:new Date().toISOString(),
+          updatedAt:new Date().toISOString(),
+        };
         saveLandingDrafts([copy, ...draftsNow]);
         renderSaved();
       });
     });
 
     container.querySelectorAll("[data-lpb-delete]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const next = loadLandingDrafts().filter((entry) => entry.id !== button.dataset.lpbDelete);
+      button.addEventListener("click", async () => {
+        const draftsNow = loadLandingDrafts();
+        const item = draftsNow.find((entry) => entry.id === button.dataset.lpbDelete);
+        if (!item) return;
+        const message = item.publishedUrl
+          ? "Delete this landing page? Its live public URL will stop working."
+          : "Delete this draft?";
+        if (!window.confirm(message)) return;
+        if (item.publishedUrl && supabase && state.company?.id) {
+          button.disabled = true;
+          button.textContent = "Deleting…";
+          const { error } = await supabase
+            .from("landing_pages")
+            .delete()
+            .eq("company_id", state.company.id)
+            .eq("draft_id", item.id);
+          if (error) {
+            console.error("YOUYOU delete published page:", error);
+            button.disabled = false;
+            button.textContent = "Delete";
+            window.alert("The live page could not be deleted. Please try again.");
+            return;
+          }
+        }
+        const next = draftsNow.filter((entry) => entry.id !== item.id);
         saveLandingDrafts(next);
         renderSaved();
       });
@@ -4081,8 +4311,7 @@ function initLandingPages() {
 
   document.querySelector("#lpb-publish")?.addEventListener("click", () => {
     readFields();
-    const stateEl = document.querySelector("#lpb-save-state");
-    if (stateEl) stateEl.textContent = "Publishing backend pending";
+    openLandingBuilder({ templateId:current.templateId || "product-launch" });
   });
 
   hydrateFields();

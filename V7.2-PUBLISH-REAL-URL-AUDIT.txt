@@ -1,0 +1,81 @@
+YOUYOU V7.2 — PUBLISH + REAL URL
+=================================
+
+SOURCE AUDITED
+- Built directly from the uploaded full project: youyou-assistance-main (13).zip.
+- Existing V7.1 media engine kept intact.
+
+AUDIT — WHAT WAS MISSING BEFORE V7.2
+1. Publish was not implemented in the dedicated Landing Page Workspace.
+   - The top bar had Save + Export HTML only.
+   - The older hidden builder still displayed “Publishing backend pending”.
+2. Drafts lived only in browser localStorage.
+   - There was no database table for public landing pages.
+3. The displayed public link was only a placeholder.
+   - /lp/your-page did not resolve to a real published page.
+4. Vercel had no /p/:slug route.
+   - Only /faq and /dashboard/* were rewritten.
+5. Export HTML was the only way to test the real page outside the builder.
+6. There was no stable live URL that survived updates.
+7. Social metadata existed in exported HTML, but there was no live canonical URL to attach to it.
+8. The current media engine correctly uploads hero/gallery/video assets to the public landing-media bucket when storage is configured. Publish must reject temporary blob/data media so a live page cannot silently break.
+9. The project still contains an older Landing Builder implementation (initLandingPages) beside the dedicated workspace. It is not removed in V7.2 to avoid unrelated regressions, but it should be refactored later.
+10. main.js and style.css remain large and patch-heavy. V7.2 intentionally does not refactor the whole app because the requested scope is safe publishing.
+
+WHAT V7.2 ADDS
+- Supabase table: public.landing_pages.
+- RLS:
+  * public can read only status='published';
+  * authenticated company members can create/read/update/delete their own company pages.
+- Stable identity: (company_id, draft_id) unique.
+- Stable public slug saved on first publish and reused on updates.
+- Publish button in the real dedicated workspace (top and bottom).
+- Publish result bar with Copy link + Open link.
+- Real URL format: https://YOUR-VERCEL-DOMAIN/p/<slug>
+- Vercel rewrite /p/:slug -> serverless published-page endpoint.
+- Public endpoint returns the exact HTML snapshot created by the builder.
+  This is intentional: the phone sees the same page engine as Export HTML, not the builder simulator.
+- Updating a published page overwrites the snapshot while keeping the same URL.
+- Canonical + og:url are inserted into published HTML.
+- Published pages remain listed locally with an Open live action.
+- Publish blocks temporary blob:/data: media to prevent broken live pages.
+
+WHY HTML SNAPSHOT PUBLISHING WAS CHOSEN
+- It produces the closest possible match between Export HTML and the real public URL.
+- It does not require duplicating all landing-template rendering logic in a server function.
+- Mobile testing happens in a real browser against the exact generated page.
+- Future template changes do not unexpectedly alter pages already published until the client clicks Update live page.
+
+FILES ADDED
+- supabase-v7.2-published-landing-pages.sql
+- api/published-page.js
+- V7.2-PUBLISH-REAL-URL-AUDIT.txt
+
+FILES UPDATED
+- main.js
+- style.css
+- vercel.json
+
+REQUIRED SETUP
+1. V7.1 landing-media SQL must already be installed (user confirmed this earlier).
+2. Run supabase-v7.2-published-landing-pages.sql ONCE.
+3. Upload this project version to GitHub and let Vercel deploy.
+4. Open Landing Pages -> edit/create -> Publish.
+5. Copy the generated /p/... link and test it on the real phone.
+
+NOT PART OF V7.2
+- OpenAI paid AI replies.
+- WhatsApp Business API.
+- Custom domain DNS connection.
+- Full remote draft synchronization across devices.
+- Analytics dashboard for published pages.
+- 30 completely unique premium template layouts.
+
+VERIFICATION PERFORMED IN THIS ENVIRONMENT
+- node --check main.js: PASS
+- node --check public/widget.js: PASS
+- node --check api/seo-audit.js: PASS
+- node --check api/published-page.js: PASS
+- vercel.json JSON parse: PASS
+- api/published-page.js mock 404 + successful HTML response test: PASS
+- npm install / full Vite build: NOT VERIFIED because dependency installation exceeded the execution timeout and left no node_modules directory.

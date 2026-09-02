@@ -1,0 +1,37 @@
+YOUYOU V7.2 — PUBLISH + REAL URL
+================================
+
+DO THIS IN THIS ORDER
+
+1) SUPABASE SQL FIRST
+- Supabase -> SQL Editor -> New query.
+- Open: supabase-v7.2-published-landing-pages.sql
+- Copy all -> Run.
+- Expected result: Success. No rows returned.
+
+2) GITHUB
+- Upload the CONTENTS of this V7.2 project over the current repository.
+- Commit message suggestion: v7.2 publish real url
+
+3) VERCEL
+- Wait for the GitHub deployment to finish.
+
+4) TEST PUBLISH
+- Login to YOUYOU.
+- Landing Pages -> create/edit a page.
+- Click Publish.
+- YOUYOU will show a link like:
+  https://youyou-assistance.vercel.app/p/your-page-abc12
+- Click Open or copy the URL to your phone.
+
+5) TEST UPDATE
+- Change something in the page.
+- Save.
+- Click Update live page.
+- Open the SAME URL again. The new version should appear.
+
+IMPORTANT
+- The V7.1 landing-media SQL must remain installed. You already ran it before.
+- Uploaded local videos/images should finish uploading before Publish.
+- Export HTML still exists, but it is now optional. The real test should be the /p/... URL.
+- A custom domain can be connected after this Vercel URL is confirmed on a real phone.

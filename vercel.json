@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/p/:slug",
+      "destination": "/api/published-page?slug=:slug"
+    },
+    {
       "source": "/faq",
       "destination": "/index.html"
     },
