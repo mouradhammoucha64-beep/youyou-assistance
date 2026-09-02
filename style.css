@@ -12072,3 +12072,72 @@ tr:hover td{background:rgba(255,255,255,.018)!important}
 .lpb-emoji-picker button{width:34px;height:34px;display:grid;place-items:center;border:1px solid #e0e5ed;border-radius:9px;background:#fff;cursor:pointer;font-size:17px;box-shadow:0 1px 2px rgba(16,24,40,.03)}
 .lpb-emoji-picker button:hover{transform:translateY(-1px);border-color:#bda9e7;background:#f8f4ff}
 @media(max-width:520px){.lpb-section-visibility{grid-template-columns:1fr}}
+
+/* =========================================================
+   YOUYOU V7.5 — FINAL LANDING ENGINE LOCK
+   Exact iframe preview · legacy CSS isolation · renderer sync
+   ========================================================= */
+/* Neutralize the legacy slider constraint even in the retired inline preview. */
+.lp-image-slide,.beauty-wow .lp-image-slide{min-height:0!important}
+
+/* The active workspace now previews the exact exported/published document in an iframe.
+   This isolates old dashboard CSS and makes iframe media queries use the real viewport width. */
+.lpw-canvas{
+  display:grid!important;
+  grid-template-rows:58px minmax(0,1fr)!important;
+}
+.lpw-preview-stage{
+  height:auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+  display:flex!important;
+  align-items:stretch!important;
+  justify-content:center!important;
+  padding:22px!important;
+}
+.lpw-device-shell{
+  width:min(1180px,100%)!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0 auto!important;
+  overflow:hidden!important;
+  border-radius:18px!important;
+  background:#fff!important;
+  border:1px solid #dfe5ee!important;
+  box-shadow:0 26px 65px rgba(31,41,55,.14)!important;
+  transition:width .22s ease,border-radius .22s ease,box-shadow .22s ease!important;
+}
+.lpw-preview-iframe,
+.lpw-preview-stage #lpb-live-preview.lpw-preview-iframe{
+  display:block!important;
+  width:100%!important;
+  max-width:none!important;
+  height:100%!important;
+  min-height:0!important;
+  margin:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:#fff!important;
+  box-shadow:none!important;
+}
+.lpw-preview-stage.is-mobile{
+  padding:18px!important;
+}
+.lpw-preview-stage.is-mobile .lpw-device-shell{
+  width:min(390px,100%)!important;
+  max-width:390px!important;
+  border-radius:24px!important;
+  box-shadow:0 24px 60px rgba(31,41,55,.18)!important;
+}
+/* Old simulator descendant rules intentionally no longer affect the iframe document. */
+.lpw-status.needs-renderer-update{
+  background:#fff0f3!important;
+  border-color:#f5c6cf!important;
+  color:#a33a50!important;
+}
+@media(max-width:760px){
+  .lpw-canvas{height:760px!important;grid-template-rows:58px minmax(0,1fr)!important}
+  .lpw-preview-stage{padding:12px!important}
+  .lpw-preview-stage.is-mobile{padding:10px!important}
+  .lpw-preview-stage.is-mobile .lpw-device-shell{width:min(390px,100%)!important;border-radius:20px!important}
+}

@@ -556,3 +556,9 @@ See `PREMIUM-THEME-AUDIT-2026-08-24.txt`.
 - Subtle module identity colors
 - Calm, premium, inclusive visual direction with restrained feminine warmth
 - Functional logic unchanged
+
+---
+
+## V7.5 — Final Landing Engine Lock
+
+The Landing Studio preview now runs the exact exported/published document in an iframe, so mobile media queries, theme colors, slider dimensions, video and spacing are evaluated by the same renderer used on public `/p/:slug` pages. V7.5 also adds renderer-version migration UX, newest-copy draft recovery, safer duplicated media handling, and RPC-only public snapshot retrieval. Existing V7.2 databases should run `supabase-v7.5-publish-security.sql` once.

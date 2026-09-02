@@ -1,0 +1,40 @@
+YOUYOU V7.5 — FINAL LANDING ENGINE LOCK
+Source: user's latest full project ZIP (15)
+
+FIXES IMPLEMENTED
+- Workspace preview changed from an in-page DIV simulation to a sandboxed iframe using landingExportHtml().
+  The preview therefore uses the same complete HTML/CSS/runtime as Export and Publish.
+- Mobile preview iframe width is 390px, so real @media rules fire inside the preview.
+- Legacy global slider min-height is explicitly neutralized and cannot leak into iframe runtime.
+- Real public slider engine was intentionally kept unchanged.
+- Renderer versioning added (7.5.0).
+  Old published snapshots are detected and display "Live design update required" with an
+  "Update live design" button. Publishing regenerates the SAME URL with the current renderer.
+- Preview mode is read-only for lead capture: testing the form/widget inside the Studio no longer
+  writes fake visitor conversations into Supabase.
+- Draft open now compares remote and local updatedAt and keeps the newest copy.
+- Published-page security changed to RPC-only public retrieval. Anonymous visitors can retrieve
+  only html_snapshot for a published slug; draft JSON/internal row metadata are not public.
+- Duplicated-page media safety improved: replacing/removing media detaches the URL but no longer
+  immediately deletes the underlying Storage object that another duplicate may still use.
+- Existing Publish + stable URL, autosave, draft recovery, media storage and page-aware widget retained.
+
+DATABASE MIGRATION
+- Existing installations that already ran V7.2 must run once:
+  supabase-v7.5-publish-security.sql
+- Fresh installations can use the updated supabase-v7.2-published-landing-pages.sql, which already
+  includes the final RPC-only public-read security model.
+
+VERIFICATION
+- node --check main.js: PASS
+- node --check public/widget.js: PASS
+- node --check api/published-page.js: PASS
+- node --check api/seo-audit.js: PASS
+- published-page API mocked 200 response through RPC: PASS
+- published-page API mocked missing-page 404: PASS
+- ZIP integrity: PASS
+
+BUILD NOTE
+A full npm/Vite production build is NOT claimed as verified. npm install exceeded the execution
+window in this environment and the source package does not include a lockfile/node_modules.
+The JavaScript syntax/API path checks above passed.

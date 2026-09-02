@@ -30,12 +30,15 @@ export default async function handler(req, res) {
   const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
 
   try {
-    const endpoint = `${supabaseUrl}/rest/v1/landing_pages?slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=html_snapshot&limit=1`;
+    const endpoint = `${supabaseUrl}/rest/v1/rpc/get_published_landing_page`;
     const response = await fetch(endpoint, {
+      method: "POST",
       headers: {
         apikey: supabaseKey,
+        "Content-Type": "application/json",
         Accept: "application/json",
       },
+      body: JSON.stringify({ p_slug: slug }),
     });
 
     if (!response.ok) {

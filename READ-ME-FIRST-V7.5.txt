@@ -1,0 +1,31 @@
+YOUYOU V7.5 — FINAL LANDING ENGINE LOCK
+
+WHAT CHANGED
+1) Workspace preview is now an iframe running the SAME full HTML renderer as Export + Published URL.
+   - Mobile button changes the iframe viewport to a real 390px phone width.
+   - Old dashboard CSS can no longer stretch the slider or override landing-page colors.
+2) Legacy slider min-height is neutralized.
+3) Published pages now carry a renderer version.
+   - Older published snapshots show "Live design update required" / "Update live design".
+   - Click that button once to regenerate the existing public URL with the current renderer.
+4) Media shared by duplicated pages is detached rather than auto-deleted from Storage.
+   This prevents deleting a photo/video in one duplicate from breaking another page.
+5) Publish security is tightened with an RPC-only public read path so anonymous visitors cannot read draft JSON or internal landing-page fields.
+
+ONE SQL STEP
+Supabase -> SQL Editor -> New query -> paste:
+  supabase-v7.5-publish-security.sql
+Then Run once.
+
+DEPLOY
+Upload the complete V7.5 project to the same GitHub repo, commit, and wait for Vercel deploy.
+Do not merge individual files with an older version.
+
+FIRST TEST
+A) Open an existing Beauty page. If it was published by an older renderer, click "Update live design".
+B) Pick a very obvious light theme in Workspace.
+C) Switch Desktop / Mobile. The preview is now the exact rendered document inside an iframe.
+D) Open the same /p/... URL on the real phone. Theme and slider should match the preview.
+E) Refresh the builder and confirm the draft/media still recover.
+
+NO OTHER SQL IS NEEDED if V7.1 media storage and V7.2 landing_pages SQL were already run.

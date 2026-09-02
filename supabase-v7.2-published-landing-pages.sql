@@ -31,13 +31,10 @@ create index if not exists landing_pages_public_lookup_idx
 
 alter table public.landing_pages enable row level security;
 
--- Anyone may load only pages that are explicitly published.
+-- V7.5 security model: anonymous visitors do not read this table directly.
+-- The public /p/:slug endpoint uses get_published_landing_page(slug), which returns
+-- only html_snapshot. Authenticated workspace members use the company RLS policies below.
 drop policy if exists "Public can view published landing pages" on public.landing_pages;
-create policy "Public can view published landing pages"
-on public.landing_pages
-for select
-to public
-using (status = 'published');
 
 -- Signed-in members may also see their own workspace pages, including drafts.
 drop policy if exists "Users can view company landing pages" on public.landing_pages;
@@ -102,5 +99,24 @@ using (
   )
 );
 
-grant select on public.landing_pages to anon;
+revoke all privileges on table public.landing_pages from anon;
 grant select, insert, update, delete on public.landing_pages to authenticated;
+
+create or replace function public.get_published_landing_page(p_slug text)
+returns table (html_snapshot text)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select lp.html_snapshot
+  from public.landing_pages lp
+  where lp.slug = lower(trim(p_slug))
+    and lp.status = 'published'
+    and nullif(lp.html_snapshot, '') is not null
+  limit 1;
+$$;
+
+revoke all on function public.get_published_landing_page(text) from public;
+grant execute on function public.get_published_landing_page(text) to anon;
+grant execute on function public.get_published_landing_page(text) to authenticated;

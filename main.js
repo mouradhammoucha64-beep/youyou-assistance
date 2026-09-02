@@ -1858,6 +1858,8 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
+const YOUYOU_LANDING_RENDERER_VERSION = "7.5.0";
+
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
   ["SAR","ر.س","Saudi Riyal"],["AED","د.إ","UAE Dirham"],["QAR","ر.ق","Qatari Riyal"],
@@ -1945,6 +1947,8 @@ function landingDraftFromRemoteRow(row = {}) {
     publishedAt:row.published_at || content.publishedAt || '',
     updatedAt:row.updated_at || content.updatedAt || '',
     status:published ? 'Published' : 'Draft',
+    rendererVersion:String(content.rendererVersion || YOUYOU_LANDING_RENDERER_VERSION),
+    publishedRendererVersion:String(content.publishedRendererVersion || content.rendererVersion || ''),
     hasUnpublishedChanges:Boolean(content.hasUnpublishedChanges),
   };
 }
@@ -2216,6 +2220,9 @@ function defaultLandingPageData(templateId = "product-launch") {
     publishedUrl: "",
     remotePageId: "",
     publishedAt: "",
+    rendererVersion: YOUYOU_LANDING_RENDERER_VERSION,
+    publishedRendererVersion: "",
+    hasUnpublishedChanges: false,
     createdAt: new Date().toISOString(),
     status: "Draft",
   };
@@ -2613,6 +2620,12 @@ function landingPublicUrl(slug = "") {
   return `${window.location.origin}/p/${encodeURIComponent(safe)}`;
 }
 
+function landingNeedsRendererUpdate(data = {}) {
+  if (!data?.publishedUrl && !data?.publishedSlug) return false;
+  const liveVersion = String(data.publishedRendererVersion || data.rendererVersion || '').trim();
+  return liveVersion !== YOUYOU_LANDING_RENDERER_VERSION;
+}
+
 function landingHasTemporaryMedia(data = {}) {
   const urls = [
     data.heroImageUrl, data.imageUrl, data.videoUrl,
@@ -2621,7 +2634,7 @@ function landingHasTemporaryMedia(data = {}) {
   return urls.some((url) => url.startsWith("blob:") || url.startsWith("data:"));
 }
 
-function landingExportHtml(data) {
+function landingExportHtml(data, options = {}) {
   const body = landingPreviewMarkup(data, false);
   return `<!doctype html>
 <html lang="${data.direction === "rtl" ? "ar" : "en"}" dir="${data.direction === "rtl" ? "rtl" : "ltr"}">
@@ -2931,8 +2944,9 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 <body>${body}<script>
 const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
-async function yyPersist(page,content,visitor={}){const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
-window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){if(status)status.textContent='Please add your name, phone, city and address.';return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){if(status)status.textContent='Please check the email address or leave it empty.';return false}const title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;if(status)status.textContent='Sending…';yyPersist(page,content,{name,email}).then(r=>{if(status)status.textContent=r.ok?'Thanks — your request was sent.':'Lead capture will activate on the connected page.';if(r.ok)form.reset()}).catch(()=>{if(status)status.textContent='Could not send right now. Please try another contact option.'}).finally(()=>{if(button)button.disabled=false});return false};
+const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
+async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
+window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){if(status)status.textContent='Please add your name, phone, city and address.';return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){if(status)status.textContent='Please check the email address or leave it empty.';return false}const title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;if(status)status.textContent='Sending…';yyPersist(page,content,{name,email}).then(r=>{if(status)status.textContent=r.ok?'Thanks — your request was sent.':(YY_PREVIEW?'Preview only — nothing was submitted.':'Lead capture will activate on the connected page.');if(r.ok)form.reset()}).catch(()=>{if(status)status.textContent='Could not send right now. Please try another contact option.'}).finally(()=>{if(button)button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
 function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dotsHost=slider.querySelector('[data-carousel-dots]'),counter=slider.querySelector('[data-carousel-counter]'),prev=slider.querySelector('.lp-image-arrow.prev'),next=slider.querySelector('.lp-image-arrow.next');if(!track||slides.length<2)return;let positions=[],active=0,raf=0,timer=null,resizeTimer=null;const nearest=()=>{let b=0,d=Infinity;positions.forEach((p,i)=>{const x=Math.abs(p-track.scrollLeft);if(x<d){d=x;b=i}});return b},indicators=()=>{active=nearest();dotsHost?.querySelectorAll('button').forEach((dot,i)=>dot.classList.toggle('is-active',i===active));if(counter&&!counter.hidden)counter.textContent=(active+1)+' / '+positions.length},measure=()=>{const tr=track.getBoundingClientRect(),max=Math.max(0,track.scrollWidth-track.clientWidth),raw=slides.map(slide=>{const r=slide.getBoundingClientRect();return Math.max(0,Math.min(max,r.left-tr.left+track.scrollLeft))});positions=raw.filter((v,i,a)=>i===0||Math.abs(v-a[i-1])>3);if(!positions.length)positions=[0];active=Math.max(0,Math.min(active,positions.length-1));if(dotsHost){if(positions.length<=10){dotsHost.hidden=false;dotsHost.innerHTML=positions.map((_,i)=>'<button type="button" data-carousel-page="'+i+'" aria-label="Show carousel page '+(i+1)+'"></button>').join('');if(counter)counter.hidden=true}else{dotsHost.hidden=true;if(counter)counter.hidden=false}}indicators()},go=(i,b='smooth')=>{if(!positions.length)measure();const safe=((i%positions.length)+positions.length)%positions.length;track.scrollTo({left:positions[safe]||0,behavior:b});active=safe;indicators()},pause=()=>{if(timer)clearInterval(timer);timer=null},play=()=>{pause();if(slider.dataset.autoplay!=='true'||reduced||positions.length<2||document.hidden)return;timer=setInterval(()=>go(active+1),Math.max(2000,Number(slider.dataset.speed)||4000))};track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(indicators)},{passive:true});dotsHost?.addEventListener('click',e=>{const dot=e.target.closest?.('[data-carousel-page]');if(dot)go(Number(dot.dataset.carouselPage||0))});prev&&prev.addEventListener('click',()=>go(active-1));next&&next.addEventListener('click',()=>go(active+1));slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});document.addEventListener('visibilitychange',()=>document.hidden?pause():play());window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{measure();go(active,'auto')},80)},{passive:true});measure();go(0,'auto');play()})}
 document.addEventListener('DOMContentLoaded',yyInitCarousels);yyInitCarousels();
@@ -3296,9 +3310,9 @@ function renderLandingPageWorkspace() {
         </div>
 
         <div class="lpw-top-actions">
-          <span id="lpw-save-state" class="lpw-status">${current.publishedUrl ? (current.hasUnpublishedChanges ? "Changes not published" : "Published") : (request.mode === "edit" ? "Saved draft" : "New draft")}</span>
+          <span id="lpw-save-state" class="lpw-status">${current.publishedUrl ? (landingNeedsRendererUpdate(current) ? "Live design update required" : (current.hasUnpublishedChanges ? "Changes not published" : "Published")) : (request.mode === "edit" ? "Saved draft" : "New draft")}</span>
           <button id="lpw-export-top" type="button">Export HTML</button>
-          <button id="lpw-publish-top" class="lpw-publish-button" type="button">${current.publishedUrl ? "Update live page" : "Publish"}</button>
+          <button id="lpw-publish-top" class="lpw-publish-button" type="button">${current.publishedUrl ? (landingNeedsRendererUpdate(current) ? "Update live design" : "Update live page") : "Publish"}</button>
           <button id="lpw-save-top" class="primary" type="button">Save</button>
         </div>
       </header>
@@ -3557,7 +3571,7 @@ function renderLandingPageWorkspace() {
 
           <div class="lpw-editor-footer">
             <button id="lpw-save-bottom" class="primary" type="button">Save draft</button>
-            <button id="lpw-publish-bottom" class="lpw-publish-button" type="button">${current.publishedUrl ? "Update live page" : "Publish"}</button>
+            <button id="lpw-publish-bottom" class="lpw-publish-button" type="button">${current.publishedUrl ? (landingNeedsRendererUpdate(current) ? "Update live design" : "Update live page") : "Publish"}</button>
             <button id="lpw-export-bottom" type="button">Export HTML</button>
           </div>
         </aside>
@@ -3579,7 +3593,9 @@ function renderLandingPageWorkspace() {
           </div>
 
           <div id="lpb-preview-frame" class="lpw-preview-stage">
-            <div id="lpb-live-preview"></div>
+            <div class="lpw-device-shell">
+              <iframe id="lpb-live-preview" class="lpw-preview-iframe" title="Exact landing page preview" sandbox="allow-scripts allow-same-origin allow-popups" allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="no-referrer"></iframe>
+            </div>
           </div>
         </section>
       </main>
@@ -3760,13 +3776,24 @@ function initLandingPageWorkspace() {
     manager.innerHTML = `<div class="lpb-gallery-manager-head"><strong>${urls.length} photo${urls.length === 1 ? "" : "s"}</strong><small>Preview · remove any image</small></div><div class="lpb-gallery-thumbs">${urls.map((url,index)=>`<figure><img src="${escapeHtml(url)}" alt="Gallery image ${index+1}" /><button type="button" data-gallery-remove="${index}" aria-label="Remove image ${index+1}">×</button></figure>`).join("")}</div>`;
   };
 
+  let previewScrollY = 0;
+  let previewToken = 0;
   const renderPreview = () => {
     readFields();
+    current.rendererVersion = YOUYOU_LANDING_RENDERER_VERSION;
     updateGalleryControls();
     renderGalleryManager();
     const preview = document.querySelector("#lpb-live-preview");
     const name = document.querySelector("#lpw-document-name");
-    if (preview) {
+    if (preview && preview.tagName === "IFRAME") {
+      try { previewScrollY = preview.contentWindow?.scrollY || previewScrollY || 0; } catch (_) {}
+      const token = ++previewToken;
+      preview.addEventListener("load", () => {
+        if (token !== previewToken) return;
+        try { preview.contentWindow?.scrollTo(0, previewScrollY); } catch (_) {}
+      }, { once:true });
+      preview.srcdoc = landingExportHtml({ ...current, publicUrl:current.publishedUrl || "" }, { preview:true });
+    } else if (preview) {
       preview.innerHTML = landingPreviewMarkup(current);
       initLandingCarousels(preview);
     }
@@ -3780,9 +3807,12 @@ function initLandingPageWorkspace() {
   let autosaveTimer = null;
   let remoteSaveTimer = null;
   let lastFocusedTextField = null;
-  let remoteHydrationDone = request.mode !== "edit" || storedDrafts.some((item) => item.id === request.pageId);
+  // Always compare the cloud copy when editing. This prevents a stale local cache
+  // from silently overwriting a newer draft saved on another device/session.
+  let remoteHydrationDone = request.mode !== "edit";
 
   const statusText = () => {
+    if (current.publishedUrl && landingNeedsRendererUpdate(current)) return "Live design update required";
     if (current.publishedUrl) return current.hasUnpublishedChanges ? "Changes not published" : "Published";
     return "Draft auto-saved";
   };
@@ -3791,8 +3821,10 @@ function initLandingPageWorkspace() {
     const stateEl = document.querySelector("#lpw-save-state");
     if (!stateEl) return;
     stateEl.textContent = message || statusText();
-    stateEl.classList.toggle("is-published", Boolean(current.publishedUrl && !current.hasUnpublishedChanges));
-    stateEl.classList.toggle("has-changes", Boolean(current.publishedUrl && current.hasUnpublishedChanges));
+    const rendererUpdate = landingNeedsRendererUpdate(current);
+    stateEl.classList.toggle("is-published", Boolean(current.publishedUrl && !current.hasUnpublishedChanges && !rendererUpdate));
+    stateEl.classList.toggle("has-changes", Boolean(current.publishedUrl && (current.hasUnpublishedChanges || rendererUpdate)));
+    stateEl.classList.toggle("needs-renderer-update", rendererUpdate);
   };
 
   const persistLocalCurrent = () => {
@@ -3863,6 +3895,7 @@ function initLandingPageWorkspace() {
   const markChangedAndAutosave = ({ remoteDelay = 900 } = {}) => {
     readFields();
     current.status = current.publishedUrl ? "Published" : "Draft";
+    current.rendererVersion = YOUYOU_LANDING_RENDERER_VERSION;
     if (current.publishedUrl) current.hasUnpublishedChanges = true;
     current.updatedAt = new Date().toISOString();
     persistLocalCurrent();
@@ -3876,6 +3909,7 @@ function initLandingPageWorkspace() {
   const saveDraft = async () => {
     readFields();
     current.status = current.publishedUrl ? "Published" : "Draft";
+    current.rendererVersion = YOUYOU_LANDING_RENDERER_VERSION;
     if (current.publishedUrl) current.hasUnpublishedChanges = true;
     current.updatedAt = new Date().toISOString();
     persistLocalCurrent();
@@ -3897,8 +3931,18 @@ function initLandingPageWorkspace() {
         .maybeSingle();
       if (error) throw error;
       if (row) {
-        current = landingDraftFromRemoteRow(row);
-        current = { ...defaultLandingPageData(current.templateId || request.templateId), ...current };
+        const remoteDraft = landingDraftFromRemoteRow(row);
+        const remoteTime = Date.parse(remoteDraft.updatedAt || row.updated_at || 0) || 0;
+        const localTime = Date.parse(current.updatedAt || current.createdAt || 0) || 0;
+        if (remoteTime > localTime) {
+          current = { ...defaultLandingPageData(remoteDraft.templateId || request.templateId), ...remoteDraft };
+        } else {
+          current = { ...defaultLandingPageData(current.templateId || request.templateId), ...current };
+          if (!current.remotePageId && row.id) current.remotePageId = String(row.id);
+          if (!current.publishedSlug && row.status === 'published') current.publishedSlug = String(row.slug || '');
+          if (!current.publishedUrl && row.status === 'published' && row.slug) current.publishedUrl = landingPublicUrl(row.slug);
+          if (!current.publishedAt && row.published_at) current.publishedAt = row.published_at;
+        }
         persistLocalCurrent();
         hydrateFields();
         renderPreview();
@@ -3920,7 +3964,9 @@ function initLandingPageWorkspace() {
     if (input) input.value = url;
     if (open) open.href = url || "#";
     document.querySelectorAll("#lpw-publish-top,#lpw-publish-bottom").forEach((button) => {
-      button.textContent = current.publishedUrl ? "Update live page" : "Publish";
+      button.textContent = current.publishedUrl
+        ? (landingNeedsRendererUpdate(current) ? "Update live design" : "Update live page")
+        : "Publish";
     });
   };
 
@@ -3972,6 +4018,8 @@ function initLandingPageWorkspace() {
         publishedUrl:publicUrl,
         publishedAt:current.publishedAt || now,
         hasUnpublishedChanges:false,
+        rendererVersion:YOUYOU_LANDING_RENDERER_VERSION,
+        publishedRendererVersion:YOUYOU_LANDING_RENDERER_VERSION,
         companyName:state.company?.name || "YOUR BRAND",
       };
       const htmlSnapshot = landingExportHtml({ ...publishData, publicUrl });
@@ -4098,7 +4146,7 @@ function initLandingPageWorkspace() {
     try {
       const blob = landingDataUrlToBlob(optimized);
       if (blob) finalUrl = await uploadLandingMediaFile(blob, { pageId:current.id, kind:"hero", fileName:`${file.name.replace(/\.[^.]+$/, "")}.webp` });
-      if (previousHeroUrl && previousHeroUrl !== finalUrl) deleteLandingMediaUrl(previousHeroUrl).catch(() => {});
+      /* Shared media can belong to duplicated pages. Old hero files are detached, not auto-deleted. */
       landingStudioStatus("Hero image uploaded · ready for export");
     } catch (error) {
       console.warn("YOUYOU hero image storage fallback:", error);
@@ -4172,7 +4220,7 @@ function initLandingPageWorkspace() {
     const target = urls[index];
     if (!target) return;
     if (String(current.imageUrl || "").trim() === target) current.imageUrl = "";
-    deleteLandingMediaUrl(target).catch(() => {});
+    /* Shared media can belong to duplicated pages. Removing a card detaches the URL only. */
     const remaining = String(current.mediaGallery || "").split("\n").map((x) => x.trim()).filter(Boolean).filter((url) => url !== target);
     current.mediaGallery = remaining.join("\n");
     const firstInput = document.querySelector("#lpb-image-url");
@@ -4209,7 +4257,7 @@ function initLandingPageWorkspace() {
     try {
       const permanentUrl = await uploadLandingMediaFile(file, { pageId:current.id, kind:"video", fileName:file.name });
       current.videoUrl = permanentUrl;
-      if (previousVideoUrl && !previousVideoUrl.startsWith("blob:") && previousVideoUrl !== permanentUrl) deleteLandingMediaUrl(previousVideoUrl).catch(() => {});
+      /* Shared media can belong to duplicated pages. Old video files are detached, not auto-deleted. */
       if (videoInput) videoInput.value = permanentUrl;
       if (window.__youyouLocalVideoUrl) {
         URL.revokeObjectURL(window.__youyouLocalVideoUrl);
@@ -4239,7 +4287,9 @@ function initLandingPageWorkspace() {
   document.querySelectorAll("[data-lpb-device]").forEach((button) => {
     button.addEventListener("click", () => {
       document.querySelectorAll("[data-lpb-device]").forEach((item) => item.classList.toggle("is-active", item === button));
-      document.querySelector("#lpb-preview-frame")?.classList.toggle("is-mobile", button.dataset.lpbDevice === "mobile");
+      const mobile = button.dataset.lpbDevice === "mobile";
+      document.querySelector("#lpb-preview-frame")?.classList.toggle("is-mobile", mobile);
+      document.querySelector("#lpb-live-preview")?.setAttribute("data-device", mobile ? "mobile" : "desktop");
     });
   });
 
