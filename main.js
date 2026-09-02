@@ -1909,6 +1909,69 @@ function saveLandingDrafts(items) {
   localStorage.setItem(landingDraftKey(), JSON.stringify(items.slice(0, 50)));
 }
 
+function mergeLandingDraftLists(localItems = [], remoteItems = []) {
+  const map = new Map();
+  [...localItems, ...remoteItems].forEach((item) => {
+    if (!item?.id) return;
+    const existing = map.get(item.id);
+    const existingTime = Date.parse(existing?.updatedAt || existing?.createdAt || 0) || 0;
+    const nextTime = Date.parse(item?.updatedAt || item?.createdAt || 0) || 0;
+    if (!existing || nextTime >= existingTime) map.set(item.id, { ...existing, ...item });
+  });
+  return [...map.values()]
+    .sort((a,b) => (Date.parse(b.updatedAt || b.createdAt || 0) || 0) - (Date.parse(a.updatedAt || a.createdAt || 0) || 0))
+    .slice(0, 50);
+}
+
+function landingDraftRemoteSlug(draftId = '') {
+  const clean = String(draftId || `lp_${Date.now()}`).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(-42);
+  const company = String(state.company?.id || 'workspace').replace(/[^a-z0-9]/gi,'').slice(0,8).toLowerCase();
+  return `draft-${company || 'ws'}-${clean || landingShortToken()}`.slice(0,78);
+}
+
+function landingDraftFromRemoteRow(row = {}) {
+  const content = row?.content && typeof row.content === 'object' ? row.content : {};
+  const templateId = String(content.templateId || row.template_id || 'product-launch');
+  const published = row.status === 'published';
+  return {
+    ...defaultLandingPageData(templateId),
+    ...content,
+    id:String(row.draft_id || content.id || `lp_${Date.now()}`),
+    remotePageId:String(row.id || content.remotePageId || ''),
+    templateId,
+    name:String(content.name || row.name || 'Landing page'),
+    publishedSlug:published ? String(row.slug || content.publishedSlug || '') : String(content.publishedSlug || ''),
+    publishedUrl:published ? landingPublicUrl(row.slug || content.publishedSlug || '') : String(content.publishedUrl || ''),
+    publishedAt:row.published_at || content.publishedAt || '',
+    updatedAt:row.updated_at || content.updatedAt || '',
+    status:published ? 'Published' : 'Draft',
+    hasUnpublishedChanges:Boolean(content.hasUnpublishedChanges),
+  };
+}
+
+async function loadRemoteLandingDrafts() {
+  if (!supabase || !state.user || !state.company?.id) return [];
+  const { data, error } = await supabase
+    .from('landing_pages')
+    .select('id,draft_id,slug,name,template_id,content,status,published_at,created_at,updated_at')
+    .eq('company_id', state.company.id)
+    .order('updated_at', { ascending:false })
+    .limit(50);
+  if (error) {
+    console.warn('YOUYOU remote drafts:', error);
+    return [];
+  }
+  return (data || []).map(landingDraftFromRemoteRow);
+}
+
+async function syncRemoteLandingDraftsToLocal() {
+  const remote = await loadRemoteLandingDrafts();
+  if (!remote.length) return loadLandingDrafts();
+  const merged = mergeLandingDraftLists(loadLandingDrafts(), remote);
+  try { saveLandingDrafts(merged); } catch (error) { console.warn('YOUYOU draft cache:', error); }
+  return merged;
+}
+
 function landingCurrencySymbol(code) {
   return LANDING_CURRENCIES.find(([value]) => value === code)?.[1] || code;
 }
@@ -1919,6 +1982,24 @@ function landingTextForBackground(hex) {
   const r = parseInt(value.slice(0,2),16), g = parseInt(value.slice(2,4),16), b = parseInt(value.slice(4,6),16);
   const luminance = (0.2126*r + 0.7152*g + 0.0722*b) / 255;
   return luminance > .66 ? "#18202a" : "#f7f8fb";
+}
+
+function landingFontStack(value = 'system') {
+  const stacks = {
+    system:'ui-sans-serif,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif',
+    modern:'Inter,ui-sans-serif,system-ui,sans-serif',
+    elegant:'Georgia,Times New Roman,serif',
+    friendly:'Trebuchet MS,Arial,sans-serif',
+    mono:'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace',
+  };
+  return stacks[value] || stacks.system;
+}
+
+function landingRootStyle(data = {}) {
+  const radius = Math.min(36, Math.max(6, Number(data.cornerRadius) || 18));
+  const align = ['left','center','right'].includes(data.contentAlign) ? data.contentAlign : 'left';
+  const justify = align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start');
+  return `--lp-accent:${escapeHtml(data.accent || '#7c5cff')};--lp-bg:${escapeHtml(data.background || '#ffffff')};--lp-surface:${escapeHtml(data.surface || '#ffffff')};--lp-text:${escapeHtml(data.textColor || '#172033')};--lp-radius:${radius}px;--lp-align:${align};--lp-justify:${justify};--lp-font:${escapeHtml(landingFontStack(data.fontFamily || 'system'))}`;
 }
 
 function landingTemplateDemoVisual(templateId = "product-launch") {
@@ -2124,6 +2205,13 @@ function defaultLandingPageData(templateId = "product-launch") {
     widgetGreeting: "Hi! Ask me anything about this page.",
     widgetPosition: "right",
     widgetName: "YOUYOU Assistant",
+    fontFamily: "system",
+    contentAlign: "left",
+    cornerRadius: "18",
+    showBenefits: "on",
+    showFaq: "on",
+    showTestimonial: "on",
+    showContact: "on",
     publishedSlug: "",
     publishedUrl: "",
     remotePageId: "",
@@ -2437,15 +2525,15 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   const mediaPos = ["right","left","top","bottom"].includes(data.mediaPosition) ? data.mediaPosition : "right";
   const pageAttrs = `data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Beauty product')}"`;
 
-  const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Benefits</a>${gallerySection ? '<a href="#details">Gallery</a>' : ''}${faqQ && faqA ? '<a href="#faq">FAQ</a>' : ''}</div><a href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
+  const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Benefits</a>${gallerySection ? '<a href="#details">Gallery</a>' : ''}${data.showFaq !== 'off' && faqQ && faqA ? '<a href="#faq">FAQ</a>' : ''}</div><a href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
   const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY')}</span><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1>${data.subheadline ? `<p>${escapeHtml(data.subheadline)}</p>` : ''}${price}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="https://wa.me/${String(data.whatsapp).replace(/\D/g,'')}">WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}</div>` : ''}</section>`;
   const marquee = `<section class="beauty-marquee" aria-hidden="true"><span>DISCOVER</span><i></i><span>DETAILS</span><i></i><span>ROUTINE</span><i></i><span>ACTION</span></section>`;
-  const story = benefits.length || desc ? `<section id="story" class="beauty-story"><div class="beauty-story-head"><span>WHY IT STANDS OUT</span><h2>Made to be easy to understand — and easy to choose.</h2>${desc ? `<p>${escapeHtml(desc)}</p>` : ''}</div>${benefits.length ? `<div class="beauty-benefits">${benefits.map((b,i)=>`<article><div class="beauty-icon">${['✦','◌','♡','＋','◇','☼'][i]||'✦'}</div><h3>${escapeHtml(b)}</h3></article>`).join('')}</div>` : ''}</section>` : '';
+  const story = data.showBenefits !== "off" && (benefits.length || desc) ? `<section id="story" class="beauty-story"><div class="beauty-story-head"><span>WHY IT STANDS OUT</span><h2>Made to be easy to understand — and easy to choose.</h2>${desc ? `<p>${escapeHtml(desc)}</p>` : ''}</div>${benefits.length ? `<div class="beauty-benefits">${benefits.map((b,i)=>`<article><div class="beauty-icon">${['✦','◌','♡','＋','◇','☼'][i]||'✦'}</div><h3>${escapeHtml(b)}</h3></article>`).join('')}</div>` : ''}</section>` : '';
   const editorial = String(data.extraText || '').trim() ? `<section class="beauty-editorial"><div class="beauty-editorial-card"><small>${escapeHtml(data.extraTitle || 'PRODUCT STORY')}</small><h2>${escapeHtml(data.extraTitle || 'More about this product')}</h2><p>${escapeHtml(data.extraText).replace(/\n/g,'<br>')}</p></div></section>` : '';
-  const review = testimonial ? `<section class="beauty-review-section"><div class="beauty-quote-mark">“</div><blockquote>${escapeHtml(testimonial)}</blockquote><div class="beauty-review-meta"><span class="beauty-avatar">C</span><div><strong>Customer feedback</strong><small>Shared by the business</small></div></div></section>` : "";
-  const faq = faqQ && faqA ? `<section id="faq" class="beauty-faq"><div><small>GOOD TO KNOW</small><h2>${escapeHtml(faqQ)}</h2></div><p>${escapeHtml(faqA)}</p></section>` : '';
+  const review = data.showTestimonial !== "off" && testimonial ? `<section class="beauty-review-section"><div class="beauty-quote-mark">“</div><blockquote>${escapeHtml(testimonial)}</blockquote><div class="beauty-review-meta"><span class="beauty-avatar">C</span><div><strong>Customer feedback</strong><small>Shared by the business</small></div></div></section>` : "";
+  const faq = data.showFaq !== "off" && faqQ && faqA ? `<section id="faq" class="beauty-faq"><div><small>GOOD TO KNOW</small><h2>${escapeHtml(faqQ)}</h2></div><p>${escapeHtml(faqA)}</p></section>` : '';
   const directCta = `<a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Continue')} <span>↗</span></a>`;
-  const finalCta = `<section id="contact" class="beauty-final-cta ${data.ctaAction === 'form' ? 'has-form' : ''}"><div><small>READY WHEN YOU ARE</small><h2>${escapeHtml(data.ctaText || 'Continue')}</h2><p>${data.ctaAction === 'form' ? 'Share your details and the business can follow up with you.' : 'Choose the action below to continue.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data, 'beauty-lead-form') : directCta}</section>`;
+  const finalCta = data.showContact === "off" ? "" : `<section id="contact" class="beauty-final-cta ${data.ctaAction === 'form' ? 'has-form' : ''}"><div><small>READY WHEN YOU ARE</small><h2>${escapeHtml(data.ctaText || 'Continue')}</h2><p>${data.ctaAction === 'form' ? 'Share your details and the business can follow up with you.' : 'Choose the action below to continue.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data, 'beauty-lead-form') : directCta}</section>`;
 
   const parts = [nav, hero, marquee];
   let videoAdded = false, galleryAdded = false;
@@ -2465,9 +2553,10 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   addAt('before-contact');
   if (!videoAdded && video) { parts.push(video); videoAdded = true; }
   if (!galleryAdded && gallerySection) { parts.push(gallerySection); galleryAdded = true; }
-  parts.push(finalCta, `<footer class="beauty-footer"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><span>Powered by YOUYOU</span></footer>`, landingWidgetMarkup(data));
+  if (finalCta) parts.push(finalCta);
+  parts.push(`<footer class="beauty-footer"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><span>Powered by YOUYOU</span></footer>`, landingWidgetMarkup(data));
 
-  return `<article class="lp-live-page beauty-wow ${compact ? 'is-compact' : ''} media-${mediaPos}" dir="${direction}" ${pageAttrs} style="--lp-accent:${escapeHtml(data.accent)};--lp-bg:${escapeHtml(data.background)};--lp-surface:${escapeHtml(data.surface)};--lp-text:${escapeHtml(data.textColor)}">${parts.join('')}</article>`;
+  return `<article class="lp-live-page beauty-wow ${compact ? 'is-compact' : ''} media-${mediaPos}" dir="${direction}" ${pageAttrs} style="${landingRootStyle(data)}">${parts.join('')}</article>`;
 }
 
 function landingPreviewMarkup(data, compact = false) {
@@ -2483,25 +2572,25 @@ function landingPreviewMarkup(data, compact = false) {
   const heroMedia = landingHeroMediaMarkup(data);
   const template = landingTemplateById(data.templateId);
   const hero = `<section class="lp-live-hero${heroMedia ? '' : ' no-hero-media'}"><div class="lp-live-copy"><span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span><h1>${escapeHtml(data.headline || "Your headline goes here")}</h1><p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>${landingPriceMarkup(data)}<div class="lp-live-actions"><a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>${data.whatsapp ? `<a href="https://wa.me/${String(data.whatsapp).replace(/\D/g, "")}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}</div><div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>${heroMedia}</section>`;
-  const benefitsSection = `<section class="lp-live-section lp-live-benefits"><small>WHY THIS OFFER</small><h2>${escapeHtml(data.description || "Explain the value clearly.")}</h2><div class="lp-live-benefit-grid">${benefits.map((item, index) => `<div><span>0${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}</div></section>`;
+  const benefitsSection = data.showBenefits === "off" ? "" : `<section class="lp-live-section lp-live-benefits"><small>WHY THIS OFFER</small><h2>${escapeHtml(data.description || "Explain the value clearly.")}</h2><div class="lp-live-benefit-grid">${benefits.map((item, index) => `<div><span>0${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}</div></section>`;
   const testimonial = String(data.testimonial || "").trim();
-  const proofSection = testimonial ? `<section class="lp-live-section lp-live-proof"><small>CUSTOMER FEEDBACK</small><blockquote>“${escapeHtml(testimonial)}”</blockquote></section>` : "";
-  const faqSection = `<section class="lp-live-section lp-live-faq"><small>FAQ</small><h3>${escapeHtml(data.faqQuestion || "Common customer question")}</h3><p>${escapeHtml(data.faqAnswer || "Add the answer here.")}</p></section>`;
+  const proofSection = data.showTestimonial !== "off" && testimonial ? `<section class="lp-live-section lp-live-proof"><small>CUSTOMER FEEDBACK</small><blockquote>“${escapeHtml(testimonial)}”</blockquote></section>` : "";
+  const faqSection = data.showFaq === "off" ? "" : `<section class="lp-live-section lp-live-faq"><small>FAQ</small><h3>${escapeHtml(data.faqQuestion || "Common customer question")}</h3><p>${escapeHtml(data.faqAnswer || "Add the answer here.")}</p></section>`;
   const directCta = `<a href="${landingCtaHref(data)}" class="lp-live-primary lp-direct-contact">${escapeHtml(data.ctaText || 'Continue')} ↗</a>`;
-  const contactSection = `<section id="contact" class="lp-live-section lp-live-contact"><div><small>${data.ctaAction === 'form' ? 'CONTACT' : 'NEXT STEP'}</small><h2>${escapeHtml(data.ctaText || "Get started")}</h2><p>${data.ctaAction === 'form' ? 'Leave your details and the business can follow up.' : 'Continue using the selected contact option.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data) : `<div class="lp-direct-contact-wrap">${directCta}</div>`}</section>`;
+  const contactSection = data.showContact === "off" ? "" : `<section id="contact" class="lp-live-section lp-live-contact"><div><small>${data.ctaAction === 'form' ? 'CONTACT' : 'NEXT STEP'}</small><h2>${escapeHtml(data.ctaText || "Get started")}</h2><p>${data.ctaAction === 'form' ? 'Leave your details and the business can follow up.' : 'Continue using the selected contact option.'}</p></div>${data.ctaAction === 'form' ? landingLeadFormMarkup(data) : `<div class="lp-direct-contact-wrap">${directCta}</div>`}</section>`;
   const bodySections = [hero];
   const pushExtraIf = (position) => { if (data.extraTextPosition === position && extraSection) bodySections.push(extraSection); };
   const pushVideoIf = (position) => { if ((data.videoPosition || "after-hero") === position && videoBlock) bodySections.push(videoBlock); };
   const pushSliderIf = (position) => { if ((data.sliderPosition || "after-video") === position && sliderBlock) bodySections.push(sliderBlock); };
   pushVideoIf("after-hero"); if ((data.sliderPosition||'after-video')==='after-video' && (data.videoPosition||'after-hero')==='after-hero' && videoBlock && sliderBlock) bodySections.push(sliderBlock); else pushSliderIf("after-hero"); pushExtraIf("after-hero");
-  bodySections.push(benefitsSection);
+  if (benefitsSection) bodySections.push(benefitsSection);
   pushVideoIf("after-benefits"); if ((data.sliderPosition||'after-video')==='after-video' && (data.videoPosition||'after-hero')==='after-benefits' && videoBlock && sliderBlock) bodySections.push(sliderBlock); else pushSliderIf("after-benefits"); if ((data.extraTextPosition || "after-benefits") === "after-benefits" && extraSection) bodySections.push(extraSection);
-  if (proofSection) bodySections.push(proofSection); bodySections.push(faqSection);
+  if (proofSection) bodySections.push(proofSection); if (faqSection) bodySections.push(faqSection);
   pushVideoIf("before-contact"); if ((data.sliderPosition||'after-video')==='after-video' && (data.videoPosition||'after-hero')==='before-contact' && videoBlock && sliderBlock) bodySections.push(sliderBlock); else pushSliderIf("before-contact"); pushExtraIf("before-contact");
   if (sliderBlock && !bodySections.includes(sliderBlock)) bodySections.splice(Math.max(1, bodySections.length-1),0,sliderBlock);
-  bodySections.push(contactSection);
+  if (contactSection) bodySections.push(contactSection);
   const slugClass = `layout-${String(template?.layout || 'standard').replace(/[^a-z0-9-]/gi,'-').toLowerCase()}`;
-  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="--lp-accent:${escapeHtml(data.accent)};--lp-bg:${escapeHtml(data.background)};--lp-surface:${escapeHtml(data.surface)};--lp-text:${escapeHtml(data.textColor)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
+  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="${landingRootStyle(data)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
 }
 
 function landingSlugify(value = "") {
@@ -2819,6 +2908,24 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
   border-radius:15px!important;
 }
 .lpw-preview-stage.is-mobile .lp-image-arrow{display:none!important}
+/* YOUYOU V7.4 — AUTHORITATIVE THEME SYNC + CLIENT FREEDOM */
+.lp-live-page,.beauty-wow{background:var(--lp-bg)!important;color:var(--lp-text)!important;font-family:var(--lp-font,ui-sans-serif,system-ui,sans-serif)!important}
+.lp-live-page *{box-sizing:border-box}
+.lp-live-copy,.beauty-copy{text-align:var(--lp-align,left)!important}
+.lp-live-actions,.beauty-actions{justify-content:var(--lp-justify,flex-start)!important}
+.lp-live-primary,.lp-live-secondary,.lp-direct-contact,.lp-lead-form button,.beauty-nav>a{border-radius:var(--lp-radius,18px)!important}
+.lp-live-media,.lp-hero-media-card,.beauty-visual-wrap,.lp-image-slide,.beauty-wow .lp-image-slide,.lp-static-image-grid figure,.beauty-gallery figure,.beauty-benefits article,.beauty-editorial-card,.beauty-final-cta,.lp-live-benefit-grid>div{border-radius:var(--lp-radius,18px)!important}
+.lp-live-sub,.lp-live-contact>div>p,.beauty-copy>p,.beauty-story-head>p,.beauty-benefits p,.beauty-faq p,.beauty-footer{color:color-mix(in srgb,var(--lp-text) 68%,transparent)!important}
+.lp-live-nav,.lp-live-footer,.beauty-nav,.beauty-story,.beauty-gallery-section,.beauty-faq,.beauty-wow .lp-product-video{background:transparent!important;color:var(--lp-text)!important;border-color:color-mix(in srgb,var(--lp-text) 10%,transparent)!important}
+.beauty-nav>a{background:var(--lp-accent)!important;color:#fff!important}.beauty-text-link{color:var(--lp-text)!important}
+.beauty-marquee,.beauty-editorial-card,.beauty-final-cta{background:color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface))!important;color:var(--lp-text)!important}
+.beauty-editorial-card p,.beauty-final-cta p{color:color-mix(in srgb,var(--lp-text) 70%,transparent)!important}
+.beauty-benefits article,.beauty-stat-grid>div,.lp-live-benefit-grid>div,.lp-lead-form input,.lp-lead-form textarea{background:var(--lp-surface)!important;color:var(--lp-text)!important;border-color:color-mix(in srgb,var(--lp-text) 10%,transparent)!important}
+.beauty-gallery-section,.beauty-wow .lp-product-video{background:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important}
+.beauty-review-section{background:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;color:var(--lp-text)!important}
+.beauty-avatar{background:var(--lp-accent)!important;color:#fff!important}
+@media(max-width:760px){.lp-image-slide,.beauty-wow .lp-image-slide{aspect-ratio:var(--yy-carousel-ratio)!important}}
+
 </style>
 </head>
 <body>${body}<script>
@@ -2869,14 +2976,14 @@ function renderLandingPagesSection() {
 
       <div class="lpb-metrics">
         <div class="dashboard-card"><small>TEMPLATES</small><strong>30</strong><span>Product · Service · Campaign</span></div>
-        <div class="dashboard-card"><small>SAVED PAGES</small><strong>${drafts.length}</strong><span>Local workspace drafts</span></div>
-        <div class="dashboard-card"><small>PUBLISHED</small><strong>${published}</strong><span>Live publish ready</span></div>
+        <div class="dashboard-card"><small>DRAFTS & PAGES</small><strong id="lpb-pages-count">${drafts.length}</strong><span>Auto-saved workspace pages</span></div>
+        <div class="dashboard-card"><small>PUBLISHED</small><strong id="lpb-published-count">${published}</strong><span>Live public pages</span></div>
         <div class="dashboard-card"><small>CONVERSION ACTIONS</small><strong>4</strong><span>Form · WhatsApp · Call · Email</span></div>
       </div>
 
       <div class="lpb-tabs dashboard-card">
         <button class="is-active" type="button" data-lpb-view="templates">Template Gallery</button>
-        <button type="button" data-lpb-view="saved">My Pages <span>${drafts.length}</span></button>
+        <button type="button" data-lpb-view="saved">My Drafts & Pages <span id="lpb-tab-pages-count">${drafts.length}</span></button>
         <span class="lpb-workspace-note">Builder opens in a dedicated workspace ↗</span>
       </div>
 
@@ -3149,7 +3256,7 @@ function renderLandingPagesSection() {
 
       <div class="lpb-panel" data-lpb-panel="saved" hidden>
         <div class="lpb-saved-head">
-          <div><small>MY PAGES</small><h2>Saved landing page projects.</h2><p>Edit, duplicate or export pages without starting from zero.</p></div>
+          <div><small>MY DRAFTS & PAGES</small><h2>Continue exactly where you stopped.</h2><p>Drafts auto-save as you work. Published pages keep the same live URL when you update them.</p></div>
           <button class="primary" type="button" data-lpb-open-builder="product-launch">Create new →</button>
         </div>
         <div id="lpb-saved-grid" class="lpb-saved-grid"></div>
@@ -3403,6 +3510,32 @@ function renderLandingPageWorkspace() {
             </div>
           </div>
 
+          <div class="lpb-editor-section lpb-freedom-editor">
+            <small>DESIGN FREEDOM</small>
+            <div class="lpb-two">
+              <label>Font style
+                <select id="lpb-font-family"><option value="system">Clean system</option><option value="modern">Modern</option><option value="elegant">Elegant serif</option><option value="friendly">Friendly</option><option value="mono">Mono / tech</option></select>
+              </label>
+              <label>Text alignment
+                <select id="lpb-content-align"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select>
+              </label>
+            </div>
+            <label>Corner style
+              <select id="lpb-corner-radius"><option value="8">Sharp</option><option value="14">Soft</option><option value="18">Premium</option><option value="26">Rounded</option><option value="34">Extra rounded</option></select>
+            </label>
+            <div class="lpb-section-visibility">
+              <label>Benefits<select id="lpb-show-benefits"><option value="on">Show</option><option value="off">Hide</option></select></label>
+              <label>FAQ<select id="lpb-show-faq"><option value="on">Show</option><option value="off">Hide</option></select></label>
+              <label>Testimonial<select id="lpb-show-testimonial"><option value="on">Show</option><option value="off">Hide</option></select></label>
+              <label>Final CTA<select id="lpb-show-contact"><option value="on">Show</option><option value="off">Hide</option></select></label>
+            </div>
+            <div class="lpb-emoji-picker" aria-label="Quick emoji insert">
+              <span>Quick emoji · click a text field, then an emoji</span>
+              <div>${['✨','🔥','❤️','✅','⭐','🚀','💎','🌿','📞','📍','🎁','💬'].map((emoji)=>`<button type="button" data-lpb-emoji="${emoji}" aria-label="Insert ${emoji}">${emoji}</button>`).join('')}</div>
+            </div>
+            <p class="lpb-media-help">These controls are optional. Clients can keep the template style or personalize it without touching code.</p>
+          </div>
+
           <div class="lpb-editor-section lpb-widget-editor">
             <small>AI PAGE WIDGET</small>
             <div class="lpb-media-toggle-row">
@@ -3579,6 +3712,8 @@ function initLandingPageWorkspace() {
     textColor:"lpb-text-color", testimonial:"lpb-testimonial",
     faqQuestion:"lpb-faq-q", faqAnswer:"lpb-faq-a",
     widgetEnabled:"lpb-widget-enabled", widgetGreeting:"lpb-widget-greeting", widgetPosition:"lpb-widget-position", widgetName:"lpb-widget-name",
+    fontFamily:"lpb-font-family", contentAlign:"lpb-content-align", cornerRadius:"lpb-corner-radius",
+    showBenefits:"lpb-show-benefits", showFaq:"lpb-show-faq", showTestimonial:"lpb-show-testimonial", showContact:"lpb-show-contact",
   };
 
   const hydrateFields = () => {
@@ -3642,12 +3777,26 @@ function initLandingPageWorkspace() {
     if (heightValue) heightValue.textContent = `${current.mediaHeight || 380}px`;
   };
 
-  const saveDraft = () => {
-    readFields();
-    current.status = current.publishedUrl ? "Published" : "Draft";
-    current.hasUnpublishedChanges = Boolean(current.publishedUrl);
-    current.updatedAt = new Date().toISOString();
+  let autosaveTimer = null;
+  let remoteSaveTimer = null;
+  let lastFocusedTextField = null;
+  let remoteHydrationDone = request.mode !== "edit" || storedDrafts.some((item) => item.id === request.pageId);
 
+  const statusText = () => {
+    if (current.publishedUrl) return current.hasUnpublishedChanges ? "Changes not published" : "Published";
+    return "Draft auto-saved";
+  };
+
+  const updateSaveState = (message = "") => {
+    const stateEl = document.querySelector("#lpw-save-state");
+    if (!stateEl) return;
+    stateEl.textContent = message || statusText();
+    stateEl.classList.toggle("is-published", Boolean(current.publishedUrl && !current.hasUnpublishedChanges));
+    stateEl.classList.toggle("has-changes", Boolean(current.publishedUrl && current.hasUnpublishedChanges));
+  };
+
+  const persistLocalCurrent = () => {
+    current.updatedAt = current.updatedAt || new Date().toISOString();
     const drafts = loadLandingDrafts();
     const index = drafts.findIndex((item) => item.id === current.id);
     const safeCurrent = {
@@ -3659,38 +3808,108 @@ function initLandingPageWorkspace() {
     try {
       saveLandingDrafts(drafts);
     } catch (error) {
-      const stateEl = document.querySelector("#lpw-save-state");
-      if (stateEl) stateEl.textContent = "Draft too large — use hosted image URLs for permanent save";
-      return;
+      console.warn("YOUYOU local draft cache:", error);
     }
 
     const nextPath = landingBuilderRoute({ pageId: current.id });
     if (window.location.pathname !== nextPath) {
       window.history.replaceState({ section:"pages-builder", pageId:current.id }, "", nextPath);
     }
+  };
 
-    const stateEl = document.querySelector("#lpw-save-state");
-    if (stateEl) {
-      stateEl.textContent = "Saved";
-      stateEl.classList.add("is-saved");
-      setTimeout(() => {
-        stateEl.textContent = current.publishedUrl ? "Saved · update live page when ready" : "Saved draft";
-        stateEl.classList.remove("is-saved");
-      }, 1400);
+  const persistRemoteCurrent = async () => {
+    if (!remoteHydrationDone || !supabase || !state.user || !state.company?.id) return false;
+    if (landingHasTemporaryMedia(current)) return false;
+    const now = new Date().toISOString();
+    const isPublished = Boolean(current.publishedUrl || current.publishedSlug);
+    const slug = isPublished
+      ? String(current.publishedSlug || landingSlugify(current.name)).trim()
+      : landingDraftRemoteSlug(current.id);
+    const safeContent = { ...current, updatedAt:now, videoUrl:String(current.videoUrl || "").startsWith("blob:") ? "" : current.videoUrl };
+    const payload = {
+      company_id:state.company.id,
+      draft_id:current.id,
+      slug,
+      name:String(current.name || "Landing page").trim().slice(0,160) || "Landing page",
+      template_id:String(current.templateId || "product-launch").slice(0,80),
+      content:safeContent,
+      status:isPublished ? "published" : "draft",
+      published_at:isPublished ? (current.publishedAt || null) : null,
+      updated_at:now,
+    };
+    const { data:saved, error } = await supabase
+      .from("landing_pages")
+      .upsert(payload, { onConflict:"company_id,draft_id" })
+      .select("id,slug,status,published_at,updated_at")
+      .single();
+    if (error) {
+      console.warn("YOUYOU draft cloud autosave:", error);
+      return false;
     }
+    current.remotePageId = saved?.id || current.remotePageId || "";
+    current.updatedAt = saved?.updated_at || now;
+    persistLocalCurrent();
+    return true;
+  };
+
+  const queueRemoteSave = (delay = 900) => {
+    clearTimeout(remoteSaveTimer);
+    remoteSaveTimer = setTimeout(async () => {
+      const ok = await persistRemoteCurrent();
+      updateSaveState(ok ? statusText() : (current.publishedUrl ? "Changes saved locally · live page unchanged" : "Draft saved locally"));
+    }, delay);
+  };
+
+  const markChangedAndAutosave = ({ remoteDelay = 900 } = {}) => {
+    readFields();
+    current.status = current.publishedUrl ? "Published" : "Draft";
+    if (current.publishedUrl) current.hasUnpublishedChanges = true;
+    current.updatedAt = new Date().toISOString();
+    persistLocalCurrent();
+    updateSaveState("Auto-saving…");
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => updateSaveState(statusText()), 450);
+    queueRemoteSave(remoteDelay);
     setPublishUi(current.publishedUrl || "");
   };
 
-  const persistLocalCurrent = () => {
-    const drafts = loadLandingDrafts();
-    const index = drafts.findIndex((item) => item.id === current.id);
-    const safeCurrent = {
-      ...current,
-      videoUrl: String(current.videoUrl || "").startsWith("blob:") ? "" : current.videoUrl
-    };
-    if (index >= 0) drafts[index] = { ...safeCurrent };
-    else drafts.unshift({ ...safeCurrent });
-    saveLandingDrafts(drafts);
+  const saveDraft = async () => {
+    readFields();
+    current.status = current.publishedUrl ? "Published" : "Draft";
+    if (current.publishedUrl) current.hasUnpublishedChanges = true;
+    current.updatedAt = new Date().toISOString();
+    persistLocalCurrent();
+    updateSaveState("Saving…");
+    clearTimeout(remoteSaveTimer);
+    const ok = await persistRemoteCurrent();
+    updateSaveState(ok ? statusText() : (current.publishedUrl ? "Saved locally · changes not published" : "Draft saved locally"));
+    setPublishUi(current.publishedUrl || "");
+  };
+
+  const hydrateRemoteDraftIfNeeded = async () => {
+    if (request.mode !== "edit" || remoteHydrationDone || !supabase || !state.company?.id) return;
+    try {
+      const { data:row, error } = await supabase
+        .from("landing_pages")
+        .select("id,draft_id,slug,name,template_id,content,status,published_at,created_at,updated_at")
+        .eq("company_id", state.company.id)
+        .eq("draft_id", request.pageId)
+        .maybeSingle();
+      if (error) throw error;
+      if (row) {
+        current = landingDraftFromRemoteRow(row);
+        current = { ...defaultLandingPageData(current.templateId || request.templateId), ...current };
+        persistLocalCurrent();
+        hydrateFields();
+        renderPreview();
+        setPublishUi(current.publishedUrl || "");
+      }
+    } catch (error) {
+      console.warn("YOUYOU draft recovery:", error);
+    } finally {
+      remoteHydrationDone = true;
+      updateSaveState(statusText());
+    }
   };
 
   const setPublishUi = (url = "") => {
@@ -3732,14 +3951,14 @@ function initLandingPageWorkspace() {
       if (!slug) {
         const { data: existing, error: existingError } = await supabase
           .from("landing_pages")
-          .select("id,slug")
+          .select("id,slug,status")
           .eq("company_id", state.company.id)
           .eq("draft_id", current.id)
           .maybeSingle();
         if (existingError) throw existingError;
-        if (existing?.slug) {
+        if (existing?.id) remotePageId = existing.id || remotePageId;
+        if (existing?.status === "published" && existing?.slug && !String(existing.slug).startsWith("draft-")) {
           slug = existing.slug;
-          remotePageId = existing.id || remotePageId;
         }
       }
 
@@ -3785,9 +4004,10 @@ function initLandingPageWorkspace() {
         updatedAt:saved?.updated_at || now,
         status:"Published",
       };
+      if (remoteSaveTimer) { clearTimeout(remoteSaveTimer); remoteSaveTimer = null; }
       persistLocalCurrent();
       setPublishUi(current.publishedUrl);
-      landingStudioStatus("Published · real URL ready");
+      updateSaveState("Published · all changes live");
       const nextPath = landingBuilderRoute({ pageId:current.id });
       if (window.location.pathname !== nextPath) {
         window.history.replaceState({ section:"pages-builder", pageId:current.id }, "", nextPath);
@@ -3838,8 +4058,28 @@ function initLandingPageWorkspace() {
 
   Object.values(fieldMap).forEach((id) => {
     const el = document.getElementById(id);
-    el?.addEventListener("input", renderPreview);
-    el?.addEventListener("change", renderPreview);
+    const onEdit = () => { renderPreview(); markChangedAndAutosave(); };
+    el?.addEventListener("input", onEdit);
+    el?.addEventListener("change", onEdit);
+    if (el && (el.matches("input[type=text],input[type=email],input[type=url],input:not([type]),textarea") || el.tagName === "TEXTAREA")) {
+      el.addEventListener("focus", () => { lastFocusedTextField = el; });
+    }
+  });
+
+  document.querySelectorAll("[data-lpb-emoji]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = lastFocusedTextField || document.querySelector("#lpb-headline");
+      if (!target) return;
+      const emoji = button.dataset.lpbEmoji || "";
+      const start = Number.isFinite(target.selectionStart) ? target.selectionStart : target.value.length;
+      const end = Number.isFinite(target.selectionEnd) ? target.selectionEnd : start;
+      target.value = `${target.value.slice(0,start)}${emoji}${target.value.slice(end)}`;
+      target.focus();
+      const next = start + emoji.length;
+      try { target.setSelectionRange(next,next); } catch (_) {}
+      renderPreview();
+      markChangedAndAutosave();
+    });
   });
 
   document.querySelector("#lpb-hero-image-file")?.addEventListener("change", async (event) => {
@@ -3872,6 +4112,7 @@ function initLandingPageWorkspace() {
     if (enabled) enabled.value = "on";
     inputEl.value = "";
     renderPreview();
+    markChangedAndAutosave({ remoteDelay:250 });
   });
 
   document.querySelector("#lpb-image-files")?.addEventListener("change", async (event) => {
@@ -3915,6 +4156,7 @@ function initLandingPageWorkspace() {
     if (galleryInput) galleryInput.value = current.mediaGallery;
     inputEl.value = "";
     renderPreview();
+    markChangedAndAutosave({ remoteDelay:250 });
     const total = galleryItems().length;
     landingStudioStatus(storageReady
       ? `${total} photo${total === 1 ? "" : "s"} ready · stored for export`
@@ -3938,6 +4180,7 @@ function initLandingPageWorkspace() {
     if (firstInput) firstInput.value = current.imageUrl || "";
     if (galleryInput) galleryInput.value = current.mediaGallery || "";
     renderPreview();
+    markChangedAndAutosave({ remoteDelay:250 });
   });
 
   document.querySelector("#lpb-video-file")?.addEventListener("change", async (event) => {
@@ -3973,6 +4216,7 @@ function initLandingPageWorkspace() {
         window.__youyouLocalVideoUrl = null;
       }
       renderPreview();
+      markChangedAndAutosave({ remoteDelay:150 });
       landingStudioStatus("Video uploaded · Ready for export");
     } catch (error) {
       console.error("YOUYOU video upload failed:", error);
@@ -3988,6 +4232,7 @@ function initLandingPageWorkspace() {
       current = { ...current, accent, background, surface, textColor };
       hydrateFields();
       renderPreview();
+      markChangedAndAutosave();
     });
   });
 
@@ -3998,7 +4243,13 @@ function initLandingPageWorkspace() {
     });
   });
 
-  document.querySelector("#lpw-back")?.addEventListener("click", () => navigateDashboard("pages"));
+  document.querySelector("#lpw-back")?.addEventListener("click", async () => {
+    readFields();
+    persistLocalCurrent();
+    clearTimeout(remoteSaveTimer);
+    await persistRemoteCurrent();
+    navigateDashboard("pages");
+  });
   document.querySelector("#lpw-save-top")?.addEventListener("click", saveDraft);
   document.querySelector("#lpw-save-bottom")?.addEventListener("click", saveDraft);
   document.querySelector("#lpw-export-top")?.addEventListener("click", exportHtml);
@@ -4020,6 +4271,23 @@ function initLandingPageWorkspace() {
     setTimeout(() => { event.currentTarget.textContent = "Copy link"; }, 1400);
   });
   setPublishUi(current.publishedUrl || "");
+  updateSaveState(statusText());
+
+  // A new workspace becomes a real draft immediately, so refresh/back never starts over.
+  if (request.mode === "new") {
+    current.status = "Draft";
+    current.updatedAt = new Date().toISOString();
+    persistLocalCurrent();
+    remoteHydrationDone = true;
+    queueRemoteSave(1200);
+  } else {
+    hydrateRemoteDraftIfNeeded();
+  }
+
+  const beforeUnload = () => {
+    try { readFields(); persistLocalCurrent(); } catch (_) {}
+  };
+  window.addEventListener("beforeunload", beforeUnload, { once:true });
 }
 
 
@@ -4087,6 +4355,24 @@ function initLandingPages() {
     openLandingBuilder({ templateId });
   };
 
+  const landingEditedLabel = (value = "") => {
+    const time = Date.parse(value || "");
+    if (!Number.isFinite(time)) return "Recently edited";
+    try { return `Edited ${new Intl.DateTimeFormat(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(new Date(time))}`; }
+    catch (_) { return "Recently edited"; }
+  };
+
+  const updateLandingCounts = () => {
+    const drafts = loadLandingDrafts();
+    const publishedCount = drafts.filter((item) => item.publishedUrl || item.status === "Published").length;
+    const pagesCount = document.querySelector("#lpb-pages-count");
+    const published = document.querySelector("#lpb-published-count");
+    const tab = document.querySelector("#lpb-tab-pages-count");
+    if (pagesCount) pagesCount.textContent = String(drafts.length);
+    if (published) published.textContent = String(publishedCount);
+    if (tab) tab.textContent = String(drafts.length);
+  };
+
   const renderSaved = () => {
     const container = document.querySelector("#lpb-saved-grid");
     if (!container) return;
@@ -4109,12 +4395,13 @@ function initLandingPages() {
           <span></span><b></b><i></i>
         </div>
         <div class="lpb-saved-copy">
-          <small>${escapeHtml(item.publishedUrl ? (item.hasUnpublishedChanges ? "Published · changes not live" : "Published") : (item.status || "Draft"))} · ${escapeHtml(item.pageType || "Landing Page")}</small>
+          <small class="lpb-page-status ${item.publishedUrl ? (item.hasUnpublishedChanges ? "has-changes" : "is-published") : "is-draft"}">${escapeHtml(item.publishedUrl ? (item.hasUnpublishedChanges ? "Published · changes not live" : "Published") : "Draft")} · ${escapeHtml(item.pageType || "Landing Page")}</small>
           <strong>${escapeHtml(item.name || "Untitled page")}</strong>
           <span>${escapeHtml(item.headline || "")}</span>
+          <em>${escapeHtml(landingEditedLabel(item.updatedAt || item.createdAt))}</em>
         </div>
         <div class="lpb-saved-actions">
-          <button type="button" data-lpb-edit="${escapeHtml(item.id)}">Edit</button>
+          <button type="button" class="lpb-continue-editing" data-lpb-edit="${escapeHtml(item.id)}">Continue editing</button>
           ${item.publishedUrl ? `<a class="lpb-open-live" href="${escapeHtml(item.publishedUrl)}" target="_blank" rel="noopener">Open live ↗</a>` : ""}
           <button type="button" data-lpb-duplicate="${escapeHtml(item.id)}">Duplicate</button>
           <button type="button" data-lpb-delete="${escapeHtml(item.id)}">Delete</button>
@@ -4150,6 +4437,7 @@ function initLandingPages() {
         };
         saveLandingDrafts([copy, ...draftsNow]);
         renderSaved();
+        updateLandingCounts();
       });
     });
 
@@ -4162,7 +4450,7 @@ function initLandingPages() {
           ? "Delete this landing page? Its live public URL will stop working."
           : "Delete this draft?";
         if (!window.confirm(message)) return;
-        if (item.publishedUrl && supabase && state.company?.id) {
+        if ((item.remotePageId || item.publishedUrl) && supabase && state.company?.id) {
           button.disabled = true;
           button.textContent = "Deleting…";
           const { error } = await supabase
@@ -4181,6 +4469,7 @@ function initLandingPages() {
         const next = draftsNow.filter((entry) => entry.id !== item.id);
         saveLandingDrafts(next);
         renderSaved();
+        updateLandingCounts();
       });
     });
   };
@@ -4317,6 +4606,11 @@ function initLandingPages() {
   hydrateFields();
   renderPreview();
   renderSaved();
+  updateLandingCounts();
+  syncRemoteLandingDraftsToLocal().then(() => {
+    renderSaved();
+    updateLandingCounts();
+  }).catch((error) => console.warn("YOUYOU draft list sync:", error));
   setSelectedTemplateV510(LANDING_PAGE_TEMPLATES[0]?.id || "");
 }
 

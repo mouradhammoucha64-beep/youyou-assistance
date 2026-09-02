@@ -12013,3 +12013,62 @@ tr:hover td{background:rgba(255,255,255,.018)!important}
   .lpw-editor-footer{grid-template-columns:1fr 1fr!important;display:grid!important}
   .lpw-editor-footer .lpw-publish-button{grid-column:1/-1;order:-1}
 }
+
+/* =========================================================
+   YOUYOU V7.4 — UNIFIED LANDING STUDIO
+   Theme sync · real mobile preview · draft UX · client freedom
+   ========================================================= */
+.lp-live-page,.beauty-wow{
+  background:var(--lp-bg)!important;
+  color:var(--lp-text)!important;
+  font-family:var(--lp-font,ui-sans-serif,system-ui,sans-serif)!important;
+}
+.lp-live-copy,.beauty-copy{text-align:var(--lp-align,left)!important}
+.lp-live-actions,.beauty-actions{justify-content:var(--lp-justify,flex-start)!important}
+.lp-live-primary,.lp-live-secondary,.lp-direct-contact,.lp-lead-form button,.beauty-nav>a{border-radius:var(--lp-radius,18px)!important}
+.lp-live-media,.lp-hero-media-card,.beauty-visual-wrap,.lp-image-slide,.beauty-wow .lp-image-slide,.lp-static-image-grid figure,.beauty-gallery figure,.beauty-benefits article,.beauty-editorial-card,.beauty-final-cta,.lp-live-benefit-grid>div{border-radius:var(--lp-radius,18px)!important}
+.lp-live-sub,.lp-live-contact>div>p,.beauty-copy>p,.beauty-story-head>p,.beauty-benefits p,.beauty-faq p,.beauty-footer{color:color-mix(in srgb,var(--lp-text) 68%,transparent)!important}
+.lp-live-nav,.lp-live-footer,.beauty-nav,.beauty-story,.beauty-gallery-section,.beauty-faq,.beauty-wow .lp-product-video{background:transparent!important;color:var(--lp-text)!important;border-color:color-mix(in srgb,var(--lp-text) 10%,transparent)!important}
+.beauty-nav>a{background:var(--lp-accent)!important;color:#fff!important}.beauty-text-link{color:var(--lp-text)!important}
+.beauty-marquee,.beauty-editorial-card,.beauty-final-cta{background:color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface))!important;color:var(--lp-text)!important}
+.beauty-editorial-card p,.beauty-final-cta p{color:color-mix(in srgb,var(--lp-text) 70%,transparent)!important}
+.beauty-benefits article,.beauty-stat-grid>div,.lp-live-benefit-grid>div,.lp-lead-form input,.lp-lead-form textarea{background:var(--lp-surface)!important;color:var(--lp-text)!important;border-color:color-mix(in srgb,var(--lp-text) 10%,transparent)!important}
+.beauty-gallery-section,.beauty-wow .lp-product-video{background:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important}
+.beauty-review-section{background:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;color:var(--lp-text)!important}
+.beauty-avatar{background:var(--lp-accent)!important;color:#fff!important}
+
+/* The simulator mirrors a real 360–390px phone without changing the real public carousel. */
+.lpw-preview-stage.is-mobile{padding:20px!important}
+.lpw-preview-stage.is-mobile #lpb-live-preview,
+.lpw-preview-stage.is-mobile .lp-live-page{width:100%!important;max-width:360px!important;margin:0 auto!important}
+.lpw-preview-stage.is-mobile .lp-image-slider{--yy-carousel-gap:10px!important;overflow:hidden!important}
+.lpw-preview-stage.is-mobile .lp-image-track{gap:10px!important;padding:3px 20% 10px 0!important}
+.lpw-preview-stage.is-mobile .lp-image-slide,
+.lpw-preview-stage.is-mobile .beauty-wow .lp-image-slide{
+  flex:0 0 78%!important;
+  width:78%!important;
+  min-width:78%!important;
+  height:auto!important;
+  aspect-ratio:var(--yy-carousel-ratio)!important;
+}
+.lpw-preview-stage.is-mobile .lp-product-gallery{padding-left:18px!important;padding-right:18px!important}
+
+/* Draft / publish status should read at a glance. */
+.lpw-status.is-published{background:#eefaf4!important;border-color:#c7ead8!important;color:#237a55!important}
+.lpw-status.has-changes{background:#fff7e8!important;border-color:#f3ddb1!important;color:#9a6718!important}
+.lpb-page-status{display:inline-flex!important;width:max-content;padding:5px 8px;border-radius:999px!important;font-weight:850!important;letter-spacing:.03em!important}
+.lpb-page-status.is-draft{background:#f0edff!important;color:#6f54bd!important}
+.lpb-page-status.is-published{background:#eaf8f1!important;color:#247956!important}
+.lpb-page-status.has-changes{background:#fff4df!important;color:#9b681d!important}
+.lpb-saved-copy em{display:block;margin-top:7px;color:#97a0af;font-size:8px;font-style:normal}
+.lpb-continue-editing{background:#f5f1ff!important;border-color:#d9cff3!important;color:#6f4fc0!important}
+
+/* Client freedom controls. */
+.lpb-freedom-editor{background:linear-gradient(180deg,#fff,#fbfaff)!important}
+.lpb-section-visibility{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.lpb-emoji-picker{display:grid;gap:9px;padding:12px;border:1px solid #e5e8ef;border-radius:13px;background:#fafbfc}
+.lpb-emoji-picker>span{color:#7d8797;font-size:9px;font-weight:700}
+.lpb-emoji-picker>div{display:flex;flex-wrap:wrap;gap:6px}
+.lpb-emoji-picker button{width:34px;height:34px;display:grid;place-items:center;border:1px solid #e0e5ed;border-radius:9px;background:#fff;cursor:pointer;font-size:17px;box-shadow:0 1px 2px rgba(16,24,40,.03)}
+.lpb-emoji-picker button:hover{transform:translateY(-1px);border-color:#bda9e7;background:#f8f4ff}
+@media(max-width:520px){.lpb-section-visibility{grid-template-columns:1fr}}

@@ -1,0 +1,39 @@
+YOUYOU V7.4 — UNIFIED LANDING STUDIO AUDIT
+==========================================
+
+Scope: latest full project supplied by the user.
+Changed files: main.js, style.css.
+No database schema change is required.
+
+CLOSED / IMPROVED
+- Unified theme variables between Workspace preview and exported/published page.
+- Removed Beauty public-theme overrides as the final authority; selected colors now win.
+- Workspace mobile carousel simulator now mirrors the public mobile carousel dimensions instead of using the older oversized preview rules.
+- Added persistent draft workflow using existing Supabase landing_pages + local cache.
+- New pages become drafts immediately.
+- Debounced cloud autosave after editing.
+- Media autosaves after permanent storage URL is available.
+- Refresh/back recovery restores stored draft state.
+- Cross-session/cross-device recovery can load the draft row from Supabase.
+- My Drafts & Pages syncs remote and local drafts.
+- Continue editing action is explicit.
+- Draft / Published / Published with changes-not-live states are visible.
+- Editing a published page updates draft content but intentionally leaves the live html_snapshot unchanged until Update live page.
+- Publishing keeps the same public URL on updates.
+- Added design freedom controls: font family, alignment, radius, section visibility and emoji quick insert.
+- Added clearer draft/publish counts and saved-page status badges.
+
+PRESERVED
+- V7.1 landing-media storage flow.
+- Existing public slider engine (the real PC/phone version that the user approved).
+- V7.2 Publish + /p/:slug routing and published-page API.
+- Existing lead form, widget, Conversations/Leads core.
+
+STATIC VERIFICATION
+- node --check main.js: PASS
+- node --check public/widget.js: PASS
+- node --check api/published-page.js: PASS
+- node --check api/seo-audit.js: PASS
+
+LIMITATION OF THIS ENVIRONMENT
+A full Vite production build was attempted, but npm dependency installation exceeded the available execution window, so the build is not claimed as verified here.

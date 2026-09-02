@@ -1,0 +1,37 @@
+YOUYOU V7.4 — UNIFIED LANDING STUDIO
+====================================
+
+This package is based directly on the latest full project ZIP supplied by the user (youyou-assistance-main (14)).
+
+NO NEW SQL IS REQUIRED for V7.4.
+Keep the V7.1 landing-media storage SQL and V7.2 landing_pages SQL already installed in Supabase.
+
+WHAT TO TEST AFTER DEPLOY
+1. Open Landing Pages and start a template.
+2. Change background / accent / text colors.
+3. Switch Workspace preview to Mobile.
+4. Add 5–8 images and check the carousel.
+5. Add a stored video and wait for permanent upload confirmation.
+6. Wait for “Draft auto-saved”, refresh the browser, then reopen the page.
+7. Confirm text, images, video, colors and design controls are restored.
+8. Open My Drafts & Pages and click Continue editing.
+9. Publish and open the real /p/... URL on an actual phone.
+10. Confirm the live page uses the same colors and design as the editor.
+11. Edit a published page. The status must show “Changes not published”.
+12. Click Update live page. The same URL must remain and the status must return to Published.
+
+NEW WORKSPACE FREEDOM
+- Font style
+- Left / center / right content alignment
+- Corner radius
+- Show/hide Benefits, FAQ, Testimonial and Final CTA
+- Emoji quick insert into the currently focused text field
+
+DRAFT MODEL
+- Local cache saves immediately for fast recovery.
+- Cloud draft autosave uses the existing landing_pages table.
+- Published pages keep their current html_snapshot live while edits auto-save as draft content.
+- “Update live page” replaces the live snapshot without changing the public URL.
+
+IMPORTANT
+Export HTML remains available as an optional backup. Publish is the normal way to create a real public link.
