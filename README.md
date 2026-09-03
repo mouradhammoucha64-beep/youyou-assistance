@@ -562,3 +562,7 @@ See `PREMIUM-THEME-AUDIT-2026-08-24.txt`.
 ## V7.5 — Final Landing Engine Lock
 
 The Landing Studio preview now runs the exact exported/published document in an iframe, so mobile media queries, theme colors, slider dimensions, video and spacing are evaluated by the same renderer used on public `/p/:slug` pages. V7.5 also adds renderer-version migration UX, newest-copy draft recovery, safer duplicated media handling, and RPC-only public snapshot retrieval. Existing V7.2 databases should run `supabase-v7.5-publish-security.sql` once.
+
+## V7.7 — Workflow + Universal Builder
+
+V7.7 adds shared WhatsApp number normalization, My Drafts search/status filters, live-link copying, universal hero layout/page-spacing controls, and reusable custom content sections that can be added, reordered and removed from the Landing Workspace. No new SQL migration is required beyond the V7.1/V7.2/V7.5 setup already included in the project.

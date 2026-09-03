@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "7.6.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "7.8.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2003,7 +2003,9 @@ function landingRootStyle(data = {}) {
   const radius = Math.min(36, Math.max(6, Number(data.cornerRadius) || 18));
   const align = ['left','center','right'].includes(data.contentAlign) ? data.contentAlign : 'left';
   const justify = align === 'center' ? 'center' : (align === 'right' ? 'flex-end' : 'flex-start');
-  return `--lp-accent:${escapeHtml(data.accent || '#7c5cff')};--lp-bg:${escapeHtml(data.background || '#ffffff')};--lp-surface:${escapeHtml(data.surface || '#ffffff')};--lp-text:${escapeHtml(data.textColor || '#172033')};--lp-radius:${radius}px;--lp-align:${align};--lp-justify:${justify};--lp-font:${escapeHtml(landingFontStack(data.fontFamily || 'system'))}`;
+  const density = ['compact','balanced','airy'].includes(data.sectionDensity) ? data.sectionDensity : 'balanced';
+  const sectionSpace = density === 'compact' ? '52px' : (density === 'airy' ? '94px' : '72px');
+  return `--lp-accent:${escapeHtml(data.accent || '#7c5cff')};--lp-bg:${escapeHtml(data.background || '#ffffff')};--lp-surface:${escapeHtml(data.surface || '#ffffff')};--lp-text:${escapeHtml(data.textColor || '#172033')};--lp-radius:${radius}px;--lp-align:${align};--lp-justify:${justify};--lp-font:${escapeHtml(landingFontStack(data.fontFamily || 'system'))};--lp-section-space:${sectionSpace}`;
 }
 
 function landingTemplateDemoVisual(templateId = "product-launch") {
@@ -2151,6 +2153,57 @@ function landingMediaMarkup(data) {
   return landingImageSliderMarkup(data);
 }
 
+function landingCallingCodeForCountry(country = "") {
+  const key = String(country || "").trim().toLowerCase();
+  const map = {
+    ma:"212", morocco:"212", maroc:"212",
+    us:"1", usa:"1", "united states":"1", "united states of america":"1",
+    ca:"1", canada:"1",
+    fr:"33", france:"33",
+    es:"34", spain:"34", españa:"34",
+    gb:"44", uk:"44", "united kingdom":"44",
+    de:"49", germany:"49", deutschland:"49",
+    it:"39", italy:"39", italia:"39",
+    pt:"351", portugal:"351",
+    ae:"971", uae:"971", "united arab emirates":"971",
+    sa:"966", "saudi arabia":"966",
+    qa:"974", qatar:"974",
+    eg:"20", egypt:"20",
+    tn:"216", tunisia:"216",
+    dz:"213", algeria:"213",
+    tr:"90", turkey:"90",
+    in:"91", india:"91"
+  };
+  return map[key] || "";
+}
+
+function normalizeWhatsAppNumber(value = "", countryCode = "") {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  let digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+
+  // WhatsApp wa.me expects an international number without +, spaces or 00.
+  if (digits.startsWith("00")) digits = digits.slice(2);
+  const cc = String(countryCode || "").replace(/\D/g, "").replace(/^00+/, "").replace(/^0+/, "");
+
+  // Explicit international formats (+212 / 00212) are already authoritative.
+  if (raw.startsWith("+") || /^00/.test(raw.replace(/\s+/g, ""))) return digits;
+  if (cc && digits.startsWith(cc)) return digits;
+
+  // Local numbers such as 06... become 2126... when a country code is supplied.
+  if (cc) {
+    digits = digits.replace(/^0+/, "");
+    return `${cc}${digits}`;
+  }
+  return digits.replace(/^0+/, "");
+}
+
+function landingWhatsAppHref(data = {}) {
+  const number = normalizeWhatsAppNumber(data.whatsapp, data.whatsappCountryCode);
+  return number ? `https://wa.me/${number}` : "#contact";
+}
+
 function defaultLandingPageData(templateId = "product-launch") {
   const template = landingTemplateById(templateId);
   const c = state.company || {};
@@ -2174,6 +2227,7 @@ function defaultLandingPageData(templateId = "product-launch") {
     leadFormEnabled: "on",
     formButtonText: "Send request",
     whatsapp: c.whatsapp_number || "",
+    whatsappCountryCode: landingCallingCodeForCountry(c.country || ""),
     phone: c.business_phone || "",
     email: c.business_email || "",
     heroMediaEnabled: "on",
@@ -2198,6 +2252,7 @@ function defaultLandingPageData(templateId = "product-launch") {
     extraTitle: "",
     extraText: "",
     extraTextPosition: "after-benefits",
+    customSections: [],
     accent: template.accent,
     background: template.bg,
     surface: template.surface,
@@ -2214,6 +2269,7 @@ function defaultLandingPageData(templateId = "product-launch") {
     fontFamily: "system",
     contentAlign: "left",
     cornerRadius: "18",
+    sectionDensity: "balanced",
     showBenefits: "on",
     showFaq: "on",
     showTestimonial: "on",
@@ -2243,8 +2299,7 @@ function landingPriceMarkup(data) {
 
 function landingCtaHref(data) {
   if (data.ctaAction === "whatsapp") {
-    const digits = String(data.whatsapp || "").replace(/\D/g, "");
-    return digits ? `https://wa.me/${digits}` : "#contact";
+    return landingWhatsAppHref(data);
   }
   if (data.ctaAction === "call") {
     const phone = String(data.phone || "").replace(/[^\d+]/g, "");
@@ -2514,6 +2569,16 @@ function initLandingCarousels(root = document) {
   });
 }
 
+function landingCustomSectionsMarkup(data = {}) {
+  const items = Array.isArray(data.customSections) ? data.customSections : [];
+  return items.slice(0, 8).map((item, index) => {
+    const title = String(item?.title || "").trim();
+    const text = String(item?.text || "").trim();
+    if (!title && !text) return "";
+    return `<section class="lp-live-section lp-custom-section" data-custom-section="${index}">${title ? `<small>${escapeHtml(item.eyebrow || "MORE")}</small><h2>${escapeHtml(title)}</h2>` : ""}${text ? `<div class="lp-custom-section-copy">${escapeHtml(text).replace(/\n/g,"<br>")}</div>` : ""}</section>`;
+  }).join("");
+}
+
 function landingBeautyPreviewMarkup(data, compact = false) {
   const direction = data.direction === "rtl" ? "rtl" : "ltr";
   const rawBenefits = String(data.benefits || "").trim();
@@ -2543,7 +2608,7 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   const pageAttrs = `data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Beauty product')}"`;
 
   const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Benefits</a>${gallerySection ? '<a href="#details">Gallery</a>' : ''}${data.showFaq !== 'off' && faqQ && faqA ? '<a href="#faq">FAQ</a>' : ''}</div><a href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
-  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY')}</span><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1>${data.subheadline ? `<p>${escapeHtml(data.subheadline)}</p>` : ''}${price}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="https://wa.me/${String(data.whatsapp).replace(/\D/g,'')}">WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}</div>` : ''}</section>`;
+  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY')}</span><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1>${data.subheadline ? `<p>${escapeHtml(data.subheadline)}</p>` : ''}${price}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="${landingWhatsAppHref(data)}">WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}</div>` : ''}</section>`;
   const marquee = `<section class="beauty-marquee" aria-hidden="true"><span>DISCOVER</span><i></i><span>DETAILS</span><i></i><span>ROUTINE</span><i></i><span>ACTION</span></section>`;
   const story = data.showBenefits !== "off" && (benefits.length || desc) ? `<section id="story" class="beauty-story"><div class="beauty-story-head"><span>WHY IT STANDS OUT</span><h2>Made to be easy to understand — and easy to choose.</h2>${desc ? `<p>${escapeHtml(desc)}</p>` : ''}</div>${benefits.length ? `<div class="beauty-benefits">${benefits.map((b,i)=>`<article><div class="beauty-icon">${['✦','◌','♡','＋','◇','☼'][i]||'✦'}</div><h3>${escapeHtml(b)}</h3></article>`).join('')}</div>` : ''}</section>` : '';
   const editorial = String(data.extraText || '').trim() ? `<section class="beauty-editorial"><div class="beauty-editorial-card"><small>${escapeHtml(data.extraTitle || 'PRODUCT STORY')}</small><h2>${escapeHtml(data.extraTitle || 'More about this product')}</h2><p>${escapeHtml(data.extraText).replace(/\n/g,'<br>')}</p></div></section>` : '';
@@ -2571,10 +2636,12 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   addAt('before-contact');
   if (!videoAdded && video) { parts.push(video); videoAdded = true; }
   if (!galleryAdded && gallerySection) { parts.push(gallerySection); galleryAdded = true; }
+  const customSections = landingCustomSectionsMarkup(data);
+  if (customSections) parts.push(customSections);
   if (finalCta) parts.push(finalCta);
   parts.push(`<footer class="beauty-footer"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><span>Powered by YOUYOU</span></footer>`, landingWidgetMarkup(data));
 
-  return `<article class="lp-live-page beauty-wow ${compact ? 'is-compact' : ''} media-${mediaPos}" dir="${direction}" ${pageAttrs} style="${landingRootStyle(data)}">${parts.join('')}</article>`;
+  return `<article class="lp-live-page beauty-wow ${compact ? 'is-compact' : ''} media-${mediaPos} density-${escapeHtml(data.sectionDensity || 'balanced')}" dir="${direction}" ${pageAttrs} style="${landingRootStyle(data)}">${parts.join('')}</article>`;
 }
 
 function landingPreviewMarkup(data, compact = false) {
@@ -2589,7 +2656,7 @@ function landingPreviewMarkup(data, compact = false) {
   const extraSection = String(data.extraText || "").trim() ? `<section class="lp-live-section lp-live-extra"><small>${escapeHtml(data.extraTitle || "MORE ABOUT THIS OFFER")}</small><div class="lp-live-extra-copy">${escapeHtml(data.extraText).replace(/\n/g,"<br>")}</div></section>` : "";
   const heroMedia = landingHeroMediaMarkup(data);
   const template = landingTemplateById(data.templateId);
-  const hero = `<section class="lp-live-hero${heroMedia ? '' : ' no-hero-media'}"><div class="lp-live-copy"><span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span><h1>${escapeHtml(data.headline || "Your headline goes here")}</h1><p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>${landingPriceMarkup(data)}<div class="lp-live-actions"><a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>${data.whatsapp ? `<a href="https://wa.me/${String(data.whatsapp).replace(/\D/g, "")}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}</div><div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>${heroMedia}</section>`;
+  const hero = `<section class="lp-live-hero${heroMedia ? '' : ' no-hero-media'}"><div class="lp-live-copy"><span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span><h1>${escapeHtml(data.headline || "Your headline goes here")}</h1><p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>${landingPriceMarkup(data)}<div class="lp-live-actions"><a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>${data.whatsapp ? `<a href="${landingWhatsAppHref(data)}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}</div><div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>${heroMedia}</section>`;
   const benefitsSection = data.showBenefits === "off" ? "" : `<section class="lp-live-section lp-live-benefits"><small>WHY THIS OFFER</small><h2>${escapeHtml(data.description || "Explain the value clearly.")}</h2><div class="lp-live-benefit-grid">${benefits.map((item, index) => `<div><span>0${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}</div></section>`;
   const testimonial = String(data.testimonial || "").trim();
   const proofSection = data.showTestimonial !== "off" && testimonial ? `<section class="lp-live-section lp-live-proof"><small>CUSTOMER FEEDBACK</small><blockquote>“${escapeHtml(testimonial)}”</blockquote></section>` : "";
@@ -2607,9 +2674,11 @@ function landingPreviewMarkup(data, compact = false) {
   if (proofSection) bodySections.push(proofSection); if (faqSection) bodySections.push(faqSection);
   pushVideoIf("before-contact"); if ((data.sliderPosition||'after-video')==='after-video' && (data.videoPosition||'after-hero')==='before-contact' && videoBlock && sliderBlock) bodySections.push(sliderBlock); else pushSliderIf("before-contact"); pushExtraIf("before-contact");
   if (sliderBlock && !bodySections.includes(sliderBlock)) bodySections.splice(Math.max(1, bodySections.length-1),0,sliderBlock);
+  const customSections = landingCustomSectionsMarkup(data);
+  if (customSections) bodySections.push(customSections);
   if (contactSection) bodySections.push(contactSection);
   const slugClass = `layout-${String(template?.layout || 'standard').replace(/[^a-z0-9-]/gi,'-').toLowerCase()}`;
-  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="${landingRootStyle(data)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
+  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} density-${escapeHtml(data.sectionDensity || "balanced")} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="${landingRootStyle(data)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
 }
 
 function landingSlugify(value = "") {
@@ -2653,9 +2722,10 @@ function landingExportHtml(data, options = {}) {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="color-scheme" content="light only"/>
-<meta name="supported-color-schemes" content="light"/>
-<meta name="theme-color" content="${escapeHtml(data.background || '#ffffff')}"/>
+<meta name="color-scheme" content="light dark"/>
+<meta name="supported-color-schemes" content="light dark"/>
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="${escapeHtml(data.background || '#ffffff')}"/>
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="${escapeHtml(data.background || '#ffffff')}"/>
 <meta name="description" content="${escapeHtml(String(data.subheadline || data.description || '').slice(0,180))}"/>
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="${escapeHtml(data.name || data.headline || 'Landing Page')}"/>
@@ -2665,12 +2735,23 @@ ${/^https?:\/\//i.test(String(data.heroImageUrl || data.imageUrl || '')) ? `<met
 <meta name="twitter:card" content="summary_large_image"/>
 <title>${escapeHtml(data.name || "Landing Page")}</title>
 <style>
-*{box-sizing:border-box}html{color-scheme:only light!important;background:${data.background}!important}body{margin:0;background:${data.background}!important;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${data.textColor}!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{box-sizing:border-box}html{color-scheme:light dark!important;background:${data.background}!important}body{margin:0;background:${data.background}!important;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${data.textColor}!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .lp-live-page{--lp-accent:${data.accent};--lp-bg:${data.background};--lp-surface:${data.surface};--lp-text:${data.textColor};max-width:1180px;margin:auto;background:var(--lp-bg);color:var(--lp-text);min-height:100vh}
 .lp-live-nav,.lp-live-footer{display:flex;justify-content:space-between;padding:22px 5%;border-bottom:1px solid #ffffff14}
 .lp-live-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,var(--lp-media-width));gap:36px;padding:70px 5%;align-items:center}.media-left .lp-live-copy{order:2}.media-left .lp-live-media{order:1}.media-top .lp-live-hero,.media-bottom .lp-live-hero{grid-template-columns:1fr}.media-top .lp-live-media{order:-1}.media-bottom .lp-live-media{order:2}.lp-live-copy h1{font-size:56px;line-height:1.02;margin:18px 0}.lp-live-sub{font-size:18px;line-height:1.6;color:#b8bdc9}.lp-live-badge{padding:7px 10px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 16%,transparent);color:var(--lp-accent);font-weight:700;font-size:12px}.lp-live-price{display:flex;gap:12px;align-items:baseline;margin:24px 0}.lp-live-price strong{font-size:34px}.lp-live-price del{opacity:.45}.lp-live-actions{display:flex;gap:10px;flex-wrap:wrap}.lp-live-actions a{padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:700}.lp-live-primary{background:var(--lp-accent);color:#080808}.lp-live-secondary{border:1px solid #ffffff25;color:var(--lp-text)}.lp-live-media{min-height:var(--lp-media-height);border-radius:24px;background:var(--lp-surface);overflow:hidden;position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:var(--lp-media-height);scrollbar-width:thin}.lp-live-media-slide{min-width:100%;height:100%;scroll-snap-align:start}.lp-live-media img,.lp-live-media video,.lp-live-media iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}.lp-live-media-hint,.lp-live-demo-note{position:absolute;left:14px;bottom:14px;padding:7px 10px;border-radius:999px;background:#0009;color:#fff;font-size:11px}.lp-live-section{padding:55px 5%;border-top:1px solid #ffffff10}.lp-live-section>small{color:var(--lp-accent);font-weight:800}.lp-live-section h2{font-size:34px;max-width:780px}.lp-live-extra-copy{max-width:850px;font-size:18px;line-height:1.75}.lp-live-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.lp-live-benefit-grid div{padding:20px;background:var(--lp-surface);border-radius:14px}.lp-live-benefit-grid span{display:block;color:var(--lp-accent);font-size:12px;margin-bottom:10px}.lp-live-proof blockquote{font-size:28px;max-width:780px;margin:20px 0}.lp-live-contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}.lp-live-contact form{display:grid;gap:10px}.lp-live-contact input,.lp-live-contact textarea{width:100%;padding:13px;border:1px solid #ffffff18;border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-live-contact button{padding:14px;border:0;border-radius:9px;background:var(--lp-accent);font-weight:800}
 .lp-live-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;font-size:12px;opacity:.65}.lp-live-footer{border-top:1px solid #ffffff14;border-bottom:0}.lp-live-media{position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}.lp-live-media-track::-webkit-scrollbar{display:none}.lp-live-media-slide{position:relative;flex:0 0 100%;min-width:100%;height:100%;scroll-snap-align:start}.lp-live-empty-slide{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:28px;text-align:center}.lp-empty-icon{font-size:28px}.lp-live-slider-arrow{position:absolute;z-index:8;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid #ffffff4a;background:#080c16aa;color:#fff;font-size:27px;cursor:pointer}.lp-live-slider-arrow.prev{left:14px}.lp-live-slider-arrow.next{right:14px}.lp-live-slider-dots{position:absolute;z-index:9;left:50%;bottom:17px;transform:translateX(-50%);display:flex;gap:7px;padding:7px 10px;border-radius:999px;background:#080c1690}.lp-live-slider-dots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#ffffff7a}.lp-live-slider-dots button.is-active{width:22px;background:var(--lp-accent)}.lp-live-media-hint{position:absolute;z-index:7;left:16px;top:16px;bottom:auto;background:#080c16a3;color:#fff;padding:8px 10px;border-radius:10px;display:flex;flex-direction:column}.lp-live-media-hint span{font-size:8px;font-weight:800}.lp-live-media-hint small{font-size:7px;opacity:.7}
 @media(max-width:760px){.lp-live-hero,.lp-live-contact{grid-template-columns:1fr}.media-left .lp-live-copy,.media-left .lp-live-media{order:initial}.lp-live-copy h1{font-size:38px}.lp-live-benefit-grid{grid-template-columns:1fr}.lp-live-media-track{height:min(var(--lp-media-height),360px)}}
+/* YOUYOU V7.8 — Samsung Internet / forced-dark compatibility.
+   We intentionally provide a dark-preference branch that preserves the creator's chosen palette.
+   This signals Samsung Internet to prefer authored colors instead of heuristic Force Dark transforms. */
+@media (prefers-color-scheme: dark){
+  html{color-scheme:light dark!important;background:${data.background}!important}
+  body{background:${data.background}!important;color:${data.textColor}!important}
+  .lp-live-page,.beauty-wow{background:var(--lp-bg)!important;color:var(--lp-text)!important}
+  .lp-live-section,.lp-live-nav,.lp-live-footer,.beauty-wow section,.beauty-wow nav,.beauty-wow footer{color:inherit}
+  .lp-live-contact input,.lp-live-contact textarea,.lp-live-contact select,.lp-live-contact button{color-scheme:light!important}
+}
+
 
 /* YOUYOU V6.4 — BEAUTY PRODUCT WOW TEMPLATE */
 .beauty-wow{font-family:var(--lp-font,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif);background:var(--lp-bg)!important;color:var(--lp-text)!important;max-width:1240px!important;box-shadow:none!important}
@@ -3289,6 +3370,15 @@ function renderLandingPagesSection() {
           <div><small>MY DRAFTS & PAGES</small><h2>Continue exactly where you stopped.</h2><p>Drafts auto-save as you work. Published pages keep the same live URL when you update them.</p></div>
           <button class="primary" type="button" data-lpb-open-builder="product-launch">Create new →</button>
         </div>
+        <div class="lpb-saved-toolbar dashboard-card">
+          <label class="lpb-pages-search"><span>Search pages</span><input id="lpb-pages-search" type="search" placeholder="Search by page name or headline…" autocomplete="off" /></label>
+          <div class="lpb-pages-filters" role="group" aria-label="Filter landing pages">
+            <button class="is-active" type="button" data-lpb-pages-filter="all">All</button>
+            <button type="button" data-lpb-pages-filter="draft">Drafts</button>
+            <button type="button" data-lpb-pages-filter="published">Published</button>
+            <button type="button" data-lpb-pages-filter="changes">Changes not live</button>
+          </div>
+        </div>
         <div id="lpb-saved-grid" class="lpb-saved-grid"></div>
       </div>
     </section>
@@ -3410,7 +3500,11 @@ function renderLandingPageWorkspace() {
               <label>Form button text<input id="lpb-form-button-text" placeholder="Send request" /></label>
             </div>
             <p class="lpb-media-help">CTA action controls the main button. The lead form is independent, so choosing WhatsApp, Call or Email does not remove your form.</p>
-            <label>WhatsApp number<input id="lpb-whatsapp" placeholder="+212..." /></label>
+            <div class="lpb-two lpb-whatsapp-fields">
+              <label>WhatsApp country code<input id="lpb-whatsapp-country-code" inputmode="numeric" placeholder="212" /></label>
+              <label>WhatsApp number<input id="lpb-whatsapp" inputmode="tel" placeholder="06... / +212... / 00212..." /></label>
+            </div>
+            <p class="lpb-media-help">YOUYOU normalizes WhatsApp numbers automatically for wa.me. You can type +212…, 00212…, 212… or a local 06… number when the country code is set.</p>
             <div class="lpb-two">
               <label>Phone<input id="lpb-phone" placeholder="+1..." /></label>
               <label>Email<input id="lpb-email" type="email" placeholder="sales@company.com" /></label>
@@ -3529,6 +3623,16 @@ function renderLandingPageWorkspace() {
             </label>
           </div>
 
+          <div class="lpb-editor-section lpb-custom-sections-editor">
+            <small>CUSTOM SECTIONS · OPTIONAL</small>
+            <div class="lpb-media-toggle-row">
+              <div><strong>Add your own content blocks</strong><span>Create, reorder or remove extra sections without touching code.</span></div>
+              <button id="lpb-add-custom-section" class="lpb-mini-action" type="button">+ Add section</button>
+            </div>
+            <div id="lpb-custom-sections-manager" class="lpb-custom-sections-manager"></div>
+            <p class="lpb-media-help">Up to 8 custom sections. Use the emoji picker below in any title or text field.</p>
+          </div>
+
           <div class="lpb-editor-section">
             <small>COLORS</small>
             <div class="lpb-color-grid">
@@ -3560,6 +3664,22 @@ function renderLandingPageWorkspace() {
             <label>Corner style
               <select id="lpb-corner-radius"><option value="8">Sharp</option><option value="14">Soft</option><option value="18">Premium</option><option value="26">Rounded</option><option value="34">Extra rounded</option></select>
             </label>
+            <div class="lpb-two">
+              <label>Hero layout
+                <select id="lpb-media-position"><option value="right">Visual right</option><option value="left">Visual left</option><option value="top">Visual above</option><option value="bottom">Visual below</option></select>
+              </label>
+              <label>Page spacing
+                <select id="lpb-section-density"><option value="compact">Compact</option><option value="balanced">Balanced</option><option value="airy">Airy</option></select>
+              </label>
+            </div>
+            <div class="lpb-two">
+              <label>Hero visual width
+                <select id="lpb-media-width"><option value="38">38%</option><option value="46">46%</option><option value="54">54%</option><option value="60">60%</option></select>
+              </label>
+              <label>Hero visual height
+                <select id="lpb-media-height"><option value="300">300 px</option><option value="380">380 px</option><option value="460">460 px</option><option value="540">540 px</option></select>
+              </label>
+            </div>
             <div class="lpb-section-visibility">
               <label>Benefits<select id="lpb-show-benefits"><option value="on">Show</option><option value="off">Hide</option></select></label>
               <label>FAQ<select id="lpb-show-faq"><option value="on">Show</option><option value="off">Hide</option></select></label>
@@ -3734,12 +3854,40 @@ function initLandingPageWorkspace() {
   // Backward-compatible defaults for landing pages saved before V5.07.
   current = { ...defaultLandingPageData(current.templateId || request.templateId), ...current };
 
+  const normalizeCustomSections = () => {
+    if (!Array.isArray(current.customSections)) current.customSections = [];
+    current.customSections = current.customSections.slice(0, 8).map((item) => ({
+      id:String(item?.id || `custom_${Date.now()}_${Math.random().toString(36).slice(2,7)}`),
+      eyebrow:String(item?.eyebrow || "MORE"),
+      title:String(item?.title || ""),
+      text:String(item?.text || ""),
+    }));
+    return current.customSections;
+  };
+
+  const renderCustomSectionsManager = () => {
+    const manager = document.querySelector("#lpb-custom-sections-manager");
+    if (!manager) return;
+    const items = normalizeCustomSections();
+    if (!items.length) {
+      manager.innerHTML = `<div class="lpb-custom-empty"><span>＋</span><p>No custom sections yet. Add one when the template needs more content.</p></div>`;
+      return;
+    }
+    manager.innerHTML = items.map((item,index) => `
+      <article class="lpb-custom-card" data-custom-index="${index}">
+        <div class="lpb-custom-card-head"><strong>Section ${index + 1}</strong><div><button type="button" data-custom-move="-1" aria-label="Move section up">↑</button><button type="button" data-custom-move="1" aria-label="Move section down">↓</button><button type="button" data-custom-remove aria-label="Remove section">×</button></div></div>
+        <label>Small label<input data-custom-field="eyebrow" value="${escapeHtml(item.eyebrow)}" placeholder="MORE" /></label>
+        <label>Title<input data-custom-field="title" value="${escapeHtml(item.title)}" placeholder="Your section title" /></label>
+        <label>Text<textarea data-custom-field="text" rows="4" placeholder="Add the content you want visitors to read…">${escapeHtml(item.text)}</textarea></label>
+      </article>`).join("");
+  };
+
   const fieldMap = {
     name:"lpb-name", pageType:"lpb-page-type", direction:"lpb-direction",
     badge:"lpb-badge", headline:"lpb-headline", subheadline:"lpb-subheadline",
     description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
-    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp",
+    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
     phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
     mediaGallery:"lpb-media-gallery", sliderEnabled:"lpb-slider-enabled", sliderTitle:"lpb-slider-title",
@@ -3751,7 +3899,7 @@ function initLandingPageWorkspace() {
     textColor:"lpb-text-color", testimonial:"lpb-testimonial",
     faqQuestion:"lpb-faq-q", faqAnswer:"lpb-faq-a",
     widgetEnabled:"lpb-widget-enabled", widgetGreeting:"lpb-widget-greeting", widgetPosition:"lpb-widget-position", widgetName:"lpb-widget-name",
-    fontFamily:"lpb-font-family", contentAlign:"lpb-content-align", cornerRadius:"lpb-corner-radius",
+    fontFamily:"lpb-font-family", contentAlign:"lpb-content-align", cornerRadius:"lpb-corner-radius", sectionDensity:"lpb-section-density",
     showBenefits:"lpb-show-benefits", showFaq:"lpb-show-faq", showTestimonial:"lpb-show-testimonial", showContact:"lpb-show-contact",
   };
 
@@ -3760,6 +3908,7 @@ function initLandingPageWorkspace() {
       const el = document.getElementById(id);
       if (el) el.value = current[key] ?? "";
     });
+    renderCustomSectionsManager();
   };
 
   const readFields = () => {
@@ -4137,6 +4286,55 @@ function initLandingPageWorkspace() {
     }
   });
 
+  document.querySelector("#lpb-add-custom-section")?.addEventListener("click", () => {
+    const items = normalizeCustomSections();
+    if (items.length >= 8) { landingStudioStatus("Maximum 8 custom sections per landing page"); return; }
+    items.push({ id:`custom_${Date.now()}`, eyebrow:"MORE", title:"", text:"" });
+    current.customSections = items;
+    renderCustomSectionsManager();
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
+  document.querySelector("#lpb-custom-sections-manager")?.addEventListener("input", (event) => {
+    const field = event.target.closest?.("[data-custom-field]");
+    if (!field) return;
+    const card = field.closest("[data-custom-index]");
+    const index = Number(card?.dataset.customIndex);
+    const items = normalizeCustomSections();
+    if (!Number.isInteger(index) || !items[index]) return;
+    items[index][field.dataset.customField] = field.value;
+    current.customSections = items;
+    lastFocusedTextField = field;
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
+  document.querySelector("#lpb-custom-sections-manager")?.addEventListener("focusin", (event) => {
+    if (event.target.matches?.("input,textarea")) lastFocusedTextField = event.target;
+  });
+
+  document.querySelector("#lpb-custom-sections-manager")?.addEventListener("click", (event) => {
+    const card = event.target.closest?.("[data-custom-index]");
+    if (!card) return;
+    const index = Number(card.dataset.customIndex);
+    const items = normalizeCustomSections();
+    if (!Number.isInteger(index) || !items[index]) return;
+    if (event.target.closest("[data-custom-remove]")) {
+      items.splice(index,1);
+    } else {
+      const move = event.target.closest("[data-custom-move]");
+      if (!move) return;
+      const next = index + Number(move.dataset.customMove || 0);
+      if (next < 0 || next >= items.length) return;
+      [items[index],items[next]] = [items[next],items[index]];
+    }
+    current.customSections = items;
+    renderCustomSectionsManager();
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
   document.querySelectorAll("[data-lpb-emoji]").forEach((button) => {
     button.addEventListener("click", () => {
       const target = lastFocusedTextField || document.querySelector("#lpb-headline");
@@ -4369,13 +4567,15 @@ function initLandingPages() {
   if (!root) return;
 
   let current = defaultLandingPageData("product-launch");
+  let savedQuery = "";
+  let savedFilter = "all";
 
   const fieldMap = {
     name:"lpb-name", pageType:"lpb-page-type", direction:"lpb-direction",
     badge:"lpb-badge", headline:"lpb-headline", subheadline:"lpb-subheadline",
     description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
-    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", whatsapp:"lpb-whatsapp",
+    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
     phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     accent:"lpb-accent", background:"lpb-background", surface:"lpb-surface",
     textColor:"lpb-text-color", testimonial:"lpb-testimonial",
@@ -4449,13 +4649,21 @@ function initLandingPages() {
   const renderSaved = () => {
     const container = document.querySelector("#lpb-saved-grid");
     if (!container) return;
-    const drafts = loadLandingDrafts();
+    const allDrafts = loadLandingDrafts();
+    const query = savedQuery.trim().toLowerCase();
+    const drafts = allDrafts.filter((item) => {
+      const published = Boolean(item.publishedUrl || item.status === "Published");
+      const hasChanges = published && Boolean(item.hasUnpublishedChanges);
+      const statusOk = savedFilter === "all" || (savedFilter === "draft" && !published) || (savedFilter === "published" && published && !hasChanges) || (savedFilter === "changes" && hasChanges);
+      const haystack = `${item.name || ""} ${item.headline || ""} ${item.pageType || ""}`.toLowerCase();
+      return statusOk && (!query || haystack.includes(query));
+    });
 
     if (!drafts.length) {
       container.innerHTML = `
         <div class="lpb-empty dashboard-card">
-          <span>▣</span><strong>No saved landing pages yet.</strong>
-          <p>Choose one of the 30 templates, customize it, then save the draft here.</p>
+          <span>▣</span><strong>${allDrafts.length ? "No pages match this filter." : "No saved landing pages yet."}</strong>
+          <p>${allDrafts.length ? "Try another status or search term." : "Choose one of the 30 templates, customize it, then save the draft here."}</p>
           <button class="primary" type="button" data-lpb-open-builder="product-launch">Create first page →</button>
         </div>`;
       container.querySelector("[data-lpb-open-builder]")?.addEventListener("click", (event) => openTemplate(event.currentTarget.dataset.lpbOpenBuilder));
@@ -4475,7 +4683,7 @@ function initLandingPages() {
         </div>
         <div class="lpb-saved-actions">
           <button type="button" class="lpb-continue-editing" data-lpb-edit="${escapeHtml(item.id)}">Continue editing</button>
-          ${item.publishedUrl ? `<a class="lpb-open-live" href="${escapeHtml(item.publishedUrl)}" target="_blank" rel="noopener">Open live ↗</a>` : ""}
+          ${item.publishedUrl ? `<a class="lpb-open-live" href="${escapeHtml(item.publishedUrl)}" target="_blank" rel="noopener">Open live ↗</a><button type="button" data-lpb-copy-live="${escapeHtml(item.id)}">Copy link</button>` : ""}
           <button type="button" data-lpb-duplicate="${escapeHtml(item.id)}">Duplicate</button>
           <button type="button" data-lpb-delete="${escapeHtml(item.id)}">Delete</button>
         </div>
@@ -4487,6 +4695,21 @@ function initLandingPages() {
         const item = loadLandingDrafts().find((entry) => entry.id === button.dataset.lpbEdit);
         if (!item) return;
         openLandingBuilder({ pageId: item.id });
+      });
+    });
+
+    container.querySelectorAll("[data-lpb-copy-live]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const item = loadLandingDrafts().find((entry) => entry.id === button.dataset.lpbCopyLive);
+        if (!item?.publishedUrl) return;
+        try {
+          await navigator.clipboard.writeText(item.publishedUrl);
+          const previous = button.textContent;
+          button.textContent = "Copied ✓";
+          setTimeout(() => { button.textContent = previous; }, 1400);
+        } catch (_) {
+          window.prompt("Copy your live page link:", item.publishedUrl);
+        }
       });
     });
 
@@ -4591,6 +4814,19 @@ function initLandingPages() {
       input.select();
       document.execCommand?.("copy");
     }
+  });
+
+  document.querySelector("#lpb-pages-search")?.addEventListener("input", (event) => {
+    savedQuery = String(event.currentTarget.value || "");
+    renderSaved();
+  });
+
+  root.querySelectorAll("[data-lpb-pages-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      savedFilter = button.dataset.lpbPagesFilter || "all";
+      root.querySelectorAll("[data-lpb-pages-filter]").forEach((item) => item.classList.toggle("is-active", item === button));
+      renderSaved();
+    });
   });
 
   document.querySelector("#lpb-template-category")?.addEventListener("change", (event) => {

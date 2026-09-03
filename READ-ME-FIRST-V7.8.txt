@@ -1,0 +1,20 @@
+YOUYOU V7.8 — Samsung Internet Theme Compatibility
+
+What changed
+- Published landing pages now declare authored light + dark color-scheme support.
+- A prefers-color-scheme: dark branch deliberately keeps the creator-selected YOUYOU palette.
+- Public endpoint extracts the published page background/text colors and locks the same palette for Samsung Internet.
+- Browser theme-color is set to the landing background in both light and dark preferences.
+- Renderer version is 7.8.0, so previously published pages should use Update live design once.
+
+No new Supabase SQL is required.
+
+Test
+1. Upload this project to GitHub and let Vercel deploy.
+2. Open a landing page in the workspace and choose a clearly light Rose theme.
+3. Click Update live design once for an already-published page.
+4. Open the same /p/... URL in Chrome and Samsung Internet with device dark mode enabled.
+5. Both should preserve the authored Rose palette under Samsung's standards-aware dark-mode behavior.
+
+Note
+If a user explicitly configures Samsung Internet to a Force Dark Only experimental behavior, the browser can still override website colors at browser level. A website cannot guarantee pixel-identical colors against a user-forced browser transformation.

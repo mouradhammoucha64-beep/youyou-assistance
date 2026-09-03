@@ -1,0 +1,53 @@
+YOUYOU V7.7 — WORKFLOW + UNIVERSAL BUILDER
+
+Base: V7.6 COMPLETE PROJECT.
+No new SQL is required for this version.
+
+WHAT CHANGED
+1) WhatsApp number normalization
+   - +212 668... -> 212668...
+   - 00212 668... -> 212668...
+   - 212668... -> unchanged
+   - local 06... + country code 212 -> 2126...
+   - The same normalized URL is used by the main CTA, Beauty WhatsApp link and post-form Continue on WhatsApp.
+
+2) My Drafts & Pages PRO
+   - Search pages by name/headline/type.
+   - Filters: All / Drafts / Published / Changes not live.
+   - Continue editing, Open live, Copy link, Duplicate and Delete.
+   - Existing cloud/local autosave and status workflow are preserved.
+
+3) Shared builder freedom for templates
+   - Hero layout: right / left / top / bottom.
+   - Hero visual width and height.
+   - Page spacing: Compact / Balanced / Airy.
+   - Existing font, alignment, corners, section visibility and emoji tools remain.
+   - These controls use the shared landing renderer instead of being Beauty-only.
+
+4) Custom Sections
+   - Add up to 8 extra content sections.
+   - Each section has small label, title and text.
+   - Move up/down or delete.
+   - Autosaves with the draft and publishes/exports with the page.
+   - Emoji picker works in custom section text fields too.
+
+TEST FIRST
+A. WhatsApp:
+   CTA action = WhatsApp
+   country code = 212
+   number = 0668907312
+   Publish/update live page, then open Continue on WhatsApp.
+   Expected wa.me number: 212668907312.
+
+B. Drafts:
+   Create/edit two pages, refresh, go to My Drafts & Pages, test search/status filters and Continue editing.
+
+C. Universal controls:
+   Test hero layout and Page spacing on Beauty and one non-Beauty template.
+
+D. Custom sections:
+   Add 2 sections, reorder, refresh, publish and confirm they remain on the live page.
+
+NOT INCLUDED
+- Custom domain connection: requires the domain after purchase.
+- Real WhatsApp Business API notifications: requires WhatsApp Business/API setup later.

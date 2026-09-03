@@ -10,6 +10,40 @@ function escapeHtml(value = "") {
     .replace(/'/g, "&#039;");
 }
 
+
+function hardenPublishedHtml(html = "") {
+  let out = String(html || "");
+  if (!out) return out;
+
+  // Samsung Internet may heuristically force a dark palette unless the page
+  // explicitly advertises authored light/dark handling. We support the dark
+  // media query but deliberately preserve the creator's chosen YOUYOU colors.
+  const bgMatch = out.match(/--lp-bg\s*:\s*([^;\"]+)/i);
+  const textMatch = out.match(/--lp-text\s*:\s*([^;\"]+)/i);
+  const bg = String(bgMatch?.[1] || "#ffffff").trim();
+  const text = String(textMatch?.[1] || "#172033").trim();
+
+  const colorMeta = '<meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark">';
+  out = out.replace(/<meta\s+name=["']color-scheme["'][^>]*>\s*/ig, '');
+  out = out.replace(/<meta\s+name=["']supported-color-schemes["'][^>]*>\s*/ig, '');
+  out = out.replace(/<head([^>]*)>/i, `<head$1>${colorMeta}`);
+
+  // Keep browser chrome/theme color aligned with the landing palette in both schemes.
+  out = out.replace(/<meta\s+name=["']theme-color["'][^>]*>\s*/ig, '');
+  out = out.replace(/<\/head>/i, `<meta name="theme-color" media="(prefers-color-scheme: light)" content="${escapeHtml(bg)}"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="${escapeHtml(bg)}"></head>`);
+
+  out = out.replace(/<style\s+id=["']youyou-runtime-color-lock["'][\s\S]*?<\/style>/ig, '');
+  const lock = `<style id="youyou-runtime-color-lock">
+html{color-scheme:light dark!important;background:${escapeHtml(bg)}!important}
+body{background:${escapeHtml(bg)}!important;color:${escapeHtml(text)}!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.lp-live-page,.beauty-wow{background:var(--lp-bg)!important;color:var(--lp-text)!important}
+@media (prefers-color-scheme: dark){html{background:${escapeHtml(bg)}!important}body{background:${escapeHtml(bg)}!important;color:${escapeHtml(text)}!important}.lp-live-page,.beauty-wow{background:var(--lp-bg)!important;color:var(--lp-text)!important}.lp-live-contact input,.lp-live-contact textarea,.lp-live-contact select,.lp-live-contact button{color-scheme:light!important}}
+@media(max-width:760px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:82%!important;width:82%!important;min-width:82%!important}}
+</style>`;
+  out = out.replace(/<\/head>/i, `${lock}</head>`);
+  return out;
+}
+
 function notFoundPage(slug = "") {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Page not found · YOUYOU</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f7f7fb;color:#1f2937;font-family:Inter,system-ui,sans-serif}.card{max-width:520px;margin:24px;padding:36px;border:1px solid #e5e7eb;border-radius:22px;background:white;box-shadow:0 20px 60px #11182712;text-align:center}.mark{width:54px;height:54px;margin:auto;border-radius:16px;display:grid;place-items:center;background:#7859ff;color:#fff;font-weight:900}.card h1{font-size:30px;margin:20px 0 8px}.card p{color:#667085;line-height:1.6}.card a{display:inline-flex;margin-top:12px;padding:12px 16px;border-radius:11px;background:#111827;color:#fff;text-decoration:none;font-weight:800}</style></head><body><main class="card"><div class="mark">Y</div><h1>Page not found</h1><p>The landing page <strong>${escapeHtml(slug)}</strong> is not published or no longer exists.</p><a href="/">Go to YOUYOU</a></main></body></html>`;
 }
@@ -49,7 +83,7 @@ export default async function handler(req, res) {
     }
 
     const rows = await response.json();
-    const html = String(rows?.[0]?.html_snapshot || "");
+    const html = hardenPublishedHtml(String(rows?.[0]?.html_snapshot || ""));
     if (!html) {
       res.setHeader("Cache-Control", "no-store");
       return res.status(404).send(notFoundPage(slug));
