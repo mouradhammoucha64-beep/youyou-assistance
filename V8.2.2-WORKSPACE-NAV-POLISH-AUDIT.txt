@@ -1,0 +1,24 @@
+YOUYOU V8.2.2 — WORKSPACE NAVIGATION POLISH
+
+{
+  "version": "8.2.2",
+  "base": "V8.2.1 WORKSPACE VIEWPORT HOTFIX",
+  "changes": {
+    "editor_scrollbar_moved_visually_into_editor_edge": true,
+    "dark_separator_removed": true,
+    "landing_preview_uses_its_own_iframe_scrollbar": true,
+    "nested_preview_stage_scroll_removed": true,
+    "live_url_bar_compacted": true,
+    "bottom_export_removed": true,
+    "bottom_actions_reduced_to_save_and_publish": true,
+    "global_green_widget_hidden_inside_landing_workspace": true,
+    "update_status_shortened": true
+  },
+  "untouched": [
+    "Product/quantity/color/bundle logic",
+    "Lead form submission",
+    "Supabase draft/publish flow",
+    "Media upload/storage",
+    "Landing page AI widget logic"
+  ]
+}

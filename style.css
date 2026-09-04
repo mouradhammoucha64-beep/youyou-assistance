@@ -12295,3 +12295,166 @@ tr:hover td{background:rgba(255,255,255,.018)!important}
     overflow:visible!important;
   }
 }
+
+
+/* =========================================================
+   YOUYOU V8.2.2 — WORKSPACE NAVIGATION POLISH
+   One editor scroll + one landing-page scroll, no dark gutter.
+   Compact live bar, lighter footer and no duplicated Export.
+   ========================================================= */
+
+/* Eliminate the black separator/gutter between editor and canvas. */
+.lpw-main{
+  column-gap:0!important;
+  background:#eef2f7!important;
+}
+
+.lpw-editor{
+  border-right:1px solid #dfe5ee!important;
+  box-shadow:1px 0 0 #f5f7fa!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:#aeb8c7 #f3f6fa!important;
+  scrollbar-gutter:stable!important;
+}
+
+.lpw-editor::-webkit-scrollbar{
+  width:11px!important;
+}
+.lpw-editor::-webkit-scrollbar-track{
+  background:#f3f6fa!important;
+  border-left:1px solid #edf1f5!important;
+}
+.lpw-editor::-webkit-scrollbar-thumb{
+  background:#aeb8c7!important;
+  border:3px solid #f3f6fa!important;
+  background-clip:padding-box!important;
+  border-radius:999px!important;
+}
+.lpw-editor::-webkit-scrollbar-thumb:hover{
+  background:#8f9aaa!important;
+  border-color:#f3f6fa!important;
+}
+
+/* Only the landing document scrolls on the right.
+   The outer preview stage is now a frame, not a second scrollbar. */
+.lpw-preview-stage{
+  display:flex!important;
+  align-items:stretch!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+  padding:14px 18px!important;
+  background:
+    linear-gradient(#e7ecf3 1px,transparent 1px),
+    linear-gradient(90deg,#e7ecf3 1px,transparent 1px),
+    #f3f6fa!important;
+  background-size:24px 24px!important;
+}
+
+.lpw-device-shell{
+  flex:1 1 auto!important;
+  width:min(1180px,100%)!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:100%!important;
+  margin:0 auto!important;
+  overflow:hidden!important;
+  border:1px solid #dce3ec!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  box-shadow:0 18px 46px rgba(31,41,55,.11)!important;
+}
+
+.lpw-preview-iframe,
+.lpw-preview-stage #lpb-live-preview.lpw-preview-iframe{
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  border:0!important;
+  background:#fff!important;
+}
+
+/* Compact published URL bar so more canvas stays visible. */
+.lpw-publish-result{
+  gap:12px!important;
+  min-height:52px!important;
+  padding:7px 16px!important;
+}
+.lpw-publish-result>div:first-child{
+  min-width:92px!important;
+}
+.lpw-publish-result>div:first-child strong{
+  display:none!important;
+}
+.lpw-publish-result small{
+  font-size:7px!important;
+}
+.lpw-publish-link-row{
+  grid-template-columns:minmax(220px,1fr) auto auto!important;
+  gap:7px!important;
+  max-width:none!important;
+}
+.lpw-publish-link-row input,
+.lpw-publish-link-row button,
+.lpw-publish-link-row a{
+  height:34px!important;
+  min-height:34px!important;
+  border-radius:9px!important;
+}
+.lpw-publish-link-row input{
+  font-size:10px!important;
+}
+.lpw-publish-link-row button,
+.lpw-publish-link-row a{
+  font-size:9px!important;
+}
+
+/* Two actions only at the bottom; Export stays in the top toolbar. */
+.lpw-editor-footer{
+  grid-template-columns:1fr 1fr!important;
+  gap:8px!important;
+  padding:10px 16px!important;
+  background:rgba(255,255,255,.97)!important;
+  box-shadow:0 -8px 24px rgba(31,41,55,.035)!important;
+}
+.lpw-editor-footer button{
+  min-height:38px!important;
+}
+
+/* Do not let the globally installed website widget cover the landing preview
+   while the dedicated landing workspace is open. */
+body:has(.lpw-shell) #youyou-public-widget-launcher,
+body:has(.lpw-shell) #youyou-public-widget-panel{
+  display:none!important;
+}
+
+/* Keep the page-aware landing AI button comfortably inside its own page. */
+.lpw-preview-iframe{
+  isolation:isolate!important;
+}
+
+@media(max-width:900px){
+  .lpw-publish-result{
+    padding:8px 12px!important;
+  }
+  .lpw-publish-result>div:first-child{
+    display:none!important;
+  }
+  .lpw-publish-link-row{
+    width:100%!important;
+    grid-template-columns:minmax(0,1fr) auto auto!important;
+  }
+}
+
+@media(max-width:760px){
+  .lpw-preview-stage{
+    display:block!important;
+    overflow:visible!important;
+    padding:12px!important;
+  }
+  .lpw-device-shell{
+    height:720px!important;
+  }
+  .lpw-editor-footer{
+    position:static!important;
+  }
+}
