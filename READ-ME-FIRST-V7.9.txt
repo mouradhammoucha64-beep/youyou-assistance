@@ -1,0 +1,19 @@
+YOUYOU V7.9 — SAMSUNG INTERNET LIGHT-LOCK
+
+WHAT THIS FIXES
+- Published landing pages no longer advertise light+dark support.
+- New/exported pages use color-scheme: only light.
+- The Vercel /p/:slug endpoint rewrites OLD snapshots at request time too, so the fix is not limited to newly published pages.
+- Brand background/surface colors get solid gradient layers as a defensive fallback against Samsung Force Dark heuristics.
+- The duplicate legacy Rose palette was aligned to the current light Rose palette.
+- No slider, form, drafts, media, WhatsApp or publishing logic was intentionally changed.
+
+DEPLOY
+1. Upload this complete project to the SAME GitHub repo.
+2. Commit and let Vercel deploy.
+3. No SQL is required.
+4. Open the SAME /p/... URL in Samsung Internet and refresh/close+reopen.
+5. Renderer diagnostic header/meta is 7.9.0.
+
+NOTE
+Samsung Internet has a user-level 'Force Dark mode for web content' option. V7.9 uses the strongest standards-based opt-out plus a palette-lock fallback. A browser mode that deliberately ignores site color-scheme declarations is ultimately user-controlled, but this build removes the V7.8 mistake that explicitly advertised dark support.

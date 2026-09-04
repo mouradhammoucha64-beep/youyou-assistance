@@ -1,0 +1,21 @@
+YOUYOU V7.9 — DEEP AUDIT / SAMSUNG INTERNET COLOR
+
+ROOT CAUSE FOUND IN THE UPLOADED PROJECT
+1. The real Vercel route /p/:slug points to /api/published-page.
+2. api/published-page.js was still injecting: color-scheme = light dark.
+3. main.js landingExportHtml() was also exporting light dark and contained a prefers-color-scheme: dark branch.
+4. A root-level published-page.js already had a different light-only experiment, but Vercel did NOT route to that root file. This mismatch explains why earlier fixes appeared present in the ZIP but did not change the live Samsung result.
+5. The legacy builder still contained an older dark Rose preset (#130d12/#1d1219). The current workspace Rose preset is light (#fff5f8/#ffffff).
+
+V7.9 CORRECTION
+- Vercel API handler and root duplicate are now identical.
+- Generated landing HTML: color-scheme 'only light'; supported-color-schemes 'light'.
+- Removed the authored dark media branch from generated landing HTML.
+- Vercel handler strips old scheme/theme meta tags and injects the authoritative V7.9 light-only declarations last.
+- Vercel handler also hardens old html_snapshot pages at request time, so existing live URLs get the runtime fix after deploy.
+- Added background-image solid gradient palette locks for page/surface/accent blocks. Samsung's forced-dark heuristics generally avoid recoloring image layers; this is a defensive fallback on top of color-scheme.
+- Legacy Rose preset aligned with current light Rose.
+- Renderer version bumped to 7.9.0.
+
+NOT TOUCHED
+Slider behavior, lead form success flow, drafts/autosave, media storage, Publish URL, custom sections and WhatsApp workflow were not intentionally changed.

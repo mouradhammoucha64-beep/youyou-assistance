@@ -566,3 +566,6 @@ The Landing Studio preview now runs the exact exported/published document in an 
 ## V7.7 — Workflow + Universal Builder
 
 V7.7 adds shared WhatsApp number normalization, My Drafts search/status filters, live-link copying, universal hero layout/page-spacing controls, and reusable custom content sections that can be added, reordered and removed from the Landing Workspace. No new SQL migration is required beyond the V7.1/V7.2/V7.5 setup already included in the project.
+
+## V7.9 Samsung Internet Light-Lock
+Fixes the published landing-page color mismatch seen in Samsung Internet. The real Vercel `/p/:slug` API route now enforces an authored light-only palette, strips older `light dark` declarations from stored snapshots, and injects the selected landing background/surface/accent colors at request time. The landing renderer is version `7.9.0`. No new SQL migration is required.
