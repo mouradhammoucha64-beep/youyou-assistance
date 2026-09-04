@@ -1,0 +1,20 @@
+YOUYOU V7.10 — SAMSUNG INTERNET ROOT-CAUSE AUDIT
+
+SOURCE AUDITED: user's youyou-assistance-main (16).zip
+
+CONFIRMED FINDINGS
+1. main.js in the supplied project declared YOUYOU_LANDING_RENDERER_VERSION = 7.8.0.
+2. main.js generated <meta name="color-scheme" content="light dark"> and supported-color-schemes="light dark".
+3. api/published-page.js — the file actually used by Vercel through vercel.json /p/:slug rewrite — still injected light dark and a prefers-color-scheme: dark block.
+4. root published-page.js had a different light-only experiment, but Vercel did not route /p/:slug to that root file.
+5. Therefore previous edits were split across two publisher implementations and the live deployment source remained on the V7.8 behavior.
+
+FIX STRATEGY
+- One authoritative light-only policy in generated HTML and both publisher implementations.
+- Vercel API hardened at response time so even old Supabase html_snapshot values receive the current palette lock.
+- Same palette repeated under prefers-color-scheme: dark while color-scheme remains only light.
+- Solid CSS gradient background layers used on the major page/surface elements to reduce auto-dark heuristic transformations.
+- Cache-control strengthened and renderer markers added so deployment state can be verified instead of guessed.
+
+UNCHANGED
+Slider, forms, drafts, media storage, publish URLs, WhatsApp workflow, custom sections and other landing features are intentionally untouched.

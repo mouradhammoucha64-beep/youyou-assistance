@@ -34,9 +34,9 @@ function hardenPublishedHtml(html = "") {
   out = out.replace(/<meta\s+name=["']color-scheme["'][^>]*>\s*/ig, "");
   out = out.replace(/<meta\s+name=["']supported-color-schemes["'][^>]*>\s*/ig, "");
   out = out.replace(/<meta\s+name=["']theme-color["'][^>]*>\s*/ig, "");
-  out = out.replace(/<head([^>]*)>/i, `<head$1><meta name="color-scheme" content="only light"><meta name="supported-color-schemes" content="light"><meta name="theme-color" content="${escapeHtml(bg)}"><meta name="youyou-renderer" content="7.9.0">`);
+  out = out.replace(/<head([^>]*)>/i, `<head$1><meta name="color-scheme" content="only light"><meta name="supported-color-schemes" content="light"><meta name="theme-color" content="${escapeHtml(bg)}"><meta name="youyou-renderer" content="7.10.0">`);
 
-  // Remove a prior runtime lock, then append V7.9 last so it wins over legacy snapshots.
+  // Remove a prior runtime lock, then append V7.10 last so it wins over legacy snapshots.
   out = out.replace(/<style\s+id=["']youyou-runtime-color-lock["'][\s\S]*?<\/style>/ig, "");
   const lock = `<style id="youyou-runtime-color-lock">
 :root{color-scheme:only light!important;--yy-page-bg:${escapeHtml(bg)};--yy-page-surface:${escapeHtml(surface)};--yy-page-text:${escapeHtml(text)};--yy-page-accent:${escapeHtml(accent)}}
@@ -51,7 +51,7 @@ html,body{color-scheme:only light!important;background-color:${escapeHtml(bg)}!i
 .lp-live-contact input,.lp-live-contact textarea,.lp-live-contact select,.lp-live-contact button,.lp-ai-form input,.lp-ai-form button{color-scheme:only light!important}
 @media(max-width:760px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:82%!important;width:82%!important;min-width:82%!important}}
 </style>`;
-  out = out.replace(/<\/head>/i, `${lock}</head>`);
+  out = out.replace(/<\/head>/i, `${lock}<!-- YOUYOU_PUBLIC_RENDERER:7.10.0 --></head>`);
   return out;
 }
 
@@ -60,6 +60,7 @@ function notFoundPage(slug = "") {
 }
 
 export default async function handler(req, res) {
+  res.setHeader("X-YOUYOU-Renderer", "7.10.0");
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.setHeader("Allow", "GET, HEAD");
     return res.status(405).send("Method Not Allowed");
@@ -97,10 +98,11 @@ export default async function handler(req, res) {
     }
 
     res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.setHeader("Cache-Control", "no-store, max-age=0");
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-    res.setHeader("X-YOUYOU-Renderer", "7.9.0");
     if (req.method === "HEAD") return res.status(200).end();
     return res.status(200).send(html);
   } catch (error) {

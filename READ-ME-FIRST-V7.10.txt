@@ -1,0 +1,26 @@
+YOUYOU V7.10 — SOURCE-VERIFIED SAMSUNG LIGHT LOCK
+
+IMPORTANT ROOT CAUSE FOUND
+The full project ZIP supplied by the user was still renderer 7.8.0 and still contained color-scheme: light dark in main.js and api/published-page.js. So the previous V7.9 fix was not actually present in the deployed project source.
+
+What V7.10 changes
+- Applies the light-only renderer directly to the latest full project supplied by the user.
+- Removes V7.8 light/dark declarations from generated landing HTML.
+- Vercel /api/published-page now strips old scheme metadata and injects an authoritative only-light runtime lock.
+- Major landing backgrounds and surfaces use solid gradient layers to reduce Samsung auto-dark heuristic recoloring.
+- The dark OS preference branch intentionally renders the SAME authored light palette; it never opts into browser dark controls.
+- Renderer marker: 7.10.0.
+- Public response header: X-YOUYOU-Renderer: 7.10.0.
+- Public HTML marker: YOUYOU_PUBLIC_RENDERER:7.10.0.
+- Strong no-cache response headers added for public landing pages.
+
+NO NEW SQL.
+
+Deployment test
+1. Upload THIS project to the existing GitHub repo (replace the old root files).
+2. Wait for Vercel deployment to be Ready.
+3. Open the published landing URL in Samsung Internet with a one-time cache-bypass query, e.g. /p/your-slug?v=710.
+4. Close the old Samsung tab before testing.
+5. Compare the same URL in Chrome and Samsung Internet.
+
+Do not mix V7.10 files with V7.8/V7.9 manually. Upload the complete project root.
