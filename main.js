@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.0.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "8.2.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2222,14 +2222,18 @@ function defaultLandingPageData(templateId = "product-launch") {
     oldPrice: "",
     currency: "USD",
     priceMode: "show",
-    commerceMode: "auto",
-    quantityEnabled: template.category === "Product" ? "on" : "off",
+    commerceEnabled: "off",
+    commerceMode: template.category === "Product" ? "product" : "service",
+    quantityEnabled: "on",
     quantityMin: "1",
     quantityMax: "20",
     quantityDefault: "1",
+    productColors: "",
     variantsText: "",
     bundleEnabled: "off",
     bundleOptions: "Single|1\nPack of 2|2\nPack of 3|3",
+    businessName: c.name || "",
+    businessAddress: c.address || c.business_address || "",
     ctaText: template.cta,
     ctaAction: template.layout === "whatsapp" ? "whatsapp" : "form",
     leadFormEnabled: "on",
@@ -2318,15 +2322,42 @@ function landingParseVariants(value = "") {
 function landingParseBundles(value = "") {
   return String(value || "").split("\n").map(line=>line.trim()).filter(Boolean).slice(0,8).map(line=>{const [labelRaw,qtyRaw]=line.split("|");const qty=Math.max(1,Math.min(99,Number(qtyRaw)||1));return{label:String(labelRaw||`${qty} items`).trim(),qty}}).filter(item=>item.label);
 }
+function landingParseColors(value = "") {
+  return String(value || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 16)
+    .map((line) => {
+      const [nameRaw, hexRaw] = line.split("|");
+      const name = String(nameRaw || "").trim();
+      const rawHex = String(hexRaw || "").trim();
+      const hex = /^#[0-9a-f]{6}$/i.test(rawHex) ? rawHex : "#CBD5E1";
+      return { name, hex };
+    })
+    .filter((item) => item.name);
+}
+
 function landingCommerceMarkup(data = {}) {
+  if (String(data.commerceEnabled || "off") !== "on") return "";
   if (landingCommerceMode(data) !== "product") return "";
-  const min=Math.max(1,Number(data.quantityMin)||1), max=Math.max(min,Math.min(99,Number(data.quantityMax)||20)), initial=Math.max(min,Math.min(max,Number(data.quantityDefault)||min));
-  const unit=Math.max(0,Number(String(data.price||"").replace(",","."))||0), symbol=landingCurrencySymbol(data.currency), variants=landingParseVariants(data.variantsText), bundles=data.bundleEnabled==="on"?landingParseBundles(data.bundleOptions):[];
-  const qtyMarkup=data.quantityEnabled==="off"?"":`<div class="lp-order-row lp-quantity-row"><div><small>QUANTITY</small><strong>How many?</strong></div><div class="lp-qty-stepper" data-order-stepper><button type="button" aria-label="Decrease quantity" onclick="window.youyouLandingChangeQty(this,-1)">−</button><output data-order-qty>${initial}</output><button type="button" aria-label="Increase quantity" onclick="window.youyouLandingChangeQty(this,1)">+</button></div></div>`;
-  const variantsMarkup=variants.length?`<div class="lp-order-variants">${variants.map(v=>`<label><span>${escapeHtml(v.name)}</span><select data-order-variant="${escapeHtml(v.name)}" onchange="window.youyouLandingUpdateOrder(this)">${v.options.map(o=>`<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("")}</select></label>`).join("")}</div>`:"";
-  const bundlesMarkup=bundles.length?`<div class="lp-order-bundles"><small>BUNDLE</small><div>${bundles.map(b=>`<button type="button" class="${b.qty===initial?"is-active":""}" data-bundle-qty="${b.qty}" onclick="window.youyouLandingChooseBundle(this,${b.qty})">${escapeHtml(b.label)}</button>`).join("")}</div></div>`:"";
-  const summary=unit>0?`<div class="lp-order-summary"><div><span>Unit price</span><strong>${escapeHtml(symbol)} ${unit.toFixed(2)}</strong></div><div><span>Quantity</span><strong data-order-summary-qty>${initial}</strong></div><div class="lp-order-total"><span>Total</span><strong><b data-order-currency>${escapeHtml(symbol)}</b> <em data-order-total>${(unit*initial).toFixed(2)}</em></strong></div></div>`:`<div class="lp-order-summary is-quote"><div><span>Selected quantity</span><strong data-order-summary-qty>${initial}</strong></div><div class="lp-order-total"><span>Price</span><strong>Contact for price</strong></div></div>`;
-  return `<div class="lp-commerce-box" data-commerce-box data-commerce-mode="product" data-unit-price="${unit}" data-currency="${escapeHtml(symbol)}" data-min="${min}" data-max="${max}"><div class="lp-commerce-head"><div><small>ORDER OPTIONS</small><strong>Choose your product options.</strong></div><span>PRODUCT</span></div>${bundlesMarkup}${qtyMarkup}${variantsMarkup}${summary}</div>`;
+
+  const min = Math.max(1, Number(data.quantityMin) || 1);
+  const max = Math.max(min, Math.min(99, Number(data.quantityMax) || 20));
+  const initial = Math.max(min, Math.min(max, Number(data.quantityDefault) || min));
+  const unit = Math.max(0, Number(String(data.price || "").replace(",", ".")) || 0);
+  const symbol = landingCurrencySymbol(data.currency);
+  const variants = landingParseVariants(data.variantsText);
+  const bundles = data.bundleEnabled === "on" ? landingParseBundles(data.bundleOptions) : [];
+  const colors = landingParseColors(data.productColors);
+
+  const colorsMarkup = colors.length ? `<div class="lp-order-colors"><small>COLOR</small><div class="lp-color-swatches">${colors.map((color,index)=>`<button type="button" class="lp-color-swatch ${index===0?"is-active":""}" data-order-color="${escapeHtml(color.name)}" title="${escapeHtml(color.name)}" onclick="window.youyouLandingChooseColor(this)"><i style="background:${escapeHtml(color.hex)}"></i><span>${escapeHtml(color.name)}</span></button>`).join("")}</div></div>` : "";
+  const qtyMarkup = data.quantityEnabled === "off" ? "" : `<div class="lp-order-row lp-quantity-row"><div><small>QUANTITY</small><strong>Select quantity</strong></div><div class="lp-qty-stepper" data-order-stepper><button type="button" aria-label="Decrease quantity" onclick="window.youyouLandingChangeQty(this,-1)">−</button><output data-order-qty>${initial}</output><button type="button" aria-label="Increase quantity" onclick="window.youyouLandingChangeQty(this,1)">+</button></div></div>`;
+  const variantsMarkup = variants.length ? `<div class="lp-order-variants">${variants.map(v=>`<label><span>${escapeHtml(v.name)}</span><select data-order-variant="${escapeHtml(v.name)}" onchange="window.youyouLandingUpdateOrder(this)">${v.options.map(o=>`<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("")}</select></label>`).join("")}</div>` : "";
+  const bundlesMarkup = bundles.length ? `<div class="lp-order-bundles"><small>BUNDLE</small><div>${bundles.map(b=>`<button type="button" class="${b.qty===initial?"is-active":""}" data-bundle-qty="${b.qty}" onclick="window.youyouLandingChooseBundle(this,${b.qty})">${escapeHtml(b.label)}</button>`).join("")}</div></div>` : "";
+  const summary = unit > 0 ? `<div class="lp-order-summary"><div><span>Unit price</span><strong>${escapeHtml(symbol)} ${unit.toFixed(2)}</strong></div><div><span>Quantity</span><strong data-order-summary-qty>${initial}</strong></div><div class="lp-order-total"><span>Total</span><strong><b data-order-currency>${escapeHtml(symbol)}</b> <em data-order-total>${(unit*initial).toFixed(2)}</em></strong></div></div>` : `<div class="lp-order-summary is-quote"><div><span>Selected quantity</span><strong data-order-summary-qty>${initial}</strong></div><div class="lp-order-total"><span>Price</span><strong>Contact for price</strong></div></div>`;
+
+  return `<div class="lp-commerce-box" data-commerce-box data-commerce-mode="product" data-unit-price="${unit}" data-currency="${escapeHtml(symbol)}" data-min="${min}" data-max="${max}"><div class="lp-commerce-head"><small>ORDER DETAILS</small><span>PRODUCT</span></div>${colorsMarkup}${bundlesMarkup}${qtyMarkup}${variantsMarkup}${summary}</div>`;
 }
 
 function landingCtaHref(data) {
@@ -2401,7 +2432,8 @@ function landingLeadFormMarkup(data, className = "") {
   const followHref = data.ctaAction && data.ctaAction !== "form" ? landingCtaHref(data) : "";
   const followLabel = data.ctaAction === "whatsapp" ? "Continue on WhatsApp" : data.ctaAction === "call" ? "Call now" : data.ctaAction === "email" ? "Send an email" : "";
   const safeFollow = followHref && followHref !== "#contact" ? `<a class="lp-lead-followup" data-lp-lead-followup href="${escapeHtml(followHref)}" ${data.ctaAction === "whatsapp" ? 'target="_blank" rel="noopener"' : ''} hidden>${escapeHtml(followLabel)} ↗</a>` : "";
-  return `<form class="lp-lead-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
+  return `<form class="lp-lead-form lp-checkout-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
+    ${landingCommerceMarkup(data)}
     <div class="lp-lead-grid">
       <label class="lp-lead-span-2"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
       <label><span>Phone</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+212..." required /></label>
@@ -2473,8 +2505,9 @@ window.youyouLandingSubmit = function(form) {
   const total = String(commerce?.querySelector('[data-order-total]')?.textContent || '').trim();
   const currency = String(commerce?.dataset?.currency || '').trim();
   const bundle = String(commerce?.querySelector('[data-bundle-qty].is-active')?.textContent || '').trim();
+  const color = String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor || '').trim();
   const variants = [...(commerce?.querySelectorAll('[data-order-variant]') || [])].map((el) => `${el.dataset.orderVariant}: ${el.value}`).filter(Boolean);
-  const details = [`Phone: ${phone}`,`City: ${city}`,`Address: ${address}`,email ? `Email: ${email}` : '',quantity ? `Quantity: ${quantity}` : '',bundle ? `Bundle: ${bundle}` : '',variants.length ? `Options: ${variants.join(', ')}` : '',total ? `Order total: ${currency} ${total}` : '',message ? `Message: ${message}` : ''].filter(Boolean).join(' | ');
+  const details = [`Phone: ${phone}`,`City: ${city}`,`Address: ${address}`,email ? `Email: ${email}` : '',quantity ? `Quantity: ${quantity}` : '',color ? `Color: ${color}` : '',bundle ? `Bundle: ${bundle}` : '',variants.length ? `Options: ${variants.join(', ')}` : '',total ? `Order total: ${currency} ${total}` : '',message ? `Message: ${message}` : ''].filter(Boolean).join(' | ');
   const content = `Lead form submission for ${pageTitle}. ${details}`;
   if (button) button.disabled = true;
   if (status) { status.textContent = 'Sending…'; status.className = 'lp-lead-status is-sending'; }
@@ -2500,10 +2533,12 @@ window.youyouLandingUpdateOrder = function(source) {
   const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'), box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]'); if(!box)return;
   const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]'); let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));
   if(qtyEl)qtyEl.textContent=String(qty); box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty)); const unit=Math.max(0,Number(box.dataset.unitPrice)||0),total=unit*qty; box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2)); box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',Number(el.dataset.bundleQty)===qty));
-  const variants=[...box.querySelectorAll('[data-order-variant]')].map(el=>`${el.dataset.orderVariant}: ${el.value}`).filter(Boolean),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=[`Hi! I am interested in ${title}.`,`Quantity: ${qty}`]; if(variants.length)summary.push(`Options: ${variants.join(', ')}`); if(unit>0)summary.push(`Total: ${currency} ${total.toFixed(2)}`);
+  const variants=[...box.querySelectorAll('[data-order-variant]')].map(el=>`${el.dataset.orderVariant}: ${el.value}`).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=[`Hi! I am interested in ${title}.`,`Quantity: ${qty}`]; if(color)summary.push(`Color: ${color}`); if(variants.length)summary.push(`Options: ${variants.join(', ')}`); if(unit>0)summary.push(`Total: ${currency} ${total.toFixed(2)}`);
   page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=`${base}?text=${encodeURIComponent(summary.join('\\n'))}`}catch(_){}});
 };
 window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));window.youyouLandingUpdateOrder(button)};
+window.youyouLandingChooseColor=function(button){const box=button?.closest?.('[data-commerce-box]');if(!box)return;box.querySelectorAll('[data-order-color]').forEach(el=>el.classList.toggle('is-active',el===button));window.youyouLandingUpdateOrder(button)};
+window.youyouLandingChooseColor=function(button){const box=button?.closest?.('[data-commerce-box]');if(!box)return;box.querySelectorAll('[data-order-color]').forEach(el=>el.classList.toggle('is-active',el===button));window.youyouLandingUpdateOrder(button)};
 window.youyouLandingChooseBundle=function(button,quantity){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box)return;if(qty)qty.textContent=String(quantity||1);box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',el===button));window.youyouLandingUpdateOrder(button)};
 function yyInitCommerce(root=document){root.querySelectorAll?.('[data-commerce-box]').forEach(box=>window.youyouLandingUpdateOrder(box))}
 
@@ -2652,7 +2687,7 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   const pageAttrs = `data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Beauty product')}"`;
 
   const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Benefits</a>${gallerySection ? '<a href="#details">Gallery</a>' : ''}${data.showFaq !== 'off' && faqQ && faqA ? '<a href="#faq">FAQ</a>' : ''}</div><a href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
-  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY')}</span><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1>${data.subheadline ? `<p>${escapeHtml(data.subheadline)}</p>` : ''}${price}${landingCommerceMarkup(data)}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="${landingWhatsAppHref(data)}">WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}</div>` : ''}</section>`;
+  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY')}</span><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1>${data.subheadline ? `<p>${escapeHtml(data.subheadline)}</p>` : ''}${price}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="${landingWhatsAppHref(data)}">WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}</div>` : ''}</section>`;
   const marquee = `<section class="beauty-marquee" aria-hidden="true"><span>DISCOVER</span><i></i><span>DETAILS</span><i></i><span>ROUTINE</span><i></i><span>ACTION</span></section>`;
   const story = data.showBenefits !== "off" && (benefits.length || desc) ? `<section id="story" class="beauty-story"><div class="beauty-story-head"><span>WHY IT STANDS OUT</span><h2>Made to be easy to understand — and easy to choose.</h2>${desc ? `<p>${escapeHtml(desc)}</p>` : ''}</div>${benefits.length ? `<div class="beauty-benefits">${benefits.map((b,i)=>`<article><div class="beauty-icon">${['✦','◌','♡','＋','◇','☼'][i]||'✦'}</div><h3>${escapeHtml(b)}</h3></article>`).join('')}</div>` : ''}</section>` : '';
   const editorial = String(data.extraText || '').trim() ? `<section class="beauty-editorial"><div class="beauty-editorial-card"><small>${escapeHtml(data.extraTitle || 'PRODUCT STORY')}</small><h2>${escapeHtml(data.extraTitle || 'More about this product')}</h2><p>${escapeHtml(data.extraText).replace(/\n/g,'<br>')}</p></div></section>` : '';
@@ -2683,7 +2718,7 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   const customSections = landingCustomSectionsMarkup(data);
   if (customSections) parts.push(customSections);
   if (finalCta) parts.push(finalCta);
-  parts.push(`<footer class="beauty-footer"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><span>Powered by YOUYOU</span></footer>`, landingWidgetMarkup(data));
+  parts.push(`<footer class="beauty-footer"><strong>${escapeHtml(data.businessName || state.company?.name || 'YOUR BRAND')}</strong><span>Powered by YOUYOU</span></footer>`, landingWidgetMarkup(data));
 
   return `<article class="lp-live-page beauty-wow ${compact ? 'is-compact' : ''} media-${mediaPos} density-${escapeHtml(data.sectionDensity || 'balanced')}" dir="${direction}" ${pageAttrs} style="${landingRootStyle(data)}">${parts.join('')}</article>`;
 }
@@ -2700,7 +2735,7 @@ function landingPreviewMarkup(data, compact = false) {
   const extraSection = String(data.extraText || "").trim() ? `<section class="lp-live-section lp-live-extra"><small>${escapeHtml(data.extraTitle || "MORE ABOUT THIS OFFER")}</small><div class="lp-live-extra-copy">${escapeHtml(data.extraText).replace(/\n/g,"<br>")}</div></section>` : "";
   const heroMedia = landingHeroMediaMarkup(data);
   const template = landingTemplateById(data.templateId);
-  const hero = `<section class="lp-live-hero${heroMedia ? '' : ' no-hero-media'}"><div class="lp-live-copy"><span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span><h1>${escapeHtml(data.headline || "Your headline goes here")}</h1><p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>${landingPriceMarkup(data)}${landingCommerceMarkup(data)}<div class="lp-live-actions"><a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>${data.whatsapp ? `<a href="${landingWhatsAppHref(data)}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}</div><div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>${heroMedia}</section>`;
+  const hero = `<section class="lp-live-hero${heroMedia ? '' : ' no-hero-media'}"><div class="lp-live-copy"><span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span><h1>${escapeHtml(data.headline || "Your headline goes here")}</h1><p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>${landingPriceMarkup(data)}<div class="lp-live-actions"><a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>${data.whatsapp ? `<a href="${landingWhatsAppHref(data)}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}</div><div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>${heroMedia}</section>`;
   const benefitsSection = data.showBenefits === "off" ? "" : `<section class="lp-live-section lp-live-benefits"><small>WHY THIS OFFER</small><h2>${escapeHtml(data.description || "Explain the value clearly.")}</h2><div class="lp-live-benefit-grid">${benefits.map((item, index) => `<div><span>0${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}</div></section>`;
   const testimonial = String(data.testimonial || "").trim();
   const proofSection = data.showTestimonial !== "off" && testimonial ? `<section class="lp-live-section lp-live-proof"><small>CUSTOMER FEEDBACK</small><blockquote>“${escapeHtml(testimonial)}”</blockquote></section>` : "";
@@ -2722,7 +2757,7 @@ function landingPreviewMarkup(data, compact = false) {
   if (customSections) bodySections.push(customSections);
   if (contactSection) bodySections.push(contactSection);
   const slugClass = `layout-${String(template?.layout || 'standard').replace(/[^a-z0-9-]/gi,'-').toLowerCase()}`;
-  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} density-${escapeHtml(data.sectionDensity || "balanced")} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="${landingRootStyle(data)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
+  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} density-${escapeHtml(data.sectionDensity || "balanced")} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="${landingRootStyle(data)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(data.businessName || state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(data.businessName || state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
 }
 
 function landingSlugify(value = "") {
@@ -3102,6 +3137,8 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 
 
 .lp-commerce-box{width:min(100%,560px);margin:18px 0 4px;padding:16px;border:1px solid color-mix(in srgb,var(--lp-accent) 18%,transparent);border-radius:16px;background:color-mix(in srgb,var(--lp-surface) 94%,var(--lp-accent) 6%)}.lp-commerce-head,.lp-order-row{display:flex;align-items:center;justify-content:space-between;gap:14px}.lp-commerce-head{align-items:flex-start;margin-bottom:12px}.lp-commerce-head small,.lp-order-bundles>small{color:var(--lp-accent);font-size:9px;font-weight:900}.lp-order-row,.lp-order-variants,.lp-order-bundles,.lp-order-summary{padding-top:12px;border-top:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)}.lp-qty-stepper{display:grid;grid-template-columns:38px 46px 38px;border:1px solid color-mix(in srgb,var(--lp-text) 12%,transparent);border-radius:12px;overflow:hidden}.lp-qty-stepper button{height:38px;border:0;background:transparent;color:var(--lp-text);font-size:20px}.lp-qty-stepper output{display:grid;place-items:center;border-left:1px solid #8883;border-right:1px solid #8883}.lp-order-variants{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.lp-order-variants label{display:grid;gap:6px}.lp-order-variants select{min-height:40px;border:1px solid #8883;border-radius:11px;background:var(--lp-surface);color:var(--lp-text)}.lp-order-bundles>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.lp-order-bundles button{padding:9px 11px;border:1px solid #8883;border-radius:11px;background:var(--lp-surface);color:var(--lp-text)}.lp-order-bundles button.is-active{border-color:var(--lp-accent);color:var(--lp-accent)}.lp-order-summary{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px}.lp-order-summary>div{padding:10px;border-radius:11px;background:color-mix(in srgb,var(--lp-bg) 62%,var(--lp-surface))}.lp-order-summary span{display:block;font-size:8px;opacity:.6}.lp-order-summary strong{display:block;margin-top:4px}.lp-order-total strong{color:var(--lp-accent)}.lp-order-total b,.lp-order-total em{font-style:normal}@media(max-width:760px){.lp-order-variants{grid-template-columns:1fr}.lp-order-summary{grid-template-columns:1fr 1fr}.lp-order-summary .lp-order-total{grid-column:1/-1}}
+
+.lp-checkout-form{display:grid!important;gap:14px!important;padding:18px!important;border:1px solid color-mix(in srgb,var(--lp-accent) 16%,transparent)!important;border-radius:22px!important;background:color-mix(in srgb,var(--lp-surface) 96%,var(--lp-accent) 4%)!important;box-shadow:0 18px 50px rgba(0,0,0,.08)!important}.lp-checkout-form .lp-commerce-box{width:100%!important;margin:0 0 4px!important;padding:0 0 14px!important;border:0!important;border-bottom:1px solid color-mix(in srgb,var(--lp-text) 9%,transparent)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}.lp-commerce-head{display:flex!important;align-items:center!important;justify-content:space-between!important;margin:0 0 8px!important}.lp-order-colors{padding:11px 0;border-top:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)}.lp-order-colors>small{display:block;margin-bottom:8px;font-size:8px;font-weight:900;letter-spacing:.1em}.lp-color-swatches{display:flex;flex-wrap:wrap;gap:8px}.lp-color-swatch{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:6px 10px 6px 6px;border:1px solid color-mix(in srgb,var(--lp-text) 12%,transparent);border-radius:999px;background:var(--lp-surface);color:var(--lp-text);font-size:9px;font-weight:800}.lp-color-swatch i{width:22px;height:22px;border-radius:50%;border:1px solid #7f7f7f4d}.lp-color-swatch.is-active{border-color:var(--lp-accent);color:var(--lp-accent)}@media(max-width:760px){.lp-checkout-form{padding:14px!important}}
 </style>
 </head>
 <body>${body}<script>
@@ -3109,9 +3146,9 @@ const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
 async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
-window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),followup=form?.querySelector('[data-lp-lead-followup]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();const setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please check the email address or leave it empty.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),quantity=String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim(),total=String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim(),currency=String(commerce?.dataset?.currency||'').trim(),bundle=String(commerce?.querySelector('[data-bundle-qty].is-active')?.textContent||'').trim(),variants=[...(commerce?.querySelectorAll('[data-order-variant]')||[])].map(el=>el.dataset.orderVariant+': '+el.value).filter(Boolean),title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',quantity?'Quantity: '+quantity:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{if(button)button.disabled=false});return false};
+window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),followup=form?.querySelector('[data-lp-lead-followup]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();const setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please check the email address or leave it empty.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),quantity=String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim(),total=String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim(),currency=String(commerce?.dataset?.currency||'').trim(),bundle=String(commerce?.querySelector('[data-bundle-qty].is-active')?.textContent||'').trim(),color=String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),variants=[...(commerce?.querySelectorAll('[data-order-variant]')||[])].map(el=>el.dataset.orderVariant+': '+el.value).filter(Boolean),title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{if(button)button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
-window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),total=unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',Number(el.dataset.bundleQty)===qty));const variants=[...box.querySelectorAll('[data-order-variant]')].map(el=>el.dataset.orderVariant+': '+el.value).filter(Boolean),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(variants.length)summary.push('Options: '+variants.join(', '));if(unit>0)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
+window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),total=unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',Number(el.dataset.bundleQty)===qty));const variants=[...box.querySelectorAll('[data-order-variant]')].map(el=>el.dataset.orderVariant+': '+el.value).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(color)summary.push('Color: '+color);if(variants.length)summary.push('Options: '+variants.join(', '));if(unit>0)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
 window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));window.youyouLandingUpdateOrder(button)};
 window.youyouLandingChooseBundle=function(button,quantity){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box)return;if(qty)qty.textContent=String(quantity||1);box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',el===button));window.youyouLandingUpdateOrder(button)};
 function yyInitCommerce(){document.querySelectorAll('[data-commerce-box]').forEach(box=>window.youyouLandingUpdateOrder(box))}
@@ -3541,6 +3578,21 @@ function renderLandingPageWorkspace() {
             </div>
           </div>
 
+          <div class="lpb-editor-section lpb-business-first">
+            <small>BUSINESS & CONTACT · START HERE</small>
+            <p class="lpb-section-intro">Add the contact details visitors should see and use.</p>
+            <label>Business / brand name<input id="lpb-business-name" placeholder="Your business name" /></label>
+            <div class="lpb-two">
+              <label>Phone<input id="lpb-phone" inputmode="tel" placeholder="+212..." /></label>
+              <label>Email<input id="lpb-email" type="email" placeholder="sales@company.com" /></label>
+            </div>
+            <label>Address<input id="lpb-business-address" placeholder="Street, city, country" /></label>
+            <div class="lpb-two lpb-whatsapp-fields">
+              <label>WhatsApp country code<input id="lpb-whatsapp-country-code" inputmode="numeric" placeholder="212" /></label>
+              <label>WhatsApp number<input id="lpb-whatsapp" inputmode="tel" placeholder="06... / +212..." /></label>
+            </div>
+          </div>
+
           <div class="lpb-editor-section">
             <small>MAIN CONTENT</small>
             <label>Badge<input id="lpb-badge" placeholder="LIMITED OFFER" /></label>
@@ -3550,35 +3602,73 @@ function renderLandingPageWorkspace() {
             <label>Benefits <span>One per line</span><textarea id="lpb-benefits" rows="4"></textarea></label>
           </div>
 
-          <div class="lpb-editor-section">
+          <div class="lpb-editor-section lpb-price-premium-section">
             <small>PRICE & OFFER</small>
-            <div class="lpb-two">
-              <label>Price<input id="lpb-price" inputmode="decimal" placeholder="79" /></label>
-              <label>Old price<input id="lpb-old-price" inputmode="decimal" placeholder="99" /></label>
+            <div class="lpb-price-mode-cards" role="group" aria-label="Price display mode">
+              <button type="button" data-price-mode-value="show"><span>01</span><strong>Show price</strong><small>Display a clear selling price</small></button>
+              <button type="button" data-price-mode-value="quote"><span>02</span><strong>Ask for quote</strong><small>Hide the amount, keep the CTA</small></button>
+              <button type="button" data-price-mode-value="hide"><span>03</span><strong>No price</strong><small>Remove pricing completely</small></button>
             </div>
-            <div class="lpb-two">
-              <label>Currency
-                <select id="lpb-currency">
-                  ${LANDING_CURRENCIES.map(([code,symbol,name]) => `<option value="${code}">${code} · ${symbol} · ${name}</option>`).join("")}
-                </select>
-              </label>
-              <label>Price display
-                <select id="lpb-price-mode"><option value="show">Show price</option><option value="quote">Contact for price</option><option value="hide">Hide price</option></select>
-              </label>
+            <select id="lpb-price-mode" class="lpb-price-mode-hidden" aria-hidden="true" tabindex="-1"><option value="show">Show price</option><option value="quote">Contact for price</option><option value="hide">Hide price</option></select>
+            <div class="lpb-price-premium-card" data-price-editor>
+              <div class="lpb-price-main-row">
+                <label class="lpb-price-currency">Currency
+                  <select id="lpb-currency">${LANDING_CURRENCIES.map(([code,symbol,name]) => `<option value="${code}">${code} · ${symbol} · ${name}</option>`).join("")}</select>
+                </label>
+                <label class="lpb-price-big">Selling price<input id="lpb-price" inputmode="decimal" placeholder="100" /></label>
+              </div>
+              <label class="lpb-old-price-premium">Compare-at / old price <span>Optional</span><input id="lpb-old-price" inputmode="decimal" placeholder="300" /></label>
+              <div class="lpb-price-hint"><span>✦</span><p><strong>Premium pricing block</strong><small>Large, visible pricing controls so the client always knows where to set the offer.</small></p></div>
             </div>
           </div>
 
+          <div class="lpb-editor-section lpb-commerce-engine lpb-commerce-pro-section">
+            <small>PRODUCT OPTIONS · OPTIONAL</small>
+            <div class="lpb-commerce-master">
+              <div><strong>Activate product options</strong><span>OFF by default. Quantity, colors, variants and bundles stay hidden until you activate this option.</span></div>
+              <select id="lpb-commerce-enabled"><option value="off">OFF</option><option value="on">ON</option></select>
+            </div>
+            <div data-commerce-settings>
+              <div class="lpb-media-toggle-row"><div><strong>Mode</strong><span>Product shows order options. Service keeps the landing page clean.</span></div><select id="lpb-commerce-mode"><option value="product">Product</option><option value="service">Service</option></select></div>
+              <div class="lpb-commerce-product-settings" data-product-settings>
+                <div class="lpb-two"><label>Quantity selector<select id="lpb-quantity-enabled"><option value="on">Enabled</option><option value="off">Hidden</option></select></label><label>Default quantity<input id="lpb-quantity-default" type="number" min="1" max="99" step="1" /></label></div>
+                <div class="lpb-three"><label>Minimum<input id="lpb-quantity-min" type="number" min="1" max="99" step="1" /></label><label>Maximum<input id="lpb-quantity-max" type="number" min="1" max="99" step="1" /></label><label>Bundles<select id="lpb-bundle-enabled"><option value="off">Off</option><option value="on">On</option></select></label></div>
 
+                <div class="lpb-color-builder">
+                  <div class="lpb-color-builder-head"><div><strong>Product colors</strong><span>Choose as many colors as the product needs.</span></div><span id="lpb-color-count">0 selected</span></div>
+                  <textarea id="lpb-product-colors" class="lpb-color-storage" aria-hidden="true" tabindex="-1"></textarea>
+                  <div class="lpb-color-preset-grid" id="lpb-color-preset-grid">
+                    <button type="button" data-product-color="Black|#111111"><i style="background:#111111"></i><span>Black</span></button>
+                    <button type="button" data-product-color="White|#FFFFFF"><i style="background:#FFFFFF"></i><span>White</span></button>
+                    <button type="button" data-product-color="Gray|#94A3B8"><i style="background:#94A3B8"></i><span>Gray</span></button>
+                    <button type="button" data-product-color="Red|#EF4444"><i style="background:#EF4444"></i><span>Red</span></button>
+                    <button type="button" data-product-color="Rose|#F43F5E"><i style="background:#F43F5E"></i><span>Rose</span></button>
+                    <button type="button" data-product-color="Pink|#EC4899"><i style="background:#EC4899"></i><span>Pink</span></button>
+                    <button type="button" data-product-color="Purple|#8B5CF6"><i style="background:#8B5CF6"></i><span>Purple</span></button>
+                    <button type="button" data-product-color="Blue|#3B82F6"><i style="background:#3B82F6"></i><span>Blue</span></button>
+                    <button type="button" data-product-color="Navy|#1E3A8A"><i style="background:#1E3A8A"></i><span>Navy</span></button>
+                    <button type="button" data-product-color="Cyan|#06B6D4"><i style="background:#06B6D4"></i><span>Cyan</span></button>
+                    <button type="button" data-product-color="Teal|#14B8A6"><i style="background:#14B8A6"></i><span>Teal</span></button>
+                    <button type="button" data-product-color="Green|#22C55E"><i style="background:#22C55E"></i><span>Green</span></button>
+                    <button type="button" data-product-color="Lime|#84CC16"><i style="background:#84CC16"></i><span>Lime</span></button>
+                    <button type="button" data-product-color="Yellow|#EAB308"><i style="background:#EAB308"></i><span>Yellow</span></button>
+                    <button type="button" data-product-color="Orange|#F97316"><i style="background:#F97316"></i><span>Orange</span></button>
+                    <button type="button" data-product-color="Brown|#92400E"><i style="background:#92400E"></i><span>Brown</span></button>
+                    <button type="button" data-product-color="Beige|#D6C3A5"><i style="background:#D6C3A5"></i><span>Beige</span></button>
+                    <button type="button" data-product-color="Gold|#D4AF37"><i style="background:#D4AF37"></i><span>Gold</span></button>
+                  </div>
+                  <div class="lpb-custom-color-row">
+                    <input id="lpb-custom-color-name" placeholder="Custom color name" />
+                    <input id="lpb-custom-color-hex" type="color" value="#D96A98" aria-label="Custom color" />
+                    <button id="lpb-add-custom-color" type="button">+ Add color</button>
+                  </div>
+                  <div id="lpb-selected-colors" class="lpb-selected-colors"></div>
+                </div>
 
-          <div class="lpb-editor-section lpb-commerce-engine">
-            <small>PRODUCT / SERVICE ENGINE</small>
-            <div class="lpb-media-toggle-row"><div><strong>Page mode</strong><span>Auto detects product templates. Force Product when you sell items, or Service when quantity is not needed.</span></div><select id="lpb-commerce-mode"><option value="auto">Auto</option><option value="product">Product</option><option value="service">Service</option></select></div>
-            <div class="lpb-commerce-product-settings" data-product-settings>
-              <div class="lpb-two"><label>Quantity selector<select id="lpb-quantity-enabled"><option value="on">Enabled</option><option value="off">Hidden</option></select></label><label>Default quantity<input id="lpb-quantity-default" type="number" min="1" max="99" step="1" /></label></div>
-              <div class="lpb-three"><label>Minimum<input id="lpb-quantity-min" type="number" min="1" max="99" step="1" /></label><label>Maximum<input id="lpb-quantity-max" type="number" min="1" max="99" step="1" /></label><label>Bundles<select id="lpb-bundle-enabled"><option value="off">Off</option><option value="on">On</option></select></label></div>
-              <label>Variants <span>Optional · Name: option 1, option 2</span><textarea id="lpb-variants-text" rows="4" placeholder="Size: Small, Medium, Large&#10;Color: Black, White, Rose"></textarea></label>
-              <label>Bundle options <span>Optional · Label|Quantity, one per line</span><textarea id="lpb-bundle-options" rows="4" placeholder="Single|1&#10;Pack of 2|2&#10;Pack of 3|3"></textarea></label>
-              <p class="lpb-media-help lpb-media-help-strong">Product mode adds quantity, variants, bundle selection and a live order summary. Service mode removes product-order controls.</p>
+                <label>Other variants <span>Optional · Name: option 1, option 2</span><textarea id="lpb-variants-text" rows="4" placeholder="Size: Small, Medium, Large&#10;Material: Cotton, Linen"></textarea></label>
+                <label>Bundle options <span>Optional · Label|Quantity, one per line</span><textarea id="lpb-bundle-options" rows="4" placeholder="Single|1&#10;Pack of 2|2&#10;Pack of 3|3"></textarea></label>
+                <p class="lpb-media-help lpb-media-help-strong">When activated, order details appear only beside the lead form near the bottom of the landing page — never under the hero.</p>
+              </div>
             </div>
           </div>
           <div class="lpb-editor-section">
@@ -3595,16 +3685,7 @@ function renderLandingPageWorkspace() {
               </label>
               <label>Form button text<input id="lpb-form-button-text" placeholder="Send request" /></label>
             </div>
-            <p class="lpb-media-help">CTA action controls the main button. The lead form is independent, so choosing WhatsApp, Call or Email does not remove your form.</p>
-            <div class="lpb-two lpb-whatsapp-fields">
-              <label>WhatsApp country code<input id="lpb-whatsapp-country-code" inputmode="numeric" placeholder="212" /></label>
-              <label>WhatsApp number<input id="lpb-whatsapp" inputmode="tel" placeholder="06... / +212... / 00212..." /></label>
-            </div>
-            <p class="lpb-media-help">YOUYOU normalizes WhatsApp numbers automatically for wa.me. You can type +212…, 00212…, 212… or a local 06… number when the country code is set.</p>
-            <div class="lpb-two">
-              <label>Phone<input id="lpb-phone" placeholder="+1..." /></label>
-              <label>Email<input id="lpb-email" type="email" placeholder="sales@company.com" /></label>
-            </div>
+            <p class="lpb-media-help">CTA action controls the main button. Business phone, WhatsApp, email and address are managed at the top of the workspace.</p>
           </div>
 
           <div class="lpb-editor-section lpb-media-pro-section">
@@ -3983,7 +4064,8 @@ function initLandingPageWorkspace() {
     badge:"lpb-badge", headline:"lpb-headline", subheadline:"lpb-subheadline",
     description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
-    commerceMode:"lpb-commerce-mode", quantityEnabled:"lpb-quantity-enabled", quantityMin:"lpb-quantity-min", quantityMax:"lpb-quantity-max", quantityDefault:"lpb-quantity-default", variantsText:"lpb-variants-text", bundleEnabled:"lpb-bundle-enabled", bundleOptions:"lpb-bundle-options",
+    businessName:"lpb-business-name", businessAddress:"lpb-business-address",
+    commerceEnabled:"lpb-commerce-enabled", commerceMode:"lpb-commerce-mode", quantityEnabled:"lpb-quantity-enabled", quantityMin:"lpb-quantity-min", quantityMax:"lpb-quantity-max", quantityDefault:"lpb-quantity-default", productColors:"lpb-product-colors", variantsText:"lpb-variants-text", bundleEnabled:"lpb-bundle-enabled", bundleOptions:"lpb-bundle-options",
     ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
     phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
@@ -4006,6 +4088,8 @@ function initLandingPageWorkspace() {
       if (el) el.value = current[key] ?? "";
     });
     renderCustomSectionsManager();
+    renderProductColorManager();
+    syncPriceModeUi();
   };
 
   const readFields = () => {
@@ -4013,6 +4097,34 @@ function initLandingPageWorkspace() {
       const el = document.getElementById(id);
       if (el) current[key] = el.value;
     });
+  };
+
+  const productColorLines = () => String(current.productColors || "").split("\n").map((line) => line.trim()).filter(Boolean).slice(0,16);
+  const renderProductColorManager = () => {
+    const selected = productColorLines();
+    const selectedNames = new Set(selected.map((line) => String(line.split("|")[0] || "").trim().toLowerCase()));
+    const storage = document.getElementById("lpb-product-colors");
+    if (storage && storage.value !== selected.join("\n")) storage.value = selected.join("\n");
+    document.querySelectorAll("[data-product-color]").forEach((button) => {
+      const name = String(button.dataset.productColor || "").split("|")[0].trim().toLowerCase();
+      button.classList.toggle("is-active", selectedNames.has(name));
+    });
+    const count = document.getElementById("lpb-color-count");
+    if (count) count.textContent = `${selected.length} selected`;
+    const host = document.getElementById("lpb-selected-colors");
+    if (host) host.innerHTML = selected.length ? selected.map((line,index)=>{const [name,hex] = line.split("|");return `<span><i style="background:${escapeHtml(hex || '#CBD5E1')}"></i>${escapeHtml(name || 'Color')}<button type="button" data-remove-product-color="${index}" aria-label="Remove ${escapeHtml(name || 'color')}">×</button></span>`}).join("") : `<small>No colors selected yet.</small>`;
+  };
+  const setProductColors = (lines) => {
+    current.productColors = [...new Set(lines.map((line)=>String(line||"").trim()).filter(Boolean))].slice(0,16).join("\n");
+    const storage = document.getElementById("lpb-product-colors");
+    if (storage) storage.value = current.productColors;
+    renderProductColorManager();
+  };
+  const syncPriceModeUi = () => {
+    const mode = String(document.getElementById("lpb-price-mode")?.value || current.priceMode || "show");
+    document.querySelectorAll("[data-price-mode-value]").forEach((button)=>button.classList.toggle("is-active", button.dataset.priceModeValue === mode));
+    const editor = document.querySelector("[data-price-editor]");
+    if (editor) editor.classList.toggle("is-muted", mode !== "show");
   };
 
   const updateGalleryControls = () => {
@@ -4049,10 +4161,10 @@ function initLandingPageWorkspace() {
   let previewToken = 0;
   const renderPreview = () => {
     readFields();
-    const commerceModeEl = document.getElementById("lpb-commerce-mode");
-    const explicitMode = String(commerceModeEl?.value || current.commerceMode || "auto");
-    const templateForMode = landingTemplateById(current.templateId);
-    const effectiveProduct = explicitMode === "product" || (explicitMode === "auto" && String(templateForMode?.category || current.pageType || "") === "Product");
+    const commerceEnabled = String(document.getElementById("lpb-commerce-enabled")?.value || current.commerceEnabled || "off") === "on";
+    const explicitMode = String(document.getElementById("lpb-commerce-mode")?.value || current.commerceMode || "product");
+    const effectiveProduct = commerceEnabled && explicitMode === "product";
+    document.querySelectorAll("[data-commerce-settings]").forEach((el) => { el.style.display = commerceEnabled ? "grid" : "none"; });
     document.querySelectorAll("[data-product-settings]").forEach((el) => { el.style.display = effectiveProduct ? "grid" : "none"; });
     current.rendererVersion = YOUYOU_LANDING_RENDERER_VERSION;
     updateGalleryControls();
@@ -4387,6 +4499,55 @@ function initLandingPageWorkspace() {
     if (el && (el.matches("input[type=text],input[type=email],input[type=url],input:not([type]),textarea") || el.tagName === "TEXTAREA")) {
       el.addEventListener("focus", () => { lastFocusedTextField = el; });
     }
+  });
+
+  document.querySelectorAll("[data-price-mode-value]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const mode = button.dataset.priceModeValue || "show";
+      const select = document.getElementById("lpb-price-mode");
+      if (select) select.value = mode;
+      current.priceMode = mode;
+      syncPriceModeUi();
+      renderPreview();
+      markChangedAndAutosave();
+    });
+  });
+
+  document.querySelector("#lpb-color-preset-grid")?.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-product-color]");
+    if (!button) return;
+    const line = String(button.dataset.productColor || "").trim();
+    const name = line.split("|")[0].trim().toLowerCase();
+    const lines = productColorLines();
+    const index = lines.findIndex((item) => item.split("|")[0].trim().toLowerCase() === name);
+    if (index >= 0) lines.splice(index,1); else lines.push(line);
+    setProductColors(lines);
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
+  document.querySelector("#lpb-add-custom-color")?.addEventListener("click", () => {
+    const nameEl = document.getElementById("lpb-custom-color-name");
+    const hexEl = document.getElementById("lpb-custom-color-hex");
+    const name = String(nameEl?.value || "Custom").trim() || "Custom";
+    const hex = String(hexEl?.value || "#D96A98").trim();
+    const lines = productColorLines().filter((line) => line.split("|")[0].trim().toLowerCase() !== name.toLowerCase());
+    lines.push(`${name}|${hex}`);
+    setProductColors(lines);
+    if (nameEl) nameEl.value = "";
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
+  document.querySelector("#lpb-selected-colors")?.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-remove-product-color]");
+    if (!button) return;
+    const index = Number(button.dataset.removeProductColor);
+    const lines = productColorLines();
+    if (Number.isInteger(index) && index >= 0 && index < lines.length) lines.splice(index,1);
+    setProductColors(lines);
+    renderPreview();
+    markChangedAndAutosave();
   });
 
   document.querySelector("#lpb-add-custom-section")?.addEventListener("click", () => {

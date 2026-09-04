@@ -1,0 +1,24 @@
+YOUYOU V8.2 — CHECKOUT FORM ENGINE
+
+{
+  "renderer_8_2": true,
+  "commerce_default_off": true,
+  "hero_has_no_commerce": true,
+  "commerce_inside_form": true,
+  "master_toggle": true,
+  "premium_price_cards": true,
+  "many_color_presets": true,
+  "color_swatches_public": true,
+  "business_top": true,
+  "business_address": true,
+  "old_heading_removed": true,
+  "node_syntax": true,
+  "css_brace_balance": true
+}
+
+Key behavior:
+- Product options OFF by default.
+- Product options render only before the lead form, in the same premium card.
+- 18 preset product colors + custom color picker.
+- Premium price display mode cards and large price editor.
+- Business/contact block moved to the top of the dedicated workspace.
