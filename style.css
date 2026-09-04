@@ -12458,3 +12458,122 @@ body:has(.lpw-shell) #youyou-public-widget-panel{
     position:static!important;
   }
 }
+
+
+/* =========================================================
+   YOUYOU V8.3 — PRO COMMERCE / CHECKOUT POLISH
+   Universal options · functional bundles · compact premium UX
+   ========================================================= */
+
+/* Workspace: price state must feel clickable and obvious */
+.lpb-price-mode-cards button{position:relative!important;min-height:72px!important;padding:10px 11px!important}
+.lpb-price-mode-cards button::after{content:"";position:absolute;right:9px;top:9px;width:17px;height:17px;border:1px solid #d7deea;border-radius:50%;background:#fff}
+.lpb-price-mode-cards button.is-active::after{content:"✓";display:grid;place-items:center;border-color:#8f67dd;background:#8f67dd;color:#fff;font-size:10px;font-weight:900}
+.lpb-price-mode-cards button.is-active{transform:translateY(-1px);box-shadow:0 8px 20px rgba(95,67,150,.09)!important}
+.lpb-price-live-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;padding:10px 12px;border:1px solid #e4e8ef;border-radius:11px;background:#f8fafc}
+.lpb-price-live-row span{font-size:8px!important;color:#7f8999!important;font-weight:800}
+.lpb-price-live-row strong{font-size:16px;color:#1f2937;letter-spacing:-.02em}
+
+/* Workspace: colors become compact tools, not giant tiles */
+.lpb-color-builder{gap:8px!important;padding:11px!important}
+.lpb-color-preset-grid{grid-template-columns:repeat(9,minmax(0,1fr))!important;gap:5px!important}
+.lpb-color-preset-grid button{position:relative!important;min-width:0!important;min-height:48px!important;padding:5px 2px!important;border:1px solid transparent!important;border-radius:9px!important;background:transparent!important;color:#7d899a!important;box-shadow:none!important}
+.lpb-color-preset-grid button i{width:22px!important;height:22px!important}
+.lpb-color-preset-grid button span{font-size:6.5px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
+.lpb-color-preset-grid button.is-active{border-color:#d8c7ea!important;background:#f8f4fc!important;color:#6f4fb4!important;box-shadow:inset 0 0 0 1px #eee4f7!important}
+.lpb-color-preset-grid button.is-active::after{content:"✓";position:absolute;right:2px;top:2px;width:13px;height:13px;display:grid;place-items:center;border-radius:50%;background:#7b57c9;color:#fff;font-size:7px;font-weight:900}
+.lpb-selected-colors{gap:5px!important}.lpb-selected-colors>span{padding:4px 6px!important;font-size:7px!important}.lpb-selected-colors i{width:13px!important;height:13px!important}
+
+/* Workspace: universal product-option cards */
+.lpb-universal-options,.lpb-bundle-builder{display:grid;gap:9px;padding:12px;border:1px solid #e1e6ee;border-radius:14px;background:#fbfcfe}
+.lpb-option-builder-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.lpb-option-builder-head strong{display:block;color:#253044;font-size:10px}
+.lpb-option-builder-head span{display:block;margin-top:2px;color:#8792a2;font-size:7.5px;line-height:1.45}
+.lpb-option-builder-head>span{margin:0;padding:5px 7px;border:1px solid #e3d8f1;border-radius:999px;background:#faf6ff;color:#7b57b7;font-size:6.5px;font-weight:900;letter-spacing:.08em}
+.lpb-option-builder-head>button{height:30px;padding:0 9px;border:1px solid #d9d0e8;border-radius:8px;background:#fff;color:#7051b0;font-size:7.5px;font-weight:900;cursor:pointer}
+.lpb-option-card{display:grid;gap:8px;padding:10px;border:1px solid #e5e9ef;border-radius:11px;background:#fff;transition:.18s ease}
+.lpb-option-card.is-enabled{border-color:#cab9e5;box-shadow:0 0 0 2px #f4effa}
+.lpb-option-card-top{display:grid;grid-template-columns:minmax(0,1fr) 74px;gap:10px;align-items:center}
+.lpb-option-card-top strong{display:block;color:#2a3547;font-size:9px}.lpb-option-card-top span{display:block;margin-top:2px;color:#929baa;font-size:7px}
+.lpb-option-card-top select{min-height:34px!important;height:34px!important;padding:4px 8px!important;font-size:8px!important}
+.lpb-option-presets{display:none;flex-wrap:wrap;gap:5px;padding-top:2px}.lpb-option-card.is-enabled .lpb-option-presets{display:flex}
+.lpb-option-presets button{min-width:38px;height:30px;padding:0 8px;border:1px solid #dde3eb;border-radius:8px;background:#f8fafc;color:#5d6878;font-size:8px;font-weight:800;cursor:pointer}
+.lpb-option-presets button.is-active{border-color:#9878d1;background:#f3edfb;color:#6543a3;box-shadow:inset 0 0 0 1px #ded0f1}
+.lpb-custom-option-fields{display:none;grid-template-columns:1fr 1.4fr;gap:8px}.lpb-option-card.is-enabled .lpb-custom-option-fields{display:grid}
+.lpb-legacy-variants,.lpb-bundle-storage{display:none!important}
+
+/* Workspace: functional bundle editor */
+.lpb-bundle-rows{display:grid;gap:6px}
+.lpb-bundle-row{display:grid;grid-template-columns:minmax(120px,1.3fr) 64px minmax(100px,.8fr) 28px;gap:6px;align-items:end;padding:8px;border:1px solid #e4e9ef;border-radius:10px;background:#fff}
+.lpb-bundle-row label{gap:4px!important}.lpb-bundle-row label>span{font-size:7px!important}.lpb-bundle-row input{min-height:34px!important;height:34px!important;padding:6px 8px!important;font-size:8.5px!important}
+.lpb-remove-bundle{width:28px;height:34px;border:1px solid #eadde2;border-radius:8px;background:#fff8fa;color:#a05a6d;font-size:15px;cursor:pointer}
+
+/* Checkout: one clean card, two clear zones */
+.lp-checkout-form{gap:12px!important;padding:16px!important;max-width:620px!important;margin-left:auto!important;margin-right:auto!important}
+.lp-commerce-box{max-width:none!important}
+.lp-commerce-head{margin:0 0 5px!important;padding-bottom:7px!important;border-bottom:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)!important}
+.lp-commerce-head>small{font-size:8px!important;letter-spacing:.12em!important}
+.lp-commerce-head>span{display:none!important}
+.lp-checkout-section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding-top:2px}
+.lp-checkout-section-title span{color:var(--lp-accent);font-size:8px;font-weight:900;letter-spacing:.12em}.lp-checkout-section-title small{font-size:8px;opacity:.52}
+
+/* Landing colors: compact circular swatches, strong selected feedback */
+.lp-order-colors{padding:9px 0!important}
+.lp-color-swatches{gap:6px!important}
+.lp-color-swatch{position:relative!important;min-height:31px!important;padding:4px 8px 4px 4px!important;gap:5px!important;border-radius:999px!important;font-size:8px!important;box-shadow:none!important}
+.lp-color-swatch i{width:19px!important;height:19px!important}
+.lp-color-swatch b{display:none;width:13px;height:13px;place-items:center;border-radius:50%;background:var(--lp-accent);color:#fff;font-size:7px}
+.lp-color-swatch.is-active{box-shadow:0 0 0 2px color-mix(in srgb,var(--lp-accent) 12%,transparent)!important}
+.lp-color-swatch.is-active b{display:grid}
+
+/* Landing universal options as selectable chips */
+.lp-order-options{display:grid;gap:10px;padding:9px 0;border-top:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)}
+.lp-order-option-group>small,.lp-order-bundles>small,.lp-order-colors>small,.lp-quantity-row>small{display:block!important;margin-bottom:6px!important;color:color-mix(in srgb,var(--lp-text) 56%,transparent)!important;font-size:7.5px!important;font-weight:900!important;letter-spacing:.1em!important}
+.lp-option-chips{display:flex;flex-wrap:wrap;gap:6px}
+.lp-option-chip{position:relative;min-width:38px;min-height:32px;padding:0 10px;border:1px solid color-mix(in srgb,var(--lp-text) 12%,transparent);border-radius:9px;background:var(--lp-surface);color:var(--lp-text);font-size:8.5px;font-weight:850;cursor:pointer}
+.lp-option-chip b{display:none;position:absolute;right:-4px;top:-5px;width:14px;height:14px;place-items:center;border-radius:50%;background:var(--lp-accent);color:#fff;font-size:7px}
+.lp-option-chip.is-active{border-color:var(--lp-accent);color:var(--lp-accent);background:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-surface))}
+.lp-option-chip.is-active b{display:grid}
+
+/* Landing bundles: visible selection + optional price */
+.lp-order-bundles{padding:9px 0!important}
+.lp-order-bundles>div{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px!important;margin-top:0!important}
+.lp-order-bundles button{position:relative!important;display:grid!important;gap:2px!important;min-height:52px!important;padding:8px 9px!important;text-align:left!important;border-radius:10px!important}
+.lp-order-bundles button strong{font-size:8.5px}.lp-order-bundles button span{font-size:7px;opacity:.55}
+.lp-order-bundles button b{display:none;position:absolute;right:6px;top:6px;width:15px;height:15px;place-items:center;border-radius:50%;background:var(--lp-accent);color:#fff;font-size:7px}
+.lp-order-bundles button.is-active b{display:grid}
+
+/* Quantity: remove redundant copy and guarantee full - 1 + visibility */
+.lp-quantity-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:9px 0!important;min-width:0!important}
+.lp-quantity-row>small{margin:0!important}
+.lp-qty-stepper{flex:0 0 112px!important;width:112px!important;grid-template-columns:34px 42px 34px!important;border-radius:10px!important;overflow:hidden!important}
+.lp-qty-stepper button,.lp-qty-stepper output{width:auto!important;min-width:0!important;height:34px!important;min-height:34px!important}
+.lp-qty-stepper button{font-size:17px!important;padding:0!important}
+.lp-qty-stepper output{font-size:11px!important}
+
+/* Summary: shorter, more premium */
+.lp-order-summary{grid-template-columns:1fr 1fr 1.15fr!important;gap:6px!important;padding-top:9px!important}
+.lp-order-summary>div{padding:8px!important;border-radius:9px!important}.lp-order-summary span{font-size:7px!important}.lp-order-summary strong{font-size:10px!important}.lp-order-total strong{font-size:12px!important}
+
+/* Form: floating captions inside fields to reduce vertical length */
+.lp-lead-grid{gap:8px!important}
+.lp-lead-field{position:relative!important;display:block!important}
+.lp-lead-field>span{position:absolute!important;z-index:2!important;left:12px!important;top:7px!important;margin:0!important;font-size:7px!important;font-weight:850!important;letter-spacing:.02em!important;color:color-mix(in srgb,var(--lp-text) 56%,transparent)!important;pointer-events:none}
+.lp-lead-field>span em{font-size:6.5px!important;font-style:normal!important;font-weight:600!important;opacity:.7}
+.lp-lead-field input,.lp-lead-field textarea{min-height:50px!important;padding:20px 12px 7px!important;border-radius:10px!important}
+.lp-lead-field textarea{min-height:76px!important;padding-top:22px!important}
+.lp-lead-form>button[type="submit"]{min-height:46px!important;border-radius:10px!important;font-size:10px!important}
+
+/* Mobile checkout stability */
+@media(max-width:760px){
+  .lpb-color-preset-grid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .lpb-bundle-row{grid-template-columns:minmax(0,1fr) 58px!important}
+  .lpb-bundle-row .is-price{grid-column:1/-2}.lpb-remove-bundle{grid-column:-2/-1;grid-row:2}
+  .lpb-custom-option-fields{grid-template-columns:1fr!important}
+  .lp-order-bundles>div{grid-template-columns:1fr!important}
+  .lp-order-summary{grid-template-columns:1fr 1fr!important}.lp-order-summary .lp-order-total{grid-column:1/-1!important}
+  .lp-checkout-section-title{display:grid!important;gap:2px!important}
+  .lp-lead-grid{grid-template-columns:1fr!important}
+  .lp-lead-span-2{grid-column:auto!important}
+  .lp-checkout-form{padding:13px!important}
+}

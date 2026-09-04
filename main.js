@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.2.2";
+const YOUYOU_LANDING_RENDERER_VERSION = "8.3.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2229,9 +2229,20 @@ function defaultLandingPageData(templateId = "product-launch") {
     quantityMax: "20",
     quantityDefault: "1",
     productColors: "",
+    sizeEnabled: "off",
+    sizeOptions: "XS,S,M,L,XL,XXL,XXXL,XXXXL",
+    weightEnabled: "off",
+    weightOptions: "250 g,500 g,1 kg,2 kg,5 kg",
+    volumeEnabled: "off",
+    volumeOptions: "100 ml,250 ml,500 ml,1 L,2 L",
+    unitsEnabled: "off",
+    unitsOptions: "1 pc,2 pcs,6 pcs,12 pcs",
+    customOptionEnabled: "off",
+    customOptionName: "Option",
+    customOptionValues: "",
     variantsText: "",
     bundleEnabled: "off",
-    bundleOptions: "Single|1\nPack of 2|2\nPack of 3|3",
+    bundleOptions: "Single|1|\nPack of 2|2|\nPack of 3|3|",
     businessName: c.name || "",
     businessAddress: c.address || c.business_address || "",
     ctaText: template.cta,
@@ -2320,7 +2331,48 @@ function landingParseVariants(value = "") {
   return String(value || "").split("\n").map(line=>line.trim()).filter(Boolean).slice(0,6).map(line=>{const parts=line.split(":");const name=String(parts.shift()||"Option").trim();const options=parts.join(":").split(",").map(x=>x.trim()).filter(Boolean).slice(0,12);return{name,options}}).filter(item=>item.name&&item.options.length);
 }
 function landingParseBundles(value = "") {
-  return String(value || "").split("\n").map(line=>line.trim()).filter(Boolean).slice(0,8).map(line=>{const [labelRaw,qtyRaw]=line.split("|");const qty=Math.max(1,Math.min(99,Number(qtyRaw)||1));return{label:String(labelRaw||`${qty} items`).trim(),qty}}).filter(item=>item.label);
+  return String(value || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 10)
+    .map((line) => {
+      const [labelRaw, qtyRaw, priceRaw] = line.split("|");
+      const qty = Math.max(1, Math.min(99, Number(qtyRaw) || 1));
+      const priceText = String(priceRaw || "").trim().replace(",", ".");
+      const price = priceText === "" ? null : Math.max(0, Number(priceText) || 0);
+      return { label:String(labelRaw || `${qty} items`).trim(), qty, price };
+    })
+    .filter((item) => item.label);
+}
+
+function landingOptionValues(value = "") {
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 16);
+}
+
+function landingUniversalVariants(data = {}) {
+  const items = [];
+  const add = (enabled, name, value) => {
+    if (String(enabled || "off") !== "on") return;
+    const options = landingOptionValues(value);
+    if (options.length) items.push({ name, options });
+  };
+  add(data.sizeEnabled, "Size", data.sizeOptions);
+  add(data.weightEnabled, "Weight", data.weightOptions);
+  add(data.volumeEnabled, "Volume", data.volumeOptions);
+  add(data.unitsEnabled, "Units", data.unitsOptions);
+  if (String(data.customOptionEnabled || "off") === "on") {
+    const name = String(data.customOptionName || "Option").trim() || "Option";
+    const options = landingOptionValues(data.customOptionValues);
+    if (options.length) items.push({ name, options });
+  }
+  // Backward compatibility for older drafts using the legacy textarea.
+  if (!items.length && String(data.variantsText || "").trim()) return landingParseVariants(data.variantsText);
+  return items.slice(0, 6);
 }
 function landingParseColors(value = "") {
   return String(value || "")
@@ -2347,17 +2399,23 @@ function landingCommerceMarkup(data = {}) {
   const initial = Math.max(min, Math.min(max, Number(data.quantityDefault) || min));
   const unit = Math.max(0, Number(String(data.price || "").replace(",", ".")) || 0);
   const symbol = landingCurrencySymbol(data.currency);
-  const variants = landingParseVariants(data.variantsText);
+  const variants = landingUniversalVariants(data);
   const bundles = data.bundleEnabled === "on" ? landingParseBundles(data.bundleOptions) : [];
   const colors = landingParseColors(data.productColors);
 
-  const colorsMarkup = colors.length ? `<div class="lp-order-colors"><small>COLOR</small><div class="lp-color-swatches">${colors.map((color,index)=>`<button type="button" class="lp-color-swatch ${index===0?"is-active":""}" data-order-color="${escapeHtml(color.name)}" title="${escapeHtml(color.name)}" onclick="window.youyouLandingChooseColor(this)"><i style="background:${escapeHtml(color.hex)}"></i><span>${escapeHtml(color.name)}</span></button>`).join("")}</div></div>` : "";
-  const qtyMarkup = data.quantityEnabled === "off" ? "" : `<div class="lp-order-row lp-quantity-row"><div><small>QUANTITY</small><strong>Select quantity</strong></div><div class="lp-qty-stepper" data-order-stepper><button type="button" aria-label="Decrease quantity" onclick="window.youyouLandingChangeQty(this,-1)">−</button><output data-order-qty>${initial}</output><button type="button" aria-label="Increase quantity" onclick="window.youyouLandingChangeQty(this,1)">+</button></div></div>`;
-  const variantsMarkup = variants.length ? `<div class="lp-order-variants">${variants.map(v=>`<label><span>${escapeHtml(v.name)}</span><select data-order-variant="${escapeHtml(v.name)}" onchange="window.youyouLandingUpdateOrder(this)">${v.options.map(o=>`<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join("")}</select></label>`).join("")}</div>` : "";
-  const bundlesMarkup = bundles.length ? `<div class="lp-order-bundles"><small>BUNDLE</small><div>${bundles.map(b=>`<button type="button" class="${b.qty===initial?"is-active":""}" data-bundle-qty="${b.qty}" onclick="window.youyouLandingChooseBundle(this,${b.qty})">${escapeHtml(b.label)}</button>`).join("")}</div></div>` : "";
-  const summary = unit > 0 ? `<div class="lp-order-summary"><div><span>Unit price</span><strong>${escapeHtml(symbol)} ${unit.toFixed(2)}</strong></div><div><span>Quantity</span><strong data-order-summary-qty>${initial}</strong></div><div class="lp-order-total"><span>Total</span><strong><b data-order-currency>${escapeHtml(symbol)}</b> <em data-order-total>${(unit*initial).toFixed(2)}</em></strong></div></div>` : `<div class="lp-order-summary is-quote"><div><span>Selected quantity</span><strong data-order-summary-qty>${initial}</strong></div><div class="lp-order-total"><span>Price</span><strong>Contact for price</strong></div></div>`;
+  const colorsMarkup = colors.length ? `<div class="lp-order-colors"><small>COLOR</small><div class="lp-color-swatches">${colors.map((color,index)=>`<button type="button" class="lp-color-swatch ${index===0?"is-active":""}" data-order-color="${escapeHtml(color.name)}" title="${escapeHtml(color.name)}" aria-pressed="${index===0?"true":"false"}" onclick="window.youyouLandingChooseColor(this)"><i style="background:${escapeHtml(color.hex)}"></i><span>${escapeHtml(color.name)}</span><b>✓</b></button>`).join("")}</div></div>` : "";
 
-  return `<div class="lp-commerce-box" data-commerce-box data-commerce-mode="product" data-unit-price="${unit}" data-currency="${escapeHtml(symbol)}" data-min="${min}" data-max="${max}"><div class="lp-commerce-head"><small>ORDER DETAILS</small><span>PRODUCT</span></div>${colorsMarkup}${bundlesMarkup}${qtyMarkup}${variantsMarkup}${summary}</div>`;
+  const variantsMarkup = variants.length ? `<div class="lp-order-options">${variants.map((v)=>`<div class="lp-order-option-group"><small>${escapeHtml(v.name.toUpperCase())}</small><div class="lp-option-chips">${v.options.map((o,index)=>`<button type="button" class="lp-option-chip ${index===0?"is-active":""}" data-order-variant-name="${escapeHtml(v.name)}" data-order-variant-value="${escapeHtml(o)}" aria-pressed="${index===0?"true":"false"}" onclick="window.youyouLandingChooseVariant(this)">${escapeHtml(o)}<b>✓</b></button>`).join("")}</div></div>`).join("")}</div>` : "";
+
+  const bundlesMarkup = bundles.length ? `<div class="lp-order-bundles"><small>BUNDLE</small><div>${bundles.map((b,index)=>`<button type="button" class="${index===0?"is-active":""}" data-bundle-qty="${b.qty}" data-bundle-price="${b.price ?? ""}" aria-pressed="${index===0?"true":"false"}" onclick="window.youyouLandingChooseBundle(this,${b.qty})"><strong>${escapeHtml(b.label)}</strong><span>${b.qty} ${b.qty===1?"item":"items"}${b.price !== null ? ` · ${escapeHtml(symbol)} ${b.price.toFixed(2)}` : ""}</span><b>✓</b></button>`).join("")}</div></div>` : "";
+
+  const qtyMarkup = data.quantityEnabled === "off" ? "" : `<div class="lp-order-row lp-quantity-row"><small>QUANTITY</small><div class="lp-qty-stepper" data-order-stepper><button type="button" aria-label="Decrease quantity" onclick="window.youyouLandingChangeQty(this,-1)">−</button><output data-order-qty>${initial}</output><button type="button" aria-label="Increase quantity" onclick="window.youyouLandingChangeQty(this,1)">+</button></div></div>`;
+
+  const summary = unit > 0 || bundles.some((b)=>b.price !== null)
+    ? `<div class="lp-order-summary"><div><span>Unit price</span><strong>${escapeHtml(symbol)} <em data-order-unit>${unit.toFixed(2)}</em></strong></div><div><span>Quantity</span><strong data-order-summary-qty>${initial}</strong></div><div class="lp-order-total"><span>Total</span><strong><b data-order-currency>${escapeHtml(symbol)}</b> <em data-order-total>${(unit*initial).toFixed(2)}</em></strong></div></div>`
+    : `<div class="lp-order-summary is-quote"><div><span>Quantity</span><strong data-order-summary-qty>${initial}</strong></div><div class="lp-order-total"><span>Price</span><strong>Contact for price</strong></div></div>`;
+
+  return `<div class="lp-commerce-box" data-commerce-box data-commerce-mode="product" data-unit-price="${unit}" data-currency="${escapeHtml(symbol)}" data-min="${min}" data-max="${max}"><div class="lp-commerce-head"><small>ORDER DETAILS</small></div>${colorsMarkup}${variantsMarkup}${bundlesMarkup}${qtyMarkup}${summary}</div>`;
 }
 
 function landingCtaHref(data) {
@@ -2434,13 +2492,14 @@ function landingLeadFormMarkup(data, className = "") {
   const safeFollow = followHref && followHref !== "#contact" ? `<a class="lp-lead-followup" data-lp-lead-followup href="${escapeHtml(followHref)}" ${data.ctaAction === "whatsapp" ? 'target="_blank" rel="noopener"' : ''} hidden>${escapeHtml(followLabel)} ↗</a>` : "";
   return `<form class="lp-lead-form lp-checkout-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
     ${landingCommerceMarkup(data)}
+    <div class="lp-checkout-section-title"><span>YOUR DETAILS</span><small>Where should the business contact or deliver?</small></div>
     <div class="lp-lead-grid">
-      <label class="lp-lead-span-2"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
-      <label><span>Phone</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+212..." required /></label>
-      <label><span>Email <em>Optional</em></span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" /></label>
-      <label><span>City</span><input name="city" autocomplete="address-level2" placeholder="Your city" required /></label>
-      <label><span>Address</span><input name="address" autocomplete="street-address" placeholder="Street / area / delivery address" required /></label>
-      <label class="lp-lead-span-2"><span>Message <em>Optional</em></span><textarea name="message" rows="3" placeholder="Anything else we should know?"></textarea></label>
+      <label class="lp-lead-field lp-lead-span-2"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
+      <label class="lp-lead-field"><span>Phone</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+212..." required /></label>
+      <label class="lp-lead-field"><span>Email <em>Optional</em></span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+      <label class="lp-lead-field"><span>City</span><input name="city" autocomplete="address-level2" placeholder="Your city" required /></label>
+      <label class="lp-lead-field"><span>Address</span><input name="address" autocomplete="street-address" placeholder="Street / area" required /></label>
+      <label class="lp-lead-field lp-lead-span-2 lp-lead-message"><span>Message <em>Optional</em></span><textarea name="message" rows="3" placeholder="Anything else we should know?"></textarea></label>
     </div>
     <button type="submit">${escapeHtml(data.formButtonText || "Send request")}</button>
     <div class="lp-lead-feedback" aria-live="polite">
@@ -2504,9 +2563,9 @@ window.youyouLandingSubmit = function(form) {
   const quantity = String(commerce?.querySelector('[data-order-qty]')?.textContent || commerce?.querySelector('[data-order-summary-qty]')?.textContent || '').trim();
   const total = String(commerce?.querySelector('[data-order-total]')?.textContent || '').trim();
   const currency = String(commerce?.dataset?.currency || '').trim();
-  const bundle = String(commerce?.querySelector('[data-bundle-qty].is-active')?.textContent || '').trim();
+  const bundle = String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent || '').trim();
   const color = String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor || '').trim();
-  const variants = [...(commerce?.querySelectorAll('[data-order-variant]') || [])].map((el) => `${el.dataset.orderVariant}: ${el.value}`).filter(Boolean);
+  const variants = [...(commerce?.querySelectorAll('[data-order-variant-name].is-active') || [])].map((el) => `${el.dataset.orderVariantName}: ${el.dataset.orderVariantValue}`).filter(Boolean);
   const details = [`Phone: ${phone}`,`City: ${city}`,`Address: ${address}`,email ? `Email: ${email}` : '',quantity ? `Quantity: ${quantity}` : '',color ? `Color: ${color}` : '',bundle ? `Bundle: ${bundle}` : '',variants.length ? `Options: ${variants.join(', ')}` : '',total ? `Order total: ${currency} ${total}` : '',message ? `Message: ${message}` : ''].filter(Boolean).join(' | ');
   const content = `Lead form submission for ${pageTitle}. ${details}`;
   if (button) button.disabled = true;
@@ -2530,17 +2589,71 @@ window.youyouLandingSubmit = function(form) {
 
 
 window.youyouLandingUpdateOrder = function(source) {
-  const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'), box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]'); if(!box)return;
-  const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]'); let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));
-  if(qtyEl)qtyEl.textContent=String(qty); box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty)); const unit=Math.max(0,Number(box.dataset.unitPrice)||0),total=unit*qty; box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2)); box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',Number(el.dataset.bundleQty)===qty));
-  const variants=[...box.querySelectorAll('[data-order-variant]')].map(el=>`${el.dataset.orderVariant}: ${el.value}`).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=[`Hi! I am interested in ${title}.`,`Quantity: ${qty}`]; if(color)summary.push(`Color: ${color}`); if(variants.length)summary.push(`Options: ${variants.join(', ')}`); if(unit>0)summary.push(`Total: ${currency} ${total.toFixed(2)}`);
-  page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=`${base}?text=${encodeURIComponent(summary.join('\\n'))}`}catch(_){}});
+  const page = source?.closest?.('.lp-live-page') || document.querySelector('.lp-live-page');
+  const box = source?.closest?.('[data-commerce-box]') || page?.querySelector('[data-commerce-box]');
+  if (!box) return;
+
+  const min = Math.max(1, Number(box.dataset.min) || 1);
+  const max = Math.max(min, Number(box.dataset.max) || 20);
+  const qtyEl = box.querySelector('[data-order-qty]');
+  let qty = Math.max(min, Math.min(max, Number(qtyEl?.textContent) || min));
+  if (qtyEl) qtyEl.textContent = String(qty);
+  box.querySelectorAll('[data-order-summary-qty]').forEach((el)=>el.textContent=String(qty));
+
+  const unit = Math.max(0, Number(box.dataset.unitPrice) || 0);
+  const activeBundle = box.querySelector('[data-bundle-qty].is-active');
+  const bundlePriceRaw = String(activeBundle?.dataset?.bundlePrice || "").trim();
+  const bundlePrice = bundlePriceRaw === "" ? null : Math.max(0, Number(bundlePriceRaw) || 0);
+  const total = bundlePrice !== null ? bundlePrice : unit * qty;
+
+  box.querySelectorAll('[data-order-total]').forEach((el)=>el.textContent=total.toFixed(2));
+  box.querySelectorAll('[data-order-unit]').forEach((el)=>el.textContent=unit.toFixed(2));
+
+  const variants = [...box.querySelectorAll('[data-order-variant-name].is-active')]
+    .map((el)=>`${el.dataset.orderVariantName}: ${el.dataset.orderVariantValue}`)
+    .filter(Boolean);
+  const color = String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor || '').trim();
+  const bundle = String(activeBundle?.querySelector('strong')?.textContent || '').trim();
+  const title = page?.dataset?.pageTitle || 'this product';
+  const currency = box.dataset.currency || "";
+  const summary = [`Hi! I am interested in ${title}.`, `Quantity: ${qty}`];
+  if (color) summary.push(`Color: ${color}`);
+  if (variants.length) summary.push(`Options: ${variants.join(', ')}`);
+  if (bundle) summary.push(`Bundle: ${bundle}`);
+  if (unit > 0 || bundlePrice !== null) summary.push(`Total: ${currency} ${total.toFixed(2)}`);
+
+  page?.querySelectorAll('a[href*="wa.me/"]').forEach((link)=>{
+    try {
+      const base = String(link.href).split('?')[0];
+      link.href = `${base}?text=${encodeURIComponent(summary.join('\\n'))}`;
+    } catch (_) {}
+  });
 };
-window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));window.youyouLandingUpdateOrder(button)};
-window.youyouLandingChooseColor=function(button){const box=button?.closest?.('[data-commerce-box]');if(!box)return;box.querySelectorAll('[data-order-color]').forEach(el=>el.classList.toggle('is-active',el===button));window.youyouLandingUpdateOrder(button)};
-window.youyouLandingChooseColor=function(button){const box=button?.closest?.('[data-commerce-box]');if(!box)return;box.querySelectorAll('[data-order-color]').forEach(el=>el.classList.toggle('is-active',el===button));window.youyouLandingUpdateOrder(button)};
-window.youyouLandingChooseBundle=function(button,quantity){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box)return;if(qty)qty.textContent=String(quantity||1);box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',el===button));window.youyouLandingUpdateOrder(button)};
-function yyInitCommerce(root=document){root.querySelectorAll?.('[data-commerce-box]').forEach(box=>window.youyouLandingUpdateOrder(box))}
+window.youyouLandingChangeQty = function(button,delta) {
+  const box=button?.closest?.('[data-commerce-box]'), qty=box?.querySelector('[data-order-qty]');
+  if(!box||!qty)return;
+  const min=Math.max(1,Number(box.dataset.min)||1), max=Math.max(min,Number(box.dataset.max)||20);
+  qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));
+  box.querySelectorAll('[data-bundle-qty]').forEach((el)=>{el.classList.remove('is-active');el.setAttribute('aria-pressed','false')});
+  window.youyouLandingUpdateOrder(button);
+};
+window.youyouLandingChooseColor = function(button) {
+  const box=button?.closest?.('[data-commerce-box]'); if(!box)return;
+  box.querySelectorAll('[data-order-color]').forEach((el)=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});
+  window.youyouLandingUpdateOrder(button);
+};
+window.youyouLandingChooseVariant = function(button) {
+  const group=button?.closest?.('.lp-order-option-group'), box=button?.closest?.('[data-commerce-box]'); if(!group||!box)return;
+  group.querySelectorAll('[data-order-variant-name]').forEach((el)=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});
+  window.youyouLandingUpdateOrder(button);
+};
+window.youyouLandingChooseBundle = function(button,quantity) {
+  const box=button?.closest?.('[data-commerce-box]'), qty=box?.querySelector('[data-order-qty]'); if(!box)return;
+  if(qty) qty.textContent=String(quantity||1);
+  box.querySelectorAll('[data-bundle-qty]').forEach((el)=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});
+  window.youyouLandingUpdateOrder(button);
+};
+function yyInitCommerce(root=document){root.querySelectorAll?.('[data-commerce-box]').forEach((box)=>window.youyouLandingUpdateOrder(box))}
 
 function initLandingCarousels(root = document) {
   const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -3161,11 +3274,13 @@ const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
 async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
-window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),followup=form?.querySelector('[data-lp-lead-followup]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();const setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please check the email address or leave it empty.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),quantity=String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim(),total=String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim(),currency=String(commerce?.dataset?.currency||'').trim(),bundle=String(commerce?.querySelector('[data-bundle-qty].is-active')?.textContent||'').trim(),color=String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),variants=[...(commerce?.querySelectorAll('[data-order-variant]')||[])].map(el=>el.dataset.orderVariant+': '+el.value).filter(Boolean),title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{if(button)button.disabled=false});return false};
+window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),followup=form?.querySelector('[data-lp-lead-followup]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();const setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please check the email address or leave it empty.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),quantity=String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim(),total=String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim(),currency=String(commerce?.dataset?.currency||'').trim(),bundle=String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim(),color=String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),variants=[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{if(button)button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
-window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),total=unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',Number(el.dataset.bundleQty)===qty));const variants=[...box.querySelectorAll('[data-order-variant]')].map(el=>el.dataset.orderVariant+': '+el.value).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(color)summary.push('Color: '+color);if(variants.length)summary.push('Options: '+variants.join(', '));if(unit>0)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
-window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));window.youyouLandingUpdateOrder(button)};
-window.youyouLandingChooseBundle=function(button,quantity){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box)return;if(qty)qty.textContent=String(quantity||1);box.querySelectorAll('[data-bundle-qty]').forEach(el=>el.classList.toggle('is-active',el===button));window.youyouLandingUpdateOrder(button)};
+window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),activeBundle=box.querySelector('[data-bundle-qty].is-active'),bundleRaw=String(activeBundle?.dataset?.bundlePrice||'').trim(),bundlePrice=bundleRaw===''?null:Math.max(0,Number(bundleRaw)||0),total=bundlePrice!==null?bundlePrice:unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-order-unit]').forEach(el=>el.textContent=unit.toFixed(2));const variants=[...box.querySelectorAll('[data-order-variant-name].is-active')].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),bundle=String(activeBundle?.querySelector('strong')?.textContent||'').trim(),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(color)summary.push('Color: '+color);if(variants.length)summary.push('Options: '+variants.join(', '));if(bundle)summary.push('Bundle: '+bundle);if(unit>0||bundlePrice!==null)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
+window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));box.querySelectorAll('[data-bundle-qty]').forEach(el=>{el.classList.remove('is-active');el.setAttribute('aria-pressed','false')});window.youyouLandingUpdateOrder(button)};
+window.youyouLandingChooseColor=function(button){const box=button?.closest?.('[data-commerce-box]');if(!box)return;box.querySelectorAll('[data-order-color]').forEach(el=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});window.youyouLandingUpdateOrder(button)};
+window.youyouLandingChooseVariant=function(button){const group=button?.closest?.('.lp-order-option-group'),box=button?.closest?.('[data-commerce-box]');if(!group||!box)return;group.querySelectorAll('[data-order-variant-name]').forEach(el=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});window.youyouLandingUpdateOrder(button)};
+window.youyouLandingChooseBundle=function(button,quantity){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box)return;if(qty)qty.textContent=String(quantity||1);box.querySelectorAll('[data-bundle-qty]').forEach(el=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});window.youyouLandingUpdateOrder(button)};
 function yyInitCommerce(){document.querySelectorAll('[data-commerce-box]').forEach(box=>window.youyouLandingUpdateOrder(box))}
 function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dotsHost=slider.querySelector('[data-carousel-dots]'),counter=slider.querySelector('[data-carousel-counter]'),prev=slider.querySelector('.lp-image-arrow.prev'),next=slider.querySelector('.lp-image-arrow.next');if(!track||slides.length<2)return;let positions=[],active=0,raf=0,timer=null,resizeTimer=null;const nearest=()=>{let b=0,d=Infinity;positions.forEach((p,i)=>{const x=Math.abs(p-track.scrollLeft);if(x<d){d=x;b=i}});return b},indicators=()=>{active=nearest();dotsHost?.querySelectorAll('button').forEach((dot,i)=>dot.classList.toggle('is-active',i===active));if(counter&&!counter.hidden)counter.textContent=(active+1)+' / '+positions.length},measure=()=>{const tr=track.getBoundingClientRect(),max=Math.max(0,track.scrollWidth-track.clientWidth),raw=slides.map(slide=>{const r=slide.getBoundingClientRect();return Math.max(0,Math.min(max,r.left-tr.left+track.scrollLeft))});positions=raw.filter((v,i,a)=>i===0||Math.abs(v-a[i-1])>3);if(!positions.length)positions=[0];active=Math.max(0,Math.min(active,positions.length-1));if(dotsHost){if(positions.length<=10){dotsHost.hidden=false;dotsHost.innerHTML=positions.map((_,i)=>'<button type="button" data-carousel-page="'+i+'" aria-label="Show carousel page '+(i+1)+'"></button>').join('');if(counter)counter.hidden=true}else{dotsHost.hidden=true;if(counter)counter.hidden=false}}indicators()},go=(i,b='smooth')=>{if(!positions.length)measure();const safe=((i%positions.length)+positions.length)%positions.length;track.scrollTo({left:positions[safe]||0,behavior:b});active=safe;indicators()},pause=()=>{if(timer)clearInterval(timer);timer=null},play=()=>{pause();if(slider.dataset.autoplay!=='true'||reduced||positions.length<2||document.hidden)return;timer=setInterval(()=>go(active+1),Math.max(2000,Number(slider.dataset.speed)||4000))};track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(indicators)},{passive:true});dotsHost?.addEventListener('click',e=>{const dot=e.target.closest?.('[data-carousel-page]');if(dot)go(Number(dot.dataset.carouselPage||0))});prev&&prev.addEventListener('click',()=>go(active-1));next&&next.addEventListener('click',()=>go(active+1));slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});document.addEventListener('visibilitychange',()=>document.hidden?pause():play());window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{measure();go(active,'auto')},80)},{passive:true});measure();go(0,'auto');play()})}
 document.addEventListener('DOMContentLoaded',()=>{yyInitCarousels();yyInitCommerce()});yyInitCarousels();yyInitCommerce();
@@ -3633,6 +3748,7 @@ function renderLandingPageWorkspace() {
                 <label class="lpb-price-big">Selling price<input id="lpb-price" inputmode="decimal" placeholder="100" /></label>
               </div>
               <label class="lpb-old-price-premium">Compare-at / old price <span>Optional</span><input id="lpb-old-price" inputmode="decimal" placeholder="300" /></label>
+              <div class="lpb-price-live-row"><span>Landing price preview</span><strong data-price-workspace-preview>$ 0.00</strong></div>
               <div class="lpb-price-hint"><span>✦</span><p><strong>Premium pricing block</strong><small>Large, visible pricing controls so the client always knows where to set the offer.</small></p></div>
             </div>
           </div>
@@ -3680,9 +3796,65 @@ function renderLandingPageWorkspace() {
                   <div id="lpb-selected-colors" class="lpb-selected-colors"></div>
                 </div>
 
-                <label>Other variants <span>Optional · Name: option 1, option 2</span><textarea id="lpb-variants-text" rows="4" placeholder="Size: Small, Medium, Large&#10;Material: Cotton, Linen"></textarea></label>
-                <label>Bundle options <span>Optional · Label|Quantity, one per line</span><textarea id="lpb-bundle-options" rows="4" placeholder="Single|1&#10;Pack of 2|2&#10;Pack of 3|3"></textarea></label>
-                <p class="lpb-media-help lpb-media-help-strong">When activated, order details appear only beside the lead form near the bottom of the landing page — never under the hero.</p>
+                <div class="lpb-universal-options">
+                  <div class="lpb-option-builder-head">
+                    <div><strong>Product option types</strong><span>Activate only what this product needs. Visitors see clean selectable chips.</span></div>
+                    <span>UNIVERSAL</span>
+                  </div>
+
+                  <div class="lpb-option-card" data-option-card="size">
+                    <div class="lpb-option-card-top"><div><strong>Size</strong><span>Clothing, shoes, accessories</span></div><select id="lpb-size-enabled"><option value="off">OFF</option><option value="on">ON</option></select></div>
+                    <input id="lpb-size-options" type="hidden" />
+                    <div class="lpb-option-presets" data-option-presets="sizeOptions">
+                      ${["XS","S","M","L","XL","XXL","XXXL","XXXXL"].map((v)=>`<button type="button" data-option-value="${v}">${v}</button>`).join("")}
+                    </div>
+                  </div>
+
+                  <div class="lpb-option-card" data-option-card="weight">
+                    <div class="lpb-option-card-top"><div><strong>Weight</strong><span>Food, cosmetics, bulk products</span></div><select id="lpb-weight-enabled"><option value="off">OFF</option><option value="on">ON</option></select></div>
+                    <input id="lpb-weight-options" type="hidden" />
+                    <div class="lpb-option-presets" data-option-presets="weightOptions">
+                      ${["250 g","500 g","1 kg","2 kg","5 kg"].map((v)=>`<button type="button" data-option-value="${v}">${v}</button>`).join("")}
+                    </div>
+                  </div>
+
+                  <div class="lpb-option-card" data-option-card="volume">
+                    <div class="lpb-option-card-top"><div><strong>Volume</strong><span>Drinks, liquids, beauty products</span></div><select id="lpb-volume-enabled"><option value="off">OFF</option><option value="on">ON</option></select></div>
+                    <input id="lpb-volume-options" type="hidden" />
+                    <div class="lpb-option-presets" data-option-presets="volumeOptions">
+                      ${["100 ml","250 ml","500 ml","1 L","2 L"].map((v)=>`<button type="button" data-option-value="${v}">${v}</button>`).join("")}
+                    </div>
+                  </div>
+
+                  <div class="lpb-option-card" data-option-card="units">
+                    <div class="lpb-option-card-top"><div><strong>Units / Pack</strong><span>Pieces, boxes, sets</span></div><select id="lpb-units-enabled"><option value="off">OFF</option><option value="on">ON</option></select></div>
+                    <input id="lpb-units-options" type="hidden" />
+                    <div class="lpb-option-presets" data-option-presets="unitsOptions">
+                      ${["1 pc","2 pcs","6 pcs","12 pcs"].map((v)=>`<button type="button" data-option-value="${v}">${v}</button>`).join("")}
+                    </div>
+                  </div>
+
+                  <div class="lpb-option-card" data-option-card="custom">
+                    <div class="lpb-option-card-top"><div><strong>Custom option</strong><span>Material, flavor, finish or anything else</span></div><select id="lpb-custom-option-enabled"><option value="off">OFF</option><option value="on">ON</option></select></div>
+                    <div class="lpb-custom-option-fields">
+                      <label>Option name<input id="lpb-custom-option-name" placeholder="Flavor" /></label>
+                      <label>Choices <span>Separate with commas</span><input id="lpb-custom-option-values" placeholder="Vanilla, Chocolate, Strawberry" /></label>
+                    </div>
+                  </div>
+
+                  <textarea id="lpb-variants-text" class="lpb-legacy-variants" aria-hidden="true" tabindex="-1"></textarea>
+                </div>
+
+                <div class="lpb-bundle-builder">
+                  <div class="lpb-option-builder-head">
+                    <div><strong>Bundle offers</strong><span>Simple quantity + optional bundle price. No code-like syntax.</span></div>
+                    <button id="lpb-add-bundle" type="button">+ Add bundle</button>
+                  </div>
+                  <textarea id="lpb-bundle-options" class="lpb-bundle-storage" aria-hidden="true" tabindex="-1"></textarea>
+                  <div id="lpb-bundle-rows" class="lpb-bundle-rows"></div>
+                </div>
+
+                <p class="lpb-media-help lpb-media-help-strong">When activated, order details appear only inside the final checkout form — never under the hero.</p>
               </div>
             </div>
           </div>
@@ -4079,7 +4251,7 @@ function initLandingPageWorkspace() {
     description:"lpb-description", benefits:"lpb-benefits", price:"lpb-price",
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
     businessName:"lpb-business-name", businessAddress:"lpb-business-address",
-    commerceEnabled:"lpb-commerce-enabled", commerceMode:"lpb-commerce-mode", quantityEnabled:"lpb-quantity-enabled", quantityMin:"lpb-quantity-min", quantityMax:"lpb-quantity-max", quantityDefault:"lpb-quantity-default", productColors:"lpb-product-colors", variantsText:"lpb-variants-text", bundleEnabled:"lpb-bundle-enabled", bundleOptions:"lpb-bundle-options",
+    commerceEnabled:"lpb-commerce-enabled", commerceMode:"lpb-commerce-mode", quantityEnabled:"lpb-quantity-enabled", quantityMin:"lpb-quantity-min", quantityMax:"lpb-quantity-max", quantityDefault:"lpb-quantity-default", productColors:"lpb-product-colors", sizeEnabled:"lpb-size-enabled", sizeOptions:"lpb-size-options", weightEnabled:"lpb-weight-enabled", weightOptions:"lpb-weight-options", volumeEnabled:"lpb-volume-enabled", volumeOptions:"lpb-volume-options", unitsEnabled:"lpb-units-enabled", unitsOptions:"lpb-units-options", customOptionEnabled:"lpb-custom-option-enabled", customOptionName:"lpb-custom-option-name", customOptionValues:"lpb-custom-option-values", variantsText:"lpb-variants-text", bundleEnabled:"lpb-bundle-enabled", bundleOptions:"lpb-bundle-options",
     ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
     phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
@@ -4103,7 +4275,10 @@ function initLandingPageWorkspace() {
     });
     renderCustomSectionsManager();
     renderProductColorManager();
+    renderUniversalOptionManager();
+    renderBundleManager();
     syncPriceModeUi();
+    syncPricePreviewUi();
   };
 
   const readFields = () => {
@@ -4139,6 +4314,85 @@ function initLandingPageWorkspace() {
     document.querySelectorAll("[data-price-mode-value]").forEach((button)=>button.classList.toggle("is-active", button.dataset.priceModeValue === mode));
     const editor = document.querySelector("[data-price-editor]");
     if (editor) editor.classList.toggle("is-muted", mode !== "show");
+  };
+
+  const optionConfig = {
+    size:{ enabled:"sizeEnabled", values:"sizeOptions" },
+    weight:{ enabled:"weightEnabled", values:"weightOptions" },
+    volume:{ enabled:"volumeEnabled", values:"volumeOptions" },
+    units:{ enabled:"unitsEnabled", values:"unitsOptions" },
+    custom:{ enabled:"customOptionEnabled", values:"customOptionValues" },
+  };
+
+  const renderUniversalOptionManager = () => {
+    Object.entries(optionConfig).forEach(([type,config]) => {
+      const card = document.querySelector(`[data-option-card="${type}"]`);
+      if (!card) return;
+      const enabled = String(current[config.enabled] || "off") === "on";
+      card.classList.toggle("is-enabled", enabled);
+      const presets = card.querySelector("[data-option-presets]");
+      if (presets) {
+        const selected = new Set(landingOptionValues(current[config.values] || ""));
+        presets.querySelectorAll("[data-option-value]").forEach((button) => {
+          const active = selected.has(String(button.dataset.optionValue || ""));
+          button.classList.toggle("is-active", active);
+          button.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+      }
+    });
+  };
+
+  const bundleRowsFromCurrent = () => {
+    const parsed = landingParseBundles(current.bundleOptions || "");
+    return parsed.length ? parsed : [
+      { label:"Single", qty:1, price:null },
+      { label:"Pack of 2", qty:2, price:null },
+      { label:"Pack of 3", qty:3, price:null },
+    ];
+  };
+
+  const serializeBundleRows = (rows) => rows
+    .filter((row)=>String(row.label || "").trim())
+    .slice(0,10)
+    .map((row)=>`${String(row.label || "").trim()}|${Math.max(1,Math.min(99,Number(row.qty)||1))}|${row.price === null || row.price === "" || Number.isNaN(Number(row.price)) ? "" : Math.max(0,Number(row.price))}`)
+    .join("\\n");
+
+  const renderBundleManager = () => {
+    const host = document.getElementById("lpb-bundle-rows");
+    if (!host) return;
+    const rows = bundleRowsFromCurrent();
+    host.innerHTML = rows.map((row,index)=>`<div class="lpb-bundle-row" data-bundle-row="${index}">
+      <label><span>Bundle name</span><input data-bundle-field="label" value="${escapeHtml(row.label)}" placeholder="Pack of 2" /></label>
+      <label class="is-qty"><span>Qty</span><input data-bundle-field="qty" type="number" min="1" max="99" value="${row.qty}" /></label>
+      <label class="is-price"><span>Bundle price <em>Optional</em></span><input data-bundle-field="price" inputmode="decimal" value="${row.price ?? ""}" placeholder="180" /></label>
+      <button type="button" class="lpb-remove-bundle" data-remove-bundle="${index}" aria-label="Remove bundle">×</button>
+    </div>`).join("");
+    const storage = document.getElementById("lpb-bundle-options");
+    if (storage) storage.value = current.bundleOptions || serializeBundleRows(rows);
+  };
+
+  const readBundleManager = () => {
+    const rows = [...document.querySelectorAll("[data-bundle-row]")].map((row)=>({
+      label:String(row.querySelector('[data-bundle-field="label"]')?.value || "").trim(),
+      qty:Math.max(1,Math.min(99,Number(row.querySelector('[data-bundle-field="qty"]')?.value)||1)),
+      price:String(row.querySelector('[data-bundle-field="price"]')?.value || "").trim(),
+    }));
+    current.bundleOptions = serializeBundleRows(rows);
+    const storage = document.getElementById("lpb-bundle-options");
+    if (storage) storage.value = current.bundleOptions;
+  };
+
+  const syncPricePreviewUi = () => {
+    const mode = String(document.getElementById("lpb-price-mode")?.value || current.priceMode || "show");
+    const value = Math.max(0, Number(String(document.getElementById("lpb-price")?.value || current.price || "").replace(",", ".")) || 0);
+    const symbol = landingCurrencySymbol(document.getElementById("lpb-currency")?.value || current.currency);
+    document.querySelectorAll("[data-price-mode-value]").forEach((button)=>{
+      const active = button.dataset.priceModeValue === mode;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    const preview = document.querySelector("[data-price-workspace-preview]");
+    if (preview) preview.textContent = mode === "show" ? `${symbol} ${value ? value.toFixed(2) : "0.00"}` : mode === "quote" ? "Quote mode" : "Price hidden";
   };
 
   const updateGalleryControls = () => {
@@ -4178,6 +4432,8 @@ function initLandingPageWorkspace() {
     const commerceEnabled = String(document.getElementById("lpb-commerce-enabled")?.value || current.commerceEnabled || "off") === "on";
     const explicitMode = String(document.getElementById("lpb-commerce-mode")?.value || current.commerceMode || "product");
     const effectiveProduct = commerceEnabled && explicitMode === "product";
+    renderUniversalOptionManager();
+    syncPricePreviewUi();
     document.querySelectorAll("[data-commerce-settings]").forEach((el) => { el.style.display = commerceEnabled ? "grid" : "none"; });
     document.querySelectorAll("[data-product-settings]").forEach((el) => { el.style.display = effectiveProduct ? "grid" : "none"; });
     current.rendererVersion = YOUYOU_LANDING_RENDERER_VERSION;
@@ -4522,6 +4778,7 @@ function initLandingPageWorkspace() {
       if (select) select.value = mode;
       current.priceMode = mode;
       syncPriceModeUi();
+      syncPricePreviewUi();
       renderPreview();
       markChangedAndAutosave();
     });
@@ -4560,6 +4817,53 @@ function initLandingPageWorkspace() {
     const lines = productColorLines();
     if (Number.isInteger(index) && index >= 0 && index < lines.length) lines.splice(index,1);
     setProductColors(lines);
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
+  document.querySelector(".lpb-universal-options")?.addEventListener("click", (event) => {
+    const button = event.target.closest?.("[data-option-value]");
+    if (!button) return;
+    const presets = button.closest("[data-option-presets]");
+    const key = String(presets?.dataset?.optionPresets || "");
+    if (!key) return;
+    const currentValues = landingOptionValues(current[key] || "");
+    const value = String(button.dataset.optionValue || "");
+    const index = currentValues.indexOf(value);
+    if (index >= 0) currentValues.splice(index,1); else currentValues.push(value);
+    current[key] = currentValues.join(",");
+    const storageId = key === "sizeOptions" ? "lpb-size-options" : key === "weightOptions" ? "lpb-weight-options" : key === "volumeOptions" ? "lpb-volume-options" : "lpb-units-options";
+    const storage = document.getElementById(storageId);
+    if (storage) storage.value = current[key];
+    renderUniversalOptionManager();
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
+  document.querySelector("#lpb-bundle-rows")?.addEventListener("input", () => {
+    readBundleManager();
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
+  document.querySelector("#lpb-bundle-rows")?.addEventListener("click", (event) => {
+    const remove = event.target.closest?.("[data-remove-bundle]");
+    if (!remove) return;
+    const rows = bundleRowsFromCurrent();
+    const index = Number(remove.dataset.removeBundle);
+    if (Number.isInteger(index) && index >= 0 && index < rows.length) rows.splice(index,1);
+    current.bundleOptions = serializeBundleRows(rows);
+    renderBundleManager();
+    renderPreview();
+    markChangedAndAutosave();
+  });
+
+  document.querySelector("#lpb-add-bundle")?.addEventListener("click", () => {
+    const rows = bundleRowsFromCurrent();
+    if (rows.length >= 10) return;
+    rows.push({ label:`Bundle ${rows.length+1}`, qty:Math.min(99, rows.length+1), price:null });
+    current.bundleOptions = serializeBundleRows(rows);
+    renderBundleManager();
     renderPreview();
     markChangedAndAutosave();
   });

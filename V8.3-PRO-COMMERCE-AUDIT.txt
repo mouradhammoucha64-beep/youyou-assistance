@@ -1,0 +1,20 @@
+YOUYOU V8.3 — PRO COMMERCE / CHECKOUT POLISH
+
+{
+  "version": "8.3.0",
+  "base": "V8.2.2 WORKSPACE NAV POLISH",
+  "implemented": [
+    "Universal product options: Size, Weight, Volume, Units/Pack, Custom; each independently ON/OFF",
+    "Preset option chips in workspace and selectable chips on landing page",
+    "Functional bundle editor with Label, Quantity, optional Bundle Price",
+    "Bundle price drives live total when selected",
+    "Compact color workspace and visible selected-state checkmarks",
+    "Compact landing color swatches with selected-state feedback",
+    "Quantity copy simplified to QUANTITY; fixed mobile stepper width",
+    "Lead form compact floating labels inside fields",
+    "Price mode cards have explicit selected feedback plus live workspace price preview",
+    "Product options remain opt-in and stay inside final checkout/form, not under hero",
+    "Lead and WhatsApp payloads include selected color, option chips, bundle, quantity and total",
+    "Published snapshots use renderer 8.3.0 after Update live page"
+  ]
+}
