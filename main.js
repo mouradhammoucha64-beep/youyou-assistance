@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.2.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "8.2.1";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],

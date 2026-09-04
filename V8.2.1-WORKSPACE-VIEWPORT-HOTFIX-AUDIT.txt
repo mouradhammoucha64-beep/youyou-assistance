@@ -1,0 +1,13 @@
+YOUYOU V8.2.1 — WORKSPACE VIEWPORT HOTFIX
+
+{
+  "version": "8.2.1",
+  "base": "V8.2 CHECKOUT FORM ENGINE",
+  "issue": "Landing workspace could expose a large dark area below editor/canvas when the outer document retained scroll position or viewport rows were mis-sized.",
+  "fix": [
+    "Desktop workspace is now pinned to the browser viewport.",
+    "Workspace uses grid rows: topbar + optional publish row + remaining canvas.",
+    "Main/editor/canvas use min-height:0 so internal scrolling stays inside each pane.",
+    "No product, checkout, landing content, Supabase, publish, draft or media logic changed."
+  ]
+}
