@@ -1,0 +1,9 @@
+YOUYOU V8.0 — UNIVERSAL PRODUCT / SERVICE ENGINE
+
+Built from the uploaded full project (17), active renderer V7.11.
+No new SQL required.
+Product mode adds quantity, variants, bundles and order summary.
+Service mode hides product-order controls.
+Quantity/options/total are included in lead submissions and WhatsApp prefill.
+Existing published pages need Update live page once to receive renderer V8.0.
+No payment checkout is included yet.

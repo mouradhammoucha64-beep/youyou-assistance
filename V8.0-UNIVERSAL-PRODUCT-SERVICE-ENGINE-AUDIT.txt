@@ -1,0 +1,24 @@
+YOUYOU V8.0 — UNIVERSAL PRODUCT / SERVICE ENGINE
+
+{
+  "source": "full project (17)",
+  "source_renderer": "7.11.0",
+  "renderer": "8.0.0",
+  "features": [
+    "Auto/Product/Service mode",
+    "Quantity +/- with min/max/default",
+    "Variants",
+    "Bundle presets",
+    "Live order total",
+    "Order data in lead submission",
+    "WhatsApp prefilled order summary"
+  ],
+  "preserved": [
+    "Draft/autosave",
+    "Publish + real URL",
+    "Media storage",
+    "Gallery/video",
+    "Landing AI widget"
+  ],
+  "sql": "No new SQL required"
+}
