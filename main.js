@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "7.10.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "7.11.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2722,8 +2722,8 @@ function landingExportHtml(data, options = {}) {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="color-scheme" content="only light"/>
-<meta name="supported-color-schemes" content="light"/>
+<meta name="color-scheme" content="light dark"/>
+<meta name="supported-color-schemes" content="light dark"/>
 <meta name="theme-color" content="${escapeHtml(data.background || '#ffffff')}"/>
 <meta name="description" content="${escapeHtml(String(data.subheadline || data.description || '').slice(0,180))}"/>
 <meta property="og:type" content="website"/>
@@ -2734,33 +2734,41 @@ ${/^https?:\/\//i.test(String(data.heroImageUrl || data.imageUrl || '')) ? `<met
 <meta name="twitter:card" content="summary_large_image"/>
 <title>${escapeHtml(data.name || "Landing Page")}</title>
 <style>
-*{box-sizing:border-box}:root{color-scheme:only light!important;--yy-page-bg:${data.background};--yy-page-surface:${data.surface};--yy-page-text:${data.textColor};--yy-page-accent:${data.accent}}html{color-scheme:only light!important;background-color:${data.background}!important;background-image:linear-gradient(${data.background},${data.background})!important}body{margin:0;color-scheme:only light!important;background-color:${data.background}!important;background-image:linear-gradient(${data.background},${data.background})!important;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${data.textColor}!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{box-sizing:border-box}:root{color-scheme:light dark!important;--yy-page-bg:${data.background};--yy-page-surface:${data.surface};--yy-page-text:${data.textColor};--yy-page-accent:${data.accent}}html{color-scheme:light dark!important;background-color:${data.background}!important;background-image:linear-gradient(${data.background},${data.background})!important}body{margin:0;color-scheme:light dark!important;background-color:${data.background}!important;background-image:linear-gradient(${data.background},${data.background})!important;font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:${data.textColor}!important;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .lp-live-page{--lp-accent:${data.accent};--lp-bg:${data.background};--lp-surface:${data.surface};--lp-text:${data.textColor};max-width:1180px;margin:auto;background:var(--lp-bg);color:var(--lp-text);min-height:100vh}
 .lp-live-nav,.lp-live-footer{display:flex;justify-content:space-between;padding:22px 5%;border-bottom:1px solid #ffffff14}
 .lp-live-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,var(--lp-media-width));gap:36px;padding:70px 5%;align-items:center}.media-left .lp-live-copy{order:2}.media-left .lp-live-media{order:1}.media-top .lp-live-hero,.media-bottom .lp-live-hero{grid-template-columns:1fr}.media-top .lp-live-media{order:-1}.media-bottom .lp-live-media{order:2}.lp-live-copy h1{font-size:56px;line-height:1.02;margin:18px 0}.lp-live-sub{font-size:18px;line-height:1.6;color:#b8bdc9}.lp-live-badge{padding:7px 10px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 16%,transparent);color:var(--lp-accent);font-weight:700;font-size:12px}.lp-live-price{display:flex;gap:12px;align-items:baseline;margin:24px 0}.lp-live-price strong{font-size:34px}.lp-live-price del{opacity:.45}.lp-live-actions{display:flex;gap:10px;flex-wrap:wrap}.lp-live-actions a{padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:700}.lp-live-primary{background:var(--lp-accent);color:#080808}.lp-live-secondary{border:1px solid #ffffff25;color:var(--lp-text)}.lp-live-media{min-height:var(--lp-media-height);border-radius:24px;background:var(--lp-surface);overflow:hidden;position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;height:var(--lp-media-height);scrollbar-width:thin}.lp-live-media-slide{min-width:100%;height:100%;scroll-snap-align:start}.lp-live-media img,.lp-live-media video,.lp-live-media iframe{width:100%;height:100%;object-fit:cover;border:0;display:block}.lp-live-media-hint,.lp-live-demo-note{position:absolute;left:14px;bottom:14px;padding:7px 10px;border-radius:999px;background:#0009;color:#fff;font-size:11px}.lp-live-section{padding:55px 5%;border-top:1px solid #ffffff10}.lp-live-section>small{color:var(--lp-accent);font-weight:800}.lp-live-section h2{font-size:34px;max-width:780px}.lp-live-extra-copy{max-width:850px;font-size:18px;line-height:1.75}.lp-live-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.lp-live-benefit-grid div{padding:20px;background:var(--lp-surface);border-radius:14px}.lp-live-benefit-grid span{display:block;color:var(--lp-accent);font-size:12px;margin-bottom:10px}.lp-live-proof blockquote{font-size:28px;max-width:780px;margin:20px 0}.lp-live-contact{display:grid;grid-template-columns:1fr 1fr;gap:30px}.lp-live-contact form{display:grid;gap:10px}.lp-live-contact input,.lp-live-contact textarea{width:100%;padding:13px;border:1px solid #ffffff18;border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-live-contact button{padding:14px;border:0;border-radius:9px;background:var(--lp-accent);font-weight:800}
 .lp-live-trust{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;font-size:12px;opacity:.65}.lp-live-footer{border-top:1px solid #ffffff14;border-bottom:0}.lp-live-media{position:relative}.lp-live-media-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}.lp-live-media-track::-webkit-scrollbar{display:none}.lp-live-media-slide{position:relative;flex:0 0 100%;min-width:100%;height:100%;scroll-snap-align:start}.lp-live-empty-slide{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:28px;text-align:center}.lp-empty-icon{font-size:28px}.lp-live-slider-arrow{position:absolute;z-index:8;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;border:1px solid #ffffff4a;background:#080c16aa;color:#fff;font-size:27px;cursor:pointer}.lp-live-slider-arrow.prev{left:14px}.lp-live-slider-arrow.next{right:14px}.lp-live-slider-dots{position:absolute;z-index:9;left:50%;bottom:17px;transform:translateX(-50%);display:flex;gap:7px;padding:7px 10px;border-radius:999px;background:#080c1690}.lp-live-slider-dots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#ffffff7a}.lp-live-slider-dots button.is-active{width:22px;background:var(--lp-accent)}.lp-live-media-hint{position:absolute;z-index:7;left:16px;top:16px;bottom:auto;background:#080c16a3;color:#fff;padding:8px 10px;border-radius:10px;display:flex;flex-direction:column}.lp-live-media-hint span{font-size:8px;font-weight:800}.lp-live-media-hint small{font-size:7px;opacity:.7}
 @media(max-width:760px){.lp-live-hero,.lp-live-contact{grid-template-columns:1fr}.media-left .lp-live-copy,.media-left .lp-live-media{order:initial}.lp-live-copy h1{font-size:38px}.lp-live-benefit-grid{grid-template-columns:1fr}.lp-live-media-track{height:min(var(--lp-media-height),360px)}}
-/* YOUYOU V7.10 — Samsung Internet authored-light lock.
-   Marketing landing pages render the creator palette exactly; they do not expose a dark variant.
-   only-light mode opts out of Chromium auto-dark where supported. Solid gradient layers are a
-   defensive fallback for Samsung Force Dark heuristics because image layers are preserved. */
-:root,html,body,.lp-live-page,.beauty-wow{color-scheme:only light!important}
-html,body{background-color:var(--yy-page-bg)!important;background-image:linear-gradient(var(--yy-page-bg),var(--yy-page-bg))!important}
-.lp-live-page,.beauty-wow{background-color:var(--lp-bg)!important;background-image:linear-gradient(var(--lp-bg),var(--lp-bg))!important;color:var(--lp-text)!important}
+/* YOUYOU V7.11 — Samsung Internet authored palette lock.
+   Samsung Internet's default Force Dark pipeline only defers to author colors when the page
+   explicitly advertises BOTH schemes and supplies a prefers-color-scheme rule. We therefore
+   advertise light+dark, but intentionally render the SAME creator palette in both schemes. */
+:root,html,body,.lp-live-page,.beauty-wow{color-scheme:light dark!important}
+.lp-live-page,.beauty-wow,.lp-live-page *,.beauty-wow *{forced-color-adjust:none!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+html,body{background-color:var(--yy-page-bg)!important;background-image:linear-gradient(var(--yy-page-bg),var(--yy-page-bg))!important;color:var(--yy-page-text)!important}
+.lp-live-page,.beauty-wow{background-color:var(--lp-bg)!important;background-image:linear-gradient(var(--lp-bg),var(--lp-bg))!important;color:var(--lp-text)!important;-webkit-text-fill-color:var(--lp-text)!important}
 .lp-live-nav,.lp-live-footer,.lp-live-section,.beauty-nav,.beauty-hero,.beauty-story,.beauty-faq,.beauty-footer{color:var(--lp-text)!important}
-.lp-live-benefit-grid>div,.beauty-benefits article,.beauty-stat-grid>div,.lp-lead-form input,.lp-lead-form textarea,.lp-lead-form select{background-color:var(--lp-surface)!important;background-image:linear-gradient(var(--lp-surface),var(--lp-surface))!important;color:var(--lp-text)!important;color-scheme:only light!important}
+.lp-live-page :is(h1,h2,h3,h4,h5,h6,p,li,label,blockquote,strong,span,small),.beauty-wow :is(h1,h2,h3,h4,h5,h6,p,li,label,blockquote,strong,span,small){-webkit-text-fill-color:currentColor}
+.lp-live-benefit-grid>div,.beauty-benefits article,.beauty-stat-grid>div,.lp-lead-form input,.lp-lead-form textarea,.lp-lead-form select{background-color:var(--lp-surface)!important;background-image:linear-gradient(var(--lp-surface),var(--lp-surface))!important;color:var(--lp-text)!important;color-scheme:light dark!important}
 .beauty-marquee,.beauty-editorial-card,.beauty-final-cta{background-color:color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface)),color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface)))!important;color:var(--lp-text)!important}
 .beauty-gallery-section,.beauty-wow .lp-product-video{background-color:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)),color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)))!important}
 .beauty-review-section{background-color:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)),color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)))!important;color:var(--lp-text)!important}
+.lp-live-badge,.lp-live-section>small,.beauty-eyebrow{color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important}
 .lp-live-primary,.beauty-nav>a,.lp-lead-form button,.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important}
-.lp-live-contact input,.lp-live-contact textarea,.lp-live-contact select,.lp-live-contact button,.lp-ai-form input,.lp-ai-form button{color-scheme:only light!important}
-/* Samsung Internet may still evaluate prefers-color-scheme before its auto-dark pass.
-   Keep the authored LIGHT palette identical even when the OS requests dark. */
+.lp-live-primary,.beauty-nav>a,.lp-lead-form button,.lp-lead-followup{color:#fff!important;-webkit-text-fill-color:#fff!important}
+.lp-live-contact input,.lp-live-contact textarea,.lp-live-contact select,.lp-live-contact button,.lp-ai-form input,.lp-ai-form button{color-scheme:light dark!important}
 @media (prefers-color-scheme: dark){
-  :root,html,body,.lp-live-page,.beauty-wow{color-scheme:only light!important}
+  :root,html,body,.lp-live-page,.beauty-wow{color-scheme:light dark!important}
   html,body{background-color:var(--yy-page-bg)!important;background-image:linear-gradient(var(--yy-page-bg),var(--yy-page-bg))!important;color:var(--yy-page-text)!important}
-  .lp-live-page,.beauty-wow{background-color:var(--lp-bg)!important;background-image:linear-gradient(var(--lp-bg),var(--lp-bg))!important;color:var(--lp-text)!important}
+  .lp-live-page,.beauty-wow{background-color:var(--lp-bg)!important;background-image:linear-gradient(var(--lp-bg),var(--lp-bg))!important;color:var(--lp-text)!important;-webkit-text-fill-color:var(--lp-text)!important}
+  .lp-live-nav,.lp-live-footer,.lp-live-section,.beauty-nav,.beauty-hero,.beauty-story,.beauty-faq,.beauty-footer{color:var(--lp-text)!important}
   .lp-live-benefit-grid>div,.beauty-benefits article,.beauty-stat-grid>div,.lp-lead-form input,.lp-lead-form textarea,.lp-lead-form select{background-color:var(--lp-surface)!important;background-image:linear-gradient(var(--lp-surface),var(--lp-surface))!important;color:var(--lp-text)!important}
+  .beauty-marquee,.beauty-editorial-card,.beauty-final-cta{background-color:color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface)),color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface)))!important;color:var(--lp-text)!important}
+  .beauty-gallery-section,.beauty-wow .lp-product-video{background-color:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)),color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)))!important}
+  .beauty-review-section{background-color:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)),color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)))!important;color:var(--lp-text)!important}
+  .lp-live-badge,.lp-live-section>small,.beauty-eyebrow{color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important}
+  .lp-live-primary,.beauty-nav>a,.lp-lead-form button,.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 
 

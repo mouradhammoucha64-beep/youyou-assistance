@@ -1,0 +1,7 @@
+YOUYOU V7.11 — Samsung authored palette fix
+
+1) No new SQL.
+2) Upload the complete project to the same GitHub repo and deploy on Vercel.
+3) Existing /p/... links are hardened at request time; Update live design is optional but recommended once.
+4) Test the same link in Chrome and Samsung Internet.
+5) If Samsung still forces dark colors, open /samsung-color-diagnostic.html. If CSS cards darken while the image-backed card stays rose, the phone has browser-level Force Dark enabled; this cannot be fully overridden by site CSS.

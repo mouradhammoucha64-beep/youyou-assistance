@@ -1,0 +1,12 @@
+YOUYOU V7.11 — Samsung Internet root-cause audit
+
+Root cause found in V7.10 approach:
+- We used color-scheme: only light. Samsung's own guidance for the "Prefer Media Query Over Force Dark" behavior requires advertising BOTH supported schemes with color-scheme: light dark, plus an authored prefers-color-scheme rule.
+- V7.11 advertises light+dark but intentionally uses the same creator-selected palette in both modes.
+- Added forced-color-adjust:none and explicit authored colors for page, cards, forms, accents and CTA text.
+- Added -webkit-text-fill-color locks for key text selectors.
+- Public endpoint hardens old snapshots at request time, so existing published pages receive the 7.11 lock without a new SQL migration.
+- Added /samsung-color-diagnostic.html for one-shot diagnosis if a Samsung device is configured in Force Dark Only mode.
+
+Important platform limitation:
+If Samsung Internet is explicitly configured to "Force Dark Mode for web content" / Force Dark Only, Samsung documents that the browser may transform page colors without developer consent. A website cannot reliably override that user/browser setting. V7.11 targets Samsung's normal/default authored-theme path and makes YOUYOU standards-correct for it.
