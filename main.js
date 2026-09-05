@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.4.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "8.5.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2248,11 +2248,12 @@ function defaultLandingPageData(templateId = "product-launch") {
     ctaText: template.cta,
     ctaAction: template.layout === "whatsapp" ? "whatsapp" : "form",
     leadFormEnabled: "on",
+    collectEmail: "off",
     formButtonText: "Send request",
     whatsapp: c.whatsapp_number || "",
     whatsappCountryCode: landingCallingCodeForCountry(c.country || ""),
     phone: c.business_phone || "",
-    email: c.business_email || "",
+    email: "",
     heroMediaEnabled: "on",
     heroImageUrl: "",
     imageUrl: "",
@@ -2427,7 +2428,8 @@ function landingCtaHref(data) {
     return phone ? `tel:${phone}` : "#contact";
   }
   if (data.ctaAction === "email") {
-    return data.email ? `mailto:${data.email}` : "#contact";
+    const email = String(data.email || "").trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? `mailto:${email}` : "#contact";
   }
   return "#contact";
 }
@@ -2487,6 +2489,7 @@ function landingWidgetMarkup(data) {
 
 
 function landingLeadFormMarkup(data, className = "") {
+  const collectEmail = String(data.collectEmail || "off") === "on";
   const followHref = data.ctaAction && data.ctaAction !== "form" ? landingCtaHref(data) : "";
   const followLabel = data.ctaAction === "whatsapp" ? "Continue on WhatsApp" : data.ctaAction === "call" ? "Call now" : data.ctaAction === "email" ? "Send an email" : "";
   const safeFollow = followHref && followHref !== "#contact" ? `<a class="lp-lead-followup" data-lp-lead-followup href="${escapeHtml(followHref)}" ${data.ctaAction === "whatsapp" ? 'target="_blank" rel="noopener"' : ''} hidden>${escapeHtml(followLabel)} ↗</a>` : "";
@@ -2496,7 +2499,7 @@ function landingLeadFormMarkup(data, className = "") {
     <div class="lp-lead-grid">
       <label class="lp-lead-field lp-lead-span-2"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
       <label class="lp-lead-field"><span>Phone</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+212..." required /></label>
-      <label class="lp-lead-field"><span>Email <em>Optional</em></span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" /></label>
+      ${collectEmail ? `<label class="lp-lead-field"><span>Email <em>Optional</em></span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" /></label>` : ""}
       <label class="lp-lead-field"><span>City</span><input name="city" autocomplete="address-level2" placeholder="Your city" required /></label>
       <label class="lp-lead-field"><span>Address</span><input name="address" autocomplete="street-address" placeholder="Street / area" required /></label>
       <label class="lp-lead-field lp-lead-span-2 lp-lead-message"><span>Message <em>Optional</em></span><textarea name="message" rows="3" placeholder="Anything else we should know?"></textarea></label>
@@ -2555,7 +2558,7 @@ window.youyouLandingSubmit = function(form) {
     return false;
   }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    if (status) { status.textContent = 'Please check the email address or leave it empty.'; status.className = 'lp-lead-status is-error'; }
+    if (status) { status.textContent = 'Please enter a valid email address.'; status.className = 'lp-lead-status is-error'; }
     return false;
   }
   const pageTitle = page?.dataset?.pageTitle || 'this offer';
@@ -3410,8 +3413,8 @@ html::-webkit-scrollbar-thumb:hover{background:#8793a3}
 const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
-async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
-window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),followup=form?.querySelector('[data-lp-lead-followup]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();const setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please check the email address or leave it empty.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),quantity=String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim(),total=String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim(),currency=String(commerce?.dataset?.currency||'').trim(),bundle=String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim(),color=String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),variants=[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{if(button)button.disabled=false});return false};
+async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
+window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),followup=form?.querySelector('[data-lp-lead-followup]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();const setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){setStatus('Please enter a valid email address.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),quantity=String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim(),total=String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim(),currency=String(commerce?.dataset?.currency||'').trim(),bundle=String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim(),color=String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),variants=[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{if(button)button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
 window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),activeBundle=box.querySelector('[data-bundle-qty].is-active'),bundleRaw=String(activeBundle?.dataset?.bundlePrice||'').trim(),bundlePrice=bundleRaw===''?null:Math.max(0,Number(bundleRaw)||0),total=bundlePrice!==null?bundlePrice:unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-order-unit]').forEach(el=>el.textContent=unit.toFixed(2));const variants=[...box.querySelectorAll('[data-order-variant-name].is-active')].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),bundle=String(activeBundle?.querySelector('strong')?.textContent||'').trim(),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(color)summary.push('Color: '+color);if(variants.length)summary.push('Options: '+variants.join(', '));if(bundle)summary.push('Bundle: '+bundle);if(unit>0||bundlePrice!==null)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
 window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));box.querySelectorAll('[data-bundle-qty]').forEach(el=>{el.classList.remove('is-active');el.setAttribute('aria-pressed','false')});window.youyouLandingUpdateOrder(button)};
@@ -3849,10 +3852,11 @@ function renderLandingPageWorkspace() {
             <small>BUSINESS & CONTACT · START HERE</small>
             <p class="lpb-section-intro">Add the contact details visitors should see and use.</p>
             <label>Business / brand name<input id="lpb-business-name" placeholder="Your business name" /></label>
-            <div class="lpb-two">
+            <div class="lpb-two lpb-business-contact-row">
               <label>Phone<input id="lpb-phone" inputmode="tel" placeholder="+212..." /></label>
-              <label>Email<input id="lpb-email" type="email" placeholder="sales@company.com" /></label>
+              <label class="lpb-business-email-field" data-business-email-field>Email <span>Optional</span><input id="lpb-email" type="email" inputmode="email" autocomplete="email" placeholder="sales@company.com" /></label>
             </div>
+            <button id="lpb-business-email-toggle" class="lpb-optional-field-toggle" type="button" aria-expanded="false">+ Add business email</button>
             <label>Address<input id="lpb-business-address" placeholder="Street, city, country" /></label>
             <div class="lpb-two lpb-whatsapp-fields">
               <label>WhatsApp country code<input id="lpb-whatsapp-country-code" inputmode="numeric" placeholder="212" /></label>
@@ -4009,7 +4013,11 @@ function renderLandingPageWorkspace() {
               </label>
               <label>Form button text<input id="lpb-form-button-text" placeholder="Send request" /></label>
             </div>
-            <p class="lpb-media-help">CTA action controls the main button. Business phone, WhatsApp, email and address are managed at the top of the workspace.</p>
+            <div class="lpb-media-toggle-row lpb-collect-email-control">
+              <div><strong>Visitor email field</strong><span>Optional. Keep it off for a shorter form; turn it on only when you need email follow-up.</span></div>
+              <select id="lpb-collect-email"><option value="off">Hidden</option><option value="on">Show optional email</option></select>
+            </div>
+            <p class="lpb-media-help">CTA action controls the main button. Business phone, WhatsApp and address are managed at the top of the workspace. Email stays optional.</p>
           </div>
 
           <div class="lpb-editor-section lpb-media-pro-section">
@@ -4389,7 +4397,7 @@ function initLandingPageWorkspace() {
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
     businessName:"lpb-business-name", businessAddress:"lpb-business-address",
     commerceEnabled:"lpb-commerce-enabled", commerceMode:"lpb-commerce-mode", quantityEnabled:"lpb-quantity-enabled", quantityMin:"lpb-quantity-min", quantityMax:"lpb-quantity-max", quantityDefault:"lpb-quantity-default", productColors:"lpb-product-colors", sizeEnabled:"lpb-size-enabled", sizeOptions:"lpb-size-options", weightEnabled:"lpb-weight-enabled", weightOptions:"lpb-weight-options", volumeEnabled:"lpb-volume-enabled", volumeOptions:"lpb-volume-options", unitsEnabled:"lpb-units-enabled", unitsOptions:"lpb-units-options", customOptionEnabled:"lpb-custom-option-enabled", customOptionName:"lpb-custom-option-name", customOptionValues:"lpb-custom-option-values", variantsText:"lpb-variants-text", bundleEnabled:"lpb-bundle-enabled", bundleOptions:"lpb-bundle-options",
-    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
+    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", collectEmail:"lpb-collect-email", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
     phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
     mediaGallery:"lpb-media-gallery", sliderEnabled:"lpb-slider-enabled", sliderTitle:"lpb-slider-title",
@@ -4405,6 +4413,128 @@ function initLandingPageWorkspace() {
     showBenefits:"lpb-show-benefits", showFaq:"lpb-show-faq", showTestimonial:"lpb-show-testimonial", showContact:"lpb-show-contact",
   };
 
+  const workspaceSectionMeta = {
+    "PAGE": { label:"Page basics", description:"Name, page type and writing direction", group:"SETUP" },
+    "BUSINESS & CONTACT · START HERE": { label:"Business & contact", description:"Brand, phone, address and optional contact channels", group:"SETUP" },
+    "MAIN CONTENT": { label:"Main content", description:"Badge, headline, description and benefits", group:"CONTENT" },
+    "PRICE & OFFER": { label:"Price & offer", description:"Price visibility, currency and offer value", group:"OFFER" },
+    "PRODUCT OPTIONS · OPTIONAL": { label:"Product options", description:"Quantity, colors, sizes, volume and bundles", group:"COMMERCE" },
+    "CONVERSION": { label:"Conversion & lead form", description:"CTA, lead capture and optional visitor email", group:"CONVERT" },
+    "HERO VISUAL · OPTIONAL": { label:"Hero visual", description:"Primary image at the top of the landing page", group:"MEDIA" },
+    "VIDEO / HERO VIDEO · OPTIONAL": { label:"Video", description:"Hero video or a dedicated video section", group:"MEDIA" },
+    "IMAGES / GALLERY": { label:"Images & gallery", description:"Gallery or carousel with your product visuals", group:"MEDIA" },
+    "EXTRA TEXT BLOCK": { label:"Extra text", description:"Delivery notes, story, guarantee or extra details", group:"CONTENT" },
+    "CUSTOM SECTIONS · OPTIONAL": { label:"Custom sections", description:"Add and reorder your own content blocks", group:"CONTENT" },
+    "COLORS": { label:"Colors", description:"Landing palette and brand accent", group:"DESIGN" },
+    "DESIGN FREEDOM": { label:"Layout & style", description:"Typography, spacing, alignment and section visibility", group:"DESIGN" },
+    "AI PAGE WIDGET": { label:"AI page widget", description:"Page-aware visitor assistant controls", group:"AI" },
+    "TRUST & FAQ": { label:"Trust & FAQ", description:"Testimonial and objection-handling content", group:"TRUST" },
+  };
+
+  const setWorkspaceSectionOpen = (section, open, remember = true) => {
+    if (!section) return;
+    const body = section.querySelector(".lpb-section-card-body");
+    const header = section.querySelector(".lpb-section-card-head");
+    if (!body || !header) return;
+    body.hidden = !open;
+    section.classList.toggle("is-open", open);
+    header.setAttribute("aria-expanded", open ? "true" : "false");
+    if (remember && open) {
+      try { sessionStorage.setItem(`youyou-lpw-open:${current.id}`, section.dataset.yySectionKey || "PAGE"); } catch (_) {}
+    }
+  };
+
+  const enhanceWorkspaceEditorSections = () => {
+    const editor = document.querySelector(".lpw-editor");
+    if (!editor) return;
+    let remembered = "";
+    try { remembered = sessionStorage.getItem(`youyou-lpw-open:${current.id}`) || ""; } catch (_) {}
+    const sections = [...editor.children].filter((node) => node.classList?.contains("lpb-editor-section"));
+    sections.forEach((section, index) => {
+      if (section.dataset.yySectionReady === "1") return;
+      const kicker = [...section.children].find((node) => node.tagName === "SMALL");
+      const rawTitle = String(kicker?.textContent || `SECTION ${index + 1}`).trim();
+      const meta = workspaceSectionMeta[rawTitle] || { label:rawTitle, description:"Landing page controls", group:"SECTION" };
+      const body = document.createElement("div");
+      body.className = "lpb-section-card-body";
+      [...section.children].forEach((child) => { if (child !== kicker) body.appendChild(child); });
+      kicker?.remove();
+      const header = document.createElement("button");
+      header.type = "button";
+      header.className = "lpb-section-card-head";
+      header.setAttribute("aria-expanded", "false");
+      header.innerHTML = `<span class="lpb-section-number">${String(index + 1).padStart(2,"0")}</span><span class="lpb-section-title"><small>${meta.group}</small><strong>${meta.label}</strong><em>${meta.description}</em></span><span class="lpb-section-card-status" data-lpb-section-status>Ready</span><span class="lpb-section-chevron" aria-hidden="true">⌄</span>`;
+      section.dataset.yySectionReady = "1";
+      section.dataset.yySectionKey = rawTitle;
+      section.classList.add("lpb-section-card");
+      section.append(header, body);
+      const openByDefault = remembered ? remembered === rawTitle : index === 0;
+      setWorkspaceSectionOpen(section, openByDefault, false);
+      header.addEventListener("click", () => {
+        const shouldOpen = !section.classList.contains("is-open");
+        if (shouldOpen) {
+          sections.forEach((other) => { if (other !== section) setWorkspaceSectionOpen(other, false, false); });
+        }
+        setWorkspaceSectionOpen(section, shouldOpen);
+      });
+    });
+  };
+
+  const syncBusinessEmailUi = () => {
+    const input = document.getElementById("lpb-email");
+    const field = document.querySelector("[data-business-email-field]");
+    const row = document.querySelector(".lpb-business-contact-row");
+    const toggle = document.getElementById("lpb-business-email-toggle");
+    if (!input || !field || !toggle) return;
+    const hasValue = Boolean(String(input.value || "").trim());
+    const manuallyOpen = field.dataset.userVisible === "1";
+    const visible = hasValue || manuallyOpen;
+    field.hidden = !visible;
+    row?.classList.toggle("is-email-hidden", !visible);
+    toggle.textContent = visible ? "Remove business email" : "+ Add business email";
+    toggle.classList.toggle("is-remove", visible);
+    toggle.setAttribute("aria-expanded", visible ? "true" : "false");
+  };
+
+  const refreshWorkspaceSectionSummaries = () => {
+    const clean = (value) => String(value || "").trim();
+    const set = (key, text, stateName = "neutral") => {
+      const section = [...document.querySelectorAll(".lpb-section-card")].find((item) => item.dataset.yySectionKey === key);
+      const chip = section?.querySelector("[data-lpb-section-status]");
+      if (!chip) return;
+      chip.textContent = text;
+      chip.dataset.state = stateName;
+    };
+    set("PAGE", clean(current.name) ? clean(current.pageType || "Page") : "Needs name", clean(current.name) ? "ready" : "attention");
+    const contactCount = [current.businessName,current.phone,current.businessAddress,current.whatsapp,current.email].filter((v)=>clean(v)).length;
+    const businessEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean(current.email));
+    const emailCtaNeedsAddress = clean(current.ctaAction) === "email" && !businessEmailValid;
+    set("BUSINESS & CONTACT · START HERE", emailCtaNeedsAddress ? "Add CTA email" : (contactCount ? `${contactCount} detail${contactCount === 1 ? "" : "s"}` : "Add details"), emailCtaNeedsAddress ? "attention" : (contactCount ? "ready" : "attention"));
+    set("MAIN CONTENT", clean(current.headline) ? "Headline ready" : "Needs headline", clean(current.headline) ? "ready" : "attention");
+    const priceMode = clean(current.priceMode || "show");
+    set("PRICE & OFFER", priceMode === "hide" ? "Hidden" : priceMode === "quote" ? "Quote mode" : (clean(current.price) ? `${clean(current.currency || "USD")} ${clean(current.price)}` : "Add price"), priceMode === "hide" ? "off" : (clean(current.price) || priceMode === "quote" ? "ready" : "neutral"));
+    const commerceOn = clean(current.commerceEnabled) === "on";
+    set("PRODUCT OPTIONS · OPTIONAL", commerceOn ? `${clean(current.commerceMode || "product")} · ON` : "OFF", commerceOn ? "ready" : "off");
+    const actionMap = { form:"Lead form", whatsapp:"WhatsApp", call:"Call", email:"Email" };
+    const conversionNeedsAttention = (clean(current.leadFormEnabled) === "off" && clean(current.ctaAction) === "form") || emailCtaNeedsAddress;
+    set("CONVERSION", emailCtaNeedsAddress ? "Email · needs address" : `${actionMap[clean(current.ctaAction)] || "CTA"}${clean(current.leadFormEnabled) === "off" ? " · form off" : ""}`, conversionNeedsAttention ? "attention" : "ready");
+    set("HERO VISUAL · OPTIONAL", clean(current.heroMediaEnabled) === "off" ? "Hidden" : (clean(current.heroImageUrl) ? "Image ready" : "Visible"), clean(current.heroMediaEnabled) === "off" ? "off" : "neutral");
+    set("VIDEO / HERO VIDEO · OPTIONAL", clean(current.videoEnabled) === "on" ? (clean(current.videoUrl) ? "Video ready" : "Enabled") : "OFF", clean(current.videoEnabled) === "on" ? "ready" : "off");
+    const galleryCount = [clean(current.imageUrl), ...String(current.mediaGallery || "").split("\n").map(clean)].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).length;
+    const galleryMode = clean(current.sliderEnabled || "off");
+    set("IMAGES / GALLERY", galleryMode === "off" ? "Hidden" : `${galleryCount} image${galleryCount === 1 ? "" : "s"}`, galleryMode === "off" ? "off" : (galleryCount ? "ready" : "neutral"));
+    set("EXTRA TEXT BLOCK", clean(current.extraTitle) || clean(current.extraText) ? "Added" : "Empty", clean(current.extraTitle) || clean(current.extraText) ? "ready" : "off");
+    const customCount = Array.isArray(current.customSections) ? current.customSections.filter((item)=>clean(item?.title) || clean(item?.text)).length : 0;
+    set("CUSTOM SECTIONS · OPTIONAL", customCount ? `${customCount} section${customCount === 1 ? "" : "s"}` : "None", customCount ? "ready" : "off");
+    set("COLORS", "Theme set", "ready");
+    set("DESIGN FREEDOM", clean(current.sectionDensity || "balanced"), "ready");
+    set("AI PAGE WIDGET", clean(current.widgetEnabled) === "off" ? "Hidden" : "ON", clean(current.widgetEnabled) === "off" ? "off" : "ready");
+    const trustCount = [current.testimonial,current.faqQuestion,current.faqAnswer].filter((v)=>clean(v)).length;
+    set("TRUST & FAQ", trustCount ? "Content ready" : "Optional", trustCount ? "ready" : "off");
+  };
+
+  enhanceWorkspaceEditorSections();
+
   const hydrateFields = () => {
     Object.entries(fieldMap).forEach(([key,id]) => {
       const el = document.getElementById(id);
@@ -4416,6 +4546,8 @@ function initLandingPageWorkspace() {
     renderBundleManager();
     syncPriceModeUi();
     syncPricePreviewUi();
+    syncBusinessEmailUi();
+    refreshWorkspaceSectionSummaries();
   };
 
   const readFields = () => {
@@ -4596,6 +4728,7 @@ function initLandingPageWorkspace() {
     const heightValue = document.querySelector("#lpb-media-height-value");
     if (widthValue) widthValue.textContent = `${current.mediaWidth || 46}%`;
     if (heightValue) heightValue.textContent = `${current.mediaHeight || 380}px`;
+    refreshWorkspaceSectionSummaries();
   };
 
   let autosaveTimer = null;
@@ -4898,6 +5031,25 @@ function initLandingPageWorkspace() {
   hydrateFields();
   renderPreview();
 
+  document.getElementById("lpb-business-email-toggle")?.addEventListener("click", () => {
+    const input = document.getElementById("lpb-email");
+    const field = document.querySelector("[data-business-email-field]");
+    if (!input || !field) return;
+    const visible = !field.hidden;
+    if (visible) {
+      input.value = "";
+      current.email = "";
+      field.dataset.userVisible = "0";
+      syncBusinessEmailUi();
+      renderPreview();
+      markChangedAndAutosave();
+    } else {
+      field.dataset.userVisible = "1";
+      syncBusinessEmailUi();
+      input.focus();
+    }
+  });
+
   Object.values(fieldMap).forEach((id) => {
     const el = document.getElementById(id);
     const onEdit = () => { renderPreview(); markChangedAndAutosave(); };
@@ -4905,6 +5057,16 @@ function initLandingPageWorkspace() {
     el?.addEventListener("change", onEdit);
     if (el && (el.matches("input[type=text],input[type=email],input[type=url],input:not([type]),textarea") || el.tagName === "TEXTAREA")) {
       el.addEventListener("focus", () => { lastFocusedTextField = el; });
+    }
+  });
+
+  document.getElementById("lpb-cta-action")?.addEventListener("change", (event) => {
+    if (event.target.value !== "email") return;
+    const field = document.querySelector("[data-business-email-field]");
+    const input = document.getElementById("lpb-email");
+    if (field && input && !String(input.value || "").trim()) {
+      field.dataset.userVisible = "1";
+      syncBusinessEmailUi();
     }
   });
 

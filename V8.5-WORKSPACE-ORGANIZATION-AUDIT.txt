@@ -1,0 +1,23 @@
+YOUYOU V8.5 — WORKSPACE ORGANIZATION AUDIT
+
+Source audited: user-provided full project ZIP (19)(1), renderer 8.4.0.
+
+Root causes / findings:
+1) Workspace controls were technically grouped, but the visual grouping was only a small uppercase heading + divider. With 15 editable sections this becomes a long scanning problem.
+2) Business email was always visible even though it is optional.
+3) Visitor email was always rendered in the public lead form, even when the business did not need it.
+4) Important bug found in the exported/public-page inline JavaScript: email regexes inside a template literal used \s without double escaping. The generated HTML could therefore degrade \s to s and reject otherwise valid email addresses containing the letter s.
+
+Changes in V8.5:
+- 15 workspace sections converted into numbered premium collapsible cards.
+- One active section at a time; last open section remembered per landing-page draft for the session.
+- Each card has a live status chip (price, gallery count, product options ON/OFF, etc.).
+- Business email is hidden when empty and appears only through + Add business email; existing saved email remains visible.
+- Removing business email clears it cleanly and autosaves.
+- Choosing CTA=Email automatically reveals the business email input when needed.
+- New Visitor email field control under Conversion: Hidden by default / Show optional email.
+- Public lead form omits the visitor email field unless enabled.
+- Fixed the exported/public runtime email-regex escaping bug.
+- New pages no longer auto-copy the company business email into every landing page.
+
+No database schema change. No SQL required.

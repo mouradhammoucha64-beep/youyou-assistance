@@ -1,0 +1,15 @@
+YOUYOU V8.5 — PREMIUM WORKSPACE ORGANIZATION
+
+Upload this COMPLETE project to the same GitHub repository root and commit. Vercel will deploy it.
+
+No SQL is required.
+
+Quick QA after deploy:
+1. Open a landing page workspace. Only one numbered section card should be expanded; click other cards and confirm they open cleanly.
+2. Business & contact: email should be hidden when empty. Click + Add business email, enter a valid address, Save, refresh, and confirm it remains visible.
+3. Remove business email and confirm it disappears and remains cleared after refresh.
+4. Conversion: Visitor email field = Hidden -> public/preview form has no Email input. Switch to Show optional email -> Email appears.
+5. With visitor email enabled, submit a normal address such as sales@example.com; it must not show the old false invalid-email warning.
+6. Check Product Options / Media / Colors sections still update the live iframe preview.
+
+Renderer: 8.5.0
