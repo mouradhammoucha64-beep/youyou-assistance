@@ -1,0 +1,33 @@
+YOUYOU V8.6 — STABLE WORKSPACE + RELIABLE BUNDLES
+
+Built from YOUYOU V8.5.
+No new SQL is required.
+
+What changed
+1. Workspace accordion no longer throws the user up/down when changing sections.
+   - The clicked section header keeps the same visual position while another open section collapses.
+   - Browser scroll anchoring is disabled inside the workspace and handled deliberately.
+
+2. Bundle Offers was rebuilt for a clear ON/OFF workflow.
+   - Dedicated OFF/ON control inside Bundle offers.
+   - OFF hides the bundle editor but keeps saved bundle data.
+   - ON restores the saved bundles.
+   - Add/remove/edit bundle rows still auto-save.
+
+3. Fixed the bundle storage bug.
+   - Bundle rows were previously serialized with a literal \\n sequence instead of real line breaks.
+   - This could collapse multiple bundle rows into one malformed bundle after editing.
+   - V8.6 stores real newline-separated bundles so all rows parse correctly.
+
+4. Customer bundle selection now gives explicit feedback.
+   - The selected bundle gets the active state/check.
+   - A “Selected: …” line changes immediately.
+   - Quantity and total update from the chosen bundle.
+   - Manual quantity changes clear the bundle and show “Custom quantity”.
+
+5. My Pages is brought forward.
+   - If saved pages exist, Landing Pages opens My Pages by default.
+   - The tab is named “My Pages”.
+   - Existing filters remain: All / Drafts / Published / Changes not live.
+
+Renderer: 8.6.0

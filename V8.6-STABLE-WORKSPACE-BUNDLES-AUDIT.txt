@@ -1,0 +1,28 @@
+YOUYOU V8.6 AUDIT
+
+Reported issue A — workspace section jump
+Root cause:
+The V8.5 accordion automatically collapsed the previously open card before opening the clicked card. Because .lpw-editor is its own scroll container, removing a large block above the clicked header changed that header's viewport position and made the workspace feel like it jumped to another option.
+Fix:
+Capture the clicked header position, perform the accordion change, then compensate .lpw-editor scrollTop on the next animation frame so the clicked header stays visually anchored.
+
+Reported issue B — Bundle Offers activation/deactivation unclear
+Root cause:
+The OFF/ON control was a small field mixed into the quantity row while the bundle editor remained visible regardless of state. OFF therefore did not look OFF.
+Fix:
+Bundle Offers now owns its OFF/ON selector. OFF hides the editor and displays a clear OFF message; ON displays the saved rows. Turning OFF does not delete bundle configuration.
+
+Reported issue C — bundle edits/selection unreliable
+Root cause found in source:
+serializeBundleRows() used .join("\\\\n"), which stores the two characters backslash+n. landingParseBundles() splits on a real newline. After the manager wrote data, multiple rows could be parsed as one malformed line.
+Fix:
+serializeBundleRows() now joins with a real newline: .join("\\n").
+Validated with 3 rows: Single, Pack of 2, Pack of 3 -> parser returns 3 independent bundles.
+
+Customer feedback improvement:
+Bundle selection has a visible Selected label in addition to active border/check, and order totals/quantity are updated immediately.
+
+My Pages:
+When drafts/pages already exist, Landing Pages now defaults to My Pages instead of burying it behind Template Gallery.
+
+No database migration / SQL required.

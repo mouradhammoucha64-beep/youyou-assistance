@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.5.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "8.6.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2408,7 +2408,7 @@ function landingCommerceMarkup(data = {}) {
 
   const variantsMarkup = variants.length ? `<div class="lp-order-options">${variants.map((v)=>`<div class="lp-order-option-group"><small>${escapeHtml(v.name.toUpperCase())}</small><div class="lp-option-chips">${v.options.map((o,index)=>`<button type="button" class="lp-option-chip ${index===0?"is-active":""}" data-order-variant-name="${escapeHtml(v.name)}" data-order-variant-value="${escapeHtml(o)}" aria-pressed="${index===0?"true":"false"}" onclick="window.youyouLandingChooseVariant(this)">${escapeHtml(o)}<b>✓</b></button>`).join("")}</div></div>`).join("")}</div>` : "";
 
-  const bundlesMarkup = bundles.length ? `<div class="lp-order-bundles"><small>BUNDLE</small><div>${bundles.map((b,index)=>`<button type="button" class="${index===0?"is-active":""}" data-bundle-qty="${b.qty}" data-bundle-price="${b.price ?? ""}" aria-pressed="${index===0?"true":"false"}" onclick="window.youyouLandingChooseBundle(this,${b.qty})"><strong>${escapeHtml(b.label)}</strong><span>${b.qty} ${b.qty===1?"item":"items"}${b.price !== null ? ` · ${escapeHtml(symbol)} ${b.price.toFixed(2)}` : ""}</span><b>✓</b></button>`).join("")}</div></div>` : "";
+  const bundlesMarkup = bundles.length ? `<div class="lp-order-bundles"><small>BUNDLE</small><div>${bundles.map((b,index)=>`<button type="button" class="${index===0?"is-active":""}" data-bundle-qty="${b.qty}" data-bundle-price="${b.price ?? ""}" aria-pressed="${index===0?"true":"false"}" onclick="window.youyouLandingChooseBundle(this,${b.qty})"><strong>${escapeHtml(b.label)}</strong><span>${b.qty} ${b.qty===1?"item":"items"}${b.price !== null ? ` · ${escapeHtml(symbol)} ${b.price.toFixed(2)}` : ""}</span><b>✓</b></button>`).join("")}</div><p class="lp-bundle-selection">Selected: <strong data-order-selected-bundle>${escapeHtml(bundles[0]?.label || "")}</strong></p></div>` : "";
 
   const qtyMarkup = data.quantityEnabled === "off" ? "" : `<div class="lp-order-row lp-quantity-row"><small>QUANTITY</small><div class="lp-qty-stepper" data-order-stepper><button type="button" aria-label="Decrease quantity" onclick="window.youyouLandingChangeQty(this,-1)">−</button><output data-order-qty>${initial}</output><button type="button" aria-label="Increase quantity" onclick="window.youyouLandingChangeQty(this,1)">+</button></div></div>`;
 
@@ -2617,6 +2617,7 @@ window.youyouLandingUpdateOrder = function(source) {
     .filter(Boolean);
   const color = String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor || '').trim();
   const bundle = String(activeBundle?.querySelector('strong')?.textContent || '').trim();
+  box.querySelectorAll('[data-order-selected-bundle]').forEach((el)=>{el.textContent=bundle || 'Custom quantity'});
   const title = page?.dataset?.pageTitle || 'this product';
   const currency = box.dataset.currency || "";
   const summary = [`Hi! I am interested in ${title}.`, `Quantity: ${qty}`];
@@ -3416,7 +3417,7 @@ const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
 async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
 window.youyouLandingSubmit=function(form){const page=form?.closest('.lp-live-page'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),followup=form?.querySelector('[data-lp-lead-followup]'),name=String(form?.elements?.name?.value||'').trim(),phone=String(form?.elements?.phone?.value||'').trim(),email=String(form?.elements?.email?.value||'').trim(),city=String(form?.elements?.city?.value||'').trim(),address=String(form?.elements?.address?.value||'').trim(),message=String(form?.elements?.message?.value||'').trim();const setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){setStatus('Please enter a valid email address.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),quantity=String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim(),total=String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim(),currency=String(commerce?.dataset?.currency||'').trim(),bundle=String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim(),color=String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),variants=[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{if(button)button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
-window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),activeBundle=box.querySelector('[data-bundle-qty].is-active'),bundleRaw=String(activeBundle?.dataset?.bundlePrice||'').trim(),bundlePrice=bundleRaw===''?null:Math.max(0,Number(bundleRaw)||0),total=bundlePrice!==null?bundlePrice:unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-order-unit]').forEach(el=>el.textContent=unit.toFixed(2));const variants=[...box.querySelectorAll('[data-order-variant-name].is-active')].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),bundle=String(activeBundle?.querySelector('strong')?.textContent||'').trim(),title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(color)summary.push('Color: '+color);if(variants.length)summary.push('Options: '+variants.join(', '));if(bundle)summary.push('Bundle: '+bundle);if(unit>0||bundlePrice!==null)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
+window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),activeBundle=box.querySelector('[data-bundle-qty].is-active'),bundleRaw=String(activeBundle?.dataset?.bundlePrice||'').trim(),bundlePrice=bundleRaw===''?null:Math.max(0,Number(bundleRaw)||0),total=bundlePrice!==null?bundlePrice:unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-order-unit]').forEach(el=>el.textContent=unit.toFixed(2));const variants=[...box.querySelectorAll('[data-order-variant-name].is-active')].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),bundle=String(activeBundle?.querySelector('strong')?.textContent||'').trim();box.querySelectorAll('[data-order-selected-bundle]').forEach(el=>{el.textContent=bundle||'Custom quantity'});const title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(color)summary.push('Color: '+color);if(variants.length)summary.push('Options: '+variants.join(', '));if(bundle)summary.push('Bundle: '+bundle);if(unit>0||bundlePrice!==null)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
 window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));box.querySelectorAll('[data-bundle-qty]').forEach(el=>{el.classList.remove('is-active');el.setAttribute('aria-pressed','false')});window.youyouLandingUpdateOrder(button)};
 window.youyouLandingChooseColor=function(button){const box=button?.closest?.('[data-commerce-box]');if(!box)return;box.querySelectorAll('[data-order-color]').forEach(el=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});window.youyouLandingUpdateOrder(button)};
 window.youyouLandingChooseVariant=function(button){const group=button?.closest?.('.lp-order-option-group'),box=button?.closest?.('[data-commerce-box]');if(!group||!box)return;group.querySelectorAll('[data-order-variant-name]').forEach(el=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});window.youyouLandingUpdateOrder(button)};
@@ -3432,6 +3433,7 @@ document.addEventListener('DOMContentLoaded',()=>{yyInitCarousels();yyInitCommer
 function renderLandingPagesSection() {
   const drafts = loadLandingDrafts();
   const published = drafts.filter((item) => item.status === "Published").length;
+  const defaultView = drafts.length ? "saved" : "templates";
 
   return `
     <section class="landing-builder-page">
@@ -3470,12 +3472,12 @@ function renderLandingPagesSection() {
       </div>
 
       <div class="lpb-tabs dashboard-card">
-        <button class="is-active" type="button" data-lpb-view="templates">Template Gallery</button>
-        <button type="button" data-lpb-view="saved">My Drafts & Pages <span id="lpb-tab-pages-count">${drafts.length}</span></button>
+        <button class="${defaultView === "templates" ? "is-active" : ""}" type="button" data-lpb-view="templates">Template Gallery</button>
+        <button class="${defaultView === "saved" ? "is-active" : ""}" type="button" data-lpb-view="saved">My Pages <span id="lpb-tab-pages-count">${drafts.length}</span></button>
         <span class="lpb-workspace-note">Builder opens in a dedicated workspace ↗</span>
       </div>
 
-      <div class="lpb-panel" data-lpb-panel="templates">
+      <div class="lpb-panel" data-lpb-panel="templates" ${defaultView === "templates" ? "" : "hidden"}>
         <div class="lpb-gallery-head">
           <div>
             <small>START FAST</small>
@@ -3755,9 +3757,9 @@ function renderLandingPagesSection() {
         </div>
       </div>
 
-      <div class="lpb-panel" data-lpb-panel="saved" hidden>
+      <div class="lpb-panel" data-lpb-panel="saved" ${defaultView === "saved" ? "" : "hidden"}>
         <div class="lpb-saved-head">
-          <div><small>MY DRAFTS & PAGES</small><h2>Continue exactly where you stopped.</h2><p>Drafts auto-save as you work. Published pages keep the same live URL when you update them.</p></div>
+          <div><small>MY PAGES</small><h2>Continue exactly where you stopped.</h2><p>Drafts, published pages and changes not live are managed here in one place.</p></div>
           <button class="primary" type="button" data-lpb-open-builder="product-launch">Create new →</button>
         </div>
         <div class="lpb-saved-toolbar dashboard-card">
@@ -3904,7 +3906,7 @@ function renderLandingPageWorkspace() {
               <div class="lpb-media-toggle-row"><div><strong>Mode</strong><span>Product shows order options. Service keeps the landing page clean.</span></div><select id="lpb-commerce-mode"><option value="product">Product</option><option value="service">Service</option></select></div>
               <div class="lpb-commerce-product-settings" data-product-settings>
                 <div class="lpb-two"><label>Quantity selector<select id="lpb-quantity-enabled"><option value="on">Enabled</option><option value="off">Hidden</option></select></label><label>Default quantity<input id="lpb-quantity-default" type="number" min="1" max="99" step="1" /></label></div>
-                <div class="lpb-three"><label>Minimum<input id="lpb-quantity-min" type="number" min="1" max="99" step="1" /></label><label>Maximum<input id="lpb-quantity-max" type="number" min="1" max="99" step="1" /></label><label>Bundles<select id="lpb-bundle-enabled"><option value="off">Off</option><option value="on">On</option></select></label></div>
+                <div class="lpb-two"><label>Minimum<input id="lpb-quantity-min" type="number" min="1" max="99" step="1" /></label><label>Maximum<input id="lpb-quantity-max" type="number" min="1" max="99" step="1" /></label></div>
 
                 <div class="lpb-color-builder">
                   <div class="lpb-color-builder-head"><div><strong>Product colors</strong><span>Choose as many colors as the product needs.</span></div><span id="lpb-color-count">0 selected</span></div>
@@ -3986,13 +3988,17 @@ function renderLandingPageWorkspace() {
                   <textarea id="lpb-variants-text" class="lpb-legacy-variants" aria-hidden="true" tabindex="-1"></textarea>
                 </div>
 
-                <div class="lpb-bundle-builder">
-                  <div class="lpb-option-builder-head">
-                    <div><strong>Bundle offers</strong><span>Simple quantity + optional bundle price. No code-like syntax.</span></div>
-                    <button id="lpb-add-bundle" type="button">+ Add bundle</button>
+                <div class="lpb-bundle-builder" data-bundle-builder>
+                  <div class="lpb-option-builder-head lpb-bundle-builder-head">
+                    <div><strong>Bundle offers</strong><span>Create clear pack offers such as 1 item, 2 items or 3 items.</span></div>
+                    <select id="lpb-bundle-enabled" class="lpb-bundle-toggle" aria-label="Bundle offers status"><option value="off">OFF</option><option value="on">ON</option></select>
                   </div>
-                  <textarea id="lpb-bundle-options" class="lpb-bundle-storage" aria-hidden="true" tabindex="-1"></textarea>
-                  <div id="lpb-bundle-rows" class="lpb-bundle-rows"></div>
+                  <div class="lpb-bundle-off-note" data-bundle-off-note>Bundles are off. Turn them on only when this product needs pack offers.</div>
+                  <div class="lpb-bundle-editor" data-bundle-editor hidden>
+                    <div class="lpb-bundle-editor-actions"><span>Bundle choices shown to the customer</span><button id="lpb-add-bundle" type="button">+ Add bundle</button></div>
+                    <textarea id="lpb-bundle-options" class="lpb-bundle-storage" aria-hidden="true" tabindex="-1"></textarea>
+                    <div id="lpb-bundle-rows" class="lpb-bundle-rows"></div>
+                  </div>
                 </div>
 
                 <p class="lpb-media-help lpb-media-help-strong">When activated, order details appear only inside the final checkout form — never under the hero.</p>
@@ -4472,10 +4478,20 @@ function initLandingPageWorkspace() {
       setWorkspaceSectionOpen(section, openByDefault, false);
       header.addEventListener("click", () => {
         const shouldOpen = !section.classList.contains("is-open");
+        const editorScroller = header.closest(".lpw-editor");
+        const beforeTop = header.getBoundingClientRect().top;
+        const canScrollEditor = editorScroller && editorScroller.scrollHeight > editorScroller.clientHeight + 2 && getComputedStyle(editorScroller).overflowY !== "visible";
         if (shouldOpen) {
           sections.forEach((other) => { if (other !== section) setWorkspaceSectionOpen(other, false, false); });
         }
         setWorkspaceSectionOpen(section, shouldOpen);
+        requestAnimationFrame(() => {
+          const afterTop = header.getBoundingClientRect().top;
+          const delta = afterTop - beforeTop;
+          if (Math.abs(delta) < 1) return;
+          if (canScrollEditor) editorScroller.scrollTop += delta;
+          else window.scrollBy(0, delta);
+        });
       });
     });
   };
@@ -4544,6 +4560,7 @@ function initLandingPageWorkspace() {
     renderProductColorManager();
     renderUniversalOptionManager();
     renderBundleManager();
+    syncBundleBuilderUi();
     syncPriceModeUi();
     syncPricePreviewUi();
     syncBusinessEmailUi();
@@ -4624,7 +4641,7 @@ function initLandingPageWorkspace() {
     .filter((row)=>String(row.label || "").trim())
     .slice(0,10)
     .map((row)=>`${String(row.label || "").trim()}|${Math.max(1,Math.min(99,Number(row.qty)||1))}|${row.price === null || row.price === "" || Number.isNaN(Number(row.price)) ? "" : Math.max(0,Number(row.price))}`)
-    .join("\\n");
+    .join("\n");
 
   const renderBundleManager = () => {
     const host = document.getElementById("lpb-bundle-rows");
@@ -4649,6 +4666,19 @@ function initLandingPageWorkspace() {
     current.bundleOptions = serializeBundleRows(rows);
     const storage = document.getElementById("lpb-bundle-options");
     if (storage) storage.value = current.bundleOptions;
+  };
+
+  const syncBundleBuilderUi = () => {
+    const select = document.getElementById("lpb-bundle-enabled");
+    const builder = document.querySelector("[data-bundle-builder]");
+    const editor = document.querySelector("[data-bundle-editor]");
+    const offNote = document.querySelector("[data-bundle-off-note]");
+    if (!select || !builder) return;
+    const enabled = String(select.value || current.bundleEnabled || "off") === "on";
+    current.bundleEnabled = enabled ? "on" : "off";
+    builder.classList.toggle("is-enabled", enabled);
+    if (editor) editor.hidden = !enabled;
+    if (offNote) offNote.hidden = enabled;
   };
 
   const syncPricePreviewUi = () => {
@@ -4705,6 +4735,7 @@ function initLandingPageWorkspace() {
     syncPricePreviewUi();
     document.querySelectorAll("[data-commerce-settings]").forEach((el) => { el.style.display = commerceEnabled ? "grid" : "none"; });
     document.querySelectorAll("[data-product-settings]").forEach((el) => { el.style.display = effectiveProduct ? "grid" : "none"; });
+    syncBundleBuilderUi();
     current.rendererVersion = YOUYOU_LANDING_RENDERER_VERSION;
     updateGalleryControls();
     renderGalleryManager();

@@ -12784,3 +12784,25 @@ body:has(.lpw-shell) #youyou-public-widget-panel{
   .lpb-section-title>em{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
   .lpb-section-card-body{padding:12px}
 }
+
+
+/* =========================================================
+   YOUYOU V8.6 — STABLE WORKSPACE + RELIABLE BUNDLES
+   ========================================================= */
+.lpb-bundle-builder{transition:border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.lpb-bundle-builder.is-enabled{border-color:#cdbce9;background:#fcfaff;box-shadow:0 0 0 2px #f4effa}
+.lpb-bundle-builder-head{grid-template-columns:minmax(0,1fr) 76px!important;align-items:center!important}
+.lpb-bundle-toggle{width:76px!important;min-height:34px!important;height:34px!important;padding:4px 8px!important;border-radius:9px!important;font-size:8px!important;font-weight:900!important}
+.lpb-bundle-off-note{padding:10px 11px;border:1px dashed #d9deea;border-radius:10px;background:#fff;color:#8a94a5;font-size:8px;line-height:1.45}
+.lpb-bundle-editor[hidden],.lpb-bundle-off-note[hidden]{display:none!important}
+.lpb-bundle-editor{display:grid;gap:9px}
+.lpb-bundle-editor-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:3px}
+.lpb-bundle-editor-actions>span{color:#7e8999;font-size:7.5px;font-weight:800}
+.lpb-bundle-editor-actions>button{min-height:32px;padding:0 10px;border:1px solid #d8cce9;border-radius:9px;background:#fff;color:#7252b5;font-size:8px;font-weight:900;cursor:pointer}
+.lpb-bundle-editor-actions>button:hover{background:#f8f4fc}
+.lp-bundle-selection{margin:7px 0 0!important;font-size:7.5px!important;color:color-mix(in srgb,var(--lp-text) 58%,transparent)!important}
+.lp-bundle-selection strong{color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important;font-size:7.5px!important}
+@media(max-width:760px){.lpb-bundle-builder-head{grid-template-columns:minmax(0,1fr) 72px!important}.lpb-bundle-editor-actions{align-items:flex-start;flex-direction:column}.lpb-bundle-editor-actions>button{width:100%}}
+/* Keep accordion movement deterministic; V8.6 preserves the clicked header position in JS. */
+.lpw-editor{overflow-anchor:none!important}
+.lpb-section-card-head{overflow-anchor:auto}
