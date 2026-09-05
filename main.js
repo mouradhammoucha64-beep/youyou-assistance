@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.6.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "8.7.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2495,13 +2495,13 @@ function landingLeadFormMarkup(data, className = "") {
   const safeFollow = followHref && followHref !== "#contact" ? `<a class="lp-lead-followup" data-lp-lead-followup href="${escapeHtml(followHref)}" ${data.ctaAction === "whatsapp" ? 'target="_blank" rel="noopener"' : ''} hidden>${escapeHtml(followLabel)} ↗</a>` : "";
   return `<form class="lp-lead-form lp-checkout-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
     ${landingCommerceMarkup(data)}
-    <div class="lp-checkout-section-title"><span>YOUR DETAILS</span><small>Where should the business contact or deliver?</small></div>
+    <div class="lp-checkout-section-title"><span>YOUR DETAILS</span><small>Contact &amp; delivery details</small></div>
     <div class="lp-lead-grid">
       <label class="lp-lead-field lp-lead-span-2"><span>Name</span><input name="name" autocomplete="name" placeholder="Your name" required /></label>
       <label class="lp-lead-field"><span>Phone</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+212..." required /></label>
-      ${collectEmail ? `<label class="lp-lead-field"><span>Email <em>Optional</em></span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" /></label>` : ""}
       <label class="lp-lead-field"><span>City</span><input name="city" autocomplete="address-level2" placeholder="Your city" required /></label>
-      <label class="lp-lead-field"><span>Address</span><input name="address" autocomplete="street-address" placeholder="Street / area" required /></label>
+      <label class="lp-lead-field lp-lead-span-2"><span>Address</span><input name="address" autocomplete="street-address" placeholder="Street / area" required /></label>
+      ${collectEmail ? `<label class="lp-lead-field lp-lead-span-2"><span>Email <em>Optional</em></span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" /></label>` : ""}
       <label class="lp-lead-field lp-lead-span-2 lp-lead-message"><span>Message <em>Optional</em></span><textarea name="message" rows="3" placeholder="Anything else we should know?"></textarea></label>
     </div>
     <button class="lp-lead-submit" type="submit">${escapeHtml(data.formButtonText || "Send request")}</button>
@@ -3392,6 +3392,34 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
   .lp-checkout-form .lp-order-bundles>div{grid-template-columns:1fr!important}
   .lp-checkout-form .lp-order-summary{grid-template-columns:1fr 1fr!important}
   .lp-checkout-form .lp-order-summary .lp-order-total{grid-column:1/-1!important}
+}
+
+
+/* =========================================================
+   YOUYOU V8.7 — PREMIUM COMPACT LEAD DETAILS
+   Clean hierarchy, full-width address, tighter professional spacing.
+   ========================================================= */
+.lp-checkout-form{gap:12px!important;padding:16px!important}
+.lp-checkout-section-title{display:grid!important;grid-template-columns:1fr!important;justify-items:start!important;align-items:start!important;gap:3px!important;padding:0 0 10px!important;margin:0!important;border-bottom:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)!important}
+.lp-checkout-section-title span{display:block!important;margin:0!important;color:var(--lp-accent)!important;font-size:9px!important;font-weight:950!important;letter-spacing:.11em!important;line-height:1.2!important}
+.lp-checkout-section-title small{display:block!important;margin:0!important;max-width:100%!important;color:color-mix(in srgb,var(--lp-text) 58%,transparent)!important;font-size:8px!important;font-weight:650!important;letter-spacing:.01em!important;line-height:1.35!important;opacity:1!important}
+.lp-lead-grid{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;column-gap:10px!important;row-gap:9px!important}
+.lp-lead-span-2{grid-column:1/-1!important}
+.lp-lead-field{position:static!important;display:grid!important;gap:5px!important;min-width:0!important}
+.lp-lead-field>span{position:static!important;display:flex!important;align-items:center!important;justify-content:space-between!important;margin:0!important;padding:0 1px!important;color:color-mix(in srgb,var(--lp-text) 72%,transparent)!important;font-size:8.5px!important;font-weight:850!important;letter-spacing:.01em!important;line-height:1.2!important;pointer-events:auto!important}
+.lp-lead-field>span em{font-size:7px!important;font-style:normal!important;font-weight:700!important;opacity:.55!important}
+.lp-lead-field input,.lp-lead-field textarea{width:100%!important;min-width:0!important;min-height:44px!important;height:44px!important;padding:0 12px!important;border:1px solid color-mix(in srgb,var(--lp-text) 11%,transparent)!important;border-radius:11px!important;background:color-mix(in srgb,var(--lp-surface) 96%,var(--lp-bg))!important;box-shadow:0 1px 0 rgba(0,0,0,.02)!important;font-size:10px!important;line-height:1.35!important}
+.lp-lead-field textarea{height:auto!important;min-height:68px!important;padding:10px 12px!important;resize:vertical!important}
+.lp-lead-field input:focus,.lp-lead-field textarea:focus{outline:none!important;border-color:color-mix(in srgb,var(--lp-accent) 58%,var(--lp-text))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--lp-accent) 9%,transparent)!important}
+.lp-lead-field input::placeholder,.lp-lead-field textarea::placeholder{color:color-mix(in srgb,var(--lp-text) 40%,transparent)!important;opacity:1!important}
+.lp-lead-form>button[type="submit"],.lp-checkout-form>.lp-lead-submit{margin-top:1px!important}
+@media(max-width:760px){
+  .lp-checkout-form{gap:11px!important;padding:13px!important}
+  .lp-checkout-section-title{padding-bottom:9px!important}
+  .lp-lead-grid{grid-template-columns:1fr!important;gap:9px!important}
+  .lp-lead-span-2{grid-column:auto!important}
+  .lp-lead-field input{min-height:43px!important;height:43px!important}
+  .lp-lead-field textarea{min-height:66px!important;height:auto!important}
 }
 
 html{

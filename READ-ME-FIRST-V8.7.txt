@@ -1,0 +1,16 @@
+YOUYOU V8.7 — PREMIUM COMPACT LEAD DETAILS
+
+Targeted polish only. Built on V8.6.
+
+Changes:
+- YOUR DETAILS title and helper are now stacked with clear hierarchy.
+- Helper copy shortened to “Contact & delivery details”.
+- Address is full-width.
+- Name is full-width; Phone + City share a compact row.
+- Optional Email is full-width when enabled.
+- Lead form fields are tighter and more balanced; less dead space.
+- Labels are intentional above fields, not visually cramped into controls.
+- Focus state is subtle and branded.
+- Mobile stays single-column with compact spacing.
+- No changes to Bundles, Drafts, Publish, Media, Lead submission, or Supabase schema.
+- No SQL required.

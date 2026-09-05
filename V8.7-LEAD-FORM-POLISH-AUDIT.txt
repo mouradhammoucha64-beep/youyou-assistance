@@ -1,0 +1,16 @@
+Root cause / polish audit
+
+1. Checkout title used flex alignment, causing YOUR DETAILS and helper copy to visually collide in narrow layouts.
+2. Address was a normal one-column field in a two-column grid, making it look too small for an address.
+3. Legacy/floating-label rules competed with later layout rules and created inconsistent spacing between preview and published snapshots.
+4. V8.7 adds an authoritative final lead-form layer in both style.css and the exported snapshot CSS.
+
+Expected layout:
+YOUR DETAILS
+Contact & delivery details
+[ Name full width ]
+[ Phone ] [ City ]
+[ Address full width ]
+[ Email full width, only if enabled ]
+[ Message full width ]
+[ Submit ]
