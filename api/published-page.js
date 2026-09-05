@@ -34,7 +34,7 @@ function hardenPublishedHtml(html = "") {
   out = out.replace(/<meta\s+name=["']color-scheme["'][^>]*>\s*/ig, "");
   out = out.replace(/<meta\s+name=["']supported-color-schemes["'][^>]*>\s*/ig, "");
   out = out.replace(/<meta\s+name=["']theme-color["'][^>]*>\s*/ig, "");
-  out = out.replace(/<head([^>]*)>/i, `<head$1><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><meta name="theme-color" content="${escapeHtml(bg)}"><meta name="youyou-renderer" content="7.11.0">`);
+  out = out.replace(/<head([^>]*)>/i, `<head$1><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><meta name="theme-color" content="${escapeHtml(bg)}"><meta name="youyou-renderer" content="8.4.0">`);
 
   // Remove a prior runtime lock, then append V7.10 last so it wins over legacy snapshots.
   out = out.replace(/<style\s+id=["']youyou-runtime-color-lock["'][\s\S]*?<\/style>/ig, "");
@@ -50,7 +50,7 @@ html,body{color-scheme:light dark!important;background-color:${escapeHtml(bg)}!i
 .beauty-gallery-section,.beauty-wow .lp-product-video{background-color:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)),color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)))!important}
 .beauty-review-section{background-color:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)),color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)))!important;color:var(--lp-text)!important}
 .lp-live-badge,.lp-live-section>small,.beauty-eyebrow{color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important}
-.lp-live-primary,.beauty-nav>a,.lp-lead-form button,.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+.lp-live-primary,.beauty-nav>a,.lp-lead-form>button[type="submit"],.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 .lp-live-contact input,.lp-live-contact textarea,.lp-live-contact select,.lp-live-contact button,.lp-ai-form input,.lp-ai-form button{color-scheme:light dark!important}
 @media (prefers-color-scheme: dark){
 :root,html,body,.lp-live-page,.beauty-wow{color-scheme:light dark!important}
@@ -61,11 +61,11 @@ html,body{background-color:${escapeHtml(bg)}!important;background-image:linear-g
 .beauty-gallery-section,.beauty-wow .lp-product-video{background-color:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)),color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)))!important}
 .beauty-review-section{background-color:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)),color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)))!important;color:var(--lp-text)!important}
 .lp-live-badge,.lp-live-section>small,.beauty-eyebrow{color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important}
-.lp-live-primary,.beauty-nav>a,.lp-lead-form button,.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+.lp-live-primary,.beauty-nav>a,.lp-lead-form>button[type="submit"],.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 @media(max-width:760px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:82%!important;width:82%!important;min-width:82%!important}}
 </style>`;
-  out = out.replace(/<\/head>/i, `${lock}<!-- YOUYOU_PUBLIC_RENDERER:7.11.0 --></head>`);
+  out = out.replace(/<\/head>/i, `${lock}<!-- YOUYOU_PUBLIC_RENDERER:8.4.0 --></head>`);
   return out;
 }
 
@@ -74,7 +74,7 @@ function notFoundPage(slug = "") {
 }
 
 export default async function handler(req, res) {
-  res.setHeader("X-YOUYOU-Renderer", "7.11.0");
+  res.setHeader("X-YOUYOU-Renderer", "8.4.0");
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.setHeader("Allow", "GET, HEAD");
     return res.status(405).send("Method Not Allowed");

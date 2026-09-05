@@ -1858,7 +1858,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.3.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "8.4.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],["EUR","€","Euro"],["MAD","DH","Moroccan Dirham"],
@@ -2501,7 +2501,7 @@ function landingLeadFormMarkup(data, className = "") {
       <label class="lp-lead-field"><span>Address</span><input name="address" autocomplete="street-address" placeholder="Street / area" required /></label>
       <label class="lp-lead-field lp-lead-span-2 lp-lead-message"><span>Message <em>Optional</em></span><textarea name="message" rows="3" placeholder="Anything else we should know?"></textarea></label>
     </div>
-    <button type="submit">${escapeHtml(data.formButtonText || "Send request")}</button>
+    <button class="lp-lead-submit" type="submit">${escapeHtml(data.formButtonText || "Send request")}</button>
     <div class="lp-lead-feedback" aria-live="polite">
       <p class="lp-lead-status" data-lp-lead-status role="status"></p>
       ${safeFollow}
@@ -2947,8 +2947,8 @@ html,body{background-color:var(--yy-page-bg)!important;background-image:linear-g
 .beauty-gallery-section,.beauty-wow .lp-product-video{background-color:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)),color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)))!important}
 .beauty-review-section{background-color:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)),color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)))!important;color:var(--lp-text)!important}
 .lp-live-badge,.lp-live-section>small,.beauty-eyebrow{color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important}
-.lp-live-primary,.beauty-nav>a,.lp-lead-form button,.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important}
-.lp-live-primary,.beauty-nav>a,.lp-lead-form button,.lp-lead-followup{color:#fff!important;-webkit-text-fill-color:#fff!important}
+.lp-live-primary,.beauty-nav>a,.lp-lead-form>button[type="submit"],.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important}
+.lp-live-primary,.beauty-nav>a,.lp-lead-form>button[type="submit"],.lp-lead-followup{color:#fff!important;-webkit-text-fill-color:#fff!important}
 .lp-live-contact input,.lp-live-contact textarea,.lp-live-contact select,.lp-live-contact button,.lp-ai-form input,.lp-ai-form button{color-scheme:light dark!important}
 @media (prefers-color-scheme: dark){
   :root,html,body,.lp-live-page,.beauty-wow{color-scheme:light dark!important}
@@ -2960,7 +2960,7 @@ html,body{background-color:var(--yy-page-bg)!important;background-image:linear-g
   .beauty-gallery-section,.beauty-wow .lp-product-video{background-color:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)),color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg)))!important}
   .beauty-review-section{background-color:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;background-image:linear-gradient(color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)),color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg)))!important;color:var(--lp-text)!important}
   .lp-live-badge,.lp-live-section>small,.beauty-eyebrow{color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important}
-  .lp-live-primary,.beauty-nav>a,.lp-lead-form button,.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  .lp-live-primary,.beauty-nav>a,.lp-lead-form>button[type="submit"],.lp-lead-followup{background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
 }
 
 
@@ -3042,7 +3042,7 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 
 /* YOUYOU V6.9 — QUALITY LOCK */
 .sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-.lp-lead-form{display:grid;gap:12px}.lp-lead-form label{display:grid;gap:6px}.lp-lead-form label>span{font-size:11px;font-weight:800;opacity:.68}.lp-lead-form input,.lp-lead-form textarea{width:100%;padding:13px;border:1px solid color-mix(in srgb,var(--lp-text) 14%,transparent);border-radius:10px;background:var(--lp-surface);color:var(--lp-text);font:inherit}.lp-lead-form button{padding:14px 18px;border:0;border-radius:10px;background:var(--lp-accent);color:#fff;font-weight:900;cursor:pointer}.lp-lead-form button:disabled{opacity:.55;cursor:wait}.lp-lead-status{min-height:18px;margin:0;font-size:11px;opacity:.72}.lp-direct-contact-wrap{display:flex;align-items:center}.lp-direct-contact{display:inline-flex;padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:900}.lp-live-contact>div>p{opacity:.68;line-height:1.6}.lp-live-trust span{padding:7px 10px;border:1px solid color-mix(in srgb,var(--lp-text) 10%,transparent);border-radius:999px}.beauty-nav>div a{color:inherit;text-decoration:none}.beauty-proofline{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}.beauty-proofline span{padding:6px 9px;border:1px solid #16192312;border-radius:999px;font-size:10px;font-weight:800;color:#777}.beauty-final-cta.has-form{align-items:flex-start}.beauty-final-cta.has-form>div{max-width:430px}.beauty-lead-form{width:min(480px,100%)}.beauty-lead-form input,.beauty-lead-form textarea{background:#ffffff12;border-color:#ffffff20;color:#fff}.beauty-lead-form input::placeholder,.beauty-lead-form textarea::placeholder{color:#ffffff72}.beauty-review-meta>b{display:none!important}.lp-ai-context,.lp-ai-powered{display:none!important}
+.lp-lead-form{display:grid;gap:12px}.lp-lead-form label{display:grid;gap:6px}.lp-lead-form label>span{font-size:11px;font-weight:800;opacity:.68}.lp-lead-form input,.lp-lead-form textarea{width:100%;padding:13px;border:1px solid color-mix(in srgb,var(--lp-text) 14%,transparent);border-radius:10px;background:var(--lp-surface);color:var(--lp-text);font:inherit}.lp-lead-form>button[type="submit"]{padding:14px 18px;border:0;border-radius:10px;background:var(--lp-accent);color:#fff;font-weight:900;cursor:pointer}.lp-lead-form>button[type="submit"]:disabled{opacity:.55;cursor:wait}.lp-lead-status{min-height:18px;margin:0;font-size:11px;opacity:.72}.lp-direct-contact-wrap{display:flex;align-items:center}.lp-direct-contact{display:inline-flex;padding:14px 18px;border-radius:10px;text-decoration:none;font-weight:900}.lp-live-contact>div>p{opacity:.68;line-height:1.6}.lp-live-trust span{padding:7px 10px;border:1px solid color-mix(in srgb,var(--lp-text) 10%,transparent);border-radius:999px}.beauty-nav>div a{color:inherit;text-decoration:none}.beauty-proofline{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}.beauty-proofline span{padding:6px 9px;border:1px solid #16192312;border-radius:999px;font-size:10px;font-weight:800;color:#777}.beauty-final-cta.has-form{align-items:flex-start}.beauty-final-cta.has-form>div{max-width:430px}.beauty-lead-form{width:min(480px,100%)}.beauty-lead-form input,.beauty-lead-form textarea{background:#ffffff12;border-color:#ffffff20;color:#fff}.beauty-lead-form input::placeholder,.beauty-lead-form textarea::placeholder{color:#ffffff72}.beauty-review-meta>b{display:none!important}.lp-ai-context,.lp-ai-powered{display:none!important}
 .lp-image-slider{overflow:hidden!important;border-radius:0!important}.lp-image-track{display:flex!important;align-items:stretch!important;gap:16px!important;width:100%!important;overflow-x:auto!important;scroll-snap-type:x mandatory!important;scroll-behavior:smooth!important;scrollbar-width:none!important;padding:4px 3px 8px!important}.lp-image-track::-webkit-scrollbar{display:none!important}.lp-image-slide,.beauty-wow .lp-image-slide{display:flex!important;flex-direction:column!important;flex:0 0 calc((100% - 32px)/3)!important;width:calc((100% - 32px)/3)!important;min-width:0!important;height:auto!important;aspect-ratio:auto!important;scroll-snap-align:start!important;border-radius:18px!important;background:var(--lp-surface)!important;border:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)!important;box-shadow:0 12px 30px rgba(10,12,20,.08)!important;overflow:hidden!important}.lp-product-slide-media{width:100%;aspect-ratio:4/3;overflow:hidden;background:var(--lp-surface)}.lp-product-slide-media img{width:100%!important;height:100%!important;object-fit:cover!important;display:block!important}.lp-product-slide-meta{position:relative;display:grid;gap:4px;padding:13px 14px 14px;min-height:78px}.lp-product-slide-meta small{font-size:9px;font-weight:900;letter-spacing:.08em;color:var(--lp-accent)}.lp-product-slide-meta strong{font-size:14px;line-height:1.2;color:var(--lp-text)}.lp-product-slide-meta>span{position:absolute;right:13px;top:13px;font-size:10px;font-weight:900;opacity:.28}.lp-image-dots{position:static!important;transform:none!important;display:flex!important;justify-content:center!important;gap:7px!important;margin:10px auto 0!important;background:transparent!important}.lp-image-dots button{width:7px;height:7px;padding:0;border:0;border-radius:999px;background:#8d8d9560}.lp-image-dots button.is-active{width:22px;background:var(--lp-accent)}
 .layout-whatsapp .lp-live-primary{background:#25d366;color:#06130a}.layout-urgent .lp-live-primary{background:#ff675f;color:#fff}.layout-luxury .lp-live-hero,.layout-hotel .lp-live-hero,.layout-property .lp-live-hero{padding-top:84px;padding-bottom:84px}.layout-saas .lp-live-media,.layout-tech .lp-live-media,.layout-app .lp-live-media{box-shadow:0 24px 70px #0005}.layout-spa .lp-live-section,.layout-salon .lp-live-section,.layout-clinic .lp-live-section,.layout-dental .lp-live-section{border-color:color-mix(in srgb,var(--lp-text) 7%,transparent)}
 @media(max-width:900px) and (min-width:761px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:calc((100% - 16px)/2)!important;width:calc((100% - 16px)/2)!important}}
@@ -3234,7 +3234,7 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 .lp-live-page *{box-sizing:border-box}
 .lp-live-copy,.beauty-copy{text-align:var(--lp-align,left)!important}
 .lp-live-actions,.beauty-actions{justify-content:var(--lp-justify,flex-start)!important}
-.lp-live-primary,.lp-live-secondary,.lp-direct-contact,.lp-lead-form button,.beauty-nav>a{border-radius:var(--lp-radius,18px)!important}
+.lp-live-primary,.lp-live-secondary,.lp-direct-contact,.lp-lead-form>button[type="submit"],.beauty-nav>a{border-radius:var(--lp-radius,18px)!important}
 .lp-live-media,.lp-hero-media-card,.beauty-visual-wrap,.lp-image-slide,.beauty-wow .lp-image-slide,.lp-static-image-grid figure,.beauty-gallery figure,.beauty-benefits article,.beauty-editorial-card,.beauty-final-cta,.lp-live-benefit-grid>div{border-radius:var(--lp-radius,18px)!important}
 .lp-live-sub,.lp-live-contact>div>p,.beauty-copy>p,.beauty-story-head>p,.beauty-benefits p,.beauty-faq p,.beauty-footer{color:color-mix(in srgb,var(--lp-text) 68%,transparent)!important}
 .lp-live-nav,.lp-live-footer,.beauty-nav,.beauty-story,.beauty-gallery-section,.beauty-faq,.beauty-wow .lp-product-video{background:transparent!important;color:var(--lp-text)!important;border-color:color-mix(in srgb,var(--lp-text) 10%,transparent)!important}
@@ -3252,6 +3252,143 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 .lp-commerce-box{width:min(100%,560px);margin:18px 0 4px;padding:16px;border:1px solid color-mix(in srgb,var(--lp-accent) 18%,transparent);border-radius:16px;background:color-mix(in srgb,var(--lp-surface) 94%,var(--lp-accent) 6%)}.lp-commerce-head,.lp-order-row{display:flex;align-items:center;justify-content:space-between;gap:14px}.lp-commerce-head{align-items:flex-start;margin-bottom:12px}.lp-commerce-head small,.lp-order-bundles>small{color:var(--lp-accent);font-size:9px;font-weight:900}.lp-order-row,.lp-order-variants,.lp-order-bundles,.lp-order-summary{padding-top:12px;border-top:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)}.lp-qty-stepper{display:grid;grid-template-columns:38px 46px 38px;border:1px solid color-mix(in srgb,var(--lp-text) 12%,transparent);border-radius:12px;overflow:hidden}.lp-qty-stepper button{height:38px;border:0;background:transparent;color:var(--lp-text);font-size:20px}.lp-qty-stepper output{display:grid;place-items:center;border-left:1px solid #8883;border-right:1px solid #8883}.lp-order-variants{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.lp-order-variants label{display:grid;gap:6px}.lp-order-variants select{min-height:40px;border:1px solid #8883;border-radius:11px;background:var(--lp-surface);color:var(--lp-text)}.lp-order-bundles>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.lp-order-bundles button{padding:9px 11px;border:1px solid #8883;border-radius:11px;background:var(--lp-surface);color:var(--lp-text)}.lp-order-bundles button.is-active{border-color:var(--lp-accent);color:var(--lp-accent)}.lp-order-summary{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px}.lp-order-summary>div{padding:10px;border-radius:11px;background:color-mix(in srgb,var(--lp-bg) 62%,var(--lp-surface))}.lp-order-summary span{display:block;font-size:8px;opacity:.6}.lp-order-summary strong{display:block;margin-top:4px}.lp-order-total strong{color:var(--lp-accent)}.lp-order-total b,.lp-order-total em{font-style:normal}@media(max-width:760px){.lp-order-variants{grid-template-columns:1fr}.lp-order-summary{grid-template-columns:1fr 1fr}.lp-order-summary .lp-order-total{grid-column:1/-1}}
 
 .lp-checkout-form{display:grid!important;gap:14px!important;padding:18px!important;border:1px solid color-mix(in srgb,var(--lp-accent) 16%,transparent)!important;border-radius:22px!important;background:color-mix(in srgb,var(--lp-surface) 96%,var(--lp-accent) 4%)!important;box-shadow:0 18px 50px rgba(0,0,0,.08)!important}.lp-checkout-form .lp-commerce-box{width:100%!important;margin:0 0 4px!important;padding:0 0 14px!important;border:0!important;border-bottom:1px solid color-mix(in srgb,var(--lp-text) 9%,transparent)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}.lp-commerce-head{display:flex!important;align-items:center!important;justify-content:space-between!important;margin:0 0 8px!important}.lp-order-colors{padding:11px 0;border-top:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)}.lp-order-colors>small{display:block;margin-bottom:8px;font-size:8px;font-weight:900;letter-spacing:.1em}.lp-color-swatches{display:flex;flex-wrap:wrap;gap:8px}.lp-color-swatch{display:inline-flex;align-items:center;gap:7px;min-height:36px;padding:6px 10px 6px 6px;border:1px solid color-mix(in srgb,var(--lp-text) 12%,transparent);border-radius:999px;background:var(--lp-surface);color:var(--lp-text);font-size:9px;font-weight:800}.lp-color-swatch i{width:22px;height:22px;border-radius:50%;border:1px solid #7f7f7f4d}.lp-color-swatch.is-active{border-color:var(--lp-accent);color:var(--lp-accent)}@media(max-width:760px){.lp-checkout-form{padding:14px!important}}
+
+
+/* =========================================================
+   YOUYOU V8.4 — PREMIUM PRODUCT OPTION TILES
+   Authoritative commerce UI for Workspace preview + public snapshot.
+   The form CTA is intentionally separated from selectable controls.
+   ========================================================= */
+.lp-checkout-form .lp-commerce-box{padding-bottom:12px!important}
+.lp-checkout-form .lp-order-colors,
+.lp-checkout-form .lp-order-options,
+.lp-checkout-form .lp-order-bundles,
+.lp-checkout-form .lp-quantity-row{border-color:color-mix(in srgb,var(--lp-text) 8%,transparent)!important}
+.lp-checkout-form .lp-order-option-group{padding:2px 0!important}
+.lp-checkout-form .lp-order-option-group>small,
+.lp-checkout-form .lp-order-bundles>small,
+.lp-checkout-form .lp-order-colors>small,
+.lp-checkout-form .lp-quantity-row>small{margin-bottom:7px!important;color:color-mix(in srgb,var(--lp-text) 68%,transparent)!important;font-size:8px!important;font-weight:900!important;letter-spacing:.09em!important}
+
+/* IMPORTANT: selectable commerce controls are not CTA buttons. */
+.lp-checkout-form :is(.lp-color-swatch,.lp-option-chip,.lp-order-bundles button,.lp-qty-stepper button){
+  -webkit-appearance:none!important;appearance:none!important;
+  background-color:color-mix(in srgb,var(--lp-bg) 74%,transparent)!important;
+  background-image:none!important;
+  color:var(--lp-text)!important;-webkit-text-fill-color:var(--lp-text)!important;
+  border:1px solid color-mix(in srgb,var(--lp-text) 13%,transparent)!important;
+  box-shadow:none!important;text-shadow:none!important;
+  transform:none!important;cursor:pointer!important;
+  font-family:inherit!important;
+}
+.lp-checkout-form :is(.lp-color-swatch,.lp-option-chip,.lp-order-bundles button,.lp-qty-stepper button):hover{
+  border-color:color-mix(in srgb,var(--lp-accent) 48%,var(--lp-text))!important;
+  background-color:color-mix(in srgb,var(--lp-accent) 5%,var(--lp-bg))!important;
+}
+.lp-checkout-form :is(.lp-color-swatch,.lp-option-chip,.lp-order-bundles button,.lp-qty-stepper button):focus-visible{
+  outline:2px solid color-mix(in srgb,var(--lp-accent) 45%,transparent)!important;
+  outline-offset:2px!important;
+}
+
+/* Color choices: small transparent premium tiles. */
+.lp-checkout-form .lp-color-swatches{display:flex!important;flex-wrap:wrap!important;gap:7px!important}
+.lp-checkout-form .lp-color-swatch{
+  position:relative!important;display:inline-flex!important;align-items:center!important;justify-content:flex-start!important;
+  gap:7px!important;width:auto!important;min-width:72px!important;max-width:122px!important;
+  min-height:38px!important;height:38px!important;padding:0 23px 0 8px!important;
+  border-radius:10px!important;font-size:8.5px!important;font-weight:800!important;line-height:1!important;
+}
+.lp-checkout-form .lp-color-swatch i{flex:0 0 16px!important;width:16px!important;height:16px!important;border-radius:5px!important;border:1px solid rgba(127,127,127,.25)!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)!important}
+.lp-checkout-form .lp-color-swatch span{display:block!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+.lp-checkout-form .lp-color-swatch b{
+  display:none!important;position:absolute!important;right:6px!important;top:50%!important;transform:translateY(-50%)!important;
+  width:13px!important;height:13px!important;place-items:center!important;border-radius:4px!important;
+  background:var(--lp-accent)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:7px!important;font-weight:950!important;
+}
+.lp-checkout-form .lp-color-swatch:is(.is-active,[aria-pressed="true"]){
+  border-color:var(--lp-accent)!important;background-color:color-mix(in srgb,var(--lp-accent) 7%,var(--lp-bg))!important;
+  color:var(--lp-text)!important;-webkit-text-fill-color:var(--lp-text)!important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--lp-accent) 10%,transparent)!important;
+}
+.lp-checkout-form .lp-color-swatch:is(.is-active,[aria-pressed="true"]) b{display:grid!important}
+
+/* Size / Weight / Volume / Pack / Custom: compact square-ish option tiles. */
+.lp-checkout-form .lp-order-options{gap:11px!important;padding:10px 0!important}
+.lp-checkout-form .lp-option-chips{display:flex!important;flex-wrap:wrap!important;gap:7px!important}
+.lp-checkout-form .lp-option-chip{
+  position:relative!important;display:inline-grid!important;place-items:center!important;
+  width:auto!important;min-width:42px!important;max-width:116px!important;height:38px!important;min-height:38px!important;
+  padding:0 11px!important;border-radius:9px!important;font-size:8.5px!important;font-weight:850!important;line-height:1!important;
+}
+.lp-checkout-form .lp-option-chip b{
+  display:none!important;position:absolute!important;right:-4px!important;top:-5px!important;
+  width:14px!important;height:14px!important;place-items:center!important;border-radius:5px!important;
+  background:var(--lp-accent)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:7px!important;font-weight:950!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.12)!important;
+}
+.lp-checkout-form .lp-option-chip:is(.is-active,[aria-pressed="true"]){
+  border-color:var(--lp-accent)!important;background-color:color-mix(in srgb,var(--lp-accent) 7%,var(--lp-bg))!important;
+  color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--lp-accent) 10%,transparent)!important;
+}
+.lp-checkout-form .lp-option-chip:is(.is-active,[aria-pressed="true"]) b{display:grid!important}
+
+/* Bundles use the same premium tile language, with enough room for price text. */
+.lp-checkout-form .lp-order-bundles{padding:10px 0!important}
+.lp-checkout-form .lp-order-bundles>div{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin-top:0!important}
+.lp-checkout-form .lp-order-bundles button{
+  position:relative!important;display:grid!important;align-content:center!important;gap:2px!important;
+  min-height:48px!important;padding:7px 23px 7px 9px!important;border-radius:10px!important;text-align:left!important;
+}
+.lp-checkout-form .lp-order-bundles button strong{font-size:8.5px!important;line-height:1.2!important;color:inherit!important;-webkit-text-fill-color:currentColor!important}
+.lp-checkout-form .lp-order-bundles button span{font-size:7px!important;line-height:1.25!important;opacity:.58!important;color:inherit!important;-webkit-text-fill-color:currentColor!important}
+.lp-checkout-form .lp-order-bundles button b{
+  display:none!important;position:absolute!important;right:6px!important;top:6px!important;width:14px!important;height:14px!important;
+  place-items:center!important;border-radius:5px!important;background:var(--lp-accent)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:7px!important;
+}
+.lp-checkout-form .lp-order-bundles button:is(.is-active,[aria-pressed="true"]){
+  border-color:var(--lp-accent)!important;background-color:color-mix(in srgb,var(--lp-accent) 7%,var(--lp-bg))!important;
+  box-shadow:0 0 0 2px color-mix(in srgb,var(--lp-accent) 10%,transparent)!important;
+}
+.lp-checkout-form .lp-order-bundles button:is(.is-active,[aria-pressed="true"]) b{display:grid!important}
+
+/* Quantity: one compact transparent control, never a pair of giant purple circles. */
+.lp-checkout-form .lp-quantity-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;padding:10px 0!important}
+.lp-checkout-form .lp-quantity-row>small{margin:0!important}
+.lp-checkout-form .lp-qty-stepper{
+  display:grid!important;grid-template-columns:32px 42px 32px!important;flex:0 0 108px!important;width:108px!important;
+  overflow:hidden!important;border:1px solid color-mix(in srgb,var(--lp-text) 13%,transparent)!important;border-radius:10px!important;
+  background:color-mix(in srgb,var(--lp-bg) 74%,transparent)!important;
+}
+.lp-checkout-form .lp-qty-stepper button{
+  width:32px!important;height:34px!important;min-height:34px!important;padding:0!important;border:0!important;border-radius:0!important;
+  background:transparent!important;color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important;font-size:16px!important;font-weight:900!important;
+}
+.lp-checkout-form .lp-qty-stepper button:first-child{border-right:1px solid color-mix(in srgb,var(--lp-text) 10%,transparent)!important}
+.lp-checkout-form .lp-qty-stepper button:last-child{border-left:1px solid color-mix(in srgb,var(--lp-text) 10%,transparent)!important}
+.lp-checkout-form .lp-qty-stepper output{display:grid!important;place-items:center!important;width:42px!important;height:34px!important;min-height:34px!important;border:0!important;background:transparent!important;color:var(--lp-text)!important;-webkit-text-fill-color:var(--lp-text)!important;font-size:10px!important;font-weight:900!important}
+
+/* Order summary: quiet, compact and aligned with the landing palette. */
+.lp-checkout-form .lp-order-summary{display:grid!important;grid-template-columns:1fr 1fr 1.1fr!important;gap:7px!important;padding-top:10px!important}
+.lp-checkout-form .lp-order-summary>div{padding:9px 10px!important;border:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)!important;border-radius:10px!important;background:color-mix(in srgb,var(--lp-bg) 58%,transparent)!important}
+.lp-checkout-form .lp-order-summary span{font-size:7px!important;opacity:.58!important}
+.lp-checkout-form .lp-order-summary strong{margin-top:3px!important;font-size:10px!important;line-height:1.25!important}
+.lp-checkout-form .lp-order-total strong{font-size:11.5px!important;color:var(--lp-accent)!important;-webkit-text-fill-color:var(--lp-accent)!important}
+
+/* Only the real form action gets the branded filled CTA treatment. */
+.lp-checkout-form>button[type="submit"],.lp-checkout-form>.lp-lead-submit{
+  min-height:46px!important;padding:0 16px!important;border:0!important;border-radius:10px!important;
+  background-color:var(--lp-accent)!important;background-image:linear-gradient(var(--lp-accent),var(--lp-accent))!important;
+  color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:10px!important;font-weight:900!important;cursor:pointer!important;
+}
+
+@media(max-width:760px){
+  .lp-checkout-form .lp-color-swatch{min-width:68px!important;max-width:108px!important;height:36px!important;min-height:36px!important}
+  .lp-checkout-form .lp-option-chip{min-width:40px!important;height:36px!important;min-height:36px!important;padding:0 9px!important}
+  .lp-checkout-form .lp-order-bundles>div{grid-template-columns:1fr!important}
+  .lp-checkout-form .lp-order-summary{grid-template-columns:1fr 1fr!important}
+  .lp-checkout-form .lp-order-summary .lp-order-total{grid-column:1/-1!important}
+}
 
 html{
   overflow-y:scroll;

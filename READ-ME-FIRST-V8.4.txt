@@ -1,0 +1,10 @@
+YOUYOU V8.4 — PREMIUM PRODUCT OPTIONS
+
+1) Upload the complete project to the existing GitHub repo.
+2) Commit and wait for Vercel Ready.
+3) Open the Beauty/Product page in the Workspace.
+4) Verify Color / Size / Volume / Quantity selection in the preview.
+5) Click Update live page once for existing published pages.
+6) Test the public /p/... URL.
+
+No SQL is required.
