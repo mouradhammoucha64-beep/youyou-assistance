@@ -1,11 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import * as mammoth from "mammoth/mammoth.browser";
-import * as XLSX from "xlsx";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-import pdfWorkerUrl from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
 import "./style.css";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -108,12 +102,12 @@ function setPublicSiteLanguage(language) {
 const PUBLIC_SITE_COPY = {
   en: {
     features:"Features", how:"How it works", pricing:"Pricing", faq:"FAQ", login:"Log in", start:"Start free",
-    dashboard:"Open dashboard", billing:"Plans & billing", plans:"View plans",
+    dashboard:"Open dashboard", billing:"Plans & billing", plans:"View plans", howCta:"Explore the workflow",
     heroEyebrow:"AI GROWTH PLATFORM",
-    heroTitle:'Turn more visitors into <span>customers and growth.</span>',
-    heroText:"YOUYOU brings AI conversations, SEO growth, Revenue Rescue, WhatsApp AI, AI Studio and campaign landing pages into one focused workspace for modern businesses.",
-    trust1:"✓ No credit card required", trust2:"✓ Setup in minutes", trust3:"✓ Available 24/7",
-    always:"AI conversations", engines:"Connected growth tools", workspace:"Landing templates", conversion:"Unified workspace",
+    heroTitle:'From idea to lead — <span>in one workspace.</span>',
+    heroText:"Build the campaign, publish the landing page, capture customer intent and keep the next action visible. YOUYOU connects the work that usually gets scattered across separate growth tools.",
+    trust1:"✓ No credit card required", trust2:"✓ No confusing credit packs", trust3:"✓ Built for USA + Canada",
+    always:"structure campaign briefs with AI Studio", engines:"focused landing pages for each offer", workspace:"visitor intent and qualified leads", conversion:"keep valuable opportunities moving",
     platformEyebrow:"YOUYOU PLATFORM",
     platformTitle:'Growth tools that <span>work together.</span>',
     platformText:"Get discovered, create campaigns, convert visitors, keep valuable leads moving and continue conversations on WhatsApp — from one connected workspace.",
@@ -131,7 +125,7 @@ const PUBLIC_SITE_COPY = {
   },
   fr: {
     features:"Fonctionnalités", how:"Comment ça marche", pricing:"Tarifs", faq:"FAQ", login:"Connexion", start:"Commencer gratuitement",
-    dashboard:"Ouvrir le tableau de bord", billing:"Offres et facturation", plans:"Voir les offres",
+    dashboard:"Ouvrir le tableau de bord", billing:"Offres et facturation", plans:"Voir les offres", howCta:"Explorer le fonctionnement",
     heroEyebrow:"PLATEFORME DE CROISSANCE IA",
     heroTitle:'Transformez plus de visiteurs en <span>clients et en croissance.</span>',
     heroText:"YOUYOU réunit conversations IA, croissance SEO, Revenue Rescue, WhatsApp AI, AI Studio et pages de campagne dans un seul espace de travail.",
@@ -153,7 +147,7 @@ const PUBLIC_SITE_COPY = {
   },
   ar: {
     features:"المزايا", how:"كيف يعمل", pricing:"الأسعار", faq:"الأسئلة الشائعة", login:"تسجيل الدخول", start:"ابدأ مجاناً",
-    dashboard:"فتح لوحة التحكم", billing:"الباقات والفوترة", plans:"عرض الباقات",
+    dashboard:"فتح لوحة التحكم", billing:"الباقات والفوترة", plans:"عرض الباقات", howCta:"استكشف طريقة العمل",
     heroEyebrow:"منصة نمو بالذكاء الاصطناعي",
     heroTitle:'حوّل المزيد من الزوار إلى <span>عملاء ونمو حقيقي.</span>',
     heroText:"تجمع YOUYOU محادثات الذكاء الاصطناعي، ونمو SEO، واسترجاع العملاء، وواتساب، وAI Studio، وصفحات الحملات في مساحة عمل واحدة.",
@@ -197,12 +191,12 @@ function applyPublicSiteLanguage(language = getPublicSiteLanguage()) {
 
   setText("#nav-login", copy.login); setText("#nav-start", copy.start);
   setText("#nav-dashboard", copy.dashboard); setText("#nav-billing", copy.billing);
-  setText("#hero-login", copy.login); setText("#hero-pricing", copy.plans);
+  setText("#hero-how", copy.howCta); setText("#hero-pricing", copy.plans);
   const heroStart = landing.querySelector("#hero-start"); if (heroStart) heroStart.innerHTML = `${copy.start} <span>→</span>`;
   const heroDashboard = landing.querySelector("#hero-dashboard"); if (heroDashboard) heroDashboard.innerHTML = `${copy.dashboard} <span>→</span>`;
 
-  setText(".hero-copy .eyebrow", copy.heroEyebrow); setHtml(".hero-copy h1", copy.heroTitle); setText(".hero-text", copy.heroText);
-  const trust = landing.querySelectorAll(".trust span"); [copy.trust1,copy.trust2,copy.trust3].forEach((v,i)=>{ if(trust[i]) trust[i].textContent=v; });
+  setText(".hero-v500-badge", copy.heroEyebrow); setHtml(".hero-v500-copy h1", copy.heroTitle); setText(".hero-v500-copy > p", copy.heroText);
+  const trust = landing.querySelectorAll(".hero-v500-trust span"); [copy.trust1,copy.trust2,copy.trust3].forEach((v,i)=>{ if(trust[i]) trust[i].textContent=v; });
   const stats = landing.querySelectorAll(".stats-section span"); [copy.always,copy.engines,copy.workspace,copy.conversion].forEach((v,i)=>{if(stats[i])stats[i].textContent=v;});
 
   setText(".growth-platform-copy .eyebrow", copy.platformEyebrow); setHtml(".growth-platform-copy h2", copy.platformTitle); setText(".growth-platform-copy > p", copy.platformText);
@@ -232,10 +226,13 @@ function renderLanding() {
 
       <header class="landing-nav">
         <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-          <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
-  <span class="brand-name-v504">YOUYOU</span>
-  <span class="brand-tag-v504">AI GROWTH</span>
-</span>
+          <span class="brand-identity-v89">
+            <span class="brand-fox-mark-v89" aria-hidden="true"><img src="/assets/youyou-fox-brand.png" alt="" /></span>
+            <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
+              <span class="brand-name-v504">YOUYOU</span>
+              <span class="brand-tag-v504">AI GROWTH</span>
+            </span>
+          </span>
         </a>
 
         <nav class="landing-links">
@@ -260,38 +257,50 @@ function renderLanding() {
         <section class="hero-v500">
           <div class="hero-v500-bg" aria-hidden="true"></div>
 
-          <div class="hero-v500-copy">
-            <div class="hero-v500-badge"><span>✦</span> ALL-IN-ONE AI GROWTH WORKSPACE</div>
-            <h1>Turn one idea into a <span>campaign, landing page and qualified lead.</span></h1>
-            <p>YOUYOU connects AI Studio, Smart Landing Pages, SEO Growth, Conversations, Revenue Rescue and WhatsApp AI in one clear workflow — from attention to follow-up.</p>
+          <div class="hero-v89-top">
+            <div class="hero-v500-copy">
+              <div class="hero-v500-badge"><span>✦</span> AI GROWTH PLATFORM</div>
+              <h1>From idea to lead — <span>in one workspace.</span></h1>
+              <p>Build the campaign, publish the landing page, capture customer intent and keep the next action visible. YOUYOU connects the work that usually gets scattered across separate growth tools.</p>
 
-            <div class="hero-v500-actions">
-              ${state.user
-                ? `<button id="hero-dashboard" class="hero-v500-primary">Open dashboard <span>→</span></button>
-                   <button id="hero-pricing" class="hero-v500-secondary">View plans</button>`
-                : `<button id="hero-start" class="hero-v500-primary">Start free <span>→</span></button>
-                   <button id="hero-login" class="hero-v500-secondary">See how it works <span class="play-dot">▶</span></button>`}
+              <div class="hero-v500-actions">
+                ${state.user
+                  ? `<button id="hero-dashboard" class="hero-v500-primary">Open dashboard <span>→</span></button>
+                     <button id="hero-pricing" class="hero-v500-secondary">View plans</button>`
+                  : `<button id="hero-start" class="hero-v500-primary">Start free <span>→</span></button>
+                     <button id="hero-how" class="hero-v500-secondary">Explore the workflow <span class="play-dot">↓</span></button>`}
+              </div>
+
+              <div class="hero-v500-trust">
+                <span>✓ No credit card required</span>
+                <span>✓ No confusing credit packs</span>
+                <span>✓ Built for USA + Canada</span>
+              </div>
             </div>
 
-            <div class="hero-v500-trust">
-              <span>✓ No credit card required</span>
-              <span>✓ No confusing credit packs</span>
-              <span>✓ One connected workspace</span>
-            </div>
+            <aside class="hero-fox-v89" aria-label="YOUYOU fox brand">
+              <div class="hero-fox-orbit-v89" aria-hidden="true"></div>
+              <div class="hero-fox-kicker-v89"><span></span> THE YOUYOU SIGNAL</div>
+              <img src="/assets/youyou-fox-brand.png" alt="The YOUYOU fox in navy, rose and mauve brand colors" width="1122" height="1402" fetchpriority="high" />
+              <div class="hero-fox-caption-v89">
+                <small>FOCUSED · ALERT · CONNECTED</small>
+                <strong>One clear system for the next growth move.</strong>
+              </div>
+            </aside>
           </div>
 
           <div class="hero-v500-product" aria-label="YOUYOU product workflow preview">
             <div class="product-frame-v500">
               <div class="product-top-v500">
                 <div class="product-logo-v500">
-                  <span class="product-logo-mark-v500"><i></i><b></b></span>
+                  <span class="product-fox-mark-v89"><img src="/assets/youyou-fox-brand.png" alt="" /></span>
                   <strong>YOUYOU</strong>
                 </div>
                 <div class="product-welcome-v500">
                   <strong>Welcome back 👋</strong>
                   <small>Here’s what’s happening with your growth today.</small>
                 </div>
-                <div class="product-status-v500"><i></i> LIVE</div>
+                <div class="product-status-v500"><i></i> PRODUCT PREVIEW</div>
               </div>
 
               <div class="product-body-v500">
@@ -307,16 +316,16 @@ function renderLanding() {
 
                 <div class="product-main-v500">
                   <div class="product-kpis-v500">
-                    <article><small>Visitors</small><strong>24,358</strong><em>↗ 12.5%</em></article>
-                    <article><small>Leads</small><strong>1,842</strong><em>↗ 18.7%</em></article>
-                    <article><small>Conversion</small><strong>7.56%</strong><em>↗ 2.3%</em></article>
-                    <article><small>Revenue</small><strong>$18,642</strong><em>↗ 21.4%</em></article>
+                    <article><small>Conversations</small><strong>Captured</strong><em>Website + landing pages</em></article>
+                    <article><small>Leads</small><strong>Qualified</strong><em>Hot and Warm signals</em></article>
+                    <article><small>Pages</small><strong>Published</strong><em>Draft-to-live workflow</em></article>
+                    <article><small>Follow-up</small><strong>Prioritized</strong><em>Revenue Rescue queue</em></article>
                   </div>
 
                   <section class="product-studio-v500">
                     <div class="product-section-title-v500">
-                      <div><small>AI STUDIO</small><strong>Create for the platforms your customers use.</strong></div>
-                      <span>Campaign ready</span>
+                      <div><small>AI STUDIO</small><strong>Plan for the platforms your customers use.</strong></div>
+                      <span>Brief ready</span>
                     </div>
                     <div class="platform-row-v500">
                       <div class="p-meta"><span>∞</span><small>Meta</small></div>
@@ -332,7 +341,7 @@ function renderLanding() {
                   <section class="product-flow-v500">
                     <div class="flow-line-v500" aria-hidden="true"><i></i></div>
                     <article class="flow-step-v500 step-1"><b>1</b><small>IDEA</small><strong>Your business goal</strong></article>
-                    <article class="flow-step-v500 step-2"><b>2</b><small>CAMPAIGN</small><strong>AI creates the ad</strong></article>
+                    <article class="flow-step-v500 step-2"><b>2</b><small>CAMPAIGN</small><strong>Creative brief ready</strong></article>
                     <article class="flow-step-v500 step-3"><b>3</b><small>LANDING PAGE</small><strong>Focused conversion page</strong></article>
                     <article class="flow-step-v500 step-4"><b>4</b><small>LEAD</small><strong>Intent captured</strong></article>
                     <article class="flow-step-v500 step-5"><b>5</b><small>FOLLOW-UP</small><strong>WhatsApp / Rescue</strong></article>
@@ -343,7 +352,7 @@ function renderLanding() {
           </div>
 
           <div class="hero-v500-platforms" aria-label="Supported campaign destinations">
-            <span class="platform-label-v500">CREATE FOR</span>
+            <span class="platform-label-v500">PLAN FOR</span>
             <span class="logo-meta-v500"><b>∞</b> Meta</span>
             <span class="logo-facebook-v500"><b>f</b> Facebook</span>
             <span class="logo-instagram-v500"><b class="ig-mini-v500"></b> Instagram</span>
@@ -355,7 +364,7 @@ function renderLanding() {
         </section>
 
         <section class="stats-section stats-live-strip stats-compact-v426 proof-strip-v427" aria-label="What YOUYOU helps you do">
-          <div class="stat-live-item"><strong>CREATE</strong><span>campaigns and content with AI Studio</span></div>
+          <div class="stat-live-item"><strong>CREATE</strong><span>structure campaign briefs with AI Studio</span></div>
           <div class="stat-live-item"><strong>LAUNCH</strong><span>focused landing pages for each offer</span></div>
           <div class="stat-live-item"><strong>CAPTURE</strong><span>visitor intent and qualified leads</span></div>
           <div class="stat-live-item"><strong>FOLLOW UP</strong><span>keep valuable opportunities moving</span></div>
@@ -444,7 +453,7 @@ function renderLanding() {
               <article class="growth-engine-card engine-conversations">
                 <div class="growth-engine-icon">◌</div><small>01 · WEBSITE AI</small>
                 <h3>AI Conversations</h3>
-                <p>Answer visitors 24/7, capture buying intent and turn questions into qualified opportunities.</p>
+                <p>Capture website questions, identify buying signals and organize each conversation around a useful next step.</p>
                 <span class="engine-status">CONVERT</span>
               </article>
               <article class="growth-engine-card engine-seo">
@@ -456,8 +465,8 @@ function renderLanding() {
               <article class="growth-engine-card engine-studio">
                 <div class="growth-engine-icon">✦</div><small>03 · CONTENT ENGINE</small>
                 <h3>AI Studio</h3>
-                <p>Create campaign ideas, ad copy, social posts, emails, scripts and landing-page messaging from your business context.</p>
-                <span class="engine-status">CREATE</span>
+                <p>Turn a raw idea into a structured creative brief today; final AI generation activates with the production AI connection.</p>
+                <span class="engine-status">AI READY</span>
               </article>
               <article class="growth-engine-card engine-pages">
                 <div class="growth-engine-icon">▦</div><small>04 · CAMPAIGN PAGES</small>
@@ -474,10 +483,94 @@ function renderLanding() {
               <article class="growth-engine-card engine-whatsapp">
                 <div class="growth-engine-icon">◉</div><small>06 · CONTINUITY</small>
                 <h3>WhatsApp AI</h3>
-                <p>Continue conversations on WhatsApp with shared business context, lead handoff and human takeover readiness.</p>
-                <span class="engine-status">CONTINUE</span>
+                <p>Open direct WhatsApp handoffs now; shared-context AI replies and human takeover activate with the official API connection.</p>
+                <span class="engine-status">API READY</span>
               </article>
             </div>
+          </div>
+        </section>
+
+        <section class="capability-atlas-v89" aria-labelledby="capability-atlas-title">
+          <div class="capability-atlas-head-v89">
+            <div>
+              <div class="eyebrow">EVERYTHING INSIDE YOUYOU</div>
+              <h2 id="capability-atlas-title">The full growth workspace, <span>mapped clearly.</span></h2>
+            </div>
+            <p>Every area works from the same business profile, knowledge, conversations and leads—so your team does not have to rebuild context in every tool.</p>
+          </div>
+
+          <div class="capability-atlas-grid-v89">
+            <article class="capability-card-v89">
+              <div class="capability-card-top-v89"><span>01</span><em>CAPTURE</em></div>
+              <h3>Website Widget & Conversations</h3>
+              <p>Install one company-specific widget and keep every visitor conversation inside your workspace.</p>
+              <ul>
+                <li>Custom welcome message, color, position and on/off status</li>
+                <li>Persistent visitor conversation sessions</li>
+                <li>Contact capture for high-intent visitors</li>
+                <li>Conversation inbox with message history and last activity</li>
+              </ul>
+            </article>
+
+            <article class="capability-card-v89">
+              <div class="capability-card-top-v89"><span>02</span><em>QUALIFY</em></div>
+              <h3>Leads & Intent Scoring</h3>
+              <p>Turn conversation signals into an organized view of the opportunities that deserve attention.</p>
+              <ul>
+                <li>Hot, Warm and qualified-lead filtering</li>
+                <li>Buying-intent score and smart conversation summary</li>
+                <li>Email and phone extraction from visitor messages</li>
+                <li>Direct email, call and conversation actions</li>
+              </ul>
+            </article>
+
+            <article class="capability-card-v89">
+              <div class="capability-card-top-v89"><span>03</span><em>TEACH</em></div>
+              <h3>Knowledge Base & AI Control</h3>
+              <p>Give YOUYOU accurate business context and control how the future connected AI represents your company.</p>
+              <ul>
+                <li>Manual knowledge entries with searchable library</li>
+                <li>PDF, DOCX, TXT, CSV and XLSX file import</li>
+                <li>Editable extraction and safe long-document splitting</li>
+                <li>Agent name, tone, language, response style and lead capture</li>
+              </ul>
+            </article>
+
+            <article class="capability-card-v89">
+              <div class="capability-card-top-v89"><span>04</span><em>CREATE</em></div>
+              <h3>AI Studio & Campaign Planning</h3>
+              <p>Shape a usable creative brief for the campaign channels your customers already use.</p>
+              <ul>
+                <li>Campaign goal, audience, offer, tone and language</li>
+                <li>Formats for ads, social, email, scripts and landing copy</li>
+                <li>Video-ready duration, format, voice and visual direction</li>
+                <li>Structured brief today; production generation when AI connects</li>
+              </ul>
+            </article>
+
+            <article class="capability-card-v89">
+              <div class="capability-card-top-v89"><span>05</span><em>GET FOUND</em></div>
+              <h3>SEO Growth Center</h3>
+              <p>Use real workspace information and a live URL audit to turn SEO gaps into practical actions.</p>
+              <ul>
+                <li>SEO readiness score and prioritized quick wins</li>
+                <li>Single-page website audit with issue severity</li>
+                <li>Keyword clusters, on-page pack and snippet preview</li>
+                <li>Local SEO plan, page ideas, content brief and checklist</li>
+              </ul>
+            </article>
+
+            <article class="capability-card-v89">
+              <div class="capability-card-top-v89"><span>06</span><em>FOLLOW UP</em></div>
+              <h3>Revenue Rescue & WhatsApp</h3>
+              <p>Keep valuable conversations visible after the first visit, without pretending an automatic message was sent.</p>
+              <ul>
+                <li>At-risk, Hot and contactable opportunity signals</li>
+                <li>Manual follow-up queue with suggested next action</li>
+                <li>Direct website-to-WhatsApp handoff links</li>
+                <li>Official WhatsApp AI and human takeover connection plan</li>
+              </ul>
+            </article>
           </div>
         </section>
 
@@ -493,14 +586,14 @@ function renderLanding() {
               </div>
 
               <h2>
-                Train your AI in
+                Build your business brain in
                 <span>minutes, not weeks.</span>
               </h2>
 
               <p>
                 Drop in the documents your business already uses. YOUYOU extracts
-                the useful information and turns it into knowledge your AI can use
-                when speaking with customers.
+                the useful information and turns it into an editable Knowledge Base
+                ready for your connected AI.
               </p>
 
               <div class="knowledge-format-row">
@@ -538,7 +631,7 @@ function renderLanding() {
               </div>
 
               <button id="knowledge-start" class="primary hero-btn knowledge-cta">
-                Train my AI →
+                Build my Knowledge Base →
               </button>
             </div>
 
@@ -714,6 +807,51 @@ function renderLanding() {
           </div>
         </section>
 
+        <section class="landing-system-v89" aria-labelledby="landing-system-title">
+          <div class="landing-system-head-v89">
+            <div class="eyebrow">UNIFIED LANDING STUDIO</div>
+            <h2 id="landing-system-title">Build, sell, book and publish—<span>without leaving the workspace.</span></h2>
+            <p>The Landing Studio supports product campaigns, service requests, bookings and lead generation from the same professional editing system.</p>
+          </div>
+
+          <div class="landing-system-grid-v89">
+            <article><span>01</span><h3>Design & media</h3><p>30 templates, live desktop/mobile preview, colors, fonts, layouts, custom sections, uploaded images, galleries, carousels and video.</p></article>
+            <article><span>02</span><h3>Products & offers</h3><p>USD/CAD pricing, show/quote/hide modes, quantity, colors, variants, option chips, bundles, bundle pricing and live order totals.</p></article>
+            <article><span>03</span><h3>Services & booking</h3><p>Service selection, urgency, preferred date and time, contact details and a clean request summary built for local businesses.</p></article>
+            <article><span>04</span><h3>Conversion actions</h3><p>Lead form, WhatsApp, phone or email CTA—with product and service selections included in the captured request.</p></article>
+            <article><span>05</span><h3>Draft-to-live workflow</h3><p>Autosave, My Pages, Continue Editing, Draft, Published and Published · changes not live statuses, real public URLs and Update live page.</p></article>
+            <article><span>06</span><h3>Ownership & portability</h3><p>Company media storage, reusable page data and HTML export as an optional backup alongside YOUYOU publishing.</p></article>
+          </div>
+        </section>
+
+        <section class="truth-status-v89" aria-labelledby="truth-status-title">
+          <div class="truth-status-copy-v89">
+            <div class="eyebrow">CLEAR LAUNCH STATUS</div>
+            <h2 id="truth-status-title">What works now. <span>What connects next.</span></h2>
+            <p>YOUYOU separates working product capabilities from integration-dependent features, so your team always knows what is active.</p>
+          </div>
+          <div class="truth-status-grid-v89">
+            <article class="is-live">
+              <span>AVAILABLE IN THIS BUILD</span>
+              <ul>
+                <li>Auth, company workspaces and business settings</li>
+                <li>Widget setup, conversations, lead capture and scoring</li>
+                <li>Knowledge import, Landing Studio, My Pages and publishing</li>
+                <li>SEO URL audit and Revenue Rescue signal queue</li>
+              </ul>
+            </article>
+            <article class="is-ready">
+              <span>ACTIVATES WITH PRODUCTION CONNECTIONS</span>
+              <ul>
+                <li>Generated AI replies and final AI Studio content</li>
+                <li>Official WhatsApp Business API automation</li>
+                <li>Paddle checkout, webhooks and paid-plan enforcement</li>
+                <li>Google Search Console data and customer API access</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
         <section id="pricing" class="pricing-section pricing-v45 pricing-v424">
           <div class="section-heading pricing-heading">
             <div class="eyebrow">SIMPLE MONTHLY PRICING</div>
@@ -738,7 +876,7 @@ function renderLanding() {
 
               <div class="pricing-divider"></div>
               <ul class="pricing-feature-list">
-                <li><span>✓</span> AI Conversations + Website Widget</li>
+                <li><span>✓</span> Website Widget + conversation capture</li>
                 <li><span>✓</span> Knowledge Base + business file import</li>
                 <li><span>✓</span> Conversations inbox + basic lead capture</li>
                 <li><span>✓</span> AI Control Center</li>
@@ -798,8 +936,8 @@ function renderLanding() {
               <ul class="pricing-feature-list">
                 <li><span>✓</span> Everything in Growth</li>
                 <li><span>✓</span> Full SEO Growth Center + advanced insights</li>
-                <li><span>✓</span> WhatsApp AI integration</li>
-                <li><span>✓</span> AI Studio · full workflow + video-ready creation</li>
+                <li><span>✓</span> WhatsApp AI capacity when the API is connected</li>
+                <li><span>✓</span> AI Studio · full workflow + video-ready briefs</li>
                 <li><span>✓</span> Smart Landing Pages · unlimited normal business use</li>
                 <li><span>✓</span> Advanced AI controls + priority workflows</li>
                 <li><span>✓</span> Unlimited normal business use · Fair Use</li>
@@ -891,10 +1029,13 @@ function renderLanding() {
 
         <div class="footer-brand">
           <a class="logo brand-home-link" href="/" aria-label="YOUYOU home">
-            <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
-  <span class="brand-name-v504">YOUYOU</span>
-  <span class="brand-tag-v504">AI GROWTH</span>
-</span>
+            <span class="brand-identity-v89">
+              <span class="brand-fox-mark-v89" aria-hidden="true"><img src="/assets/youyou-fox-brand.png" alt="" /></span>
+              <span class="brand-wordmark brand-v504" aria-label="YOUYOU">
+                <span class="brand-name-v504">YOUYOU</span>
+                <span class="brand-tag-v504">AI GROWTH</span>
+              </span>
+            </span>
           </a>
 
           <p>
@@ -921,7 +1062,7 @@ function renderLanding() {
   document.querySelector("#nav-login")?.addEventListener("click", showLogin);
   document.querySelector("#nav-start")?.addEventListener("click", showSignup);
   document.querySelector("#hero-start")?.addEventListener("click", showSignup);
-  document.querySelector("#hero-login")?.addEventListener("click", showLogin);
+  document.querySelector("#hero-how")?.addEventListener("click", () => document.querySelector("#how")?.scrollIntoView({ behavior: "smooth", block: "start" }));
   document.querySelector("#nav-dashboard")?.addEventListener("click", () => navigateDashboard("overview"));
   document.querySelector("#hero-dashboard")?.addEventListener("click", () => navigateDashboard("overview"));
   document.querySelector("#nav-billing")?.addEventListener("click", () => navigateDashboard("billing"));
@@ -6035,7 +6176,7 @@ function renderDashboard() {
             <input
               id="knowledge-file-input"
               type="file"
-              accept=".pdf,.docx,.txt,.csv,.xlsx,.xls"
+              accept=".pdf,.docx,.txt,.csv,.xlsx"
               hidden
             />
             <div class="knowledge-drop-icon">⇧</div>
@@ -10035,6 +10176,11 @@ function normalizeExtractedKnowledge(text = "") {
 }
 
 async function extractPdfText(file) {
+  const [pdfjsLib, pdfWorkerModule] = await Promise.all([
+    import("pdfjs-dist/legacy/build/pdf.mjs"),
+    import("pdfjs-dist/legacy/build/pdf.worker.min.mjs?url"),
+  ]);
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerModule.default;
   const buffer = await file.arrayBuffer();
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
   const pages = [];
@@ -10054,23 +10200,32 @@ async function extractPdfText(file) {
 }
 
 async function extractDocxText(file) {
+  const mammoth = await import("mammoth/mammoth.browser");
   const buffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer: buffer });
   return result.value || "";
 }
 
 async function extractSpreadsheetText(file) {
-  const buffer = await file.arrayBuffer();
-  const workbook = XLSX.read(buffer, { type: "array" });
+  const { default: readXlsxFile, readSheetNames } = await import("read-excel-file");
+  const sheetNames = await readSheetNames(file);
   const sections = [];
 
-  workbook.SheetNames.forEach((sheetName) => {
-    const sheet = workbook.Sheets[sheetName];
-    const csv = XLSX.utils.sheet_to_csv(sheet, { blankrows: false });
-    if (csv.trim()) {
-      sections.push(`Sheet: ${sheetName}\n${csv.trim()}`);
-    }
-  });
+  for (const sheetName of sheetNames) {
+    const rows = await readXlsxFile(file, { sheet: sheetName });
+    const text = rows
+      .map((row) => row
+        .map((cell) => {
+          if (cell instanceof Date) return cell.toISOString();
+          if (cell && typeof cell === "object") return JSON.stringify(cell);
+          return String(cell ?? "").replace(/\s*\n\s*/g, " ").trim();
+        })
+        .join(" | "))
+      .filter((line) => line.replace(/\|/g, "").trim())
+      .join("\n");
+
+    if (text) sections.push(`Sheet: ${sheetName}\n${text}`);
+  }
 
   return sections.join("\n\n");
 }
@@ -10090,11 +10245,11 @@ async function extractKnowledgeFileText(file) {
     return await extractDocxText(file);
   }
 
-  if (extension === "xlsx" || extension === "xls") {
+  if (extension === "xlsx") {
     return await extractSpreadsheetText(file);
   }
 
-  throw new Error("Unsupported file type. Use PDF, DOCX, TXT, CSV, XLSX or XLS.");
+  throw new Error("Unsupported file type. Use PDF, DOCX, TXT, CSV or XLSX.");
 }
 
 function resetKnowledgeFileUpload() {
@@ -10121,7 +10276,7 @@ async function handleKnowledgeFile(file) {
     return;
   }
 
-  const allowed = ["pdf", "docx", "txt", "csv", "xlsx", "xls"];
+  const allowed = ["pdf", "docx", "txt", "csv", "xlsx"];
   const extension = file.name.split(".").pop()?.toLowerCase() || "";
 
   if (!allowed.includes(extension)) {
