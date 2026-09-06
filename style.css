@@ -12835,3 +12835,24 @@ body:has(.lpw-shell) #youyou-public-widget-panel{
   .lp-lead-field input{min-height:43px!important;height:43px!important}
   .lp-lead-field textarea{min-height:66px!important;height:auto!important}
 }
+
+
+/* ============================================================
+   YOUYOU V8.8 — PRE-QA FUNCTIONALITY FREEZE
+   USA + Canada launch · My Pages navigation · Service request engine
+   ============================================================ */
+.public-market-pill{display:inline-flex;align-items:center;min-height:34px;padding:0 11px;border:1px solid rgba(255,255,255,.12);border-radius:999px;font-size:10px;font-weight:850;letter-spacing:.08em;opacity:.82;white-space:nowrap}
+.dashboard-nav button[data-nav="my-pages"]{margin-top:-2px;padding-left:30px;font-size:12px;opacity:.88}
+.dashboard-nav button[data-nav="my-pages"]>span{font-size:12px;opacity:.75}
+.dashboard-nav button[data-nav="my-pages"].active{opacity:1}
+.lpb-commerce-service-settings{display:none;gap:12px;padding:14px;margin-top:10px;border:1px solid color-mix(in srgb,var(--accent,#7c5cff) 14%,transparent);border-radius:14px;background:rgba(255,255,255,.025)}
+.lpb-commerce-service-settings label{display:grid;gap:7px}.lpb-commerce-service-settings textarea,.lpb-commerce-service-settings select{width:100%}
+.lp-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}
+.lp-service-box .lp-commerce-head>span{padding:5px 8px;border-radius:999px;background:color-mix(in srgb,var(--lp-accent) 10%,transparent);color:var(--lp-accent);font-size:8px;font-weight:900}
+.lp-service-group{padding:10px 0;border-top:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)}
+.lp-service-group>small{display:block;margin-bottom:7px;color:color-mix(in srgb,var(--lp-text) 58%,transparent);font-size:8px;font-weight:900;letter-spacing:.1em}
+.lp-service-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.lp-service-tiles.is-compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+.lp-service-tile{position:relative;min-height:42px;padding:9px 28px 9px 10px;text-align:left;border:1px solid color-mix(in srgb,var(--lp-text) 12%,transparent);border-radius:10px;background:var(--lp-surface);color:var(--lp-text);font-size:9px;font-weight:800;cursor:pointer}
+.lp-service-tile b{display:none;position:absolute;right:7px;top:50%;transform:translateY(-50%);width:16px;height:16px;place-items:center;border-radius:50%;background:var(--lp-accent);color:#fff;font-size:8px}.lp-service-tile.is-active{border-color:var(--lp-accent);color:var(--lp-accent);background:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-surface));box-shadow:0 0 0 2px color-mix(in srgb,var(--lp-accent) 8%,transparent)}.lp-service-tile.is-active b{display:grid}
+.lp-service-schedule{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 0;border-top:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent)}.lp-service-date{display:grid;gap:5px}.lp-service-date span{font-size:8px;font-weight:850;opacity:.62}.lp-service-date input{width:100%;min-height:38px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--lp-text) 12%,transparent);border-radius:9px;background:var(--lp-surface);color:var(--lp-text)}.lp-service-summary{margin:3px 0 0;padding-top:9px;border-top:1px solid color-mix(in srgb,var(--lp-text) 8%,transparent);font-size:8px;opacity:.72}.lp-service-summary strong{color:var(--lp-accent)}
+@media(max-width:760px){.public-market-pill{display:none}.lp-service-tiles,.lp-service-tiles.is-compact{grid-template-columns:1fr 1fr}.lp-service-schedule{grid-template-columns:1fr}}

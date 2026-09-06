@@ -81,7 +81,7 @@ async function fetchPublicUrl(initialUrl, { method = "GET", maxBytes = MAX_BYTES
         redirect: "manual",
         signal: controller.signal,
         headers: {
-          "User-Agent": "YOUYOU-SEO-Audit/1.0 (+https://youyou.pro)",
+          "User-Agent": "YOUYOU-SEO-Audit/1.0 (+https://youyouapp.com)",
           "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         },
       });
