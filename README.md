@@ -29,8 +29,16 @@ The included fallback is only the browser-safe Supabase URL + publishable key.
 ## Security rule
 Never commit any Supabase service-role key, OpenAI API key, Stripe secret key, or webhook secret to this repository. Those belong in server-side environment variables only.
 
-## V8.9 Stripe Payment Links
-Landing Studio supports merchant-owned Stripe Payment Links as a conversion action. Merchants paste their own `https://buy.stripe.com/...` link, test it from the workspace, and receive funds in their own Stripe account. With the lead form enabled, YOUYOU captures the request before revealing secure payment; with the form hidden, the CTA opens Stripe directly. No Stripe API key or SQL migration is required. Static Payment Links keep final product, amount, currency, tax, shipping and adjustable quantity under Stripe's control.
+## V9.0 Stripe Connect Checkout
+Landing Studio now creates a server-side Stripe Checkout Session on the merchant's connected Stripe account. The published price is loaded from Supabase instead of trusted from the browser. Quantity, color, bundle and product options are validated and sent to Stripe metadata. The visitor sees `Opening secure checkout…`, returns to the landing page after payment, and receives a paid confirmation only after YOUYOU retrieves the Checkout Session from Stripe.
+
+Run `supabase-v9.0-stripe-connect-checkout.sql` once. Configure these server-side Vercel variables:
+- `STRIPE_SECRET_KEY`
+- `STRIPE_TEST_CONNECTED_ACCOUNT_ID` (Sandbox fallback only)
+- `STRIPE_WEBHOOK_SECRET`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+`VITE_STRIPE_PUBLISHABLE_KEY` is browser-safe. Every secret must remain in Vercel and must never be committed or pasted into the Landing Studio. The V8.9 Payment Link field remains optional only as a temporary fallback during migration.
 
 ## Next product stage
 Before connecting a paid AI API, finish/verify Supabase RLS, conversation/message policies, lead capture, AI settings persistence, and production QA. Then connect the AI engine to company knowledge + conversations.

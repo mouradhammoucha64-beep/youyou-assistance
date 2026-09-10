@@ -1,0 +1,36 @@
+YOUYOU V9.0 — STRIPE CONNECT CHECKOUT AUDIT
+Date: 2026-09-10
+
+IMPLEMENTED
+- Server-created Stripe Checkout Sessions on a connected account.
+- Published offer lookup through a restricted Supabase RPC.
+- Server validation for price, currency, quantity, colors, variants and bundles.
+- Customer and order selections copied to Checkout and PaymentIntent metadata.
+- Landing CTA uses Pay securely and no longer reports Request sent for Stripe.
+- Return-page verification retrieves the Checkout Session before showing Payment received.
+- Signed webhook handler stores verified orders in public.stripe_orders.
+- Existing Payment Link remains an optional migration fallback.
+
+SECURITY
+- The browser never receives STRIPE_SECRET_KEY or SUPABASE_SERVICE_ROLE_KEY.
+- The browser-provided total is ignored; the server uses the published Supabase price.
+- Connected account, landing page and allowed selections are resolved server-side.
+- Webhook signature verification is required before an order is stored.
+
+DEPLOYMENT REQUIREMENTS
+1. Run supabase-v9.0-stripe-connect-checkout.sql in Supabase SQL Editor.
+2. Configure STRIPE_SECRET_KEY and STRIPE_TEST_CONNECTED_ACCOUNT_ID in Vercel.
+3. Configure SUPABASE_SERVICE_ROLE_KEY in Vercel for verified order storage.
+4. After deployment, create a Stripe Connect webhook for:
+   https://YOUR-DOMAIN/api/stripe/webhook
+   Listen to events on connected accounts and select checkout.session.completed plus
+   checkout.session.async_payment_succeeded.
+5. Save the signing secret as STRIPE_WEBHOOK_SECRET in Vercel and redeploy.
+6. Re-publish older landing pages once so their HTML snapshot uses renderer 9.0.0.
+
+VALIDATION
+- npm run build: PASS
+- exported landing runtime syntax: PASS
+- Node syntax checks for all Stripe functions: PASS
+- npm audit --omit=dev: 0 vulnerabilities
+

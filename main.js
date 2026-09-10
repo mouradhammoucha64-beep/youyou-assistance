@@ -1997,7 +1997,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.9.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "9.0.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],
@@ -2613,9 +2613,7 @@ function landingCommerceMarkup(data = {}) {
 
 function landingCtaHref(data) {
   if (data.ctaAction === "stripe") {
-    const paymentLink = landingStripePaymentLink(data.stripePaymentLink);
-    if (!paymentLink) return "#contact";
-    return String(data.leadFormEnabled || "on") === "off" ? paymentLink : "#contact";
+    return "#contact";
   }
   if (data.ctaAction === "whatsapp") {
     return landingWhatsAppHref(data);
@@ -2711,7 +2709,8 @@ function landingLeadFormMarkup(data, className = "") {
     : (data.ctaAction && data.ctaAction !== "form" ? landingCtaHref(data) : "");
   const followLabel = data.ctaAction === "stripe" ? "Continue to secure payment" : data.ctaAction === "whatsapp" ? "Continue on WhatsApp" : data.ctaAction === "call" ? "Call now" : data.ctaAction === "email" ? "Send an email" : "";
   const safeFollow = followHref && followHref !== "#contact" ? `<a class="lp-lead-followup${data.ctaAction === "stripe" ? " is-stripe" : ""}" data-lp-lead-followup href="${escapeHtml(followHref)}"${landingExternalLinkAttrs(followHref)} hidden>${escapeHtml(followLabel)} ↗</a>` : "";
-  return `<form class="lp-lead-form lp-checkout-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
+  const submitLabel = data.ctaAction === "stripe" ? "Pay securely" : (data.formButtonText || "Send request");
+  return `<form class="lp-lead-form lp-checkout-form ${className}" data-lp-lead-form data-checkout-action="${escapeHtml(data.ctaAction || 'form')}" onsubmit="return window.youyouLandingSubmit(this)">
     ${landingCommerceMarkup(data)}
     <div class="lp-checkout-section-title"><span>YOUR DETAILS</span><small>Contact &amp; delivery details</small></div>
     <div class="lp-lead-grid">
@@ -2723,8 +2722,8 @@ function landingLeadFormMarkup(data, className = "") {
       <label class="lp-lead-field lp-lead-span-2 lp-lead-message"><span>Message <em>Optional</em></span><textarea name="message" rows="3" placeholder="Anything else we should know?"></textarea></label>
     </div>
     <label class="lp-honeypot" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
-    <button class="lp-lead-submit" type="submit">${escapeHtml(data.formButtonText || "Send request")}</button>
-    ${data.ctaAction === "stripe" && followHref ? '<p class="lp-stripe-security-note">Secure payment is completed on Stripe. YOUYOU never collects card details.</p>' : ''}
+    <button class="lp-lead-submit" type="submit">${escapeHtml(submitLabel)}</button>
+    ${data.ctaAction === "stripe" ? '<p class="lp-stripe-security-note">Your order choices are sent securely to Stripe. YOUYOU never collects card details.</p>' : ''}
     <div class="lp-lead-feedback" aria-live="polite">
       <p class="lp-lead-status" data-lp-lead-status role="status"></p>
       ${safeFollow}
@@ -2777,6 +2776,7 @@ window.youyouLandingSubmit = function(form) {
   const city = String(form.elements?.city?.value || '').trim();
   const address = String(form.elements?.address?.value || '').trim();
   const message = String(form.elements?.message?.value || '').trim();
+  const stripeCheckout = String(form.dataset.checkoutAction || page?.dataset?.ctaAction || '') === 'stripe';
   if (!name || !phone || !city || !address) { setStatus('Please add your name, phone, city and address.', 'is-error'); return false; }
   if (phone.replace(/\D/g,'').length < 7) { setStatus('Please enter a valid phone number.', 'is-error'); return false; }
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setStatus('Please enter a valid email address.', 'is-error'); return false; }
@@ -2788,7 +2788,9 @@ window.youyouLandingSubmit = function(form) {
   const currency = mode === 'product' ? String(commerce?.dataset?.currency || '').trim() : '';
   const bundle = mode === 'product' ? String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent || '').trim() : '';
   const color = mode === 'product' ? String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor || '').trim() : '';
-  const variants = mode === 'product' ? [...(commerce?.querySelectorAll('[data-order-variant-name].is-active') || [])].map((el) => `${el.dataset.orderVariantName}: ${el.dataset.orderVariantValue}`).filter(Boolean) : [];
+  const variantElements = mode === 'product' ? [...(commerce?.querySelectorAll('[data-order-variant-name].is-active') || [])] : [];
+  const variants = variantElements.map((el) => `${el.dataset.orderVariantName}: ${el.dataset.orderVariantValue}`).filter(Boolean);
+  const variantSelections = Object.fromEntries(variantElements.map((el) => [String(el.dataset.orderVariantName || ''), String(el.dataset.orderVariantValue || '')]).filter(([key,value]) => key && value));
   const service = mode === 'service' ? String(commerce?.querySelector('[data-service-choice].is-active')?.dataset?.serviceChoice || '').trim() : '';
   const urgency = mode === 'service' ? String(commerce?.querySelector('[data-service-urgency].is-active')?.dataset?.serviceUrgency || '').trim() : '';
   const preferredDate = mode === 'service' ? String(commerce?.querySelector('[data-service-date]')?.value || '').trim() : '';
@@ -2797,9 +2799,29 @@ window.youyouLandingSubmit = function(form) {
   const content = `Lead form submission for ${pageTitle}. ${details}`;
   form.dataset.sending = 'true';
   if (button) button.disabled = true;
-  setStatus('Sending…', 'is-sending');
+  setStatus(stripeCheckout ? 'Opening secure checkout…' : 'Sending…', 'is-sending');
   (async()=>{
     try {
+      if (stripeCheckout) {
+        const slug = String(page?.dataset?.pageSlug || location.pathname.split('/').filter(Boolean).pop() || '').trim();
+        if (!slug || !/^\/?p\//.test(location.pathname)) {
+          setStatus('Preview only — publish the page to test secure payment.', 'is-preview');
+          return;
+        }
+        await youyouLandingPersistVisitor(page, content, { name, email }).catch(()=>({ ok:false }));
+        const response = await fetch('/api/stripe/create-checkout-session', {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json' },
+          body:JSON.stringify({
+            slug, quantity:Number(quantity)||1, color, bundle, variants:variantSelections,
+            customer:{ name, phone, email, city, address, message }
+          })
+        });
+        const checkout = await response.json().catch(()=>({}));
+        if (!response.ok || !checkout.url) throw new Error(checkout.error || 'Secure checkout could not be started.');
+        window.location.assign(checkout.url);
+        return;
+      }
       const result = await youyouLandingPersistVisitor(page, content, { name, email });
       if (result.ok) {
         setStatus('✓ Request sent successfully. We received your details.', 'is-success');
@@ -2809,7 +2831,7 @@ window.youyouLandingSubmit = function(form) {
       } else setStatus('Preview only — publish the page to receive real requests.', 'is-preview');
     } catch (error) {
       console.error('YOUYOU landing lead form:', error);
-      setStatus('Could not send right now. Please try again or use another contact option.', 'is-error');
+      setStatus(stripeCheckout ? String(error?.message || 'Secure checkout could not be started. Please try again.').slice(0,220) : 'Could not send right now. Please try again or use another contact option.', 'is-error');
     } finally { form.dataset.sending = 'false'; if (button && form.dataset.submitted !== 'true') button.disabled = false; }
   })();
   return false;
@@ -3046,7 +3068,7 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   }
   const video = data.videoEnabled !== "off" ? landingVideoBlockMarkup(data) : "";
   const mediaPos = ["right","left","top","bottom"].includes(data.mediaPosition) ? data.mediaPosition : "right";
-  const pageAttrs = `data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Beauty product')}"`;
+  const pageAttrs = `data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-slug="${escapeHtml(data.publishedSlug || '')}" data-page-title="${escapeHtml(data.name || 'Beauty product')}" data-cta-action="${escapeHtml(data.ctaAction || 'form')}"`;
   const primaryHref = landingCtaHref(data);
   const primaryAttrs = landingExternalLinkAttrs(primaryHref);
 
@@ -3123,7 +3145,7 @@ function landingPreviewMarkup(data, compact = false) {
   if (customSections) bodySections.push(customSections);
   if (contactSection) bodySections.push(contactSection);
   const slugClass = `layout-${String(template?.layout || 'standard').replace(/[^a-z0-9-]/gi,'-').toLowerCase()}`;
-  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} density-${escapeHtml(data.sectionDensity || "balanced")} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" style="${landingRootStyle(data)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(data.businessName || state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(data.businessName || state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
+  return `<article class="lp-live-page ${compact ? "is-compact" : ""} media-${mediaPosition} density-${escapeHtml(data.sectionDensity || "balanced")} ${slugClass}" dir="${direction}" data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-slug="${escapeHtml(data.publishedSlug || '')}" data-page-title="${escapeHtml(data.name || 'Landing page')}" data-cta-action="${escapeHtml(data.ctaAction || 'form')}" style="${landingRootStyle(data)};--lp-media-width:${mediaWidth}%;--lp-media-height:${mediaHeight}px"><nav class="lp-live-nav"><strong>${escapeHtml(data.businessName || state.company?.name || "YOUR BRAND")}</strong><span>${escapeHtml(data.pageType || "Landing Page")}</span></nav>${bodySections.join("")}<footer class="lp-live-footer"><strong>${escapeHtml(data.businessName || state.company?.name || "YOUR BRAND")}</strong><span>Built with YOUYOU</span></footer>${landingWidgetMarkup(data)}</article>`;
 }
 
 function landingSlugify(value = "") {
@@ -3695,6 +3717,33 @@ const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
 async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
 window.youyouLandingSubmit=function(form){if(!form)return false;const page=form.closest('.lp-live-page'),status=form.querySelector('[data-lp-lead-status]'),button=form.querySelector('button[type="submit"]'),followup=form.querySelector('[data-lp-lead-followup]'),stripeFallback=()=>{if(YY_PREVIEW||!followup?.classList.contains('is-stripe'))return false;followup.hidden=false;form.dataset.submitted='true';setStatus('Your request could not be saved, but secure payment is still available below.','is-preview');return true},setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(form.dataset.sending==='true')return false;if(form.dataset.submitted==='true'){setStatus('✓ Your request was already sent.','is-success');return false}if(String(form.elements?.website?.value||'').trim())return false;const name=String(form.elements?.name?.value||'').trim(),phone=String(form.elements?.phone?.value||'').trim(),email=String(form.elements?.email?.value||'').trim(),city=String(form.elements?.city?.value||'').trim(),address=String(form.elements?.address?.value||'').trim(),message=String(form.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(phone.replace(/\D/g,'').length<7){setStatus('Please enter a valid phone number.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please enter a valid email address.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),mode=String(commerce?.dataset?.commerceMode||''),quantity=mode==='product'?String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim():'',total=mode==='product'?String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim():'',currency=mode==='product'?String(commerce?.dataset?.currency||'').trim():'',bundle=mode==='product'?String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim():'',color=mode==='product'?String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim():'',variants=mode==='product'?[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean):[],service=mode==='service'?String(commerce?.querySelector('[data-service-choice].is-active')?.dataset?.serviceChoice||'').trim():'',urgency=mode==='service'?String(commerce?.querySelector('[data-service-urgency].is-active')?.dataset?.serviceUrgency||'').trim():'',preferredDate=mode==='service'?String(commerce?.querySelector('[data-service-date]')?.value||'').trim():'',preferredTime=mode==='service'?String(commerce?.querySelector('[data-service-time]')?.value||'').trim():'',title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',service?'Service: '+service:'',urgency?'Urgency: '+urgency:'',preferredDate?'Preferred date: '+preferredDate:'',preferredTime?'Preferred time: '+preferredTime:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;form.dataset.sending='true';if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else if(!stripeFallback())setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>{if(!stripeFallback())setStatus('Could not send right now. Please try again or use another contact option.','is-error')}).finally(()=>{form.dataset.sending='false';if(button&&form.dataset.submitted!=='true')button.disabled=false});return false};
+const yyLegacyLandingSubmit=window.youyouLandingSubmit;
+window.youyouLandingSubmit=function(form){
+  const page=form?.closest?.('.lp-live-page');
+  if(String(form?.dataset?.checkoutAction||page?.dataset?.ctaAction||'')!=='stripe')return yyLegacyLandingSubmit(form);
+  if(!form||form.dataset.sending==='true')return false;
+  const status=form.querySelector('[data-lp-lead-status]'),button=form.querySelector('button[type="submit"]');
+  const setStatus=(text,type)=>{if(status){status.textContent=text;status.className='lp-lead-status '+(type||'')}};
+  if(String(form.elements?.website?.value||'').trim())return false;
+  const name=String(form.elements?.name?.value||'').trim(),phone=String(form.elements?.phone?.value||'').trim(),email=String(form.elements?.email?.value||'').trim(),city=String(form.elements?.city?.value||'').trim(),address=String(form.elements?.address?.value||'').trim(),message=String(form.elements?.message?.value||'').trim();
+  if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}
+  if([...phone].filter(ch=>ch>='0'&&ch<='9').length<7){setStatus('Please enter a valid phone number.','is-error');return false}
+  if(email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){setStatus('Please enter a valid email address.','is-error');return false}
+  const box=page?.querySelector('[data-commerce-box]'),quantity=Number(box?.querySelector('[data-order-qty]')?.textContent||box?.querySelector('[data-order-summary-qty]')?.textContent||1),color=String(box?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||''),bundle=String(box?.querySelector('[data-bundle-qty].is-active strong')?.textContent||''),variants=Object.fromEntries([...(box?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>[String(el.dataset.orderVariantName||''),String(el.dataset.orderVariantValue||'')]).filter(x=>x[0]&&x[1])),slug=String(page?.dataset?.pageSlug||location.pathname.split('/').filter(Boolean).pop()||'').trim();
+  if(YY_PREVIEW||!slug||location.pathname.indexOf('/p/')!==0){setStatus('Preview only — publish the page to test secure payment.','is-preview');return false}
+  form.dataset.sending='true';if(button)button.disabled=true;setStatus('Opening secure checkout…','is-sending');
+  const leadContent='Stripe checkout started for '+String(page?.dataset?.pageTitle||'this offer')+'. Quantity: '+quantity+(color?' | Color: '+color:'')+(bundle?' | Bundle: '+bundle:'')+(Object.keys(variants).length?' | Options: '+JSON.stringify(variants):'');
+  yyPersist(page,leadContent,{name,email}).catch(()=>({ok:false})).then(()=>fetch('/api/stripe/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug,quantity,color,bundle,variants,customer:{name,phone,email,city,address,message}})})).then(async response=>{const result=await response.json().catch(()=>({}));if(!response.ok||!result.url)throw new Error(result.error||'Secure checkout could not be started.');location.assign(result.url)}).catch(error=>{setStatus(String(error?.message||'Secure checkout could not be started. Please try again.').slice(0,220),'is-error');form.dataset.sending='false';if(button)button.disabled=false});
+  return false;
+};
+async function yyVerifyStripeReturn(){
+  if(YY_PREVIEW)return;const params=new URLSearchParams(location.search),payment=params.get('payment');if(!payment)return;
+  const form=document.querySelector('[data-lp-lead-form][data-checkout-action="stripe"]'),status=form?.querySelector('[data-lp-lead-status]'),button=form?.querySelector('button[type="submit"]'),setStatus=(text,type)=>{if(status){status.textContent=text;status.className='lp-lead-status '+(type||'')}};
+  if(payment==='cancelled'){setStatus('Payment was cancelled. You can review the order and try again.','is-preview');return}
+  const sessionId=params.get('session_id'),page=document.querySelector('.lp-live-page'),slug=String(page?.dataset?.pageSlug||location.pathname.split('/').filter(Boolean).pop()||'');
+  if(payment!=='success'||!sessionId||!slug)return;setStatus('Confirming your payment…','is-sending');
+  try{const response=await fetch('/api/stripe/verify-session?slug='+encodeURIComponent(slug)+'&session_id='+encodeURIComponent(sessionId)),result=await response.json();if(!response.ok)throw new Error(result.error||'Payment confirmation failed.');if(result.paid){setStatus('✓ Payment received. Your order is confirmed.','is-success');if(button)button.disabled=true;form.dataset.submitted='true'}else setStatus('Payment is still processing. Please check again shortly.','is-preview')}catch(_){setStatus('Payment was submitted. Confirmation is still processing.','is-preview')}
+}
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
 window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),activeBundle=box.querySelector('[data-bundle-qty].is-active'),bundleRaw=String(activeBundle?.dataset?.bundlePrice||'').trim(),bundlePrice=bundleRaw===''?null:Math.max(0,Number(bundleRaw)||0),total=bundlePrice!==null?bundlePrice:unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-order-unit]').forEach(el=>el.textContent=unit.toFixed(2));const variants=[...box.querySelectorAll('[data-order-variant-name].is-active')].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),bundle=String(activeBundle?.querySelector('strong')?.textContent||'').trim();box.querySelectorAll('[data-order-selected-bundle]').forEach(el=>{el.textContent=bundle||'Custom quantity'});const title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(color)summary.push('Color: '+color);if(variants.length)summary.push('Options: '+variants.join(', '));if(bundle)summary.push('Bundle: '+bundle);if(unit>0||bundlePrice!==null)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
 window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));box.querySelectorAll('[data-bundle-qty]').forEach(el=>{el.classList.remove('is-active');el.setAttribute('aria-pressed','false')});window.youyouLandingUpdateOrder(button)};
@@ -3705,7 +3754,7 @@ window.youyouLandingUpdateService=function(source){const page=source?.closest?.(
 window.youyouLandingChooseService=function(button,kind){const box=button?.closest?.('[data-commerce-box]');if(!box)return;const selector=kind==='urgency'?'[data-service-urgency]':'[data-service-choice]';box.querySelectorAll(selector).forEach(el=>{const active=el===button;el.classList.toggle('is-active',active);el.setAttribute('aria-pressed',active?'true':'false')});window.youyouLandingUpdateService(button)};
 function yyInitCommerce(){document.querySelectorAll('[data-commerce-box]').forEach(box=>{if(box.dataset.commerceMode==='service')window.youyouLandingUpdateService(box);else window.youyouLandingUpdateOrder(box)})}
 function yyInitCarousels(){const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;document.querySelectorAll('.lp-image-slider').forEach(slider=>{if(slider.dataset.yyCarouselReady==='1')return;slider.dataset.yyCarouselReady='1';const track=slider.querySelector('.lp-image-track'),slides=[...(track?.querySelectorAll('.lp-image-slide')||[])],dotsHost=slider.querySelector('[data-carousel-dots]'),counter=slider.querySelector('[data-carousel-counter]'),prev=slider.querySelector('.lp-image-arrow.prev'),next=slider.querySelector('.lp-image-arrow.next');if(!track||slides.length<2)return;let positions=[],active=0,raf=0,timer=null,resizeTimer=null;const nearest=()=>{let b=0,d=Infinity;positions.forEach((p,i)=>{const x=Math.abs(p-track.scrollLeft);if(x<d){d=x;b=i}});return b},indicators=()=>{active=nearest();dotsHost?.querySelectorAll('button').forEach((dot,i)=>dot.classList.toggle('is-active',i===active));if(counter&&!counter.hidden)counter.textContent=(active+1)+' / '+positions.length},measure=()=>{const tr=track.getBoundingClientRect(),max=Math.max(0,track.scrollWidth-track.clientWidth),raw=slides.map(slide=>{const r=slide.getBoundingClientRect();return Math.max(0,Math.min(max,r.left-tr.left+track.scrollLeft))});positions=raw.filter((v,i,a)=>i===0||Math.abs(v-a[i-1])>3);if(!positions.length)positions=[0];active=Math.max(0,Math.min(active,positions.length-1));if(dotsHost){if(positions.length<=10){dotsHost.hidden=false;dotsHost.innerHTML=positions.map((_,i)=>'<button type="button" data-carousel-page="'+i+'" aria-label="Show carousel page '+(i+1)+'"></button>').join('');if(counter)counter.hidden=true}else{dotsHost.hidden=true;if(counter)counter.hidden=false}}indicators()},go=(i,b='smooth')=>{if(!positions.length)measure();const safe=((i%positions.length)+positions.length)%positions.length;track.scrollTo({left:positions[safe]||0,behavior:b});active=safe;indicators()},pause=()=>{if(timer)clearInterval(timer);timer=null},play=()=>{pause();if(slider.dataset.autoplay!=='true'||reduced||positions.length<2||document.hidden)return;timer=setInterval(()=>go(active+1),Math.max(2000,Number(slider.dataset.speed)||4000))};track.addEventListener('scroll',()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(indicators)},{passive:true});dotsHost?.addEventListener('click',e=>{const dot=e.target.closest?.('[data-carousel-page]');if(dot)go(Number(dot.dataset.carouselPage||0))});prev&&prev.addEventListener('click',()=>go(active-1));next&&next.addEventListener('click',()=>go(active+1));slider.addEventListener('mouseenter',pause);slider.addEventListener('mouseleave',play);slider.addEventListener('focusin',pause);slider.addEventListener('focusout',play);slider.addEventListener('pointerdown',pause,{passive:true});slider.addEventListener('pointerup',play,{passive:true});document.addEventListener('visibilitychange',()=>document.hidden?pause():play());window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{measure();go(active,'auto')},80)},{passive:true});measure();go(0,'auto');play()})}
-document.addEventListener('DOMContentLoaded',()=>{yyInitCarousels();yyInitCommerce()});yyInitCarousels();yyInitCommerce();
+document.addEventListener('DOMContentLoaded',()=>{yyInitCarousels();yyInitCommerce();yyVerifyStripeReturn()});yyInitCarousels();yyInitCommerce();yyVerifyStripeReturn();
 
 </script></body>
 </html>`;
@@ -4315,14 +4364,14 @@ function renderLandingPageWorkspace() {
             <div class="lpb-two">
               <label>CTA text<input id="lpb-cta-text" placeholder="Get a quote" /></label>
               <label>CTA action
-                <select id="lpb-cta-action"><option value="form">Scroll to lead form</option><option value="stripe">Stripe payment link</option><option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="email">Email</option></select>
+                <select id="lpb-cta-action"><option value="form">Scroll to lead form</option><option value="stripe">Stripe Connect checkout</option><option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="email">Email</option></select>
               </label>
             </div>
             <div class="lpb-stripe-payment-card" data-stripe-payment-field hidden>
-              <div class="lpb-stripe-payment-head"><div><strong>Stripe Payment Link</strong><span>Paste the merchant's own Stripe link. Payments go directly to that merchant's Stripe account.</span></div><b>STRIPE</b></div>
-              <label>Secure payment URL<input id="lpb-stripe-payment-link" type="url" inputmode="url" autocomplete="off" placeholder="https://buy.stripe.com/test_..." /></label>
+              <div class="lpb-stripe-payment-head"><div><strong>Stripe Connect checkout</strong><span>Quantity, color and product options are sent to the merchant's connected Stripe account.</span></div><b>STRIPE</b></div>
+              <label>Fallback Payment Link <span>Optional</span><input id="lpb-stripe-payment-link" type="url" inputmode="url" autocomplete="off" placeholder="https://buy.stripe.com/test_..." /></label>
               <div class="lpb-stripe-test-row"><button id="lpb-test-stripe-link" type="button">Test payment link ↗</button><span id="lpb-stripe-link-status" role="status">Use a Stripe Sandbox link first.</span></div>
-              <p>Accepted links must start with <strong>https://buy.stripe.com/</strong>. The final product, price and adjustable quantity are controlled by Stripe; YOUYOU selections are saved as lead context only. No Stripe secret key is stored here.</p>
+              <p>YOUYOU creates a secure Stripe Checkout from the published product price. The optional Payment Link is kept only as a temporary fallback. Merchants never enter secret keys here.</p>
             </div>
             <div class="lpb-two">
               <label>Lead form
@@ -4838,8 +4887,8 @@ function initLandingPageWorkspace() {
     if (testButton) testButton.disabled = !valid;
     if (status) {
       status.textContent = valid
-        ? (/\/test_/i.test(valid) ? "Sandbox link ready to test." : "Live Stripe link detected.")
-        : (raw ? "Enter a valid buy.stripe.com payment link." : "Use a Stripe Sandbox link first.");
+        ? (/\/test_/i.test(valid) ? "Optional Sandbox fallback ready." : "Optional live fallback detected.")
+        : (raw ? "Fallback must be a valid buy.stripe.com link." : "Stripe Connect checkout will be used.");
       status.dataset.state = valid ? "ready" : (raw ? "error" : "neutral");
     }
   };
@@ -4864,9 +4913,9 @@ function initLandingPageWorkspace() {
     const commerceOn = clean(current.commerceEnabled) === "on";
     set("PRODUCT / SERVICE OPTIONS · OPTIONAL", commerceOn ? `${clean(current.commerceMode || "product")} · ON` : "OFF", commerceOn ? "ready" : "off");
     const actionMap = { form:"Lead form", stripe:"Stripe payment", whatsapp:"WhatsApp", call:"Call", email:"Email" };
-    const stripeCtaNeedsLink = clean(current.ctaAction) === "stripe" && !landingStripePaymentLink(current.stripePaymentLink);
-    const conversionNeedsAttention = (clean(current.leadFormEnabled) === "off" && clean(current.ctaAction) === "form") || emailCtaNeedsAddress || stripeCtaNeedsLink;
-    const conversionLabel = emailCtaNeedsAddress ? "Email · needs address" : stripeCtaNeedsLink ? "Stripe · add valid link" : `${actionMap[clean(current.ctaAction)] || "CTA"}${clean(current.leadFormEnabled) === "off" ? " · form off" : ""}`;
+    const stripeNeedsCheckout = clean(current.ctaAction) === "stripe" && (clean(current.leadFormEnabled) === "off" || clean(current.commerceEnabled) !== "on" || clean(current.commerceMode) !== "product" || !clean(current.price));
+    const conversionNeedsAttention = (clean(current.leadFormEnabled) === "off" && clean(current.ctaAction) === "form") || emailCtaNeedsAddress || stripeNeedsCheckout;
+    const conversionLabel = emailCtaNeedsAddress ? "Email · needs address" : stripeNeedsCheckout ? "Stripe · complete product setup" : `${actionMap[clean(current.ctaAction)] || "CTA"}${clean(current.leadFormEnabled) === "off" ? " · form off" : ""}`;
     set("CONVERSION", conversionLabel, conversionNeedsAttention ? "attention" : "ready");
     set("HERO VISUAL · OPTIONAL", clean(current.heroMediaEnabled) === "off" ? "Hidden" : (clean(current.heroImageUrl) ? "Image ready" : "Visible"), clean(current.heroMediaEnabled) === "off" ? "off" : "neutral");
     set("VIDEO / HERO VIDEO · OPTIONAL", clean(current.videoEnabled) === "on" ? (clean(current.videoUrl) ? "Video ready" : "Enabled") : "OFF", clean(current.videoEnabled) === "on" ? "ready" : "off");
@@ -5277,9 +5326,8 @@ function initLandingPageWorkspace() {
       document.querySelector("#lpb-name")?.focus();
       return;
     }
-    if (String(current.ctaAction || "") === "stripe" && !landingStripePaymentLink(current.stripePaymentLink)) {
-      landingStudioStatus("Add a valid Stripe Payment Link starting with https://buy.stripe.com/ before publishing.");
-      document.querySelector("#lpb-stripe-payment-link")?.focus();
+    if (String(current.ctaAction || "") === "stripe" && (current.leadFormEnabled === "off" || current.commerceEnabled !== "on" || current.commerceMode !== "product" || !(Number(String(current.price || "").replace(",", ".")) > 0))) {
+      landingStudioStatus("Stripe checkout needs the lead form, Product options and a valid selling price.");
       return;
     }
     if (landingHasTemporaryMedia(current)) {
@@ -5380,9 +5428,8 @@ function initLandingPageWorkspace() {
 
   const exportHtml = () => {
     readFields();
-    if (String(current.ctaAction || "") === "stripe" && !landingStripePaymentLink(current.stripePaymentLink)) {
-      landingStudioStatus("Add a valid Stripe Payment Link before exporting this page.");
-      document.querySelector("#lpb-stripe-payment-link")?.focus();
+    if (String(current.ctaAction || "") === "stripe" && (current.leadFormEnabled === "off" || current.commerceEnabled !== "on" || current.commerceMode !== "product" || !(Number(String(current.price || "").replace(",", ".")) > 0))) {
+      landingStudioStatus("Stripe checkout needs the lead form, Product options and a valid selling price.");
       return;
     }
     if (String(current.videoUrl || "").startsWith("blob:")) {
