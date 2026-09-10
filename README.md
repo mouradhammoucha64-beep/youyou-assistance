@@ -36,7 +36,7 @@ Run `supabase-v9.0-stripe-connect-checkout.sql` once. Configure these server-sid
 - `STRIPE_SECRET_KEY`
 - `STRIPE_TEST_CONNECTED_ACCOUNT_ID` (Sandbox fallback only)
 - `STRIPE_WEBHOOK_SECRET`
-- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_SECRET_KEY` (recommended `sb_secret_...`; legacy `SUPABASE_SERVICE_ROLE_KEY` is also supported)
 
 `VITE_STRIPE_PUBLISHABLE_KEY` is browser-safe. Every secret must remain in Vercel and must never be committed or pasted into the Landing Studio. The V8.9 Payment Link field remains optional only as a temporary fallback during migration.
 

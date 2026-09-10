@@ -20,7 +20,8 @@ SECURITY
 DEPLOYMENT REQUIREMENTS
 1. Run supabase-v9.0-stripe-connect-checkout.sql in Supabase SQL Editor.
 2. Configure STRIPE_SECRET_KEY and STRIPE_TEST_CONNECTED_ACCOUNT_ID in Vercel.
-3. Configure SUPABASE_SERVICE_ROLE_KEY in Vercel for verified order storage.
+3. Configure SUPABASE_SECRET_KEY (`sb_secret_...`) in Vercel for verified order storage.
+   The legacy SUPABASE_SERVICE_ROLE_KEY name remains supported during migration.
 4. After deployment, create a Stripe Connect webhook for:
    https://YOUR-DOMAIN/api/stripe/webhook
    Listen to events on connected accounts and select checkout.session.completed plus
@@ -33,4 +34,3 @@ VALIDATION
 - exported landing runtime syntax: PASS
 - Node syntax checks for all Stripe functions: PASS
 - npm audit --omit=dev: 0 vulnerabilities
-

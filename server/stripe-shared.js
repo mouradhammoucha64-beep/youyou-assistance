@@ -21,10 +21,10 @@ export function supabaseConfig({ service = false } = {}) {
       process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
       ""
   ).trim();
-  const serviceKey = String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  const serviceKey = String(process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
   const key = service ? serviceKey : anonKey;
   if (!url || !key) {
-    throw new Error(service ? "SUPABASE_SERVICE_ROLE_KEY is not configured." : "Supabase public API is not configured.");
+    throw new Error(service ? "SUPABASE_SECRET_KEY is not configured." : "Supabase public API is not configured.");
   }
   return { url, key };
 }
@@ -33,7 +33,7 @@ export async function publishedCheckoutOffer(slug) {
   const { url, key } = supabaseConfig();
   const response = await fetch(`${url}/rest/v1/rpc/get_stripe_checkout_offer`, {
     method: "POST",
-    headers: { apikey: key, Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    headers: { apikey: key, "Content-Type": "application/json" },
     body: JSON.stringify({ p_slug: slug }),
   });
   if (!response.ok) {
@@ -113,4 +113,3 @@ export function amountInMinorUnits(value) {
   if (!Number.isFinite(amount) || amount <= 0) throw new Error("This published offer does not have a valid selling price.");
   return Math.round(amount * 100);
 }
-

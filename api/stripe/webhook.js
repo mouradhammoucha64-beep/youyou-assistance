@@ -37,7 +37,6 @@ async function saveOrder(event, session) {
     method: "POST",
     headers: {
       apikey: key,
-      Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
       Prefer: "resolution=merge-duplicates,return=minimal",
     },
@@ -65,4 +64,3 @@ export default async function handler(req, res) {
     return res.status(400).send(`Webhook error: ${String(error?.message || "Invalid event").slice(0, 220)}`);
   }
 }
-
