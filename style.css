@@ -12819,6 +12819,30 @@ body:has(.lpw-shell) #youyou-public-widget-panel{
 .lpw-editor{overflow-anchor:none!important}
 .lpb-section-card-head{overflow-anchor:auto}
 
+/* =========================================================
+   YOUYOU V8.9 — STRIPE PAYMENT LINK
+   Merchant-owned checkout with sandbox testing and no card handling.
+   ========================================================= */
+.lpb-stripe-payment-card{
+  display:grid;gap:10px;padding:13px;border:1px solid #d8cff0;border-radius:13px;
+  background:linear-gradient(145deg,#fbf9ff,#fff);box-shadow:0 6px 18px rgba(84,63,134,.045)
+}
+.lpb-stripe-payment-card[hidden]{display:none!important}
+.lpb-stripe-payment-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.lpb-stripe-payment-head>div{display:grid;gap:3px}
+.lpb-stripe-payment-head strong{color:#252d3c;font-size:10px}
+.lpb-stripe-payment-head span{color:#7d8798;font-size:8px;line-height:1.5}
+.lpb-stripe-payment-head>b{padding:5px 7px;border-radius:7px;background:#635bff;color:#fff;font-size:6.5px;letter-spacing:.09em}
+.lpb-stripe-test-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px;align-items:center}
+.lpb-stripe-test-row>button{min-height:34px;padding:0 11px;border:0;border-radius:9px;background:#635bff;color:#fff;font-size:8px;font-weight:900;cursor:pointer}
+.lpb-stripe-test-row>button:disabled{background:#c9c6d8;cursor:not-allowed}
+.lpb-stripe-test-row>span{color:#7f8999;font-size:7.5px;line-height:1.4}
+.lpb-stripe-test-row>span[data-state="ready"]{color:#32845a}
+.lpb-stripe-test-row>span[data-state="error"]{color:#b54747}
+.lpb-stripe-payment-card>p{margin:0;color:#7c8696;font-size:7.5px;line-height:1.5}
+.lpb-stripe-payment-card input[aria-invalid="true"]{border-color:#d86b6b!important;box-shadow:0 0 0 3px rgba(216,107,107,.10)!important}
+@media(max-width:760px){.lpb-stripe-test-row{grid-template-columns:1fr}.lpb-stripe-test-row>button{width:100%}}
+
 
 
 /* =========================================================

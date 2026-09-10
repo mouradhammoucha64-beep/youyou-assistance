@@ -1,0 +1,61 @@
+YOUYOU V8.9 — STRIPE PAYMENT LINK AUDIT
+Date: 2026-09-10
+
+SCOPE
+- Audited the active Landing Workspace, commerce options, lead form, preview renderer,
+  HTML export and published snapshot flow.
+- Added merchant-owned Stripe Payment Links. This is not YOUYOU subscription billing
+  and does not use Stripe Connect.
+
+BASELINE FINDINGS
+- V8.7/V8.8 already had a strong product/service checkout form and lead persistence.
+- No real Stripe payment action existed before this change.
+- Existing billing buttons still refer to the future YOUYOU subscription integration.
+- The production build is successful. npm audit reports 0 known vulnerabilities.
+
+IMPLEMENTED
+- New CTA action: Stripe payment link.
+- New Stripe link field in Conversion & payment.
+- Strict allow-list: HTTPS links on buy.stripe.com only.
+- Rejects malformed links, look-alike hosts, credentials and custom ports.
+- Sandbox/live status feedback and a Test payment link button.
+- Publish and HTML export are blocked when Stripe is selected without a valid link.
+- If Lead form is ON, the visitor submits contact/order details first and then receives
+  a Continue to secure payment button.
+- If lead persistence is temporarily unavailable on a published page, secure payment
+  remains available and the visitor is clearly told that the request was not saved.
+- If Lead form is OFF, the main CTA opens Stripe directly.
+- External checkout opens with noopener/noreferrer protection.
+- Card details never enter YOUYOU and no Stripe secret key is stored in the project.
+- Renderer upgraded to 8.9.0 so existing published pages show Update live design.
+
+IMPORTANT LIMITATION OF PAYMENT LINKS
+- Stripe owns the final checkout product, amount, currency, tax, shipping and adjustable
+  quantity settings.
+- YOUYOU color/size/bundle/quantity selections are saved as lead context only; a static
+  Payment Link cannot receive a dynamic YOUYOU cart without a future server-side Stripe
+  Checkout/API integration.
+- The merchant must make the product and price shown in YOUYOU match the Stripe Payment Link.
+
+SAFE TEST
+1. In Stripe Dashboard, switch to a Sandbox and create a Payment Link.
+2. In Landing Studio > Conversion & payment, select Stripe payment link.
+3. Paste the https://buy.stripe.com/test_... link.
+4. Click Test payment link.
+5. Use test card 4242 4242 4242 4242, any future date and any 3-digit CVC.
+6. Publish the landing page and repeat the full visitor flow.
+7. Do not enter real card data in a Stripe Sandbox.
+
+DEPLOYMENT
+- No SQL migration is required.
+- No Stripe API key is required for Payment Links.
+- Existing live pages must be opened in My Pages and updated once to receive renderer 8.9.0.
+
+VERIFICATION
+- node --check main.js: PASS
+- npm audit --omit=dev --audit-level=high: PASS (0 vulnerabilities)
+- npm run build: PASS
+- Stripe URL validator cases: PASS (7/7 valid, malformed and hostile-host scenarios)
+- Production bundle contains the Stripe field, validation and payment handoff.
+- Vite reports a non-blocking large-chunk warning; this existed outside the payment flow
+  and can be handled later with code splitting.

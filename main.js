@@ -1997,7 +1997,7 @@ const LANDING_PAGE_TEMPLATES = [
   { id:"booking", name:"Booking Campaign", category:"Campaign", layout:"booking", accent:"#9e8cff", bg:"#0b0912", surface:"#161221", headline:"Make booking the easiest part of the customer journey.", sub:"A focused service page for appointments, demos, consultations and reservations.", cta:"Book now", badge:"BOOKING" },
 ];
 
-const YOUYOU_LANDING_RENDERER_VERSION = "8.8.0";
+const YOUYOU_LANDING_RENDERER_VERSION = "8.9.0";
 
 const LANDING_CURRENCIES = [
   ["USD","$","US Dollar"],
@@ -2425,6 +2425,7 @@ function defaultLandingPageData(templateId = "product-launch") {
     businessAddress: c.address || c.business_address || "",
     ctaText: template.cta,
     ctaAction: template.layout === "whatsapp" ? "whatsapp" : "form",
+    stripePaymentLink: "",
     leadFormEnabled: "on",
     collectEmail: "off",
     formButtonText: "Send request",
@@ -2611,6 +2612,11 @@ function landingCommerceMarkup(data = {}) {
 }
 
 function landingCtaHref(data) {
+  if (data.ctaAction === "stripe") {
+    const paymentLink = landingStripePaymentLink(data.stripePaymentLink);
+    if (!paymentLink) return "#contact";
+    return String(data.leadFormEnabled || "on") === "off" ? paymentLink : "#contact";
+  }
   if (data.ctaAction === "whatsapp") {
     return landingWhatsAppHref(data);
   }
@@ -2623,6 +2629,25 @@ function landingCtaHref(data) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? `mailto:${email}` : "#contact";
   }
   return "#contact";
+}
+
+function landingStripePaymentLink(value = "") {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    const url = new URL(raw);
+    const host = String(url.hostname || "").toLowerCase();
+    if (url.protocol !== "https:" || host !== "buy.stripe.com" || url.username || url.password || url.port) return "";
+    if (!String(url.pathname || "").replace(/\//g, "").trim()) return "";
+    url.hash = "";
+    return url.toString();
+  } catch (_) {
+    return "";
+  }
+}
+
+function landingExternalLinkAttrs(href = "") {
+  return /^https:\/\//i.test(String(href || "")) ? ' target="_blank" rel="noopener noreferrer"' : "";
 }
 
 
@@ -2681,9 +2706,11 @@ function landingWidgetMarkup(data) {
 
 function landingLeadFormMarkup(data, className = "") {
   const collectEmail = String(data.collectEmail || "off") === "on";
-  const followHref = data.ctaAction && data.ctaAction !== "form" ? landingCtaHref(data) : "";
-  const followLabel = data.ctaAction === "whatsapp" ? "Continue on WhatsApp" : data.ctaAction === "call" ? "Call now" : data.ctaAction === "email" ? "Send an email" : "";
-  const safeFollow = followHref && followHref !== "#contact" ? `<a class="lp-lead-followup" data-lp-lead-followup href="${escapeHtml(followHref)}" ${data.ctaAction === "whatsapp" ? 'target="_blank" rel="noopener"' : ''} hidden>${escapeHtml(followLabel)} ↗</a>` : "";
+  const followHref = data.ctaAction === "stripe"
+    ? landingStripePaymentLink(data.stripePaymentLink)
+    : (data.ctaAction && data.ctaAction !== "form" ? landingCtaHref(data) : "");
+  const followLabel = data.ctaAction === "stripe" ? "Continue to secure payment" : data.ctaAction === "whatsapp" ? "Continue on WhatsApp" : data.ctaAction === "call" ? "Call now" : data.ctaAction === "email" ? "Send an email" : "";
+  const safeFollow = followHref && followHref !== "#contact" ? `<a class="lp-lead-followup${data.ctaAction === "stripe" ? " is-stripe" : ""}" data-lp-lead-followup href="${escapeHtml(followHref)}"${landingExternalLinkAttrs(followHref)} hidden>${escapeHtml(followLabel)} ↗</a>` : "";
   return `<form class="lp-lead-form lp-checkout-form ${className}" data-lp-lead-form onsubmit="return window.youyouLandingSubmit(this)">
     ${landingCommerceMarkup(data)}
     <div class="lp-checkout-section-title"><span>YOUR DETAILS</span><small>Contact &amp; delivery details</small></div>
@@ -2697,6 +2724,7 @@ function landingLeadFormMarkup(data, className = "") {
     </div>
     <label class="lp-honeypot" aria-hidden="true">Website<input name="website" tabindex="-1" autocomplete="off" /></label>
     <button class="lp-lead-submit" type="submit">${escapeHtml(data.formButtonText || "Send request")}</button>
+    ${data.ctaAction === "stripe" && followHref ? '<p class="lp-stripe-security-note">Secure payment is completed on Stripe. YOUYOU never collects card details.</p>' : ''}
     <div class="lp-lead-feedback" aria-live="polite">
       <p class="lp-lead-status" data-lp-lead-status role="status"></p>
       ${safeFollow}
@@ -3019,15 +3047,17 @@ function landingBeautyPreviewMarkup(data, compact = false) {
   const video = data.videoEnabled !== "off" ? landingVideoBlockMarkup(data) : "";
   const mediaPos = ["right","left","top","bottom"].includes(data.mediaPosition) ? data.mediaPosition : "right";
   const pageAttrs = `data-company-id="${escapeHtml(state.company?.id || '')}" data-page-id="${escapeHtml(data.id || '')}" data-page-title="${escapeHtml(data.name || 'Beauty product')}"`;
+  const primaryHref = landingCtaHref(data);
+  const primaryAttrs = landingExternalLinkAttrs(primaryHref);
 
-  const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Benefits</a>${gallerySection ? '<a href="#details">Gallery</a>' : ''}${data.showFaq !== 'off' && faqQ && faqA ? '<a href="#faq">FAQ</a>' : ''}</div><a href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
-  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY')}</span><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1>${data.subheadline ? `<p>${escapeHtml(data.subheadline)}</p>` : ''}${price}<div class="beauty-actions"><a class="lp-live-primary" href="${landingCtaHref(data)}">${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="${landingWhatsAppHref(data)}">WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}</div>` : ''}</section>`;
+  const nav = `<nav class="beauty-nav"><strong>${escapeHtml(state.company?.name || 'YOUR BRAND')}</strong><div><a href="#story">Benefits</a>${gallerySection ? '<a href="#details">Gallery</a>' : ''}${data.showFaq !== 'off' && faqQ && faqA ? '<a href="#faq">FAQ</a>' : ''}</div><a href="${escapeHtml(primaryHref)}"${primaryAttrs}>${escapeHtml(data.ctaText || 'Explore')}</a></nav>`;
+  const hero = `<section class="beauty-hero${productVisual ? '' : ' no-hero-media'}"><div class="beauty-copy"><span class="beauty-eyebrow">${escapeHtml(data.badge || 'BEAUTY')}</span><h1>${escapeHtml(data.headline || 'Your next beauty essential starts here.')}</h1>${data.subheadline ? `<p>${escapeHtml(data.subheadline)}</p>` : ''}${price}<div class="beauty-actions"><a class="lp-live-primary" href="${escapeHtml(primaryHref)}"${primaryAttrs}>${escapeHtml(data.ctaText || 'Explore the offer')}</a>${data.whatsapp ? `<a class="beauty-text-link" href="${landingWhatsAppHref(data)}" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>`:''}</div></div>${productVisual ? `<div class="beauty-visual-wrap${heroVideo ? ' has-video' : ''}">${productVisual}</div>` : ''}</section>`;
   const marquee = `<section class="beauty-marquee" aria-hidden="true"><span>DISCOVER</span><i></i><span>DETAILS</span><i></i><span>ROUTINE</span><i></i><span>ACTION</span></section>`;
   const story = data.showBenefits !== "off" && (benefits.length || desc) ? `<section id="story" class="beauty-story"><div class="beauty-story-head"><span>WHY IT STANDS OUT</span><h2>Made to be easy to understand — and easy to choose.</h2>${desc ? `<p>${escapeHtml(desc)}</p>` : ''}</div>${benefits.length ? `<div class="beauty-benefits">${benefits.map((b,i)=>`<article><div class="beauty-icon">${['✦','◌','♡','＋','◇','☼'][i]||'✦'}</div><h3>${escapeHtml(b)}</h3></article>`).join('')}</div>` : ''}</section>` : '';
   const editorial = String(data.extraText || '').trim() ? `<section class="beauty-editorial"><div class="beauty-editorial-card"><small>${escapeHtml(data.extraTitle || 'PRODUCT STORY')}</small><h2>${escapeHtml(data.extraTitle || 'More about this product')}</h2><p>${escapeHtml(data.extraText).replace(/\n/g,'<br>')}</p></div></section>` : '';
   const review = data.showTestimonial !== "off" && testimonial ? `<section class="beauty-review-section"><div class="beauty-quote-mark">“</div><blockquote>${escapeHtml(testimonial)}</blockquote><div class="beauty-review-meta"><span class="beauty-avatar">C</span><div><strong>Customer feedback</strong><small>Shared by the business</small></div></div></section>` : "";
   const faq = data.showFaq !== "off" && faqQ && faqA ? `<section id="faq" class="beauty-faq"><div><small>GOOD TO KNOW</small><h2>${escapeHtml(faqQ)}</h2></div><p>${escapeHtml(faqA)}</p></section>` : '';
-  const directCta = data.ctaAction !== 'form' ? `<a class="lp-live-primary lp-direct-contact" href="${landingCtaHref(data)}" ${data.ctaAction === 'whatsapp' ? 'target="_blank" rel="noopener"' : ''}>${escapeHtml(data.ctaText || 'Continue')} <span>↗</span></a>` : '';
+  const directCta = data.ctaAction !== 'form' && primaryHref !== '#contact' ? `<a class="lp-live-primary lp-direct-contact" href="${escapeHtml(primaryHref)}"${primaryAttrs}>${escapeHtml(data.ctaText || 'Continue')} <span>↗</span></a>` : '';
   const showLeadForm = data.leadFormEnabled !== 'off';
   const finalCta = data.showContact === "off" ? "" : `<section id="contact" class="beauty-final-cta ${showLeadForm ? 'has-form' : ''}"><div><small>READY WHEN YOU ARE</small><h2>${escapeHtml(data.ctaText || 'Continue')}</h2><p>${showLeadForm ? 'Share your details and the business can follow up with you.' : 'Choose the action below to continue.'}</p>${directCta ? `<div class="lp-contact-direct-action">${directCta}</div>` : ''}</div>${showLeadForm ? landingLeadFormMarkup(data, 'beauty-lead-form') : ''}</section>`;
 
@@ -3069,12 +3099,14 @@ function landingPreviewMarkup(data, compact = false) {
   const extraSection = String(data.extraText || "").trim() ? `<section class="lp-live-section lp-live-extra"><small>${escapeHtml(data.extraTitle || "MORE ABOUT THIS OFFER")}</small><div class="lp-live-extra-copy">${escapeHtml(data.extraText).replace(/\n/g,"<br>")}</div></section>` : "";
   const heroMedia = landingHeroMediaMarkup(data);
   const template = landingTemplateById(data.templateId);
-  const hero = `<section class="lp-live-hero${heroMedia ? '' : ' no-hero-media'}"><div class="lp-live-copy"><span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span><h1>${escapeHtml(data.headline || "Your headline goes here")}</h1><p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>${landingPriceMarkup(data)}<div class="lp-live-actions"><a href="${landingCtaHref(data)}" class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>${data.whatsapp ? `<a href="${landingWhatsAppHref(data)}" class="lp-live-secondary">WhatsApp ↗</a>` : ""}</div><div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>${heroMedia}</section>`;
+  const primaryHref = landingCtaHref(data);
+  const primaryAttrs = landingExternalLinkAttrs(primaryHref);
+  const hero = `<section class="lp-live-hero${heroMedia ? '' : ' no-hero-media'}"><div class="lp-live-copy"><span class="lp-live-badge">${escapeHtml(data.badge || "FEATURED")}</span><h1>${escapeHtml(data.headline || "Your headline goes here")}</h1><p class="lp-live-sub">${escapeHtml(data.subheadline || "")}</p>${landingPriceMarkup(data)}<div class="lp-live-actions"><a href="${escapeHtml(primaryHref)}"${primaryAttrs} class="lp-live-primary">${escapeHtml(data.ctaText || "Get started")}</a>${data.whatsapp ? `<a href="${landingWhatsAppHref(data)}" target="_blank" rel="noopener noreferrer" class="lp-live-secondary">WhatsApp ↗</a>` : ""}</div><div class="lp-live-trust">${landingTemplateExperience(data).map(item => `<span>${escapeHtml(item)}</span>`).join("")}</div></div>${heroMedia}</section>`;
   const benefitsSection = data.showBenefits === "off" ? "" : `<section class="lp-live-section lp-live-benefits"><small>WHY THIS OFFER</small><h2>${escapeHtml(data.description || "Explain the value clearly.")}</h2><div class="lp-live-benefit-grid">${benefits.map((item, index) => `<div><span>0${index + 1}</span><strong>${escapeHtml(item)}</strong></div>`).join("")}</div></section>`;
   const testimonial = String(data.testimonial || "").trim();
   const proofSection = data.showTestimonial !== "off" && testimonial ? `<section class="lp-live-section lp-live-proof"><small>CUSTOMER FEEDBACK</small><blockquote>“${escapeHtml(testimonial)}”</blockquote></section>` : "";
   const faqSection = data.showFaq === "off" ? "" : `<section class="lp-live-section lp-live-faq"><small>FAQ</small><h3>${escapeHtml(data.faqQuestion || "Common customer question")}</h3><p>${escapeHtml(data.faqAnswer || "Add the answer here.")}</p></section>`;
-  const directCta = data.ctaAction !== 'form' ? `<a href="${landingCtaHref(data)}" class="lp-live-primary lp-direct-contact" ${data.ctaAction === 'whatsapp' ? 'target="_blank" rel="noopener"' : ''}>${escapeHtml(data.ctaText || 'Continue')} ↗</a>` : '';
+  const directCta = data.ctaAction !== 'form' && primaryHref !== '#contact' ? `<a href="${escapeHtml(primaryHref)}"${primaryAttrs} class="lp-live-primary lp-direct-contact">${escapeHtml(data.ctaText || 'Continue')} ↗</a>` : '';
   const showLeadForm = data.leadFormEnabled !== 'off';
   const contactSection = data.showContact === "off" ? "" : `<section id="contact" class="lp-live-section lp-live-contact"><div><small>CONTACT</small><h2>${escapeHtml(data.ctaText || "Get started")}</h2><p>${showLeadForm ? 'Leave your details and the business can follow up.' : 'Continue using the selected contact option.'}</p>${directCta ? `<div class="lp-contact-direct-action">${directCta}</div>` : ''}</div>${showLeadForm ? landingLeadFormMarkup(data) : ''}</section>`;
   const bodySections = [hero];
@@ -3468,7 +3500,7 @@ html,body{max-width:100%;overflow-x:hidden}.lp-live-page{width:100%;overflow:hid
 .beauty-gallery-section,.beauty-wow .lp-product-video{background:color-mix(in srgb,var(--lp-surface) 68%,var(--lp-bg))!important}
 .beauty-review-section{background:color-mix(in srgb,var(--lp-accent) 8%,var(--lp-bg))!important;color:var(--lp-text)!important}
 .beauty-avatar{background:var(--lp-accent)!important;color:#fff!important}
-.lp-lead-feedback{display:grid;gap:10px;margin-top:2px}.lp-lead-status{min-height:0;margin:0;padding:0;border-radius:12px;font-size:13px;font-weight:750;line-height:1.45;opacity:1}.lp-lead-status:not(:empty){padding:11px 13px}.lp-lead-status.is-success{background:#eaf8ef;color:#176b38;border:1px solid #bce8cb}.lp-lead-status.is-error{background:#fff0f0;color:#9f2f2f;border:1px solid #f4c4c4}.lp-lead-status.is-sending,.lp-lead-status.is-preview{background:color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface));color:var(--lp-text);border:1px solid color-mix(in srgb,var(--lp-accent) 24%,transparent)}.lp-lead-followup{display:inline-flex;justify-content:center;align-items:center;min-height:48px;padding:0 16px;border-radius:12px;background:#22c55e;color:#fff;text-decoration:none;font-weight:900}.lp-lead-followup[hidden]{display:none!important}.lp-contact-direct-action{margin-top:16px}.lp-contact-direct-action .lp-direct-contact{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px}
+.lp-lead-feedback{display:grid;gap:10px;margin-top:2px}.lp-lead-status{min-height:0;margin:0;padding:0;border-radius:12px;font-size:13px;font-weight:750;line-height:1.45;opacity:1}.lp-lead-status:not(:empty){padding:11px 13px}.lp-lead-status.is-success{background:#eaf8ef;color:#176b38;border:1px solid #bce8cb}.lp-lead-status.is-error{background:#fff0f0;color:#9f2f2f;border:1px solid #f4c4c4}.lp-lead-status.is-sending,.lp-lead-status.is-preview{background:color-mix(in srgb,var(--lp-accent) 10%,var(--lp-surface));color:var(--lp-text);border:1px solid color-mix(in srgb,var(--lp-accent) 24%,transparent)}.lp-lead-followup{display:inline-flex;justify-content:center;align-items:center;min-height:48px;padding:0 16px;border-radius:12px;background:#22c55e;color:#fff;text-decoration:none;font-weight:900}.lp-lead-followup.is-stripe{background:#635bff!important;background-image:linear-gradient(#635bff,#635bff)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}.lp-lead-followup[hidden]{display:none!important}.lp-stripe-security-note{margin:0;text-align:center;color:color-mix(in srgb,var(--lp-text) 62%,transparent);font-size:10px;line-height:1.5}.lp-contact-direct-action{margin-top:16px}.lp-contact-direct-action .lp-direct-contact{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px}
 @media(max-width:760px){.lp-image-slide,.beauty-wow .lp-image-slide{aspect-ratio:var(--yy-carousel-ratio)!important}}
 
 
@@ -3662,7 +3694,7 @@ const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
 async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
-window.youyouLandingSubmit=function(form){if(!form)return false;const page=form.closest('.lp-live-page'),status=form.querySelector('[data-lp-lead-status]'),button=form.querySelector('button[type="submit"]'),setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(form.dataset.sending==='true')return false;if(form.dataset.submitted==='true'){setStatus('✓ Your request was already sent.','is-success');return false}if(String(form.elements?.website?.value||'').trim())return false;const name=String(form.elements?.name?.value||'').trim(),phone=String(form.elements?.phone?.value||'').trim(),email=String(form.elements?.email?.value||'').trim(),city=String(form.elements?.city?.value||'').trim(),address=String(form.elements?.address?.value||'').trim(),message=String(form.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(phone.replace(/\D/g,'').length<7){setStatus('Please enter a valid phone number.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please enter a valid email address.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),mode=String(commerce?.dataset?.commerceMode||''),quantity=mode==='product'?String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim():'',total=mode==='product'?String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim():'',currency=mode==='product'?String(commerce?.dataset?.currency||'').trim():'',bundle=mode==='product'?String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim():'',color=mode==='product'?String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim():'',variants=mode==='product'?[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean):[],service=mode==='service'?String(commerce?.querySelector('[data-service-choice].is-active')?.dataset?.serviceChoice||'').trim():'',urgency=mode==='service'?String(commerce?.querySelector('[data-service-urgency].is-active')?.dataset?.serviceUrgency||'').trim():'',preferredDate=mode==='service'?String(commerce?.querySelector('[data-service-date]')?.value||'').trim():'',preferredTime=mode==='service'?String(commerce?.querySelector('[data-service-time]')?.value||'').trim():'',title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',service?'Service: '+service:'',urgency?'Urgency: '+urgency:'',preferredDate?'Preferred date: '+preferredDate:'',preferredTime?'Preferred time: '+preferredTime:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;form.dataset.sending='true';if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');const followup=form.querySelector('[data-lp-lead-followup]');if(followup)followup.hidden=false;form.dataset.submitted='true'}else setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>setStatus('Could not send right now. Please try again or use another contact option.','is-error')).finally(()=>{form.dataset.sending='false';if(button&&form.dataset.submitted!=='true')button.disabled=false});return false};
+window.youyouLandingSubmit=function(form){if(!form)return false;const page=form.closest('.lp-live-page'),status=form.querySelector('[data-lp-lead-status]'),button=form.querySelector('button[type="submit"]'),followup=form.querySelector('[data-lp-lead-followup]'),stripeFallback=()=>{if(YY_PREVIEW||!followup?.classList.contains('is-stripe'))return false;followup.hidden=false;form.dataset.submitted='true';setStatus('Your request could not be saved, but secure payment is still available below.','is-preview');return true},setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(form.dataset.sending==='true')return false;if(form.dataset.submitted==='true'){setStatus('✓ Your request was already sent.','is-success');return false}if(String(form.elements?.website?.value||'').trim())return false;const name=String(form.elements?.name?.value||'').trim(),phone=String(form.elements?.phone?.value||'').trim(),email=String(form.elements?.email?.value||'').trim(),city=String(form.elements?.city?.value||'').trim(),address=String(form.elements?.address?.value||'').trim(),message=String(form.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(phone.replace(/\D/g,'').length<7){setStatus('Please enter a valid phone number.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please enter a valid email address.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),mode=String(commerce?.dataset?.commerceMode||''),quantity=mode==='product'?String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim():'',total=mode==='product'?String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim():'',currency=mode==='product'?String(commerce?.dataset?.currency||'').trim():'',bundle=mode==='product'?String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim():'',color=mode==='product'?String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim():'',variants=mode==='product'?[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean):[],service=mode==='service'?String(commerce?.querySelector('[data-service-choice].is-active')?.dataset?.serviceChoice||'').trim():'',urgency=mode==='service'?String(commerce?.querySelector('[data-service-urgency].is-active')?.dataset?.serviceUrgency||'').trim():'',preferredDate=mode==='service'?String(commerce?.querySelector('[data-service-date]')?.value||'').trim():'',preferredTime=mode==='service'?String(commerce?.querySelector('[data-service-time]')?.value||'').trim():'',title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',service?'Service: '+service:'',urgency?'Urgency: '+urgency:'',preferredDate?'Preferred date: '+preferredDate:'',preferredTime?'Preferred time: '+preferredTime:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;form.dataset.sending='true';if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else if(!stripeFallback())setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>{if(!stripeFallback())setStatus('Could not send right now. Please try again or use another contact option.','is-error')}).finally(()=>{form.dataset.sending='false';if(button&&form.dataset.submitted!=='true')button.disabled=false});return false};
 window.youyouLandingAsk=function(source,forcedQuestion){const w=source&&source.closest('[data-lp-widget]'),p=source&&source.closest('.lp-live-page');if(!w||!p)return;w.classList.add('is-open');const q=String(forcedQuestion||(w.querySelector('input')||{}).value||'').trim();if(!q)return;const m=w.querySelector('[data-lp-widget-messages]');const add=(c,t)=>{const d=document.createElement('div');d.className='lp-ai-msg '+c;d.textContent=t;m.appendChild(d);m.scrollTop=m.scrollHeight};add('user',q);yyPersist(p,q).catch(()=>{});const l=q.toLowerCase(),price=p.querySelector('.lp-live-price strong')?.textContent?.trim(),quote=p.querySelector('.lp-live-price.quote')?.textContent?.trim(),benefits=[...p.querySelectorAll('.lp-live-benefit-grid strong,.beauty-benefits h3')].map(x=>x.textContent.trim()),cta=p.querySelector('.lp-live-primary')?.textContent?.trim(),sub=(p.querySelector('.lp-live-sub')||p.querySelector('.beauty-copy>p'))?.textContent?.trim(),faq=(p.querySelector('.lp-live-faq p')||p.querySelector('.beauty-faq p'))?.textContent?.trim();let a='';if(/price|cost|how much|prix|combien|ثمن|السعر|ch7al|شحال/.test(l))a=price?'The current price shown on this page is '+price+'.':(quote||'Contact the business for pricing.');else if(/benefit|why|feature|advantage|مزايا|علاش|شنو/.test(l))a=benefits.length?'Main benefits: '+benefits.join(' · ')+'.':(sub||'The main value is explained on this page.');else if(/start|book|buy|order|contact|reserve|appointment|حجز|نطلب/.test(l))a=cta?'The next step is “'+cta+'”. Use the main button to continue.':'Use the main call-to-action to continue.';else if(/faq|question/.test(l)&&faq)a=faq;else a='Based on this page: '+(sub||p.innerText.slice(0,180));setTimeout(()=>add('bot',a),150)};
 window.youyouLandingUpdateOrder=function(source){const page=source?.closest?.('.lp-live-page')||document.querySelector('.lp-live-page'),box=source?.closest?.('[data-commerce-box]')||page?.querySelector('[data-commerce-box]');if(!box)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20),qtyEl=box.querySelector('[data-order-qty]');let qty=Math.max(min,Math.min(max,Number(qtyEl?.textContent)||min));if(qtyEl)qtyEl.textContent=String(qty);box.querySelectorAll('[data-order-summary-qty]').forEach(el=>el.textContent=String(qty));const unit=Math.max(0,Number(box.dataset.unitPrice)||0),activeBundle=box.querySelector('[data-bundle-qty].is-active'),bundleRaw=String(activeBundle?.dataset?.bundlePrice||'').trim(),bundlePrice=bundleRaw===''?null:Math.max(0,Number(bundleRaw)||0),total=bundlePrice!==null?bundlePrice:unit*qty;box.querySelectorAll('[data-order-total]').forEach(el=>el.textContent=total.toFixed(2));box.querySelectorAll('[data-order-unit]').forEach(el=>el.textContent=unit.toFixed(2));const variants=[...box.querySelectorAll('[data-order-variant-name].is-active')].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean),color=String(box.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim(),bundle=String(activeBundle?.querySelector('strong')?.textContent||'').trim();box.querySelectorAll('[data-order-selected-bundle]').forEach(el=>{el.textContent=bundle||'Custom quantity'});const title=page?.dataset?.pageTitle||'this product',currency=box.dataset.currency||'',summary=['Hi! I am interested in '+title+'.','Quantity: '+qty];if(color)summary.push('Color: '+color);if(variants.length)summary.push('Options: '+variants.join(', '));if(bundle)summary.push('Bundle: '+bundle);if(unit>0||bundlePrice!==null)summary.push('Total: '+currency+' '+total.toFixed(2));page?.querySelectorAll('a[href*="wa.me/"]').forEach(link=>{try{const base=String(link.href).split('?')[0];link.href=base+'?text='+encodeURIComponent(summary.join('\\n'))}catch(_){}})};
 window.youyouLandingChangeQty=function(button,delta){const box=button?.closest?.('[data-commerce-box]'),qty=box?.querySelector('[data-order-qty]');if(!box||!qty)return;const min=Math.max(1,Number(box.dataset.min)||1),max=Math.max(min,Number(box.dataset.max)||20);qty.textContent=String(Math.max(min,Math.min(max,(Number(qty.textContent)||min)+Number(delta||0))));box.querySelectorAll('[data-bundle-qty]').forEach(el=>{el.classList.remove('is-active');el.setAttribute('aria-pressed','false')});window.youyouLandingUpdateOrder(button)};
@@ -4283,8 +4315,14 @@ function renderLandingPageWorkspace() {
             <div class="lpb-two">
               <label>CTA text<input id="lpb-cta-text" placeholder="Get a quote" /></label>
               <label>CTA action
-                <select id="lpb-cta-action"><option value="form">Scroll to lead form</option><option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="email">Email</option></select>
+                <select id="lpb-cta-action"><option value="form">Scroll to lead form</option><option value="stripe">Stripe payment link</option><option value="whatsapp">WhatsApp</option><option value="call">Call</option><option value="email">Email</option></select>
               </label>
+            </div>
+            <div class="lpb-stripe-payment-card" data-stripe-payment-field hidden>
+              <div class="lpb-stripe-payment-head"><div><strong>Stripe Payment Link</strong><span>Paste the merchant's own Stripe link. Payments go directly to that merchant's Stripe account.</span></div><b>STRIPE</b></div>
+              <label>Secure payment URL<input id="lpb-stripe-payment-link" type="url" inputmode="url" autocomplete="off" placeholder="https://buy.stripe.com/test_..." /></label>
+              <div class="lpb-stripe-test-row"><button id="lpb-test-stripe-link" type="button">Test payment link ↗</button><span id="lpb-stripe-link-status" role="status">Use a Stripe Sandbox link first.</span></div>
+              <p>Accepted links must start with <strong>https://buy.stripe.com/</strong>. The final product, price and adjustable quantity are controlled by Stripe; YOUYOU selections are saved as lead context only. No Stripe secret key is stored here.</p>
             </div>
             <div class="lpb-two">
               <label>Lead form
@@ -4296,7 +4334,7 @@ function renderLandingPageWorkspace() {
               <div><strong>Visitor email field</strong><span>Optional. Keep it off for a shorter form; turn it on only when you need email follow-up.</span></div>
               <select id="lpb-collect-email"><option value="off">Hidden</option><option value="on">Show optional email</option></select>
             </div>
-            <p class="lpb-media-help">CTA action controls the main button. Business phone, WhatsApp and address are managed at the top of the workspace. Email stays optional.</p>
+            <p class="lpb-media-help">CTA action controls the main button. Stripe can run after lead capture or open directly when the lead form is hidden. Business phone, WhatsApp and address are managed at the top of the workspace.</p>
           </div>
 
           <div class="lpb-editor-section lpb-media-pro-section">
@@ -4676,7 +4714,7 @@ function initLandingPageWorkspace() {
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
     businessName:"lpb-business-name", businessAddress:"lpb-business-address",
     commerceEnabled:"lpb-commerce-enabled", commerceMode:"lpb-commerce-mode", serviceOptions:"lpb-service-options", serviceUrgencyEnabled:"lpb-service-urgency-enabled", serviceUrgencyOptions:"lpb-service-urgency-options", serviceDateEnabled:"lpb-service-date-enabled", serviceTimeEnabled:"lpb-service-time-enabled", quantityEnabled:"lpb-quantity-enabled", quantityMin:"lpb-quantity-min", quantityMax:"lpb-quantity-max", quantityDefault:"lpb-quantity-default", productColors:"lpb-product-colors", sizeEnabled:"lpb-size-enabled", sizeOptions:"lpb-size-options", weightEnabled:"lpb-weight-enabled", weightOptions:"lpb-weight-options", volumeEnabled:"lpb-volume-enabled", volumeOptions:"lpb-volume-options", unitsEnabled:"lpb-units-enabled", unitsOptions:"lpb-units-options", customOptionEnabled:"lpb-custom-option-enabled", customOptionName:"lpb-custom-option-name", customOptionValues:"lpb-custom-option-values", variantsText:"lpb-variants-text", bundleEnabled:"lpb-bundle-enabled", bundleOptions:"lpb-bundle-options",
-    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", collectEmail:"lpb-collect-email", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
+    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", stripePaymentLink:"lpb-stripe-payment-link", leadFormEnabled:"lpb-lead-form-enabled", collectEmail:"lpb-collect-email", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
     phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
     mediaGallery:"lpb-media-gallery", sliderEnabled:"lpb-slider-enabled", sliderTitle:"lpb-slider-title",
@@ -4698,7 +4736,7 @@ function initLandingPageWorkspace() {
     "MAIN CONTENT": { label:"Main content", description:"Badge, headline, description and benefits", group:"CONTENT" },
     "PRICE & OFFER": { label:"Price & offer", description:"Price visibility, currency and offer value", group:"OFFER" },
     "PRODUCT / SERVICE OPTIONS · OPTIONAL": { label:"Offer options", description:"Product order choices or service request details", group:"COMMERCE" },
-    "CONVERSION": { label:"Conversion & lead form", description:"CTA, lead capture and optional visitor email", group:"CONVERT" },
+    "CONVERSION": { label:"Conversion & payment", description:"CTA, Stripe payment, lead capture and optional visitor email", group:"CONVERT" },
     "HERO VISUAL · OPTIONAL": { label:"Hero visual", description:"Primary image at the top of the landing page", group:"MEDIA" },
     "VIDEO / HERO VIDEO · OPTIONAL": { label:"Video", description:"Hero video or a dedicated video section", group:"MEDIA" },
     "IMAGES / GALLERY": { label:"Images & gallery", description:"Gallery or carousel with your product visuals", group:"MEDIA" },
@@ -4785,6 +4823,27 @@ function initLandingPageWorkspace() {
     toggle.setAttribute("aria-expanded", visible ? "true" : "false");
   };
 
+  const syncStripePaymentUi = () => {
+    const action = String(document.getElementById("lpb-cta-action")?.value || current.ctaAction || "form");
+    const field = document.querySelector("[data-stripe-payment-field]");
+    const input = document.getElementById("lpb-stripe-payment-link");
+    const status = document.getElementById("lpb-stripe-link-status");
+    const testButton = document.getElementById("lpb-test-stripe-link");
+    const show = action === "stripe";
+    if (field) field.hidden = !show;
+    if (!show || !input) return;
+    const raw = String(input.value || "").trim();
+    const valid = landingStripePaymentLink(raw);
+    input.setAttribute("aria-invalid", raw && !valid ? "true" : "false");
+    if (testButton) testButton.disabled = !valid;
+    if (status) {
+      status.textContent = valid
+        ? (/\/test_/i.test(valid) ? "Sandbox link ready to test." : "Live Stripe link detected.")
+        : (raw ? "Enter a valid buy.stripe.com payment link." : "Use a Stripe Sandbox link first.");
+      status.dataset.state = valid ? "ready" : (raw ? "error" : "neutral");
+    }
+  };
+
   const refreshWorkspaceSectionSummaries = () => {
     const clean = (value) => String(value || "").trim();
     const set = (key, text, stateName = "neutral") => {
@@ -4804,9 +4863,11 @@ function initLandingPageWorkspace() {
     set("PRICE & OFFER", priceMode === "hide" ? "Hidden" : priceMode === "quote" ? "Quote mode" : (clean(current.price) ? `${clean(current.currency || "USD")} ${clean(current.price)}` : "Add price"), priceMode === "hide" ? "off" : (clean(current.price) || priceMode === "quote" ? "ready" : "neutral"));
     const commerceOn = clean(current.commerceEnabled) === "on";
     set("PRODUCT / SERVICE OPTIONS · OPTIONAL", commerceOn ? `${clean(current.commerceMode || "product")} · ON` : "OFF", commerceOn ? "ready" : "off");
-    const actionMap = { form:"Lead form", whatsapp:"WhatsApp", call:"Call", email:"Email" };
-    const conversionNeedsAttention = (clean(current.leadFormEnabled) === "off" && clean(current.ctaAction) === "form") || emailCtaNeedsAddress;
-    set("CONVERSION", emailCtaNeedsAddress ? "Email · needs address" : `${actionMap[clean(current.ctaAction)] || "CTA"}${clean(current.leadFormEnabled) === "off" ? " · form off" : ""}`, conversionNeedsAttention ? "attention" : "ready");
+    const actionMap = { form:"Lead form", stripe:"Stripe payment", whatsapp:"WhatsApp", call:"Call", email:"Email" };
+    const stripeCtaNeedsLink = clean(current.ctaAction) === "stripe" && !landingStripePaymentLink(current.stripePaymentLink);
+    const conversionNeedsAttention = (clean(current.leadFormEnabled) === "off" && clean(current.ctaAction) === "form") || emailCtaNeedsAddress || stripeCtaNeedsLink;
+    const conversionLabel = emailCtaNeedsAddress ? "Email · needs address" : stripeCtaNeedsLink ? "Stripe · add valid link" : `${actionMap[clean(current.ctaAction)] || "CTA"}${clean(current.leadFormEnabled) === "off" ? " · form off" : ""}`;
+    set("CONVERSION", conversionLabel, conversionNeedsAttention ? "attention" : "ready");
     set("HERO VISUAL · OPTIONAL", clean(current.heroMediaEnabled) === "off" ? "Hidden" : (clean(current.heroImageUrl) ? "Image ready" : "Visible"), clean(current.heroMediaEnabled) === "off" ? "off" : "neutral");
     set("VIDEO / HERO VIDEO · OPTIONAL", clean(current.videoEnabled) === "on" ? (clean(current.videoUrl) ? "Video ready" : "Enabled") : "OFF", clean(current.videoEnabled) === "on" ? "ready" : "off");
     const galleryCount = [clean(current.imageUrl), ...String(current.mediaGallery || "").split("\n").map(clean)].filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).length;
@@ -4837,6 +4898,7 @@ function initLandingPageWorkspace() {
     syncPriceModeUi();
     syncPricePreviewUi();
     syncBusinessEmailUi();
+    syncStripePaymentUi();
     refreshWorkspaceSectionSummaries();
   };
 
@@ -5014,6 +5076,7 @@ function initLandingPageWorkspace() {
     current.rendererVersion = YOUYOU_LANDING_RENDERER_VERSION;
     updateGalleryControls();
     renderGalleryManager();
+    syncStripePaymentUi();
     const preview = document.querySelector("#lpb-live-preview");
     const name = document.querySelector("#lpw-document-name");
     if (preview && preview.tagName === "IFRAME") {
@@ -5214,6 +5277,11 @@ function initLandingPageWorkspace() {
       document.querySelector("#lpb-name")?.focus();
       return;
     }
+    if (String(current.ctaAction || "") === "stripe" && !landingStripePaymentLink(current.stripePaymentLink)) {
+      landingStudioStatus("Add a valid Stripe Payment Link starting with https://buy.stripe.com/ before publishing.");
+      document.querySelector("#lpb-stripe-payment-link")?.focus();
+      return;
+    }
     if (landingHasTemporaryMedia(current)) {
       landingStudioStatus("Some media is still local. Re-upload it and wait until YOUYOU confirms permanent storage before publishing.");
       return;
@@ -5312,6 +5380,11 @@ function initLandingPageWorkspace() {
 
   const exportHtml = () => {
     readFields();
+    if (String(current.ctaAction || "") === "stripe" && !landingStripePaymentLink(current.stripePaymentLink)) {
+      landingStudioStatus("Add a valid Stripe Payment Link before exporting this page.");
+      document.querySelector("#lpb-stripe-payment-link")?.focus();
+      return;
+    }
     if (String(current.videoUrl || "").startsWith("blob:")) {
       const stateEl = document.querySelector("#lpw-save-state");
       if (stateEl) stateEl.textContent = "Video upload is not finished. Wait until it says Ready for export, then export again.";
@@ -5367,13 +5440,36 @@ function initLandingPageWorkspace() {
   });
 
   document.getElementById("lpb-cta-action")?.addEventListener("change", (event) => {
-    if (event.target.value !== "email") return;
-    const field = document.querySelector("[data-business-email-field]");
-    const input = document.getElementById("lpb-email");
-    if (field && input && !String(input.value || "").trim()) {
-      field.dataset.userVisible = "1";
-      syncBusinessEmailUi();
+    syncStripePaymentUi();
+    if (event.target.value === "stripe") {
+      const buttonText = document.getElementById("lpb-form-button-text");
+      if (buttonText && (!String(buttonText.value || "").trim() || String(buttonText.value).trim() === "Send request")) {
+        buttonText.value = "Continue to payment";
+        current.formButtonText = buttonText.value;
+        renderPreview();
+        markChangedAndAutosave();
+      }
     }
+    if (event.target.value === "email") {
+      const field = document.querySelector("[data-business-email-field]");
+      const input = document.getElementById("lpb-email");
+      if (field && input && !String(input.value || "").trim()) {
+        field.dataset.userVisible = "1";
+        syncBusinessEmailUi();
+      }
+    }
+  });
+
+  document.getElementById("lpb-test-stripe-link")?.addEventListener("click", () => {
+    const raw = document.getElementById("lpb-stripe-payment-link")?.value || current.stripePaymentLink || "";
+    const paymentLink = landingStripePaymentLink(raw);
+    if (!paymentLink) {
+      landingStudioStatus("Enter a valid Stripe Payment Link before testing.");
+      syncStripePaymentUi();
+      return;
+    }
+    window.open(paymentLink, "_blank", "noopener,noreferrer");
+    landingStudioStatus(/\/test_/i.test(paymentLink) ? "Stripe Sandbox opened in a new tab." : "Live Stripe checkout opened in a new tab.");
   });
 
   document.querySelectorAll("[data-price-mode-value]").forEach((button) => {

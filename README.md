@@ -29,6 +29,9 @@ The included fallback is only the browser-safe Supabase URL + publishable key.
 ## Security rule
 Never commit any Supabase service-role key, OpenAI API key, Stripe secret key, or webhook secret to this repository. Those belong in server-side environment variables only.
 
+## V8.9 Stripe Payment Links
+Landing Studio supports merchant-owned Stripe Payment Links as a conversion action. Merchants paste their own `https://buy.stripe.com/...` link, test it from the workspace, and receive funds in their own Stripe account. With the lead form enabled, YOUYOU captures the request before revealing secure payment; with the form hidden, the CTA opens Stripe directly. No Stripe API key or SQL migration is required. Static Payment Links keep final product, amount, currency, tax, shipping and adjustable quantity under Stripe's control.
+
 ## Next product stage
 Before connecting a paid AI API, finish/verify Supabase RLS, conversation/message policies, lead capture, AI settings persistence, and production QA. Then connect the AI engine to company knowledge + conversations.
 

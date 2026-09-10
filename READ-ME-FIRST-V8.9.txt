@@ -1,0 +1,14 @@
+YOUYOU V8.9 — STRIPE PAYMENT LINK
+
+What changed
+- Landing Studio now supports merchant-owned Stripe Payment Links.
+- Choose Stripe payment link in Conversion & payment, paste a buy.stripe.com URL and test it.
+- Keep Lead form ON to capture the request before payment, or turn it OFF for direct checkout.
+
+Before going live
+- Create and test the link in a Stripe Sandbox first.
+- Confirm that product, price and currency match between YOUYOU and Stripe.
+- Replace the Sandbox link with the merchant's live Stripe Payment Link only after testing.
+
+No SQL migration and no Stripe secret/API key are required for this version.
+See V8.9-STRIPE-PAYMENT-LINK-AUDIT.txt for the full audit and test checklist.
