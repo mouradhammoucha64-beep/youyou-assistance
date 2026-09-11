@@ -13392,6 +13392,10 @@ body:has(.lpw-shell) #youyou-public-widget-panel{
 .stripe-connect-brand small{color:#938dff;font-size:9px;font-weight:900;letter-spacing:.13em}
 .stripe-connect-brand strong{font-size:19px}
 .stripe-connect-panel>p{margin:0;color:var(--muted);line-height:1.65}
+.stripe-connect-email{display:grid;gap:7px;max-width:560px;color:#dfe3ef;font-size:12px;font-weight:800}
+.stripe-connect-email input{width:100%;min-height:46px;padding:0 14px;border:1px solid rgba(147,141,255,.28);border-radius:12px;background:rgba(7,17,31,.72);color:#fff;font:inherit;font-size:14px;outline:none}
+.stripe-connect-email input:focus{border-color:#938dff;box-shadow:0 0 0 3px rgba(147,141,255,.12)}
+.stripe-connect-email small{color:#979fb2;font-size:11px;font-weight:500;line-height:1.5}
 .stripe-connect-checks{display:flex;flex-wrap:wrap;gap:9px}
 .stripe-connect-checks span{padding:8px 11px;border:1px solid rgba(255,184,77,.2);border-radius:999px;background:rgba(255,184,77,.07);color:#ffc978;font-size:11px;font-weight:800}
 .stripe-connect-checks span.is-ready{border-color:rgba(44,210,139,.24);background:rgba(44,210,139,.08);color:#75e5b4}
