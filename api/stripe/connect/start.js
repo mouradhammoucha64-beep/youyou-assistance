@@ -32,9 +32,10 @@ function errorResponse(res, error, stage = "start") {
       diagnostic: stage,
     });
   }
+  const diagnostic = stripeCode ? `${stage}:${stripeCode}` : stage;
   return res.status(500).json({
-    error: "Stripe onboarding could not be started. Please try again.",
-    diagnostic: stripeCode ? `${stage}:${stripeCode}` : stage,
+    error: `Stripe onboarding could not be started (${diagnostic}).`,
+    diagnostic,
   });
 }
 
