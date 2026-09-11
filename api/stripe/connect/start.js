@@ -14,7 +14,7 @@ function errorResponse(res, error, stage = "start") {
   const stripeCode = String(error?.code || error?.raw?.code || "").replace(/[^a-z0-9_-]/gi, "").slice(0, 80);
   console.error("YOUYOU Stripe Connect start:", { stage, stripeCode, error });
 
-  if (/connect|platform profile|business model|signed up/i.test(message)) {
+  if (/platform profile|business model|signed up for connect|complete (?:your )?connect setup/i.test(message)) {
     return res.status(409).json({
       error: "Finish your Stripe Connect platform setup, then try again.",
       diagnostic: stage,
@@ -58,14 +58,16 @@ export default async function handler(req, res) {
       account = await stripe.accounts.retrieve(company.stripe_account_id);
     } else {
       const website = cleanText(company.website_url, 240);
+      const emailCandidate = cleanText(company.business_email || user.email, 180);
+      const stripeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailCandidate) ? emailCandidate : "";
       const accountData = {
         type: "standard",
-        email: cleanText(company.business_email || user.email, 180) || undefined,
         metadata: {
           youyou_company_id: String(company.id),
           youyou_workspace: "true",
         },
       };
+      if (stripeEmail) accountData.email = stripeEmail;
       if (/^https:\/\//i.test(website)) {
         accountData.business_profile = { url: website };
       } else {
