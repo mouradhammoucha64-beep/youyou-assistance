@@ -1536,6 +1536,7 @@ function stripePaymentSettingsMarkup(company = {}) {
   const status = String(company.stripe_connect_status || "not_connected");
   const ready = status === "connected" && company.stripe_charges_enabled && company.stripe_payouts_enabled;
   const pending = ["pending", "restricted"].includes(status);
+  const stripeEmail = String(company.business_email || state.user?.email || "");
   const title = ready ? "Stripe connected" : pending ? "Finish Stripe setup" : "Connect Stripe";
   const copy = ready
     ? "Online payments go directly to your connected Stripe account."
@@ -1546,6 +1547,11 @@ function stripePaymentSettingsMarkup(company = {}) {
     <div class="stripe-connect-panel ${ready ? "is-connected" : pending ? "is-pending" : "is-disconnected"}" id="stripe-connect-panel">
       <div class="stripe-connect-brand"><span>◫</span><div><small>MERCHANT PAYMENTS</small><strong>${title}</strong></div></div>
       <p id="stripe-connect-copy">${copy}</p>
+      ${ready ? "" : `<label class="stripe-connect-email">
+        <span>Stripe email</span>
+        <input id="stripe-onboarding-email" type="email" autocomplete="email" value="${escapeHtml(stripeEmail)}" data-current-email="${pending ? escapeHtml(stripeEmail.toLowerCase()) : ""}" placeholder="merchant@business.com" />
+        <small>Use the email you want for Stripe. You can change it here until payments are active.</small>
+      </label>`}
       <div class="stripe-connect-checks">
         <span data-stripe-check="charges" class="${company.stripe_charges_enabled ? "is-ready" : ""}">Card payments ${company.stripe_charges_enabled ? "ready" : "pending"}</span>
         <span data-stripe-check="payouts" class="${company.stripe_payouts_enabled ? "is-ready" : ""}">Payouts ${company.stripe_payouts_enabled ? "ready" : "pending"}</span>
@@ -8377,6 +8383,15 @@ else if (state.section === "settings") {
 
   document.querySelector("#stripe-connect-button")?.addEventListener("click", connectStripe);
   document.querySelector("#stripe-refresh-button")?.addEventListener("click", () => loadStripeConnectStatus());
+  document.querySelector("#stripe-onboarding-email")?.addEventListener("input", (event) => {
+    const button = document.querySelector("#stripe-connect-button");
+    if (!button || button.disabled) return;
+    const currentEmail = String(event.currentTarget.dataset.currentEmail || "").trim().toLowerCase();
+    const nextEmail = String(event.currentTarget.value || "").trim().toLowerCase();
+    if (currentEmail && nextEmail !== currentEmail) button.textContent = "Use this email & restart →";
+    else if (currentEmail) button.textContent = "Continue Stripe setup →";
+    else button.textContent = "Connect Stripe →";
+  });
 
   document.querySelector("#refresh-orders")?.addEventListener("click", loadStripeOrders);
   document.querySelector("#orders-search")?.addEventListener("input", renderStripeOrders);
@@ -10872,6 +10887,7 @@ function updateStripeConnectUi(result = {}) {
   const message = panel.querySelector("#stripe-connect-message");
   const charges = panel.querySelector('[data-stripe-check="charges"]');
   const payouts = panel.querySelector('[data-stripe-check="payouts"]');
+  const emailInput = panel.querySelector("#stripe-onboarding-email");
   if (title) title.textContent = ready ? "Stripe connected" : pending ? "Finish Stripe setup" : "Connect Stripe";
   if (copy) copy.textContent = ready ? "Online payments go directly to your connected Stripe account." : pending ? "Stripe still needs information before payments and payouts can be activated." : "Connect your own Stripe account. No API key, Payment Link or account ID is required.";
   if (button) { button.disabled = ready; button.textContent = ready ? "Connected ✓" : pending ? "Continue Stripe setup →" : "Connect Stripe →"; }
@@ -10879,6 +10895,10 @@ function updateStripeConnectUi(result = {}) {
   if (charges) { charges.textContent = `Card payments ${result.chargesEnabled ? "ready" : "pending"}`; charges.classList.toggle("is-ready", Boolean(result.chargesEnabled)); }
   if (payouts) { payouts.textContent = `Payouts ${result.payoutsEnabled ? "ready" : "pending"}`; payouts.classList.toggle("is-ready", Boolean(result.payoutsEnabled)); }
   if (message) message.textContent = ready ? "Payments and payouts are active." : pending && result.requirementsDue ? `${result.requirementsDue} Stripe requirement${result.requirementsDue === 1 ? "" : "s"} still need attention.` : "Your Stripe login and bank details stay securely with Stripe.";
+  if (emailInput && result.accountEmail) {
+    emailInput.value = result.accountEmail;
+    emailInput.dataset.currentEmail = result.accountEmail.trim().toLowerCase();
+  }
   state.company = {
     ...state.company,
     stripe_connect_status:result.status,
@@ -10890,16 +10910,25 @@ function updateStripeConnectUi(result = {}) {
 async function connectStripe() {
   const button = document.querySelector("#stripe-connect-button");
   const message = document.querySelector("#stripe-connect-message");
+  const emailInput = document.querySelector("#stripe-onboarding-email");
+  const email = String(emailInput?.value || "").trim();
+  const currentEmail = String(emailInput?.dataset.currentEmail || "").trim().toLowerCase();
+  const restart = Boolean(currentEmail && email.toLowerCase() !== currentEmail);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (message) message.textContent = "Enter a valid Stripe email address.";
+    emailInput?.focus();
+    return;
+  }
   button?.setAttribute("disabled", "disabled");
   if (button) button.textContent = "Opening Stripe…";
   if (message) message.textContent = "Creating a secure Stripe onboarding link…";
   try {
-    const result = await stripeConnectApi("/api/stripe/connect/start", { method:"POST", body:"{}" });
+    const result = await stripeConnectApi("/api/stripe/connect/start", { method:"POST", body:JSON.stringify({ email, restart }) });
     if (!/^https:\/\/(connect\.)?stripe\.com\//i.test(String(result.url || ""))) throw new Error("Stripe did not return a secure onboarding link.");
     window.location.assign(result.url);
   } catch (error) {
     button?.removeAttribute("disabled");
-    if (button) button.textContent = "Connect Stripe →";
+    if (button) button.textContent = restart ? "Use this email & restart →" : currentEmail ? "Continue Stripe setup →" : "Connect Stripe →";
     if (message) message.textContent = String(error?.message || "Stripe onboarding could not be started.");
   }
 }
