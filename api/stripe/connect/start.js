@@ -1,6 +1,6 @@
 import {
   authenticatedCompany,
-  cleanText,
+  createStripeMerchantAccount,
   requestOrigin,
   stripeAccountState,
   stripeClient,
@@ -53,29 +53,14 @@ export default async function handler(req, res) {
     const stripe = stripeClient();
     let account = null;
 
-    stage = "retrieve_or_create_account";
+    stage = "retrieve_account";
     if (/^acct_[A-Za-z0-9]+$/.test(String(company.stripe_account_id || ""))) {
       account = await stripe.accounts.retrieve(company.stripe_account_id);
     } else {
-      const website = cleanText(company.website_url, 240);
-      const emailCandidate = cleanText(company.business_email || user.email, 180);
-      const stripeEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailCandidate) ? emailCandidate : "";
-      const accountData = {
-        type: "standard",
-        metadata: {
-          youyou_company_id: String(company.id),
-          youyou_workspace: "true",
-        },
-      };
-      if (stripeEmail) accountData.email = stripeEmail;
-      if (/^https:\/\//i.test(website)) {
-        accountData.business_profile = { url: website };
-      } else {
-        accountData.business_profile = {
-          product_description: cleanText(company.business_description || company.industry || "Online sales through YOUYOU", 240),
-        };
-      }
-      account = await stripe.accounts.create(accountData);
+      stage = "create_account_v2";
+      const createdAccount = await createStripeMerchantAccount({ company, user });
+      stage = "retrieve_created_account";
+      account = await stripe.accounts.retrieve(createdAccount.id);
     }
 
     stage = "save_account";
