@@ -8,6 +8,62 @@ export function stripeClient() {
   return new Stripe(secretKey);
 }
 
+export async function createStripeMerchantAccount({ company, user }) {
+  const secretKey = String(process.env.STRIPE_SECRET_KEY || "").trim();
+  if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not configured.");
+
+  const businessEmail = cleanText(company?.business_email, 180);
+  const userEmail = cleanText(user?.email, 180);
+  const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  const contactEmail = isEmail(businessEmail) ? businessEmail : isEmail(userEmail) ? userEmail : "";
+  const displayName = cleanText(company?.name || company?.business_name || "YOUYOU merchant", 120);
+  const countryCandidate = cleanText(company?.country, 2).toUpperCase();
+  const country = countryCandidate === "CA" ? "CA" : "US";
+  const body = {
+    display_name: displayName,
+    dashboard: "full",
+    identity: { country },
+    configuration: {
+      merchant: {
+        capabilities: {
+          card_payments: { requested: true },
+        },
+      },
+    },
+    defaults: {
+      responsibilities: {
+        fees_collector: "stripe",
+        losses_collector: "stripe",
+      },
+    },
+    metadata: {
+      youyou_company_id: String(company.id),
+      youyou_workspace: "true",
+    },
+    include: ["configuration.merchant", "defaults", "requirements"],
+  };
+  if (contactEmail) body.contact_email = contactEmail;
+
+  const response = await fetch("https://api.stripe.com/v2/core/accounts", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secretKey}`,
+      "Content-Type": "application/json",
+      "Stripe-Version": "2026-08-26.dahlia",
+      "Idempotency-Key": `youyou-merchant-${String(company.id)}`,
+    },
+    body: JSON.stringify(body),
+  });
+  const result = await jsonOrText(response);
+  if (!response.ok || !/^acct_[A-Za-z0-9]+$/.test(String(result?.id || ""))) {
+    const stripeError = result?.error || result || {};
+    const error = new Error(String(stripeError?.message || `Stripe Accounts v2 creation failed (${response.status}).`));
+    error.code = String(stripeError?.code || stripeError?.type || "");
+    throw error;
+  }
+  return result;
+}
+
 export function supabaseConfig({ service = false } = {}) {
   const url = String(
     process.env.SUPABASE_URL ||
