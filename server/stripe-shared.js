@@ -8,14 +8,20 @@ export function stripeClient() {
   return new Stripe(secretKey);
 }
 
-export async function createStripeMerchantAccount({ company, user }) {
+export async function createStripeMerchantAccount({ company, user, contactEmail: contactEmailOverride = "" }) {
   const secretKey = String(process.env.STRIPE_SECRET_KEY || "").trim();
   if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not configured.");
 
+  const requestedEmail = cleanText(contactEmailOverride, 180);
   const businessEmail = cleanText(company?.business_email, 180);
   const userEmail = cleanText(user?.email, 180);
   const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-  const contactEmail = isEmail(businessEmail) ? businessEmail : isEmail(userEmail) ? userEmail : "";
+  if (requestedEmail && !isEmail(requestedEmail)) {
+    const error = new Error("Enter a valid Stripe email address.");
+    error.code = "YOUYOU_EMAIL_INVALID";
+    throw error;
+  }
+  const contactEmail = requestedEmail || (isEmail(businessEmail) ? businessEmail : isEmail(userEmail) ? userEmail : "");
   const displayName = cleanText(company?.name || company?.business_name || "YOUYOU merchant", 120);
   const countryCandidate = cleanText(company?.country, 2).toUpperCase();
   const country = countryCandidate === "CA" ? "CA" : "US";
@@ -50,7 +56,7 @@ export async function createStripeMerchantAccount({ company, user }) {
       Authorization: `Bearer ${secretKey}`,
       "Content-Type": "application/json",
       "Stripe-Version": "2026-08-26.dahlia",
-      "Idempotency-Key": `youyou-merchant-${String(company.id)}`,
+      "Idempotency-Key": `youyou-merchant-${String(company.id)}-${contactEmail.toLowerCase() || "no-email"}`,
     },
     body: JSON.stringify(body),
   });
