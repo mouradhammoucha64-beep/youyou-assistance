@@ -7,12 +7,35 @@ import {
   updateCompanyStripe,
 } from "../../../server/stripe-shared.js";
 
-function errorResponse(res, error) {
+function errorResponse(res, error, stage = "start") {
   const message = String(error?.message || "");
   if (message === "AUTH_REQUIRED") return res.status(401).json({ error: "Sign in again to connect Stripe." });
   if (message === "COMPANY_NOT_FOUND") return res.status(404).json({ error: "Your company workspace was not found." });
-  console.error("YOUYOU Stripe Connect start:", error);
-  return res.status(500).json({ error: "Stripe onboarding could not be started. Please try again." });
+  const stripeCode = String(error?.code || error?.raw?.code || "").replace(/[^a-z0-9_-]/gi, "").slice(0, 80);
+  console.error("YOUYOU Stripe Connect start:", { stage, stripeCode, error });
+
+  if (/connect|platform profile|business model|signed up/i.test(message)) {
+    return res.status(409).json({
+      error: "Finish your Stripe Connect platform setup, then try again.",
+      diagnostic: stage,
+    });
+  }
+  if (/branding/i.test(message)) {
+    return res.status(409).json({
+      error: "Save your Stripe Connect branding, then try again.",
+      diagnostic: stage,
+    });
+  }
+  if (/not configured/i.test(message)) {
+    return res.status(503).json({
+      error: "The payment service is not configured yet.",
+      diagnostic: stage,
+    });
+  }
+  return res.status(500).json({
+    error: "Stripe onboarding could not be started. Please try again.",
+    diagnostic: stripeCode ? `${stage}:${stripeCode}` : stage,
+  });
 }
 
 export default async function handler(req, res) {
@@ -23,11 +46,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed." });
   }
 
+  let stage = "authenticate";
   try {
     const { user, company, serviceConfig } = await authenticatedCompany(req);
     const stripe = stripeClient();
     let account = null;
 
+    stage = "retrieve_or_create_account";
     if (/^acct_[A-Za-z0-9]+$/.test(String(company.stripe_account_id || ""))) {
       account = await stripe.accounts.retrieve(company.stripe_account_id);
     } else {
@@ -50,6 +75,7 @@ export default async function handler(req, res) {
       account = await stripe.accounts.create(accountData);
     }
 
+    stage = "save_account";
     const accountState = stripeAccountState(account);
     await updateCompanyStripe(company.id, {
       stripe_account_id: account.id,
@@ -58,6 +84,7 @@ export default async function handler(req, res) {
       stripe_payouts_enabled: accountState.payoutsEnabled,
     }, serviceConfig);
 
+    stage = "create_account_link";
     const origin = requestOrigin(req);
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
@@ -69,6 +96,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ url: accountLink.url });
   } catch (error) {
-    return errorResponse(res, error);
+    return errorResponse(res, error, stage);
   }
 }
