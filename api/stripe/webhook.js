@@ -1,4 +1,4 @@
-import { stripeClient, supabaseConfig } from "../../server/stripe-shared.js";
+import { stripeAccountState, stripeClient, supabaseConfig } from "../../server/stripe-shared.js";
 
 export const config = { api: { bodyParser: false } };
 
@@ -17,7 +17,10 @@ async function saveOrder(event, session) {
     connected_account_id: event.account || null,
     checkout_session_id: session.id,
     payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id || null,
-    status: session.payment_status === "paid" ? "paid" : "processing",
+    product_name: meta.product_name || null,
+    status: ["checkout.session.async_payment_failed", "checkout.session.expired"].includes(event.type)
+      ? "failed"
+      : session.payment_status === "paid" ? "paid" : "processing",
     amount_total: Number(session.amount_total || 0),
     currency: String(session.currency || "usd").toUpperCase(),
     customer_name: meta.customer_name || session.customer_details?.name || null,
@@ -45,6 +48,22 @@ async function saveOrder(event, session) {
   if (!response.ok) throw new Error(`Order storage failed (${response.status}): ${(await response.text()).slice(0, 240)}`);
 }
 
+async function saveConnectedAccountState(account) {
+  const { url, key } = supabaseConfig({ service:true });
+  const state = stripeAccountState(account);
+  const response = await fetch(`${url}/rest/v1/companies?stripe_account_id=eq.${encodeURIComponent(account.id)}`, {
+    method:"PATCH",
+    headers:{ apikey:key, "Content-Type":"application/json", Prefer:"return=minimal" },
+    body:JSON.stringify({
+      stripe_connect_status:state.status,
+      stripe_charges_enabled:state.chargesEnabled,
+      stripe_payouts_enabled:state.payoutsEnabled,
+      updated_at:new Date().toISOString(),
+    }),
+  });
+  if (!response.ok) throw new Error(`Stripe account status storage failed (${response.status}).`);
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -55,9 +74,10 @@ export default async function handler(req, res) {
     if (!secret) throw new Error("STRIPE_WEBHOOK_SECRET is not configured.");
     const signature = req.headers["stripe-signature"];
     const event = stripeClient().webhooks.constructEvent(await rawBody(req), signature, secret);
-    if (["checkout.session.completed", "checkout.session.async_payment_succeeded"].includes(event.type)) {
+    if (["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "checkout.session.expired"].includes(event.type)) {
       await saveOrder(event, event.data.object);
     }
+    if (event.type === "account.updated") await saveConnectedAccountState(event.data.object);
     return res.status(200).json({ received: true });
   } catch (error) {
     console.error("YOUYOU Stripe webhook:", error);

@@ -29,16 +29,17 @@ The included fallback is only the browser-safe Supabase URL + publishable key.
 ## Security rule
 Never commit any Supabase service-role key, OpenAI API key, Stripe secret key, or webhook secret to this repository. Those belong in server-side environment variables only.
 
-## V9.0 Stripe Connect Checkout
-Landing Studio now creates a server-side Stripe Checkout Session on the merchant's connected Stripe account. The published price is loaded from Supabase instead of trusted from the browser. Quantity, color, bundle and product options are validated and sent to Stripe metadata. The visitor sees `Opening secure checkout…`, returns to the landing page after payment, and receives a paid confirmation only after YOUYOU retrieves the Checkout Session from Stripe.
+## V9.1 Stripe Connect + Merchant Orders
+Landing Studio creates a server-side Stripe Checkout Session on each merchant's own connected Stripe account. The merchant connects from `Settings → Payments` through Stripe-hosted onboarding and never enters a Payment Link, API key, secret key or account ID. The published price is loaded from Supabase instead of trusted from the browser. Quantity, color, bundle and product options are validated and sent to Stripe metadata.
 
-Run `supabase-v9.0-stripe-connect-checkout.sql` once. Configure these server-side Vercel variables:
+Run `supabase-v9.0-stripe-connect-checkout.sql` once, followed by `supabase-v9.1-stripe-merchant-orders.sql`. Configure these server-side Vercel variables:
 - `STRIPE_SECRET_KEY`
-- `STRIPE_TEST_CONNECTED_ACCOUNT_ID` (Sandbox fallback only)
 - `STRIPE_WEBHOOK_SECRET`
 - `SUPABASE_SECRET_KEY` (recommended `sb_secret_...`; legacy `SUPABASE_SERVICE_ROLE_KEY` is also supported)
 
-`VITE_STRIPE_PUBLISHABLE_KEY` is browser-safe. Every secret must remain in Vercel and must never be committed or pasted into the Landing Studio. The V8.9 Payment Link field remains optional only as a temporary fallback during migration.
+The Stripe webhook should listen to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired` and `account.updated` from connected accounts. Every secret must remain in Vercel and must never be committed or pasted into Landing Studio.
+
+The Orders dashboard separates Stripe payment status from merchant fulfilment status and formats Stripe minor units correctly (for example, `3000` is shown as `$30.00`).
 
 ## Next product stage
 Before connecting a paid AI API, finish/verify Supabase RLS, conversation/message policies, lead capture, AI settings persistence, and production QA. Then connect the AI engine to company knowledge + conversations.

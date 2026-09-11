@@ -10,7 +10,39 @@ import {
   publishedCheckoutOffer,
   requestOrigin,
   stripeClient,
+  supabaseConfig,
 } from "../../server/stripe-shared.js";
+
+async function savePendingOrder({ row, session, metadata, customer, quantity, color, bundle, variants, amountTotal, currency, connectedAccount, productName }) {
+  const { url, key } = supabaseConfig({ service:true });
+  const response = await fetch(`${url}/rest/v1/stripe_orders?on_conflict=checkout_session_id`, {
+    method:"POST",
+    headers:{ apikey:key, "Content-Type":"application/json", Prefer:"resolution=merge-duplicates,return=minimal" },
+    body:JSON.stringify({
+      company_id:row.company_id,
+      landing_page_id:row.page_id,
+      connected_account_id:connectedAccount,
+      checkout_session_id:session.id,
+      payment_intent_id:typeof session.payment_intent === "string" ? session.payment_intent : null,
+      product_name:productName,
+      status:"processing",
+      amount_total:amountTotal,
+      currency:String(currency || "usd").toUpperCase(),
+      customer_name:customer.name || null,
+      customer_email:customer.email || null,
+      customer_phone:customer.phone || null,
+      customer_city:customer.city || null,
+      customer_address:customer.address || null,
+      quantity:Math.max(1, Number.parseInt(metadata.actual_quantity,10) || quantity || 1),
+      color:color || null,
+      bundle:bundle?.label || null,
+      options:variants,
+      customer_message:customer.message || null,
+      updated_at:new Date().toISOString(),
+    }),
+  });
+  if (!response.ok) throw new Error(`Pending order storage failed (${response.status}): ${(await response.text()).slice(0,180)}`);
+}
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -77,7 +109,7 @@ export default async function handler(req, res) {
     if (customer.phone.replace(/\D/g, "").length < 7) return res.status(400).json({ error: "Invalid phone number." });
     if (customer.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) return res.status(400).json({ error: "Invalid email address." });
 
-    const connectedAccount = cleanText(row.stripe_account_id || process.env.STRIPE_TEST_CONNECTED_ACCOUNT_ID, 80);
+    const connectedAccount = cleanText(row.stripe_account_id, 80);
     if (!/^acct_[A-Za-z0-9]+$/.test(connectedAccount)) throw new Error("This merchant has not connected Stripe yet.");
 
     const productName = cleanText(offer.name || row.page_name, 120) || "Product order";
@@ -87,6 +119,7 @@ export default async function handler(req, res) {
       landing_page_id: String(row.page_id),
       company_id: String(row.company_id),
       landing_slug: slug,
+      product_name: productName,
       actual_quantity: String(bundle?.quantity || quantity),
       color,
       bundle: bundle?.label || "",
@@ -121,6 +154,17 @@ export default async function handler(req, res) {
     }, { stripeAccount: connectedAccount });
 
     if (!session.url) throw new Error("Stripe did not return a checkout URL.");
+    try {
+      await savePendingOrder({
+        row, session, metadata, customer, quantity, color, bundle, variants,
+        amountTotal:unitAmount * quantity,
+        currency:session.currency || currencyCode(offer.currency),
+        connectedAccount,
+        productName,
+      });
+    } catch (storageError) {
+      console.error("YOUYOU pending Stripe order:", storageError);
+    }
     return res.status(200).json({ url: session.url });
   } catch (error) {
     console.error("YOUYOU Stripe checkout:", error);
@@ -130,4 +174,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: message });
   }
 }
-

@@ -26,6 +26,7 @@ let state = {
 const DASHBOARD_ROUTES = {
   overview: "/dashboard/overview",
   conversations: "/dashboard/conversations",
+  orders: "/dashboard/orders",
   leads: "/dashboard/leads",
   knowledge: "/dashboard/knowledge",
   widget: "/dashboard/widget",
@@ -1522,6 +1523,42 @@ function settingsOption(value, currentValue = "") {
   return `<option value="${escapeHtml(value)}" ${selected}>${escapeHtml(value)}</option>`;
 }
 
+function formatMinorMoney(amount = 0, currency = "USD") {
+  const value = Number(amount || 0) / 100;
+  try {
+    return new Intl.NumberFormat("en-US", { style:"currency", currency:String(currency || "USD").toUpperCase() }).format(value);
+  } catch (_) {
+    return `$${value.toFixed(2)}`;
+  }
+}
+
+function stripePaymentSettingsMarkup(company = {}) {
+  const status = String(company.stripe_connect_status || "not_connected");
+  const ready = status === "connected" && company.stripe_charges_enabled && company.stripe_payouts_enabled;
+  const pending = ["pending", "restricted"].includes(status);
+  const title = ready ? "Stripe connected" : pending ? "Finish Stripe setup" : "Connect Stripe";
+  const copy = ready
+    ? "Online payments go directly to your connected Stripe account."
+    : pending
+      ? "Stripe still needs information before payments and payouts can be activated."
+      : "Connect your own Stripe account. No API key, Payment Link or account ID is required.";
+  return `
+    <div class="stripe-connect-panel ${ready ? "is-connected" : pending ? "is-pending" : "is-disconnected"}" id="stripe-connect-panel">
+      <div class="stripe-connect-brand"><span>◫</span><div><small>MERCHANT PAYMENTS</small><strong>${title}</strong></div></div>
+      <p id="stripe-connect-copy">${copy}</p>
+      <div class="stripe-connect-checks">
+        <span data-stripe-check="charges" class="${company.stripe_charges_enabled ? "is-ready" : ""}">Card payments ${company.stripe_charges_enabled ? "ready" : "pending"}</span>
+        <span data-stripe-check="payouts" class="${company.stripe_payouts_enabled ? "is-ready" : ""}">Payouts ${company.stripe_payouts_enabled ? "ready" : "pending"}</span>
+      </div>
+      <div class="stripe-connect-actions">
+        <button id="stripe-connect-button" class="primary" type="button" ${ready ? "disabled" : ""}>${ready ? "Connected ✓" : pending ? "Continue Stripe setup →" : "Connect Stripe →"}</button>
+        <button id="stripe-refresh-button" class="secondary" type="button">Refresh status</button>
+        <a id="stripe-dashboard-link" class="secondary ${ready ? "" : "is-hidden"}" href="https://dashboard.stripe.com/" target="_blank" rel="noopener noreferrer">Open Stripe Dashboard ↗</a>
+      </div>
+      <div class="stripe-connect-message" id="stripe-connect-message" role="status">${ready ? "Payments and payouts are active." : "Your Stripe login and bank details stay securely with Stripe."}</div>
+    </div>`;
+}
+
 
 function dashboardShell(content) {
   const company =
@@ -1552,6 +1589,7 @@ function dashboardShell(content) {
           <nav class="dashboard-nav">
             ${navItem("overview", "⌂", "Overview")}
             ${navItem("conversations", "◌", "Conversations")}
+            ${navItem("orders", "▦", "Orders")}
             ${navItem("leads", "✦", "Leads")}
             ${navItem("knowledge", "▤", "Knowledge")}
             ${navItem("widget", "◇", "Website Widget")}
@@ -4368,10 +4406,9 @@ function renderLandingPageWorkspace() {
               </label>
             </div>
             <div class="lpb-stripe-payment-card" data-stripe-payment-field hidden>
-              <div class="lpb-stripe-payment-head"><div><strong>Stripe Connect checkout</strong><span>Quantity, color and product options are sent to the merchant's connected Stripe account.</span></div><b>STRIPE</b></div>
-              <label>Fallback Payment Link <span>Optional</span><input id="lpb-stripe-payment-link" type="url" inputmode="url" autocomplete="off" placeholder="https://buy.stripe.com/test_..." /></label>
-              <div class="lpb-stripe-test-row"><button id="lpb-test-stripe-link" type="button">Test payment link ↗</button><span id="lpb-stripe-link-status" role="status">Use a Stripe Sandbox link first.</span></div>
-              <p>YOUYOU creates a secure Stripe Checkout from the published product price. The optional Payment Link is kept only as a temporary fallback. Merchants never enter secret keys here.</p>
+              <div class="lpb-stripe-payment-head"><div><strong>Stripe secure checkout</strong><span>Quantity, color and product options go to this workspace's connected Stripe account.</span></div><b>STRIPE</b></div>
+              <div class="lpb-stripe-connect-note"><strong>No Payment Link required</strong><span>Connect Stripe once in Settings → Payments. YOUYOU creates every checkout securely and sends funds to that merchant only.</span></div>
+              <p>API keys, secret keys and Stripe account IDs are never entered in Landing Studio.</p>
             </div>
             <div class="lpb-two">
               <label>Lead form
@@ -4727,6 +4764,7 @@ function initLandingPageWorkspace() {
 
   // Backward-compatible defaults for landing pages saved before V5.07.
   current = { ...defaultLandingPageData(current.templateId || request.templateId), ...current };
+  current.stripePaymentLink = "";
 
   const normalizeCustomSections = () => {
     if (!Array.isArray(current.customSections)) current.customSections = [];
@@ -4763,7 +4801,7 @@ function initLandingPageWorkspace() {
     oldPrice:"lpb-old-price", currency:"lpb-currency", priceMode:"lpb-price-mode",
     businessName:"lpb-business-name", businessAddress:"lpb-business-address",
     commerceEnabled:"lpb-commerce-enabled", commerceMode:"lpb-commerce-mode", serviceOptions:"lpb-service-options", serviceUrgencyEnabled:"lpb-service-urgency-enabled", serviceUrgencyOptions:"lpb-service-urgency-options", serviceDateEnabled:"lpb-service-date-enabled", serviceTimeEnabled:"lpb-service-time-enabled", quantityEnabled:"lpb-quantity-enabled", quantityMin:"lpb-quantity-min", quantityMax:"lpb-quantity-max", quantityDefault:"lpb-quantity-default", productColors:"lpb-product-colors", sizeEnabled:"lpb-size-enabled", sizeOptions:"lpb-size-options", weightEnabled:"lpb-weight-enabled", weightOptions:"lpb-weight-options", volumeEnabled:"lpb-volume-enabled", volumeOptions:"lpb-volume-options", unitsEnabled:"lpb-units-enabled", unitsOptions:"lpb-units-options", customOptionEnabled:"lpb-custom-option-enabled", customOptionName:"lpb-custom-option-name", customOptionValues:"lpb-custom-option-values", variantsText:"lpb-variants-text", bundleEnabled:"lpb-bundle-enabled", bundleOptions:"lpb-bundle-options",
-    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", stripePaymentLink:"lpb-stripe-payment-link", leadFormEnabled:"lpb-lead-form-enabled", collectEmail:"lpb-collect-email", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
+    ctaText:"lpb-cta-text", ctaAction:"lpb-cta-action", leadFormEnabled:"lpb-lead-form-enabled", collectEmail:"lpb-collect-email", formButtonText:"lpb-form-button-text", whatsapp:"lpb-whatsapp", whatsappCountryCode:"lpb-whatsapp-country-code",
     phone:"lpb-phone", email:"lpb-email", heroMediaEnabled:"lpb-hero-media-enabled", heroImageUrl:"lpb-hero-image-url", imageUrl:"lpb-image-url", videoUrl:"lpb-video-url",
     videoEnabled:"lpb-video-enabled", videoTitle:"lpb-video-title", videoPosition:"lpb-video-position",
     mediaGallery:"lpb-media-gallery", sliderEnabled:"lpb-slider-enabled", sliderTitle:"lpb-slider-title",
@@ -4875,22 +4913,8 @@ function initLandingPageWorkspace() {
   const syncStripePaymentUi = () => {
     const action = String(document.getElementById("lpb-cta-action")?.value || current.ctaAction || "form");
     const field = document.querySelector("[data-stripe-payment-field]");
-    const input = document.getElementById("lpb-stripe-payment-link");
-    const status = document.getElementById("lpb-stripe-link-status");
-    const testButton = document.getElementById("lpb-test-stripe-link");
     const show = action === "stripe";
     if (field) field.hidden = !show;
-    if (!show || !input) return;
-    const raw = String(input.value || "").trim();
-    const valid = landingStripePaymentLink(raw);
-    input.setAttribute("aria-invalid", raw && !valid ? "true" : "false");
-    if (testButton) testButton.disabled = !valid;
-    if (status) {
-      status.textContent = valid
-        ? (/\/test_/i.test(valid) ? "Optional Sandbox fallback ready." : "Optional live fallback detected.")
-        : (raw ? "Fallback must be a valid buy.stripe.com link." : "Stripe Connect checkout will be used.");
-      status.dataset.state = valid ? "ready" : (raw ? "error" : "neutral");
-    }
   };
 
   const refreshWorkspaceSectionSummaries = () => {
@@ -5330,6 +5354,10 @@ function initLandingPageWorkspace() {
       landingStudioStatus("Stripe checkout needs the lead form, Product options and a valid selling price.");
       return;
     }
+    if (String(current.ctaAction || "") === "stripe" && (state.company?.stripe_connect_status !== "connected" || !state.company?.stripe_charges_enabled || !state.company?.stripe_payouts_enabled)) {
+      landingStudioStatus("Connect and activate Stripe in Settings → Payments before publishing online checkout.");
+      return;
+    }
     if (landingHasTemporaryMedia(current)) {
       landingStudioStatus("Some media is still local. Re-upload it and wait until YOUYOU confirms permanent storage before publishing.");
       return;
@@ -5505,18 +5533,6 @@ function initLandingPageWorkspace() {
         syncBusinessEmailUi();
       }
     }
-  });
-
-  document.getElementById("lpb-test-stripe-link")?.addEventListener("click", () => {
-    const raw = document.getElementById("lpb-stripe-payment-link")?.value || current.stripePaymentLink || "";
-    const paymentLink = landingStripePaymentLink(raw);
-    if (!paymentLink) {
-      landingStudioStatus("Enter a valid Stripe Payment Link before testing.");
-      syncStripePaymentUi();
-      return;
-    }
-    window.open(paymentLink, "_blank", "noopener,noreferrer");
-    landingStudioStatus(/\/test_/i.test(paymentLink) ? "Stripe Sandbox opened in a new tab." : "Live Stripe checkout opened in a new tab.");
   });
 
   document.querySelectorAll("[data-price-mode-value]").forEach((button) => {
@@ -7730,6 +7746,31 @@ else if (state.section === "billing") {
     `;
 }
 
+else if (state.section === "orders") {
+    body = `
+      <section class="orders-page">
+        <div class="orders-page-head">
+          <div><small>COMMERCE</small><h1>Orders</h1><p>Track payment and fulfilment from every published landing page.</p></div>
+          <button id="refresh-orders" class="secondary" type="button">Refresh orders</button>
+        </div>
+        <div class="orders-stats" id="orders-stats">
+          <article><span>Paid revenue</span><strong>—</strong></article>
+          <article><span>Paid orders</span><strong>—</strong></article>
+          <article><span>Needs attention</span><strong>—</strong></article>
+        </div>
+        <div class="orders-toolbar">
+          <div class="orders-filters" role="group" aria-label="Payment status">
+            <button class="is-active" type="button" data-order-filter="all">All</button>
+            <button type="button" data-order-filter="paid">Paid</button>
+            <button type="button" data-order-filter="processing">Not paid yet</button>
+          </div>
+          <input id="orders-search" type="search" placeholder="Search customer, phone or order…" />
+        </div>
+        <div class="orders-list" id="orders-list"><div class="orders-empty">Loading orders…</div></div>
+        <p class="orders-footnote">Stripe stores money in cents. YOUYOU converts it automatically, so 3000 appears as $30.00.</p>
+      </section>`;
+  }
+
 else if (state.section === "settings") {
     const c = state.company || {};
 
@@ -7965,9 +8006,22 @@ else if (state.section === "settings") {
           </div>
         </section>
 
-        <section class="settings-section-card account-settings-card">
+        <section class="settings-section-card stripe-settings-card">
           <div class="settings-section-head">
             <div class="settings-section-icon">05</div>
+            <div>
+              <small>PAYMENTS</small>
+              <h2>Stripe merchant account</h2>
+              <p>Receive landing-page payments directly in your own Stripe account.</p>
+            </div>
+          </div>
+
+          ${stripePaymentSettingsMarkup(c)}
+        </section>
+
+        <section class="settings-section-card account-settings-card">
+          <div class="settings-section-head">
+            <div class="settings-section-icon">06</div>
             <div>
               <small>ACCOUNT</small>
               <h2>Workspace & subscription</h2>
@@ -8321,6 +8375,23 @@ else if (state.section === "settings") {
     saveSettings
   );
 
+  document.querySelector("#stripe-connect-button")?.addEventListener("click", connectStripe);
+  document.querySelector("#stripe-refresh-button")?.addEventListener("click", () => loadStripeConnectStatus());
+
+  document.querySelector("#refresh-orders")?.addEventListener("click", loadStripeOrders);
+  document.querySelector("#orders-search")?.addEventListener("input", renderStripeOrders);
+  document.querySelectorAll("[data-order-filter]").forEach((button) => {
+    button.addEventListener("click", () => {
+      stripeOrdersFilter = button.dataset.orderFilter || "all";
+      document.querySelectorAll("[data-order-filter]").forEach((item)=>item.classList.toggle("is-active", item === button));
+      renderStripeOrders();
+    });
+  });
+  document.querySelector("#orders-list")?.addEventListener("change", (event) => {
+    const select = event.target.closest("[data-order-status]");
+    if (select) updateOrderStatus(select.dataset.orderStatus, select.value, select);
+  });
+
   document.querySelector("#save-ai-config")?.addEventListener(
     "click",
     saveAiConfiguration
@@ -8340,6 +8411,21 @@ if (state.section === "widget") {
 
 if (state.section === "leads") {
   loadLeads();
+}
+
+if (state.section === "orders") {
+  loadStripeOrders();
+}
+
+if (state.section === "settings") {
+  const stripeFlow = new URLSearchParams(window.location.search).get("stripe");
+  if (stripeFlow === "refresh") {
+    window.history.replaceState({ section:"settings" }, "", "/dashboard/settings");
+    connectStripe();
+  } else {
+    loadStripeConnectStatus({ returned:stripeFlow === "return" });
+    if (stripeFlow === "return") window.history.replaceState({ section:"settings" }, "", "/dashboard/settings");
+  }
 }
 
 if (state.section === "overview") {
@@ -10759,6 +10845,159 @@ async function addKnowledge() {
   await loadKnowledge();
 }
 
+
+async function stripeConnectApi(path, options = {}) {
+  const { data } = await supabase.auth.getSession();
+  const token = data?.session?.access_token;
+  if (!token) throw new Error("Sign in again to continue.");
+  const response = await fetch(path, {
+    ...options,
+    headers: { ...(options.headers || {}), Authorization:`Bearer ${token}`, "Content-Type":"application/json" },
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || "Stripe request failed.");
+  return result;
+}
+
+function updateStripeConnectUi(result = {}) {
+  const panel = document.querySelector("#stripe-connect-panel");
+  if (!panel) return;
+  const ready = result.status === "connected" && result.chargesEnabled && result.payoutsEnabled;
+  const pending = ["pending", "restricted"].includes(result.status);
+  panel.className = `stripe-connect-panel ${ready ? "is-connected" : pending ? "is-pending" : "is-disconnected"}`;
+  const title = panel.querySelector(".stripe-connect-brand strong");
+  const copy = panel.querySelector("#stripe-connect-copy");
+  const button = panel.querySelector("#stripe-connect-button");
+  const dashboardLink = panel.querySelector("#stripe-dashboard-link");
+  const message = panel.querySelector("#stripe-connect-message");
+  const charges = panel.querySelector('[data-stripe-check="charges"]');
+  const payouts = panel.querySelector('[data-stripe-check="payouts"]');
+  if (title) title.textContent = ready ? "Stripe connected" : pending ? "Finish Stripe setup" : "Connect Stripe";
+  if (copy) copy.textContent = ready ? "Online payments go directly to your connected Stripe account." : pending ? "Stripe still needs information before payments and payouts can be activated." : "Connect your own Stripe account. No API key, Payment Link or account ID is required.";
+  if (button) { button.disabled = ready; button.textContent = ready ? "Connected ✓" : pending ? "Continue Stripe setup →" : "Connect Stripe →"; }
+  dashboardLink?.classList.toggle("is-hidden", !ready);
+  if (charges) { charges.textContent = `Card payments ${result.chargesEnabled ? "ready" : "pending"}`; charges.classList.toggle("is-ready", Boolean(result.chargesEnabled)); }
+  if (payouts) { payouts.textContent = `Payouts ${result.payoutsEnabled ? "ready" : "pending"}`; payouts.classList.toggle("is-ready", Boolean(result.payoutsEnabled)); }
+  if (message) message.textContent = ready ? "Payments and payouts are active." : pending && result.requirementsDue ? `${result.requirementsDue} Stripe requirement${result.requirementsDue === 1 ? "" : "s"} still need attention.` : "Your Stripe login and bank details stay securely with Stripe.";
+  state.company = {
+    ...state.company,
+    stripe_connect_status:result.status,
+    stripe_charges_enabled:Boolean(result.chargesEnabled),
+    stripe_payouts_enabled:Boolean(result.payoutsEnabled),
+  };
+}
+
+async function connectStripe() {
+  const button = document.querySelector("#stripe-connect-button");
+  const message = document.querySelector("#stripe-connect-message");
+  button?.setAttribute("disabled", "disabled");
+  if (button) button.textContent = "Opening Stripe…";
+  if (message) message.textContent = "Creating a secure Stripe onboarding link…";
+  try {
+    const result = await stripeConnectApi("/api/stripe/connect/start", { method:"POST", body:"{}" });
+    if (!/^https:\/\/(connect\.)?stripe\.com\//i.test(String(result.url || ""))) throw new Error("Stripe did not return a secure onboarding link.");
+    window.location.assign(result.url);
+  } catch (error) {
+    button?.removeAttribute("disabled");
+    if (button) button.textContent = "Connect Stripe →";
+    if (message) message.textContent = String(error?.message || "Stripe onboarding could not be started.");
+  }
+}
+
+async function loadStripeConnectStatus({ returned = false } = {}) {
+  const message = document.querySelector("#stripe-connect-message");
+  if (message) message.textContent = returned ? "Checking the Stripe account after onboarding…" : "Checking Stripe connection…";
+  try {
+    const result = await stripeConnectApi("/api/stripe/connect/status", { method:"GET" });
+    updateStripeConnectUi(result);
+  } catch (error) {
+    if (message) message.textContent = String(error?.message || "Stripe status could not be checked.");
+  }
+}
+
+let stripeOrdersCache = [];
+let stripeOrdersFilter = "all";
+
+function orderPaymentLabel(status = "processing") {
+  const labels = { paid:"Paid", processing:"Not paid yet", failed:"Failed", refunded:"Refunded", partially_refunded:"Partially refunded" };
+  return labels[status] || "Processing";
+}
+
+function orderFulfilmentLabel(status = "new") {
+  const labels = { new:"New", confirmed:"Confirmed", preparing:"Preparing", shipped:"Shipped", completed:"Completed", cancelled:"Cancelled" };
+  return labels[status] || "New";
+}
+
+function renderStripeOrders() {
+  const host = document.querySelector("#orders-list");
+  if (!host) return;
+  const query = String(document.querySelector("#orders-search")?.value || "").trim().toLowerCase();
+  const rows = stripeOrdersCache.filter((order) => {
+    const statusMatch = stripeOrdersFilter === "all" || (stripeOrdersFilter === "processing" ? order.status !== "paid" : order.status === stripeOrdersFilter);
+    const haystack = [order.customer_name,order.customer_email,order.customer_phone,order.customer_city,order.checkout_session_id,order.product_name].join(" ").toLowerCase();
+    return statusMatch && (!query || haystack.includes(query));
+  });
+  if (!rows.length) {
+    host.innerHTML = `<div class="orders-empty"><strong>No matching orders</strong><span>Paid and pending Stripe checkouts will appear here.</span></div>`;
+    return;
+  }
+  host.innerHTML = rows.map((order) => {
+    const options = order.options && typeof order.options === "object" ? Object.entries(order.options).map(([key,value]) => `${key}: ${value}`).join(" · ") : "";
+    const variant = [order.color ? `Color: ${order.color}` : "", options, order.bundle ? `Bundle: ${order.bundle}` : ""].filter(Boolean).join(" · ");
+    const date = new Date(order.paid_at || order.created_at);
+    const status = String(order.status || "processing");
+    const fulfilment = String(order.order_status || "new");
+    return `<article class="order-card" data-order-id="${escapeHtml(order.id)}">
+      <div class="order-card-top">
+        <div><small>${escapeHtml(date.toLocaleString())}</small><strong>${escapeHtml(order.product_name || "Landing page order")}</strong><span>${escapeHtml(variant || "Standard selection")}</span></div>
+        <div class="order-total"><strong>${escapeHtml(formatMinorMoney(order.amount_total, order.currency))}</strong><span class="payment-status is-${escapeHtml(status)}">${escapeHtml(orderPaymentLabel(status))}</span></div>
+      </div>
+      <div class="order-grid">
+        <div><small>CUSTOMER</small><strong>${escapeHtml(order.customer_name || "Customer")}</strong><span>${escapeHtml(order.customer_email || "No email")}</span><span>${escapeHtml(order.customer_phone || "No phone")}</span></div>
+        <div><small>DELIVERY</small><strong>${escapeHtml(order.customer_city || "City not provided")}</strong><span>${escapeHtml(order.customer_address || "Address not provided")}</span></div>
+        <div><small>ORDER</small><strong>Quantity ${escapeHtml(order.quantity || 1)}</strong><span>${escapeHtml(String(order.checkout_session_id || "").slice(-14) || "Stripe checkout")}</span></div>
+        <label><small>FULFILMENT</small><select data-order-status="${escapeHtml(order.id)}">
+          ${["new","confirmed","preparing","shipped","completed","cancelled"].map((value)=>`<option value="${value}" ${value === fulfilment ? "selected" : ""}>${orderFulfilmentLabel(value)}</option>`).join("")}
+        </select></label>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+function updateOrdersStats() {
+  const stats = document.querySelector("#orders-stats");
+  if (!stats) return;
+  const paid = stripeOrdersCache.filter((order) => order.status === "paid");
+  const revenueByCurrency = paid.reduce((map, order) => { const key=String(order.currency||"USD").toUpperCase(); map[key]=(map[key]||0)+Number(order.amount_total||0); return map; }, {});
+  const revenue = Object.entries(revenueByCurrency).map(([currency,amount])=>formatMinorMoney(amount,currency)).join(" + ") || "$0.00";
+  const attention = stripeOrdersCache.filter((order) => order.status !== "paid" || ["new","confirmed"].includes(order.order_status || "new")).length;
+  const values = [revenue,String(paid.length),String(attention)];
+  stats.querySelectorAll("article strong").forEach((el,index)=>{ el.textContent=values[index] || "0"; });
+}
+
+async function loadStripeOrders() {
+  const host = document.querySelector("#orders-list");
+  if (!state.company?.id || !supabase || !host) return;
+  host.innerHTML = `<div class="orders-empty">Loading orders…</div>`;
+  const { data, error } = await supabase.from("stripe_orders").select("*").eq("company_id", state.company.id).order("created_at", { ascending:false }).limit(200);
+  if (error) {
+    host.innerHTML = `<div class="orders-empty"><strong>Orders could not be loaded</strong><span>${escapeHtml(error.message)}</span></div>`;
+    return;
+  }
+  stripeOrdersCache = data || [];
+  updateOrdersStats();
+  renderStripeOrders();
+}
+
+async function updateOrderStatus(orderId, status, select) {
+  select.disabled = true;
+  const { error } = await supabase.rpc("update_stripe_order_status", { p_order_id:orderId, p_status:status });
+  select.disabled = false;
+  if (error) { window.alert(error.message); await loadStripeOrders(); return; }
+  const order = stripeOrdersCache.find((item)=>item.id===orderId);
+  if (order) order.order_status=status;
+  updateOrdersStats();
+}
 
 function setSettingsSaveStatus(message, type = "") {
   const status = document.querySelector("#settings-save-status");

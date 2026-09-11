@@ -1,0 +1,30 @@
+YOUYOU V9.1 — STRIPE MERCHANT ONBOARDING + ORDERS
+
+DELIVERED
+- Settings → Payments with Connect Stripe, status refresh and Stripe Dashboard access.
+- Authenticated server endpoints create Stripe Standard connected accounts and one-time hosted onboarding links.
+- Stripe account IDs are stored server-side against the authenticated merchant company.
+- Landing Studio no longer asks for Payment Links, API keys, secret keys or account IDs.
+- Published Stripe checkout is blocked until that merchant has card payments enabled.
+- The shared STRIPE_TEST_CONNECTED_ACCOUNT_ID fallback has been removed.
+- Orders dashboard shows customer, address, phone, selections, quantity, amount and payment status.
+- Fulfilment status is separate: New, Confirmed, Preparing, Shipped, Completed or Cancelled.
+- A checkout is stored as processing when opened, then the signed webhook changes it to paid or failed.
+- Supabase migration protects Stripe connection columns from browser updates.
+
+INSTALL
+1. Run supabase-v9.1-stripe-merchant-orders.sql in Supabase SQL Editor.
+2. Redeploy Vercel with the existing STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and SUPABASE_SECRET_KEY.
+3. In the Stripe connected-accounts webhook, listen to:
+   - checkout.session.completed
+   - checkout.session.async_payment_succeeded
+   - checkout.session.async_payment_failed
+   - checkout.session.expired
+   - account.updated
+4. In YOUYOU, open Settings → Payments and click Connect Stripe.
+
+SECURITY
+- Stripe-hosted onboarding links are created only after the Supabase access token is verified server-side.
+- Company identity is resolved on the server and is never trusted from browser request data.
+- Stripe login, identity and bank data stay with Stripe.
+- Every checkout uses only the connected Stripe account stored for the published page's company.

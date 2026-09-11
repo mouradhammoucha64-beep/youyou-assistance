@@ -68,6 +68,86 @@ export function parseRequestBody(req) {
   return {};
 }
 
+export function bearerToken(req) {
+  const header = String(req.headers?.authorization || req.headers?.Authorization || "").trim();
+  const match = header.match(/^Bearer\s+([^\s]+)$/i);
+  return match?.[1] || "";
+}
+
+async function jsonOrText(response) {
+  const text = await response.text();
+  try { return JSON.parse(text || "{}"); } catch (_) { return { message: text }; }
+}
+
+export async function authenticatedCompany(req) {
+  const token = bearerToken(req);
+  if (!token) throw new Error("AUTH_REQUIRED");
+
+  const publicConfig = supabaseConfig();
+  const userResponse = await fetch(`${publicConfig.url}/auth/v1/user`, {
+    headers: { apikey: publicConfig.key, Authorization: `Bearer ${token}` },
+  });
+  const user = await jsonOrText(userResponse);
+  if (!userResponse.ok || !user?.id) throw new Error("AUTH_REQUIRED");
+
+  const serviceConfig = supabaseConfig({ service: true });
+  const profileResponse = await fetch(
+    `${serviceConfig.url}/rest/v1/profiles?id=eq.${encodeURIComponent(user.id)}&select=company_id&limit=1`,
+    { headers: { apikey: serviceConfig.key, Accept: "application/json" } }
+  );
+  const profiles = await jsonOrText(profileResponse);
+  const companyId = Array.isArray(profiles) ? profiles[0]?.company_id : null;
+  if (!profileResponse.ok || !companyId) throw new Error("COMPANY_NOT_FOUND");
+
+  const companyResponse = await fetch(
+    `${serviceConfig.url}/rest/v1/companies?id=eq.${encodeURIComponent(companyId)}&select=*&limit=1`,
+    { headers: { apikey: serviceConfig.key, Accept: "application/json" } }
+  );
+  const companies = await jsonOrText(companyResponse);
+  const company = Array.isArray(companies) ? companies[0] : null;
+  if (!companyResponse.ok || !company?.id) throw new Error("COMPANY_NOT_FOUND");
+  return { user, company, serviceConfig };
+}
+
+export async function updateCompanyStripe(companyId, values, serviceConfig = supabaseConfig({ service: true })) {
+  const response = await fetch(
+    `${serviceConfig.url}/rest/v1/companies?id=eq.${encodeURIComponent(companyId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: serviceConfig.key,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify({ ...values, updated_at: new Date().toISOString() }),
+    }
+  );
+  const rows = await jsonOrText(response);
+  if (!response.ok) throw new Error(`Stripe connection could not be saved (${response.status}).`);
+  return Array.isArray(rows) ? rows[0] || null : rows;
+}
+
+export function stripeAccountState(account) {
+  const chargesEnabled = Boolean(account?.charges_enabled);
+  const payoutsEnabled = Boolean(account?.payouts_enabled);
+  const detailsSubmitted = Boolean(account?.details_submitted);
+  const requirementsDue = Array.isArray(account?.requirements?.currently_due)
+    ? account.requirements.currently_due.length
+    : 0;
+  const status = chargesEnabled && payoutsEnabled
+    ? "connected"
+    : detailsSubmitted
+      ? "restricted"
+      : "pending";
+  return {
+    status,
+    chargesEnabled,
+    payoutsEnabled,
+    detailsSubmitted,
+    requirementsDue,
+  };
+}
+
 export function optionValues(value) {
   return String(value || "").split(",").map((item) => cleanText(item, 80)).filter(Boolean).slice(0, 16);
 }
