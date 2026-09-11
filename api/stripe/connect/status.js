@@ -23,6 +23,7 @@ export default async function handler(req, res) {
         payoutsEnabled: false,
         detailsSubmitted: false,
         requirementsDue: 0,
+        accountEmail: "",
       });
     }
 
@@ -36,6 +37,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       ...accountState,
+      accountEmail: String(account.email || ""),
       accountLabel: accountState.status === "connected" ? `Stripe ••••${account.id.slice(-4)}` : "Stripe onboarding",
     });
   } catch (error) {
