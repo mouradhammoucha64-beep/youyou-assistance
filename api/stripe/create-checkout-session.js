@@ -9,7 +9,9 @@ import {
   parseRequestBody,
   publishedCheckoutOffer,
   requestOrigin,
+  stripeAccountState,
   stripeClient,
+  stripeTestMode,
   supabaseConfig,
 } from "../../server/stripe-shared.js";
 
@@ -112,6 +114,13 @@ export default async function handler(req, res) {
     const connectedAccount = cleanText(row.stripe_account_id, 80);
     if (!/^acct_[A-Za-z0-9]+$/.test(connectedAccount)) throw new Error("This merchant has not connected Stripe yet.");
 
+    const stripe = stripeClient();
+    const connectedAccountState = stripeAccountState(await stripe.accounts.retrieve(connectedAccount));
+    if (!connectedAccountState.chargesEnabled) throw new Error("This merchant's card payments are not active yet.");
+    if (!stripeTestMode() && !connectedAccountState.payoutsEnabled) {
+      throw new Error("This merchant must finish Stripe payouts before accepting live payments.");
+    }
+
     const productName = cleanText(offer.name || row.page_name, 120) || "Product order";
     const optionSummary = [color ? `Color: ${color}` : "", ...Object.entries(variants).map(([key, value]) => `${key}: ${value}`), bundle ? `Bundle: ${bundle.label}` : ""].filter(Boolean).join(" · ");
     const metadata = {
@@ -132,7 +141,6 @@ export default async function handler(req, res) {
     };
 
     const origin = requestOrigin(req);
-    const stripe = stripeClient();
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items: [{
@@ -168,7 +176,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ url: session.url });
   } catch (error) {
     console.error("YOUYOU Stripe checkout:", error);
-    const message = /not configured|not connected|valid selling price|lookup failed/i.test(String(error?.message || ""))
+    const message = /not configured|not connected|not active|finish Stripe payouts|valid selling price|lookup failed/i.test(String(error?.message || ""))
       ? String(error.message).slice(0, 220)
       : "Secure checkout could not be started. Please try again.";
     return res.status(500).json({ error: message });

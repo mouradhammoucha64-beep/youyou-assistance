@@ -2,6 +2,7 @@ import {
   authenticatedCompany,
   stripeAccountState,
   stripeClient,
+  stripeTestMode,
   updateCompanyStripe,
 } from "../../../server/stripe-shared.js";
 
@@ -15,6 +16,7 @@ export default async function handler(req, res) {
 
   try {
     const { company, serviceConfig } = await authenticatedCompany(req);
+    const testMode = stripeTestMode();
     const accountId = String(company.stripe_account_id || "");
     if (!/^acct_[A-Za-z0-9]+$/.test(accountId)) {
       return res.status(200).json({
@@ -24,6 +26,7 @@ export default async function handler(req, res) {
         detailsSubmitted: false,
         requirementsDue: 0,
         accountEmail: "",
+        testMode,
       });
     }
 
@@ -39,6 +42,7 @@ export default async function handler(req, res) {
       ...accountState,
       accountEmail: String(account.email || ""),
       accountLabel: accountState.status === "connected" ? `Stripe ••••${account.id.slice(-4)}` : "Stripe onboarding",
+      testMode,
     });
   } catch (error) {
     const message = String(error?.message || "");

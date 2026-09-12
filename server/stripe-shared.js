@@ -8,6 +8,11 @@ export function stripeClient() {
   return new Stripe(secretKey);
 }
 
+export function stripeTestMode() {
+  const secretKey = String(process.env.STRIPE_SECRET_KEY || "").trim();
+  return secretKey.startsWith("sk_test_") || secretKey.startsWith("rk_test_");
+}
+
 export async function createStripeMerchantAccount({ company, user, contactEmail: contactEmailOverride = "" }) {
   const secretKey = String(process.env.STRIPE_SECRET_KEY || "").trim();
   if (!secretKey) throw new Error("STRIPE_SECRET_KEY is not configured.");
@@ -92,18 +97,36 @@ export function supabaseConfig({ service = false } = {}) {
 }
 
 export async function publishedCheckoutOffer(slug) {
-  const { url, key } = supabaseConfig();
-  const response = await fetch(`${url}/rest/v1/rpc/get_stripe_checkout_offer`, {
-    method: "POST",
-    headers: { apikey: key, "Content-Type": "application/json" },
-    body: JSON.stringify({ p_slug: slug }),
-  });
-  if (!response.ok) {
-    const detail = await response.text();
-    throw new Error(`Checkout offer lookup failed (${response.status}): ${detail.slice(0, 240)}`);
-  }
-  const rows = await response.json();
-  return Array.isArray(rows) ? rows[0] || null : rows || null;
+  const { url, key } = supabaseConfig({ service: true });
+  const headers = { apikey: key, Authorization: `Bearer ${key}`, Accept: "application/json" };
+  const pageResponse = await fetch(
+    `${url}/rest/v1/landing_pages?slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=id,company_id,name,content&limit=1`,
+    { headers }
+  );
+  const pages = await jsonOrText(pageResponse);
+  if (!pageResponse.ok) throw new Error(`Checkout offer lookup failed (${pageResponse.status}).`);
+  const page = Array.isArray(pages) ? pages[0] : null;
+  const offer = page?.content && typeof page.content === "object" ? page.content : null;
+  if (!page?.id || !page?.company_id || !offer) return null;
+  if (String(offer.priceMode || "show") !== "show" || String(offer.commerceEnabled || "off") !== "on") return null;
+
+  const companyResponse = await fetch(
+    `${url}/rest/v1/companies?id=eq.${encodeURIComponent(page.company_id)}&select=stripe_account_id,stripe_connect_status,stripe_charges_enabled,stripe_payouts_enabled&limit=1`,
+    { headers }
+  );
+  const companies = await jsonOrText(companyResponse);
+  if (!companyResponse.ok) throw new Error(`Checkout merchant lookup failed (${companyResponse.status}).`);
+  const company = Array.isArray(companies) ? companies[0] : null;
+  return {
+    page_id: page.id,
+    company_id: page.company_id,
+    page_name: page.name,
+    offer,
+    stripe_account_id: company?.stripe_account_id || null,
+    stripe_connect_status: company?.stripe_connect_status || "not_connected",
+    stripe_charges_enabled: Boolean(company?.stripe_charges_enabled),
+    stripe_payouts_enabled: Boolean(company?.stripe_payouts_enabled),
+  };
 }
 
 export function cleanText(value, max = 180) {

@@ -1532,6 +1532,12 @@ function formatMinorMoney(amount = 0, currency = "USD") {
   }
 }
 
+function stripeCheckoutPublishReady(company = {}) {
+  if (!company.stripe_charges_enabled) return false;
+  if (company.stripe_test_mode) return true;
+  return company.stripe_connect_status === "connected" && Boolean(company.stripe_payouts_enabled);
+}
+
 function stripePaymentSettingsMarkup(company = {}) {
   const status = String(company.stripe_connect_status || "not_connected");
   const ready = status === "connected" && company.stripe_charges_enabled && company.stripe_payouts_enabled;
@@ -5360,9 +5366,24 @@ function initLandingPageWorkspace() {
       landingStudioStatus("Stripe checkout needs the lead form, Product options and a valid selling price.");
       return;
     }
-    if (String(current.ctaAction || "") === "stripe" && (state.company?.stripe_connect_status !== "connected" || !state.company?.stripe_charges_enabled || !state.company?.stripe_payouts_enabled)) {
-      landingStudioStatus("Connect and activate Stripe in Settings → Payments before publishing online checkout.");
-      return;
+    if (String(current.ctaAction || "") === "stripe") {
+      try {
+        const stripeStatus = await stripeConnectApi("/api/stripe/connect/status");
+        state.company = {
+          ...state.company,
+          stripe_connect_status:stripeStatus.status,
+          stripe_charges_enabled:Boolean(stripeStatus.chargesEnabled),
+          stripe_payouts_enabled:Boolean(stripeStatus.payoutsEnabled),
+          stripe_test_mode:Boolean(stripeStatus.testMode),
+        };
+      } catch (error) {
+        landingStudioStatus(String(error?.message || "Stripe status could not be checked. Sign in again and retry.").slice(0, 180));
+        return;
+      }
+      if (!stripeCheckoutPublishReady(state.company)) {
+        landingStudioStatus("Finish Stripe card payments and payouts setup before publishing live checkout.");
+        return;
+      }
     }
     if (landingHasTemporaryMedia(current)) {
       landingStudioStatus("Some media is still local. Re-upload it and wait until YOUYOU confirms permanent storage before publishing.");
@@ -10904,6 +10925,7 @@ function updateStripeConnectUi(result = {}) {
     stripe_connect_status:result.status,
     stripe_charges_enabled:Boolean(result.chargesEnabled),
     stripe_payouts_enabled:Boolean(result.payoutsEnabled),
+    stripe_test_mode:Boolean(result.testMode),
   };
 }
 
