@@ -37,7 +37,7 @@ Run `supabase-v9.0-stripe-connect-checkout.sql` once, followed by `supabase-v9.1
 - `STRIPE_WEBHOOK_SECRET`
 - `SUPABASE_SECRET_KEY` (recommended `sb_secret_...`; legacy `SUPABASE_SERVICE_ROLE_KEY` is also supported)
 
-The Stripe webhook should listen to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired` and `account.updated` from connected accounts. Every secret must remain in Vercel and must never be committed or pasted into Landing Studio.
+The Stripe webhook should listen to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `checkout.session.expired`, `charge.refunded` and `account.updated` from connected accounts. Refund updates are scoped to both the connected account and PaymentIntent, and repeated Stripe deliveries safely converge on the same order status. Every secret must remain in Vercel and must never be committed or pasted into Landing Studio.
 
 The Orders dashboard separates Stripe payment status from merchant fulfilment status and formats Stripe minor units correctly (for example, `3000` is shown as `$30.00`).
 

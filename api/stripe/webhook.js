@@ -8,7 +8,7 @@ async function rawBody(req) {
   return Buffer.concat(chunks);
 }
 
-async function saveOrder(event, session) {
+export async function saveOrder(event, session) {
   const { url, key } = supabaseConfig({ service: true });
   const meta = session.metadata || {};
   const row = {
@@ -41,11 +41,19 @@ async function saveOrder(event, session) {
     headers: {
       apikey: key,
       "Content-Type": "application/json",
-      Prefer: "resolution=merge-duplicates,return=minimal",
+      Prefer: "resolution=ignore-duplicates,return=minimal",
     },
     body: JSON.stringify(row),
   });
   if (!response.ok) throw new Error(`Order storage failed (${response.status}): ${(await response.text()).slice(0, 240)}`);
+  // Apply checkout updates atomically without overwriting a later refund or payment.
+  const allowedStatuses = row.status === "paid" ? "processing,failed,paid" : "processing,failed";
+  const update = await fetch(`${url}/rest/v1/stripe_orders?checkout_session_id=eq.${encodeURIComponent(session.id)}&connected_account_id=eq.${encodeURIComponent(event.account)}&status=in.(${allowedStatuses})`, {
+    method: "PATCH",
+    headers: { apikey:key, "Content-Type":"application/json", Prefer:"return=minimal" },
+    body: JSON.stringify(row),
+  });
+  if (!update.ok) throw new Error(`Order update failed (${update.status}).`);
 }
 
 async function saveConnectedAccountState(account) {
@@ -64,6 +72,48 @@ async function saveConnectedAccountState(account) {
   if (!response.ok) throw new Error(`Stripe account status storage failed (${response.status}).`);
 }
 
+export function refundedPaymentStatus(charge) {
+  const amount = Number(charge?.amount || 0);
+  const amountRefunded = Number(charge?.amount_refunded || 0);
+  if (amountRefunded <= 0) return null;
+  return charge?.refunded === true || (amount > 0 && amountRefunded >= amount)
+    ? "refunded"
+    : "partially_refunded";
+}
+
+export async function saveRefundedOrder(event, charge) {
+  const connectedAccount = String(event?.account || "").trim();
+  const paymentIntent = typeof charge?.payment_intent === "string"
+    ? charge.payment_intent
+    : charge?.payment_intent?.id || "";
+  const status = refundedPaymentStatus(charge);
+  if (!/^acct_[A-Za-z0-9]+$/.test(connectedAccount) || !/^pi_[A-Za-z0-9]+$/.test(paymentIntent) || !status) {
+    return false;
+  }
+
+  const { url, key } = supabaseConfig({ service:true });
+  const response = await fetch(
+    `${url}/rest/v1/stripe_orders?connected_account_id=eq.${encodeURIComponent(connectedAccount)}&payment_intent_id=eq.${encodeURIComponent(paymentIntent)}${status === "partially_refunded" ? "&status=neq.refunded" : ""}`,
+    {
+      method:"PATCH",
+      headers:{
+        apikey:key,
+        "Content-Type":"application/json",
+        Prefer:"return=representation",
+      },
+      body:JSON.stringify({ status, updated_at:new Date().toISOString() }),
+    }
+  );
+  const body = await response.text();
+  if (!response.ok) throw new Error(`Refunded order storage failed (${response.status}): ${body.slice(0,240)}`);
+  try {
+    const rows = JSON.parse(body || "[]");
+    return Array.isArray(rows) && rows.length > 0;
+  } catch (_) {
+    return false;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -76,6 +126,9 @@ export default async function handler(req, res) {
     const event = stripeClient().webhooks.constructEvent(await rawBody(req), signature, secret);
     if (["checkout.session.completed", "checkout.session.async_payment_succeeded", "checkout.session.async_payment_failed", "checkout.session.expired"].includes(event.type)) {
       await saveOrder(event, event.data.object);
+    }
+    if (event.type === "charge.refunded") {
+      await saveRefundedOrder(event, event.data.object);
     }
     if (event.type === "account.updated") await saveConnectedAccountState(event.data.object);
     return res.status(200).json({ received: true });

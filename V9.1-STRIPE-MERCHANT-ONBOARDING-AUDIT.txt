@@ -20,6 +20,7 @@ INSTALL
    - checkout.session.async_payment_succeeded
    - checkout.session.async_payment_failed
    - checkout.session.expired
+   - charge.refunded
    - account.updated
 4. In YOUYOU, open Settings → Payments and click Connect Stripe.
 

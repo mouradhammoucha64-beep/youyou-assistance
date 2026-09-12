@@ -1,0 +1,19 @@
+YOUYOU V9.2 — STRIPE REFUND SYNC
+Date: 2026-09-12
+
+DELIVERED
+- Connected-account charge.refunded webhooks update the matching YOUYOU order.
+- Full refunds map to Refunded and partial refunds map to Partially refunded.
+- Refund updates are scoped by both connected_account_id and payment_intent_id.
+- Repeated webhook deliveries are idempotent because each delivery sets the same derived status.
+- Payment status remains separate from merchant fulfilment status.
+- No database migration is required; the existing V9.0 status constraint already supports both refund states.
+
+STRIPE WEBHOOK REQUIREMENT
+- Add charge.refunded to the existing connected-accounts webhook destination.
+- Keep the existing checkout session and account.updated event subscriptions.
+
+VALIDATION
+- npm test
+- npm run build
+- node --check api/stripe/webhook.js
