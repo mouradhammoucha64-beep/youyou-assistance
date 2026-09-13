@@ -1,3 +1,5 @@
+export const YOUYOU_PUBLISHED_RENDERER_VERSION = "9.0.0";
+
 const DEFAULT_SUPABASE_URL = "https://zprvmydgjxsifuhjplll.supabase.co";
 const DEFAULT_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_emmyZ-bcTdUcaVWi_tWONw_1zDbGSSK";
 
@@ -21,7 +23,7 @@ function extractLandingColor(html = "", variable = "", fallback = "#ffffff") {
   return normalizeHex(match?.[1], fallback);
 }
 
-function hardenPublishedHtml(html = "") {
+export function hardenPublishedHtml(html = "") {
   let out = String(html || "");
   if (!out) return out;
 
@@ -34,7 +36,8 @@ function hardenPublishedHtml(html = "") {
   out = out.replace(/<meta\s+name=["']color-scheme["'][^>]*>\s*/ig, "");
   out = out.replace(/<meta\s+name=["']supported-color-schemes["'][^>]*>\s*/ig, "");
   out = out.replace(/<meta\s+name=["']theme-color["'][^>]*>\s*/ig, "");
-  out = out.replace(/<head([^>]*)>/i, `<head$1><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><meta name="theme-color" content="${escapeHtml(bg)}"><meta name="youyou-renderer" content="8.8.0">`);
+  out = out.replace(/<meta\s+name=["']youyou-renderer["'][^>]*>\s*/ig, "");
+  out = out.replace(/<head([^>]*)>/i, `<head$1><meta name="color-scheme" content="light dark"><meta name="supported-color-schemes" content="light dark"><meta name="theme-color" content="${escapeHtml(bg)}"><meta name="youyou-renderer" content="${YOUYOU_PUBLISHED_RENDERER_VERSION}">`);
 
   // Remove a prior runtime lock, then append V7.10 last so it wins over legacy snapshots.
   out = out.replace(/<style\s+id=["']youyou-runtime-color-lock["'][\s\S]*?<\/style>/ig, "");
@@ -65,7 +68,7 @@ html,body{background-color:${escapeHtml(bg)}!important;background-image:linear-g
 }
 @media(max-width:760px){.lp-image-slide,.beauty-wow .lp-image-slide{flex-basis:82%!important;width:82%!important;min-width:82%!important}}
 </style>`;
-  out = out.replace(/<\/head>/i, `${lock}<!-- YOUYOU_PUBLIC_RENDERER:8.8.0 --></head>`);
+  out = out.replace(/<\/head>/i, `${lock}<!-- YOUYOU_PUBLIC_RENDERER:${YOUYOU_PUBLISHED_RENDERER_VERSION} --></head>`);
   return out;
 }
 
@@ -74,7 +77,7 @@ function notFoundPage(slug = "") {
 }
 
 export default async function handler(req, res) {
-  res.setHeader("X-YOUYOU-Renderer", "8.8.0");
+  res.setHeader("X-YOUYOU-Renderer", YOUYOU_PUBLISHED_RENDERER_VERSION);
   if (req.method !== "GET" && req.method !== "HEAD") {
     res.setHeader("Allow", "GET, HEAD");
     return res.status(405).send("Method Not Allowed");
