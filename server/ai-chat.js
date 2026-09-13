@@ -126,11 +126,16 @@ function responseText(payload) {
 function publicError(error = {}) {
   const status = Number(error.status || 0);
   const code = String(error.code || "");
+  const message = String(error.message || "");
+  if (message === "OPENAI_API_KEY_MISSING") return { code: "ai_not_configured", status: 503 };
+  if (message === "OPENAI_EMPTY_RESPONSE") return { code: "ai_empty_response", status: 503 };
   if (status === 429 && /credit_balance_exhausted|spend_limit|usage_limit|insufficient_quota/i.test(code)) {
     return { code: "ai_budget_unavailable", status: 503 };
   }
   if (status === 429) return { code: "ai_busy", status: 429 };
   if (status === 401 || status === 403) return { code: "ai_not_configured", status: 503 };
+  if (status === 404) return { code: "ai_model_unavailable", status: 503 };
+  if (status === 400 || status === 422) return { code: "ai_request_invalid", status: 503 };
   if (error.name === "AbortError") return { code: "ai_timeout", status: 504 };
   return { code: "ai_unavailable", status: 503 };
 }
