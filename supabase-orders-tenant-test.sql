@@ -56,5 +56,5 @@ begin
   end if;
 end $$;
 
+select 'PASS: own orders readable; other-company orders hidden; cross-company fulfilment rejected' as result;
 rollback;
-select 'PASS: own orders readable; other-company orders hidden; cross-company fulfilment rejected; test rolled back' as result;
