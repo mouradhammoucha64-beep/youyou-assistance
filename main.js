@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import "./style.css";
+import { orderMoney, orderRevenue, orderMatchesPaymentFilter } from "./shared/order-money.js";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -7781,7 +7782,7 @@ else if (state.section === "orders") {
           <button id="refresh-orders" class="secondary" type="button">Refresh orders</button>
         </div>
         <div class="orders-stats" id="orders-stats">
-          <article><span>Paid revenue</span><strong>—</strong></article>
+          <article><span>Revenue after refunds</span><strong>—</strong><small>Before Stripe fees</small></article>
           <article><span>Paid orders</span><strong>—</strong></article>
           <article><span>Needs attention</span><strong>—</strong></article>
         </div>
@@ -7790,11 +7791,12 @@ else if (state.section === "orders") {
             <button class="is-active" type="button" data-order-filter="all">All</button>
             <button type="button" data-order-filter="paid">Paid</button>
             <button type="button" data-order-filter="processing">Not paid yet</button>
+            <button type="button" data-order-filter="refunded">Refunds</button>
           </div>
           <input id="orders-search" type="search" placeholder="Search customer, phone or order…" />
         </div>
         <div class="orders-list" id="orders-list"><div class="orders-empty">Loading orders…</div></div>
-        <p class="orders-footnote">Stripe stores money in cents. YOUYOU converts it automatically, so 3000 appears as $30.00.</p>
+        <p class="orders-footnote">Totals cover the latest 200 orders, before Stripe fees. Currencies are shown separately. Refunded amounts are deducted from revenue; amounts awaiting sync are not estimated.</p>
       </section>`;
   }
 
@@ -10984,7 +10986,7 @@ function renderStripeOrders() {
   if (!host) return;
   const query = String(document.querySelector("#orders-search")?.value || "").trim().toLowerCase();
   const rows = stripeOrdersCache.filter((order) => {
-    const statusMatch = stripeOrdersFilter === "all" || (stripeOrdersFilter === "processing" ? order.status !== "paid" : order.status === stripeOrdersFilter);
+    const statusMatch = orderMatchesPaymentFilter(order, stripeOrdersFilter);
     const haystack = [order.customer_name,order.customer_email,order.customer_phone,order.customer_city,order.checkout_session_id,order.product_name].join(" ").toLowerCase();
     return statusMatch && (!query || haystack.includes(query));
   });
@@ -10998,10 +11000,16 @@ function renderStripeOrders() {
     const date = new Date(order.paid_at || order.created_at);
     const status = String(order.status || "processing");
     const fulfilment = String(order.order_status || "new");
+    const money = orderMoney(order);
+    const refundDetails = ["refunded", "partially_refunded"].includes(status)
+      ? money.refunded === null
+        ? '<small class="order-refund-details">Refund amount awaiting sync</small>'
+        : `<small class="order-refund-details">Refunded: ${escapeHtml(formatMinorMoney(money.refunded, order.currency))}<br>Remaining before fees: ${escapeHtml(formatMinorMoney(money.retained, order.currency))}</small>`
+      : "";
     return `<article class="order-card" data-order-id="${escapeHtml(order.id)}">
       <div class="order-card-top">
         <div><small>${escapeHtml(date.toLocaleString())}</small><strong>${escapeHtml(order.product_name || "Landing page order")}</strong><span>${escapeHtml(variant || "Standard selection")}</span></div>
-        <div class="order-total"><strong>${escapeHtml(formatMinorMoney(order.amount_total, order.currency))}</strong><span class="payment-status is-${escapeHtml(status)}">${escapeHtml(orderPaymentLabel(status))}</span></div>
+        <div class="order-total"><strong>${escapeHtml(formatMinorMoney(order.amount_total, order.currency))}</strong><span class="payment-status is-${escapeHtml(status)}">${escapeHtml(orderPaymentLabel(status))}</span>${refundDetails}</div>
       </div>
       <div class="order-grid">
         <div><small>CUSTOMER</small><strong>${escapeHtml(order.customer_name || "Customer")}</strong><span>${escapeHtml(order.customer_email || "No email")}</span><span>${escapeHtml(order.customer_phone || "No phone")}</span></div>
@@ -11018,9 +11026,11 @@ function renderStripeOrders() {
 function updateOrdersStats() {
   const stats = document.querySelector("#orders-stats");
   if (!stats) return;
-  const paid = stripeOrdersCache.filter((order) => order.status === "paid");
-  const revenueByCurrency = paid.reduce((map, order) => { const key=String(order.currency||"USD").toUpperCase(); map[key]=(map[key]||0)+Number(order.amount_total||0); return map; }, {});
-  const revenue = Object.entries(revenueByCurrency).map(([currency,amount])=>formatMinorMoney(amount,currency)).join(" + ") || "$0.00";
+  const paid = stripeOrdersCache.filter((order) => ["paid", "partially_refunded"].includes(order.status));
+  const revenueByCurrency = orderRevenue(stripeOrdersCache);
+  const revenue = [...revenueByCurrency].map(([currency, entry]) => entry.complete
+    ? formatMinorMoney(entry.amount, currency)
+    : `${currency}: awaiting refund sync`).join(" + ") || "$0.00";
   const attention = stripeOrdersCache.filter((order) => order.status !== "paid" || ["new","confirmed"].includes(order.order_status || "new")).length;
   const values = [revenue,String(paid.length),String(attention)];
   stats.querySelectorAll("article strong").forEach((el,index)=>{ el.textContent=values[index] || "0"; });

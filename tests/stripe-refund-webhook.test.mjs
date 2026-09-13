@@ -17,7 +17,9 @@ test("duplicate and reordered checkout/refund deliveries preserve full refunds a
       return new Response(null, { status:204 });
     }
     const condition = query.get("status");
-    const allowed = !condition || (condition === "neq.refunded" ? stored.status !== "refunded" : condition.slice(4,-1).split(",").includes(stored.status));
+    const statusAllowed = !condition || (condition === "neq.refunded" ? stored.status !== "refunded" : condition.slice(4,-1).split(",").includes(stored.status));
+    const refundCeiling = query.get("or")?.match(/amount_refunded.lte.(\d+)/)?.[1];
+    const allowed = statusAllowed && (refundCeiling === undefined || stored.amount_refunded == null || stored.amount_refunded <= Number(refundCeiling));
     if (allowed) stored = { ...stored, ...row };
     return new Response(JSON.stringify(allowed ? [stored] : []), { status:200 });
   };
@@ -31,6 +33,10 @@ test("duplicate and reordered checkout/refund deliveries preserve full refunds a
   await saveOrder(event, session);
   assert.equal(stored.status, "paid");
   const charge = { payment_intent:"pi_Test456", amount:3000, amount_refunded:3000, refunded:true };
+  await saveRefundedOrder(event, { ...charge, amount_refunded:1000, refunded:false });
+  await saveRefundedOrder(event, { ...charge, amount_refunded:1500, refunded:false });
+  await saveRefundedOrder(event, { ...charge, amount_refunded:1000, refunded:false });
+  assert.equal(stored.amount_refunded, 1500);
   await saveRefundedOrder(event, charge);
   await saveRefundedOrder(event, charge);
   await saveOrder(event, session);
@@ -38,6 +44,7 @@ test("duplicate and reordered checkout/refund deliveries preserve full refunds a
   assert.equal(stored.status, "refunded");
   assert.equal(stored.order_status, "confirmed");
   assert.equal(stored.amount_total, 3000);
+  assert.equal(stored.amount_refunded, 3000);
 });
 
 test("maps full and partial Stripe refunds to order payment statuses", () => {
@@ -74,6 +81,8 @@ test("refund updates are scoped to the connected account and PaymentIntent", asy
   assert.equal(matched, true);
   assert.match(request.url, /connected_account_id=eq\.acct_Test123/);
   assert.match(request.url, /payment_intent_id=eq\.pi_Test456/);
+  assert.match(request.url, /amount_refunded.lte.3000/);
+  assert.equal(JSON.parse(request.options.body).amount_refunded, 3000);
   assert.equal(request.options.method, "PATCH");
   assert.equal(JSON.parse(request.options.body).status, "refunded");
 });
@@ -81,4 +90,28 @@ test("refund updates are scoped to the connected account and PaymentIntent", asy
 test("refund events without safe Connect identifiers are ignored", async () => {
   assert.equal(await saveRefundedOrder({}, { amount:3000, amount_refunded:3000, refunded:true }), false);
   assert.equal(await saveRefundedOrder({ account:"acct_Test123" }, { payment_intent:null, amount:3000, amount_refunded:3000, refunded:true }), false);
+});
+
+test('before migration, preserve refund status and request retry instead of losing amount', async (t) => {
+  const originalFetch = globalThis.fetch;
+  const originalKey = process.env.SUPABASE_SECRET_KEY;
+  process.env.SUPABASE_SECRET_KEY = 'test-service-key';
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    calls.push({url, body:JSON.parse(options.body)});
+    return calls.length === 1
+      ? new Response(JSON.stringify({code:'PGRST204',message:'amount_refunded column missing'}), {status:400})
+      : new Response(null, {status:204});
+  };
+  t.after(() => {
+    globalThis.fetch = originalFetch;
+    if (originalKey === undefined) delete process.env.SUPABASE_SECRET_KEY;
+    else process.env.SUPABASE_SECRET_KEY = originalKey;
+  });
+  await assert.rejects(saveRefundedOrder({account:'acct_Test123'},
+    {payment_intent:'pi_Test456',amount:4500,amount_refunded:100,refunded:false}), /Apply supabase-v9.3/);
+  assert.equal(calls.length,2);
+  assert.equal(calls[1].body.status,'partially_refunded');
+  assert.equal(calls[1].body.amount_refunded,undefined);
+  assert.match(calls[1].url,/connected_account_id=eq.acct_Test123/);
 });

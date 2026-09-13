@@ -91,9 +91,14 @@ export async function saveRefundedOrder(event, charge) {
     return false;
   }
 
+  const amountRefunded = Number(charge.amount_refunded);
+  const amount = Number(charge.amount);
+  if (!Number.isSafeInteger(amountRefunded) || !Number.isSafeInteger(amount) || amountRefunded <= 0 || amountRefunded > amount) {
+    throw new Error("Invalid Stripe refund amount.");
+  }
   const { url, key } = supabaseConfig({ service:true });
   const response = await fetch(
-    `${url}/rest/v1/stripe_orders?connected_account_id=eq.${encodeURIComponent(connectedAccount)}&payment_intent_id=eq.${encodeURIComponent(paymentIntent)}${status === "partially_refunded" ? "&status=neq.refunded" : ""}`,
+    `${url}/rest/v1/stripe_orders?connected_account_id=eq.${encodeURIComponent(connectedAccount)}&payment_intent_id=eq.${encodeURIComponent(paymentIntent)}${status === "partially_refunded" ? "&status=neq.refunded" : ""}&or=(amount_refunded.is.null,amount_refunded.lte.${amountRefunded})`,
     {
       method:"PATCH",
       headers:{
@@ -101,10 +106,19 @@ export async function saveRefundedOrder(event, charge) {
         "Content-Type":"application/json",
         Prefer:"return=representation",
       },
-      body:JSON.stringify({ status, updated_at:new Date().toISOString() }),
+      body:JSON.stringify({ status, amount_refunded:amountRefunded, updated_at:new Date().toISOString() }),
     }
   );
   const body = await response.text();
+  if (!response.ok && /amount_refunded/i.test(body) && /PGRST204|42703/.test(body)) {
+    // During rollout retain V9.2 status sync, but request a retry for the amount.
+    const fallback = await fetch(`${url}/rest/v1/stripe_orders?connected_account_id=eq.${encodeURIComponent(connectedAccount)}&payment_intent_id=eq.${encodeURIComponent(paymentIntent)}${status === "partially_refunded" ? "&status=neq.refunded" : ""}`, {
+      method:"PATCH", headers:{ apikey:key, "Content-Type":"application/json", Prefer:"return=minimal" },
+      body:JSON.stringify({ status, updated_at:new Date().toISOString() }),
+    });
+    if (!fallback.ok) throw new Error("Refund status storage failed during migration.");
+    throw new Error("Apply supabase-v9.3-refund-amounts.sql to store refund amounts; retry this event afterwards.");
+  }
   if (!response.ok) throw new Error(`Refunded order storage failed (${response.status}): ${body.slice(0,240)}`);
   try {
     const rows = JSON.parse(body || "[]");

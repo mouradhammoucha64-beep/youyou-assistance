@@ -578,3 +578,25 @@ The Landing Studio preview now runs the exact exported/published document in an 
 ## V7.7 — Workflow + Universal Builder
 
 V7.7 adds shared WhatsApp number normalization, My Drafts search/status filters, live-link copying, universal hero layout/page-spacing controls, and reusable custom content sections that can be added, reordered and removed from the Landing Workspace. No new SQL migration is required beyond the V7.1/V7.2/V7.5 setup already included in the project.
+
+### Refund amounts (V9.3)
+
+Run `supabase-v9.3-refund-amounts.sql` in Supabase SQL Editor to enable refund amounts.
+`charge.refunded` stores the cumulative `amount_refunded` in minor units, scoped to
+both connected account and PaymentIntent. Atomic filters prevent delayed events
+from decreasing the recorded refund. Checkout events preserve refund state.
+
+Orders shows original total, refunded amount and remaining amount before Stripe
+fees. Revenue after refunds includes partially refunded orders, separates currencies,
+and covers the latest 200 orders. Historical partial refunds with unknown amounts
+show "awaiting sync"; revenue for that currency is withheld until synchronized.
+Replay their original `charge.refunded` event once after migration and deployment.
+Full historical refunds are backfilled by the migration from their original total.
+
+If deployment precedes migration, the webhook preserves refund status using the
+previous schema and returns an error requesting retry, so the missing amount is not
+silently acknowledged. Run the migration promptly, then retry failed deliveries.
+No Stripe secret or customer payment action is required for the migration.
+
+Validation: `npm test` and `npm run build`. SQL must also be applied to the hosted
+Supabase project; local tests do not verify the hosted database or live payments.

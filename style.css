@@ -13439,3 +13439,10 @@ body:has(.lpw-shell) #youyou-public-widget-panel{
   .stripe-connect-actions>*{width:100%}.orders-stats{grid-template-columns:1fr}.order-grid{grid-template-columns:1fr}.order-total{justify-items:start}
   #orders-search{width:100%}
 }
+
+/* Refund amounts stay readable on desktop and mobile. */
+.order-refund-details{color:#bdc6da;font-size:12px;line-height:1.7;text-align:right;overflow-wrap:anywhere}
+.payment-status.is-refunded,.payment-status.is-partially_refunded{background:rgba(160,130,255,.14);color:#c9b9ff}
+.orders-stats article>small{color:#aab3c6;font-size:12px}
+.orders-stats strong{overflow-wrap:anywhere}
+@media(max-width:640px){.order-refund-details{text-align:left}.orders-filters{flex-wrap:wrap}}
