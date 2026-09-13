@@ -10,6 +10,13 @@ test("duplicate and reordered checkout/refund deliveries preserve full refunds a
   let stored;
   globalThis.fetch = async (url, options) => {
     const query = new URL(url).searchParams;
+    if (!options.method) {
+      const path = new URL(url).pathname;
+      const rows = path.endsWith('/stripe_orders') ? (stored ? [stored] : [])
+        : path.endsWith('/companies') ? [{id:'11111111-1111-4111-8111-111111111111',stripe_account_id:'acct_Test123'}]
+        : [{id:'22222222-2222-4222-8222-222222222222',company_id:'11111111-1111-4111-8111-111111111111'}];
+      return new Response(JSON.stringify(rows));
+    }
     const row = JSON.parse(options.body);
     if (options.method === "POST") {
       if (!stored) stored = { ...row, order_status:"confirmed" };
@@ -29,7 +36,7 @@ test("duplicate and reordered checkout/refund deliveries preserve full refunds a
     else process.env.SUPABASE_SECRET_KEY = oldKey;
   });
   const event = { account:"acct_Test123", type:"checkout.session.completed" };
-  const session = { id:"cs_Test123", payment_intent:"pi_Test456", payment_status:"paid", amount_total:3000, metadata:{ company_id:"company1" } };
+  const session = { id:"cs_Test123", payment_intent:"pi_Test456", payment_status:"paid", amount_total:3000, metadata:{ company_id:"11111111-1111-4111-8111-111111111111", landing_page_id:"22222222-2222-4222-8222-222222222222" } };
   await saveOrder(event, session);
   assert.equal(stored.status, "paid");
   const charge = { payment_intent:"pi_Test456", amount:3000, amount_refunded:3000, refunded:true };

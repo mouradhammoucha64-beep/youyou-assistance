@@ -1,4 +1,5 @@
 import { stripeAccountState, stripeClient, supabaseConfig } from "../../server/stripe-shared.js";
+import { checkoutOrderOwner } from "../../server/stripe-order-owner.js";
 
 export const config = { api: { bodyParser: false } };
 
@@ -9,12 +10,14 @@ async function rawBody(req) {
 }
 
 export async function saveOrder(event, session) {
+  const owner = await checkoutOrderOwner(event, session);
+  if (!owner) return false;
   const { url, key } = supabaseConfig({ service: true });
   const meta = session.metadata || {};
   const row = {
-    company_id: meta.company_id || null,
-    landing_page_id: meta.landing_page_id || null,
-    connected_account_id: event.account || null,
+    company_id: owner.company_id,
+    landing_page_id: owner.landing_page_id,
+    connected_account_id: owner.connected_account_id,
     checkout_session_id: session.id,
     payment_intent_id: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id || null,
     product_name: meta.product_name || null,
