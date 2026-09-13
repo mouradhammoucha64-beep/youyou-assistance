@@ -10,6 +10,11 @@
     localStorage.getItem("youyou_company_id") ||
     "";
 
+  const API_ORIGIN = (() => {
+    try { return new URL(script?.src || location.href, location.href).origin; }
+    catch (_) { return location.origin; }
+  })();
+
   const SUPABASE_URL =
     "https://zprvmydgjxsifuhjplll.supabase.co";
 
@@ -128,7 +133,7 @@
 
   async function saveVisitorMessage(content) {
     const id = await ensureConversation();
-    if (!id) return;
+    if (!id) return "";
 
     const response = await fetch(`${SUPABASE_URL}/rest/v1/messages`, {
       method: "POST",
@@ -143,6 +148,26 @@
     if (!response.ok) {
       throw new Error(`Message save failed: ${await response.text()}`);
     }
+    return id;
+  }
+
+  async function requestAiReply(content, id) {
+    if (!companyId || !id) throw new Error("AI conversation is not ready.");
+    const pageDescription = document.querySelector('meta[name="description"]')?.content || "";
+    const response = await fetch(`${API_ORIGIN}/api/ai/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        companyId,
+        conversationId: id,
+        message: content,
+        source: "website_widget",
+        pageContext: `Page: ${document.title || "Website"}\nURL: ${location.href}\nDescription: ${pageDescription}`,
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!result.reply) throw new Error("AI reply is unavailable.");
+    return { ...result, available: response.ok && result.ok === true };
   }
 
   /* =========================
@@ -668,42 +693,37 @@
           messages.scrollHeight;
 
         /* =========================
-           SUPABASE
+           SAVE + AI
         ========================= */
-
-        if (!companyId) {
-          console.warn(
-            "YOUYOU: company ID missing. Message displayed locally only."
-          );
-        } else {
-          try {
-            await saveVisitorMessage(text);
-          } catch (error) {
-            console.error("YOUYOU Supabase error:", error);
-          }
-        }
-
-        /* =========================
-           LOCAL SMART REPLY
-           AI integration intentionally deferred
-        ========================= */
-
         const score = scoreLocalIntent(text);
+        const submitButton = panel.querySelector('#youyou-form button[type="submit"]');
+        input.disabled = true;
+        if (submitButton) submitButton.disabled = true;
 
-        if (capturedContact) {
-          appendAgentBubble(
-            "Thank you — I’ve captured your contact details. A member of the team can follow up with you."
-          );
-        } else if (score >= 70 && !contactPromptShown) {
-          contactPromptShown = true;
-
-          appendAgentBubble(
-            "It looks like you’re seriously interested. Would you like the team to contact you? Please share your <strong>email address or phone number</strong>."
-          );
-        } else {
-          appendAgentBubble(
-            "Thanks for your message. I’m currently collecting your request for the team. Full AI responses will be activated soon."
-          );
+        try {
+          const id = await saveVisitorMessage(text);
+          const result = await requestAiReply(text, id);
+          appendAgentBubble(escapeHtml(result.reply));
+        } catch (error) {
+          console.warn("YOUYOU AI temporarily unavailable.");
+          if (capturedContact) {
+            appendAgentBubble(
+              "Thank you — I’ve captured your contact details. A member of the team can follow up with you."
+            );
+          } else if (score >= 70 && !contactPromptShown) {
+            contactPromptShown = true;
+            appendAgentBubble(
+              "It looks like you’re seriously interested. Would you like the team to contact you? Please share your <strong>email address or phone number</strong>."
+            );
+          } else {
+            appendAgentBubble(
+              "I’m sorry, I can’t answer that right now. Your message has been saved for the team, so please try again shortly."
+            );
+          }
+        } finally {
+          input.disabled = false;
+          if (submitButton) submitButton.disabled = false;
+          input.focus();
         }
 
       }

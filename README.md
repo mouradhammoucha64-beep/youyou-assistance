@@ -26,6 +26,23 @@ The app can use these Vercel environment variables when present:
 
 The included fallback is only the browser-safe Supabase URL + publishable key.
 
+## Server-side OpenAI integration
+
+YOUYOU uses the OpenAI Responses API only through isolated Vercel functions:
+
+- `/api/ai/chat` powers the installed website widget and published landing-page chat.
+- `/api/ai/studio` powers authenticated AI Studio improvement and generation.
+- The chat loads the matching company's AI settings, Knowledge Base, recent conversation history and verified published-offer content server-side.
+- Stripe checkout, webhooks, orders and refund code are not imported or changed by the AI module.
+
+Configure these server-side Vercel variables for Production, Preview and Development as needed:
+
+- `OPENAI_API_KEY` — the existing YOUYOU service-account secret. Never prefix it with `VITE_`.
+- `OPENAI_MODEL` — optional; defaults to `gpt-5-mini`.
+- `SUPABASE_SECRET_KEY` — already used for trusted server-side tenant lookups.
+
+The AI layer limits message/context/history/knowledge sizes, caps chat output at 300 tokens and AI Studio output at 700 tokens, applies request/concurrency limits, uses an 18-second timeout, and sets `store:false`. API, quota and timeout failures return a safe fallback instead of breaking the widget.
+
 ## Security rule
 Never commit any Supabase service-role key, OpenAI API key, Stripe secret key, or webhook secret to this repository. Those belong in server-side environment variables only.
 

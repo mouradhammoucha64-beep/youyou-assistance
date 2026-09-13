@@ -1911,6 +1911,22 @@ function initSeoProTabs() {
 }
 
 
+async function aiStudioRequest(action, brief) {
+  const { data } = await supabase.auth.getSession();
+  const token = data?.session?.access_token;
+  if (!token) throw new Error("Sign in again to use AI Studio.");
+  const response = await fetch("/api/ai/studio", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ action, brief }),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.output) {
+    throw new Error(result.error || "AI generation is temporarily unavailable.");
+  }
+  return result.output;
+}
+
 function initAiStudio() {
   const root = document.querySelector(".studio-page");
   if (!root) return;
@@ -1943,16 +1959,41 @@ function initAiStudio() {
     });
   });
 
-  root.querySelector("#studio-improve-idea")?.addEventListener("click", () => {
+  const readBrief = () => ({
+    idea: idea?.value.trim() || "",
+    type: currentType,
+    goal: root.querySelector("#studio-goal")?.value || "",
+    platform: root.querySelector("#studio-platform")?.value || "",
+    tone: root.querySelector("#studio-tone")?.value || "",
+    language: root.querySelector("#studio-language")?.value || "",
+    audience: root.querySelector("#studio-audience")?.value.trim() || "",
+    offer: root.querySelector("#studio-offer")?.value.trim() || "",
+    duration: root.querySelector("#studio-duration")?.value || "",
+    format: root.querySelector("#studio-format")?.value || "",
+    voice: root.querySelector("#studio-voice")?.value || "",
+    visual: root.querySelector("#studio-visual")?.value || "",
+  });
+
+  root.querySelector("#studio-improve-idea")?.addEventListener("click", async (event) => {
     if (!idea?.value.trim()) {
       if (status) status.textContent = "Write your idea first";
       idea?.focus();
       return;
     }
-    if (status) status.textContent = "Improve Idea will activate with the AI API";
+    const button = event.currentTarget;
+    button.disabled = true;
+    if (status) status.textContent = "Improving your idea with AI...";
+    try {
+      idea.value = await aiStudioRequest("improve", readBrief());
+      if (status) status.textContent = "Idea improved — review it before generation";
+    } catch (error) {
+      if (status) status.textContent = error?.message || "AI is temporarily unavailable";
+    } finally {
+      button.disabled = false;
+    }
   });
 
-  root.querySelector("#studio-generate")?.addEventListener("click", () => {
+  root.querySelector("#studio-generate")?.addEventListener("click", async (event) => {
     const ideaText = idea?.value.trim() || "";
     if (!ideaText) {
       if (status) status.textContent = "Describe your idea before generating";
@@ -1960,44 +2001,31 @@ function initAiStudio() {
       return;
     }
 
-    const goal = root.querySelector("#studio-goal")?.value || "—";
-    const platform = root.querySelector("#studio-platform")?.value || "—";
-    const tone = root.querySelector("#studio-tone")?.value || "—";
-    const language = root.querySelector("#studio-language")?.value || "—";
-    const audience = root.querySelector("#studio-audience")?.value.trim() || "Use business context";
-    const offer = root.querySelector("#studio-offer")?.value.trim() || "No specific offer";
-
-    if (empty) empty.hidden = true;
-    if (preview) {
-      preview.hidden = false;
-      preview.innerHTML = `
-        <div class="studio-preview-head">
-          <div><small>CREATIVE BRIEF</small><strong>${escapeHtml(currentType)}</strong></div>
-          <span>READY FOR AI</span>
-        </div>
-        <p>${escapeHtml(ideaText)}</p>
-        <div class="studio-preview-grid">
-          <div><small>GOAL</small><strong>${escapeHtml(goal)}</strong></div>
-          <div><small>PLATFORM</small><strong>${escapeHtml(platform)}</strong></div>
-          <div><small>TONE</small><strong>${escapeHtml(tone)}</strong></div>
-          <div><small>LANGUAGE</small><strong>${escapeHtml(language)}</strong></div>
-          <div><small>AUDIENCE</small><strong>${escapeHtml(audience)}</strong></div>
-          <div><small>OFFER</small><strong>${escapeHtml(offer)}</strong></div>
-        </div>
-        ${currentType === "Video Ad" ? `
-          <div class="studio-preview-video">
-            <small>VIDEO PLAN</small>
-            <span>${escapeHtml(root.querySelector("#studio-duration")?.value || "30 sec")}</span>
-            <span>${escapeHtml(root.querySelector("#studio-format")?.value || "9:16")}</span>
-            <span>${escapeHtml(root.querySelector("#studio-voice")?.value || "Professional")}</span>
-            <span>${escapeHtml(root.querySelector("#studio-visual")?.value || "Premium realistic")}</span>
-          </div>` : ""}
-        <div class="studio-preview-notice">
-          This is the structured brief only. No AI content has been generated yet.
-        </div>
-      `;
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.textContent = "Generating...";
+    if (status) status.textContent = "Generating real content with AI...";
+    try {
+      const output = await aiStudioRequest("generate", readBrief());
+      if (empty) empty.hidden = true;
+      if (preview) {
+        preview.hidden = false;
+        preview.innerHTML = `
+          <div class="studio-preview-head">
+            <div><small>AI GENERATED</small><strong>${escapeHtml(currentType)}</strong></div>
+            <span>READY TO REVIEW</span>
+          </div>
+          <div class="studio-generated-copy" style="white-space:pre-wrap">${escapeHtml(output)}</div>
+          <div class="studio-preview-notice">Review and edit the content before publishing it.</div>
+        `;
+      }
+      if (status) status.textContent = "AI content generated successfully";
+    } catch (error) {
+      if (status) status.textContent = error?.message || "AI generation is temporarily unavailable";
+    } finally {
+      button.disabled = false;
+      button.textContent = "Generate with AI →";
     }
-    if (status) status.textContent = "Creative brief ready for AI connection";
   });
 
   setType("Video Ad");
@@ -3766,7 +3794,7 @@ html::-webkit-scrollbar-thumb:hover{background:#8793a3}
 const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
-async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true}}
+async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true,conversationId:id}}
 window.youyouLandingSubmit=function(form){if(!form)return false;const page=form.closest('.lp-live-page'),status=form.querySelector('[data-lp-lead-status]'),button=form.querySelector('button[type="submit"]'),followup=form.querySelector('[data-lp-lead-followup]'),stripeFallback=()=>{if(YY_PREVIEW||!followup?.classList.contains('is-stripe'))return false;followup.hidden=false;form.dataset.submitted='true';setStatus('Your request could not be saved, but secure payment is still available below.','is-preview');return true},setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(form.dataset.sending==='true')return false;if(form.dataset.submitted==='true'){setStatus('✓ Your request was already sent.','is-success');return false}if(String(form.elements?.website?.value||'').trim())return false;const name=String(form.elements?.name?.value||'').trim(),phone=String(form.elements?.phone?.value||'').trim(),email=String(form.elements?.email?.value||'').trim(),city=String(form.elements?.city?.value||'').trim(),address=String(form.elements?.address?.value||'').trim(),message=String(form.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(phone.replace(/\D/g,'').length<7){setStatus('Please enter a valid phone number.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please enter a valid email address.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),mode=String(commerce?.dataset?.commerceMode||''),quantity=mode==='product'?String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim():'',total=mode==='product'?String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim():'',currency=mode==='product'?String(commerce?.dataset?.currency||'').trim():'',bundle=mode==='product'?String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim():'',color=mode==='product'?String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim():'',variants=mode==='product'?[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean):[],service=mode==='service'?String(commerce?.querySelector('[data-service-choice].is-active')?.dataset?.serviceChoice||'').trim():'',urgency=mode==='service'?String(commerce?.querySelector('[data-service-urgency].is-active')?.dataset?.serviceUrgency||'').trim():'',preferredDate=mode==='service'?String(commerce?.querySelector('[data-service-date]')?.value||'').trim():'',preferredTime=mode==='service'?String(commerce?.querySelector('[data-service-time]')?.value||'').trim():'',title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',service?'Service: '+service:'',urgency?'Urgency: '+urgency:'',preferredDate?'Preferred date: '+preferredDate:'',preferredTime?'Preferred time: '+preferredTime:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;form.dataset.sending='true';if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else if(!stripeFallback())setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>{if(!stripeFallback())setStatus('Could not send right now. Please try again or use another contact option.','is-error')}).finally(()=>{form.dataset.sending='false';if(button&&form.dataset.submitted!=='true')button.disabled=false});return false};
 const yyLegacyLandingSubmit=window.youyouLandingSubmit;
 window.youyouLandingSubmit=function(form){
@@ -6817,7 +6845,7 @@ else if (state.section === "studio") {
           <h1>Turn one idea into campaign-ready content.</h1>
           <p>
             Start with your own idea. YOUYOU will combine it with your business context,
-            brand voice and Knowledge Base when the AI generation layer is connected.
+            brand voice and Knowledge Base through the secure YOUYOU AI engine.
           </p>
         </div>
         <div class="studio-context-card">
@@ -6945,7 +6973,7 @@ else if (state.section === "studio") {
             <div>
               <small>GENERATION STATUS</small>
               <strong id="studio-status">Creative brief ready</strong>
-              <span>AI generation is intentionally not connected yet.</span>
+              <span>Secure server-side generation with usage limits.</span>
             </div>
             <button id="studio-generate" class="primary studio-generate-btn" type="button">Generate with AI →</button>
           </div>
@@ -6955,7 +6983,7 @@ else if (state.section === "studio") {
           <div class="studio-output dashboard-card">
             <div class="studio-section-head">
               <div><small>OUTPUT WORKSPACE</small><h2>Your creative will appear here.</h2></div>
-              <span class="studio-api-badge">AI API LATER</span>
+              <span class="studio-api-badge">SERVER AI</span>
             </div>
             <div id="studio-output-empty" class="studio-output-empty">
               <div class="studio-output-icon">✦</div>

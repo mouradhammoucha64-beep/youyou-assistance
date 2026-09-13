@@ -9,11 +9,12 @@ test('root and Vercel entrypoints use the same renderer implementation', () => {
 });
 
 test('renderer emits one matching version in meta and HTML marker', () => {
-  const html = hardenPublishedHtml('<!doctype html><html><head><meta name="youyou-renderer" content="8.8.0"></head><body style="--lp-bg:#ffffff"></body></html>');
+  const html = hardenPublishedHtml('<!doctype html><html><head><meta name="youyou-renderer" content="8.8.0"></head><body style="--lp-bg:#ffffff"><script src="/landing-ai.js"></script></body></html>');
   assert.match(html, /name="youyou-renderer" content="9\.0\.0"/);
   assert.match(html, /YOUYOU_PUBLIC_RENDERER:9\.0\.0/);
   assert.equal((html.match(/name="youyou-renderer"/g) || []).length, 1);
   assert.doesNotMatch(html, /8\.8\.0/);
+  assert.equal((html.match(/src="\/landing-ai\.js"/g) || []).length, 1);
 });
 
 test('deployed handler advertises the same version header', async t => {
