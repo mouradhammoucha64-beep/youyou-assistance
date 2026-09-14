@@ -152,12 +152,23 @@ test("helpers bound history, isolate instructions, and parse Responses output", 
   assert.equal(historyInput(history, "latest").length, AI_LIMITS.maxHistoryMessages + 1);
   const instructions = buildInstructions({
     settings: { language: "English", response_style: "Concise" },
-    company: { name: "Acme" },
+    company: { name: "Acme", business_email: "hello@acme.test", business_phone: "+1 555 0100" },
     knowledge: [{ title: "Policy", content: "No invented facts." }],
     page: null,
   });
   assert.match(instructions, /Never invent prices/);
   assert.match(instructions, /No invented facts/);
+  assert.match(instructions, /hello@acme\.test/);
+  assert.match(instructions, /Never guess or construct a contact address/);
+  assert.match(instructions, /Do not repeat facts or explanations already given/);
+  assert.match(instructions, /natural, warm, friendly, and conversational/);
+  assert.match(instructions, /available to answer visitors 24\/7/);
+  assert.match(historyInput([], "TALK WITH ME ABOUT THIS WEBSITE").at(-1).content, /LATEST VISITOR MESSAGE/);
   assert.equal(responseText({ output_text: "  Hello  " }), "Hello");
   assert.equal(publicError({ status: 429, code: "project_spend_limit_exceeded" }).code, "ai_budget_unavailable");
+  assert.equal(publicError(new Error("OPENAI_API_KEY_MISSING")).code, "ai_key_missing");
+  assert.equal(publicError({ status: 401 }).code, "ai_key_invalid");
+  assert.equal(publicError({ status: 403 }).code, "ai_key_forbidden");
+  assert.equal(publicError({ status: 400 }).code, "ai_request_invalid");
+  assert.equal(publicError({ status: 404 }).code, "ai_model_unavailable");
 });
