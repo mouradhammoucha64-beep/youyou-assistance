@@ -18,6 +18,14 @@ test('renderer emits one matching version in meta and HTML marker', () => {
 });
 
 test('deployed handler advertises the same version header', async t => {
+  const priorApp = process.env.APP_ORIGIN;
+  const priorPages = process.env.PUBLISHED_PAGES_ORIGIN;
+  process.env.APP_ORIGIN='https://app.example';
+  process.env.PUBLISHED_PAGES_ORIGIN='https://pages.example';
+  t.after(()=>{
+    if(priorApp===undefined) delete process.env.APP_ORIGIN; else process.env.APP_ORIGIN=priorApp;
+    if(priorPages===undefined) delete process.env.PUBLISHED_PAGES_ORIGIN; else process.env.PUBLISHED_PAGES_ORIGIN=priorPages;
+  });
   const oldFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response(JSON.stringify([{html_snapshot:'<html><head></head><body>Published</body></html>'}]), {status:200});
   t.after(() => { globalThis.fetch = oldFetch; });
@@ -30,7 +38,7 @@ test('deployed handler advertises the same version header', async t => {
     send(value) { body = value; return this; },
     end() { return this; },
   };
-  await apiHandler({method:'GET',query:{slug:'renderer-test'}},res);
+  await apiHandler({method:'GET',headers:{host:'pages.example'},query:{slug:'renderer-test'}},res);
   assert.equal(statusCode,200);
   assert.equal(headers['X-YOUYOU-Renderer'],'9.0.0');
   assert.match(body,/YOUYOU_PUBLIC_RENDERER:9\.0\.0/);
