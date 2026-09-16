@@ -1,3 +1,4 @@
+import { publishedOrigins } from '../server/published-origin.js';
 export const YOUYOU_PUBLISHED_RENDERER_VERSION = "9.0.0";
 
 const DEFAULT_SUPABASE_URL = "https://zprvmydgjxsifuhjplll.supabase.co";
@@ -89,6 +90,21 @@ export default async function handler(req, res) {
   if (!/^[a-z0-9][a-z0-9-]{0,79}$/.test(slug)) {
     res.setHeader("Cache-Control", "no-store");
     return res.status(404).send(notFoundPage(slug));
+  }
+
+  let origins;
+  try { origins = publishedOrigins(); } catch {
+    return res.status(503).send('Published page isolation is not configured.');
+  }
+  if (String(req.headers?.host || '').toLowerCase() !== new URL(origins.pages).host) {
+    const target = new URL(`/p/${slug}`, origins.pages);
+    // Preserve payment status and the session ID, never arbitrary callback URLs.
+    for (const key of ['payment','session_id']) {
+      if (typeof req.query?.[key] === 'string') target.searchParams.set(key, req.query[key]);
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Location', target.toString());
+    return res.status(307).end();
   }
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
