@@ -1,7 +1,23 @@
 (function () {
   "use strict";
 
-  const FALLBACK = "I’m sorry, I can’t answer that right now. Your message has been saved for the team, so please try again shortly.";
+  const FALLBACK = "I’m having trouble answering that right now. Please try again in a moment.";
+
+  function pageContext(page) {
+    const title = document.title || "Landing page";
+    const description = document.querySelector('meta[name="description"]')?.content || "";
+    const visibleText = String(page?.innerText || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 3500);
+
+    return [
+      `Page title: ${title}`,
+      description ? `Page description: ${description}` : "",
+      `Merchant landing-page content: ${visibleText}`,
+      "Use this landing-page content as the primary source for questions about the product, service, offer, price, benefits, CTA, booking, ordering, contact options, delivery, guarantees, or other merchant-provided details. Do not invent facts that are not present here or in verified business knowledge."
+    ].filter(Boolean).join("\n");
+  }
 
   function localFallback(page, question) {
     const lower = String(question || "").toLowerCase();
@@ -10,6 +26,7 @@
       .map((item) => item.textContent.trim())
       .filter(Boolean);
     const cta = page.querySelector(".lp-live-primary")?.textContent?.trim();
+
     if (/price|cost|how much|prix|combien|ch7al/.test(lower) && price) {
       return `The current price shown on this page is ${price}.`;
     }
@@ -65,6 +82,7 @@
           slug: page.dataset.pageSlug || "",
           message: question,
           source: "published_landing_page",
+          pageContext: pageContext(page),
         }),
       });
       const result = await response.json().catch(() => ({}));
