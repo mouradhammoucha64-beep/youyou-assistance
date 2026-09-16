@@ -154,6 +154,10 @@
   async function requestAiReply(content, id) {
     if (!companyId || !id) throw new Error("AI conversation is not ready.");
     const pageDescription = document.querySelector('meta[name="description"]')?.content || "";
+    const pageText = String((document.querySelector("main") || document.body)?.innerText || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 4_500);
     const response = await fetch(`${API_ORIGIN}/api/ai/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -162,7 +166,7 @@
         conversationId: id,
         message: content,
         source: "website_widget",
-        pageContext: `Page: ${document.title || "Website"}\nURL: ${location.href}\nDescription: ${pageDescription}`,
+        pageContext: `Page: ${document.title || "Website"}\nURL: ${location.href}\nDescription: ${pageDescription}\nVisible content: ${pageText}`,
       }),
     });
     const result = await response.json().catch(() => ({}));
@@ -708,16 +712,16 @@
           console.warn("YOUYOU AI temporarily unavailable.");
           if (capturedContact) {
             appendAgentBubble(
-              "Thank you — I’ve captured your contact details. A member of the team can follow up with you."
+              "Thank you — your contact details are saved in this conversation."
             );
           } else if (score >= 70 && !contactPromptShown) {
             contactPromptShown = true;
             appendAgentBubble(
-              "It looks like you’re seriously interested. Would you like the team to contact you? Please share your <strong>email address or phone number</strong>."
+              "It looks like you’re seriously interested. If you’d like a human follow-up, please share your <strong>email address or phone number</strong>."
             );
           } else {
             appendAgentBubble(
-              "I’m sorry, I can’t answer that right now. Your message has been saved for the team, so please try again shortly."
+              "I’m having trouble answering that right now. Please try again in a moment."
             );
           }
         } finally {
