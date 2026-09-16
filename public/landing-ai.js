@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const FALLBACK = "I’m sorry, I can’t answer that right now. Your message has been saved for the team, so please try again shortly.";
+  const FALLBACK = "I’m having trouble answering that right now. Please try again in a moment.";
 
   function localFallback(page, question) {
     const lower = String(question || "").toLowerCase();
@@ -65,6 +65,7 @@
           slug: page.dataset.pageSlug || "",
           message: question,
           source: "published_landing_page",
+          pageContext: String(page.innerText || "").replace(/\s+/g, " ").trim().slice(0, 3500),
         }),
       });
       const result = await response.json().catch(() => ({}));
