@@ -1,3 +1,3 @@
-import { createAiChatHandler } from "../../server/ai-chat.js";
+import { createAiWidgetChatHandler } from "../../server/ai-widget-chat.js";
 
-export default createAiChatHandler();
+export default createAiWidgetChatHandler();
