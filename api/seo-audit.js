@@ -1,119 +1,11 @@
-import dns from "node:dns/promises";
-import net from "node:net";
-
-const MAX_BYTES = 2_000_000;
-const TIMEOUT_MS = 9000;
-const MAX_REDIRECTS = 3;
+import { fetchPublicUrl } from "../server/public-fetch.js";
+import { authenticatedCompany, bearerToken, supabaseConfig } from "../server/stripe-shared.js";
 
 function normalizeUrl(value = "") {
-  let raw = String(value || "").trim();
+  const raw = String(value || "").trim();
   if (!raw) throw new Error("Website URL is required.");
-  if (!/^https?:\/\//i.test(raw)) raw = `https://${raw}`;
-
-  const url = new URL(raw);
-  if (!["http:", "https:"].includes(url.protocol)) {
-    throw new Error("Only public http/https websites can be audited.");
-  }
-  if (url.username || url.password) {
-    throw new Error("URLs with embedded credentials are not supported.");
-  }
-  return url;
+  return new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
 }
-
-function isPrivateIp(ip) {
-  if (!ip) return true;
-
-  if (net.isIPv4(ip)) {
-    const parts = ip.split(".").map(Number);
-    if (parts[0] === 10 || parts[0] === 127 || parts[0] === 0) return true;
-    if (parts[0] === 169 && parts[1] === 254) return true;
-    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-    if (parts[0] === 192 && parts[1] === 168) return true;
-    if (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) return true;
-    if (parts[0] >= 224) return true;
-    return false;
-  }
-
-  const low = ip.toLowerCase();
-  return (
-    low === "::1" ||
-    low === "::" ||
-    low.startsWith("fc") ||
-    low.startsWith("fd") ||
-    low.startsWith("fe80:")
-  );
-}
-
-async function assertPublicHost(hostname) {
-  const lowered = hostname.toLowerCase();
-  if (
-    lowered === "localhost" ||
-    lowered.endsWith(".localhost") ||
-    lowered.endsWith(".local")
-  ) {
-    throw new Error("Private/local network addresses cannot be audited.");
-  }
-
-  if (net.isIP(hostname)) {
-    if (isPrivateIp(hostname)) throw new Error("Private/local network addresses cannot be audited.");
-    return;
-  }
-
-  const records = await dns.lookup(hostname, { all: true, verbatim: true });
-  if (!records.length || records.some((record) => isPrivateIp(record.address))) {
-    throw new Error("This hostname resolves to a private/local network address.");
-  }
-}
-
-async function fetchPublicUrl(initialUrl, { method = "GET", maxBytes = MAX_BYTES } = {}) {
-  let current = normalizeUrl(initialUrl);
-
-  for (let redirect = 0; redirect <= MAX_REDIRECTS; redirect += 1) {
-    await assertPublicHost(current.hostname);
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    let response;
-    try {
-      response = await fetch(current, {
-        method,
-        redirect: "manual",
-        signal: controller.signal,
-        headers: {
-          "User-Agent": "YOUYOU-SEO-Audit/1.0 (+https://youyouapp.com)",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        },
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-
-    if ([301, 302, 303, 307, 308].includes(response.status)) {
-      const location = response.headers.get("location");
-      if (!location) throw new Error("Website redirect did not include a destination.");
-      current = new URL(location, current);
-      continue;
-    }
-
-    const contentType = response.headers.get("content-type") || "";
-    const contentLength = Number(response.headers.get("content-length") || 0);
-    if (contentLength > maxBytes) throw new Error("Page is too large for this lightweight audit.");
-
-    const buffer = Buffer.from(await response.arrayBuffer());
-    if (buffer.length > maxBytes) throw new Error("Page is too large for this lightweight audit.");
-
-    return {
-      response,
-      body: buffer.toString("utf8"),
-      finalUrl: current.toString(),
-      contentType,
-    };
-  }
-
-  throw new Error("Too many redirects.");
-}
-
 function cleanText(value = "") {
   return String(value || "")
     .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
@@ -225,12 +117,23 @@ function safeSuggestedMeta(service, city, companyName) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control','no-store');
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Use POST for website audits." });
   }
 
   try {
+    try { await authenticatedCompany(req); } catch {
+      return res.status(401).json({error:'Sign in to run an audit.'});
+    }
+    const {url,key} = supabaseConfig();
+    const quota = await fetch(`${url}/rest/v1/rpc/consume_seo_audit`, {
+      method:'POST',headers:{apikey:key,Authorization:`Bearer ${bearerToken(req)}`,'Content-Type':'application/json'},body:'{}',
+      signal:AbortSignal.timeout(5000),
+    });
+    if (!quota.ok) return res.status(503).json({error:'Audit limits are temporarily unavailable.'});
+    if ((await quota.json()) !== true) return res.status(429).json({error:'Please wait a minute before running another audit.'});
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
     const service = cleanText(body.service);
     const city = cleanText(body.city);

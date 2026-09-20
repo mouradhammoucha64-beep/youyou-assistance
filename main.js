@@ -3,11 +3,17 @@ import "./style.css";
 import "./workspace-theme.css";
 import { initWorkspaceNavigation } from "./workspace-navigation.js";
 import { orderMoney, orderRevenue, orderMatchesPaymentFilter } from "./shared/order-money.js";
+import { visitorMessages } from "./shared/visitor-messages.js";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const app = document.querySelector("#app");
+window.addEventListener('message', event => {
+  const frame = document.querySelector('#lpb-live-preview');
+  if (frame && event.source === frame.contentWindow && event.data?.type === 'youyou-preview-scroll'
+    && Number.isFinite(event.data.y) && event.data.y >= 0) frame.dataset.scrollY = String(Math.min(event.data.y,100000));
+});
 
 const supabase =
   SUPABASE_URL && SUPABASE_KEY
@@ -2151,7 +2157,7 @@ function landingDraftRemoteSlug(draftId = '') {
 }
 
 function landingDraftFromRemoteRow(row = {}) {
-  const content = row?.content && typeof row.content === 'object' ? row.content : {};
+  const content = row?.draft_content || row?.content || {};
   const templateId = String(content.templateId || row.template_id || 'product-launch');
   const published = row.status === 'published';
   return {
@@ -2176,7 +2182,7 @@ async function loadRemoteLandingDrafts() {
   if (!supabase || !state.user || !state.company?.id) return [];
   const { data, error } = await supabase
     .from('landing_pages')
-    .select('id,draft_id,slug,name,template_id,content,status,published_at,created_at,updated_at')
+    .select('id,draft_id,slug,name,template_id,content,draft_content,status,published_at,created_at,updated_at')
     .eq('company_id', state.company.id)
     .order('updated_at', { ascending:false })
     .limit(50);
@@ -3797,6 +3803,10 @@ html::-webkit-scrollbar-thumb:hover{background:#8793a3}
 const YY_SUPABASE_URL=${JSON.stringify(SUPABASE_URL || "")};
 const YY_SUPABASE_KEY=${JSON.stringify(SUPABASE_KEY || "")};
 const YY_PREVIEW=${JSON.stringify(Boolean(options.preview))};
+if(YY_PREVIEW){
+  addEventListener('scroll',()=>parent.postMessage({type:'youyou-preview-scroll',y:scrollY},'*'),{passive:true});
+  addEventListener('message',event=>{if(event.source===parent&&event.data?.type==='youyou-preview-restore'&&Number.isFinite(event.data.y))scrollTo(0,Math.max(0,Math.min(event.data.y,100000)));});
+}
 async function yyPersist(page,content,visitor={}){if(YY_PREVIEW)return{ok:false,preview:true};const companyId=page?.dataset?.companyId||'';if(!companyId||!YY_SUPABASE_URL||!YY_SUPABASE_KEY)return{ok:false};const pageId=page?.dataset?.pageId||'page',key='youyou_lp_conversation_'+companyId+'_'+pageId;let id=sessionStorage.getItem(key)||'';const headers={'Content-Type':'application/json',apikey:YY_SUPABASE_KEY};if(!id){id=crypto.randomUUID();const r=await fetch(YY_SUPABASE_URL+'/rest/v1/conversations',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({id,company_id:companyId,visitor_name:String(visitor.name||'Landing page visitor').slice(0,120),visitor_email:/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(visitor.email||''))?String(visitor.email).slice(0,180):null,status:'open'})});if(!r.ok)throw new Error(await r.text());sessionStorage.setItem(key,id)}const m=await fetch(YY_SUPABASE_URL+'/rest/v1/messages',{method:'POST',headers:{...headers,Prefer:'return=minimal'},body:JSON.stringify({conversation_id:id,sender:'visitor',content:String(content||'').slice(0,4000)})});if(!m.ok)throw new Error(await m.text());return{ok:true,conversationId:id}}
 window.youyouLandingSubmit=function(form){if(!form)return false;const page=form.closest('.lp-live-page'),status=form.querySelector('[data-lp-lead-status]'),button=form.querySelector('button[type="submit"]'),followup=form.querySelector('[data-lp-lead-followup]'),stripeFallback=()=>{if(YY_PREVIEW||!followup?.classList.contains('is-stripe'))return false;followup.hidden=false;form.dataset.submitted='true';setStatus('Your request could not be saved, but secure payment is still available below.','is-preview');return true},setStatus=(text,type)=>{if(!status)return;status.textContent=text;status.className='lp-lead-status '+(type||'')};if(form.dataset.sending==='true')return false;if(form.dataset.submitted==='true'){setStatus('✓ Your request was already sent.','is-success');return false}if(String(form.elements?.website?.value||'').trim())return false;const name=String(form.elements?.name?.value||'').trim(),phone=String(form.elements?.phone?.value||'').trim(),email=String(form.elements?.email?.value||'').trim(),city=String(form.elements?.city?.value||'').trim(),address=String(form.elements?.address?.value||'').trim(),message=String(form.elements?.message?.value||'').trim();if(!name||!phone||!city||!address){setStatus('Please add your name, phone, city and address.','is-error');return false}if(phone.replace(/\D/g,'').length<7){setStatus('Please enter a valid phone number.','is-error');return false}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('Please enter a valid email address.','is-error');return false}const commerce=page?.querySelector('[data-commerce-box]'),mode=String(commerce?.dataset?.commerceMode||''),quantity=mode==='product'?String(commerce?.querySelector('[data-order-qty]')?.textContent||commerce?.querySelector('[data-order-summary-qty]')?.textContent||'').trim():'',total=mode==='product'?String(commerce?.querySelector('[data-order-total]')?.textContent||'').trim():'',currency=mode==='product'?String(commerce?.dataset?.currency||'').trim():'',bundle=mode==='product'?String(commerce?.querySelector('[data-bundle-qty].is-active strong')?.textContent||'').trim():'',color=mode==='product'?String(commerce?.querySelector('[data-order-color].is-active')?.dataset?.orderColor||'').trim():'',variants=mode==='product'?[...(commerce?.querySelectorAll('[data-order-variant-name].is-active')||[])].map(el=>el.dataset.orderVariantName+': '+el.dataset.orderVariantValue).filter(Boolean):[],service=mode==='service'?String(commerce?.querySelector('[data-service-choice].is-active')?.dataset?.serviceChoice||'').trim():'',urgency=mode==='service'?String(commerce?.querySelector('[data-service-urgency].is-active')?.dataset?.serviceUrgency||'').trim():'',preferredDate=mode==='service'?String(commerce?.querySelector('[data-service-date]')?.value||'').trim():'',preferredTime=mode==='service'?String(commerce?.querySelector('[data-service-time]')?.value||'').trim():'',title=page?.dataset?.pageTitle||'this offer',details=['Phone: '+phone,'City: '+city,'Address: '+address,email?'Email: '+email:'',service?'Service: '+service:'',urgency?'Urgency: '+urgency:'',preferredDate?'Preferred date: '+preferredDate:'',preferredTime?'Preferred time: '+preferredTime:'',quantity?'Quantity: '+quantity:'',color?'Color: '+color:'',bundle?'Bundle: '+bundle:'',variants.length?'Options: '+variants.join(', '):'',total?'Order total: '+currency+' '+total:'',message?'Message: '+message:''].filter(Boolean).join(' | '),content='Lead form submission for '+title+'. '+details;form.dataset.sending='true';if(button)button.disabled=true;setStatus('Sending…','is-sending');yyPersist(page,content,{name,email}).then(r=>{if(r.ok){setStatus('✓ Request sent successfully. We received your details.','is-success');if(followup)followup.hidden=false;form.dataset.submitted='true'}else if(!stripeFallback())setStatus(YY_PREVIEW?'Preview only — publish the page to receive real requests.':'Lead capture is not connected yet.','is-preview')}).catch(()=>{if(!stripeFallback())setStatus('Could not send right now. Please try again or use another contact option.','is-error')}).finally(()=>{form.dataset.sending='false';if(button&&form.dataset.submitted!=='true')button.disabled=false});return false};
 const yyLegacyLandingSubmit=window.youyouLandingSubmit;
@@ -4692,7 +4702,7 @@ function renderLandingPageWorkspace() {
 
           <div id="lpb-preview-frame" class="lpw-preview-stage">
             <div class="lpw-device-shell">
-              <iframe id="lpb-live-preview" class="lpw-preview-iframe" title="Exact landing page preview" sandbox="allow-scripts allow-same-origin allow-popups" allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="no-referrer"></iframe>
+              <iframe id="lpb-live-preview" class="lpw-preview-iframe" title="Exact landing page preview" sandbox="allow-scripts allow-popups" allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="no-referrer"></iframe>
             </div>
           </div>
         </section>
@@ -5197,11 +5207,11 @@ function initLandingPageWorkspace() {
     const preview = document.querySelector("#lpb-live-preview");
     const name = document.querySelector("#lpw-document-name");
     if (preview && preview.tagName === "IFRAME") {
-      try { previewScrollY = preview.contentWindow?.scrollY || previewScrollY || 0; } catch (_) {}
+      previewScrollY = Number(preview.dataset.scrollY || 0);
       const token = ++previewToken;
       preview.addEventListener("load", () => {
         if (token !== previewToken) return;
-        try { preview.contentWindow?.scrollTo(0, previewScrollY); } catch (_) {}
+        preview.contentWindow?.postMessage({type:'youyou-preview-restore',y:previewScrollY},'*');
       }, { once:true });
       preview.srcdoc = landingExportHtml({ ...current, publicUrl:current.publishedUrl || "" }, { preview:true });
     } else if (preview) {
@@ -5277,7 +5287,7 @@ function initLandingPageWorkspace() {
       slug,
       name:String(current.name || "Landing page").trim().slice(0,160) || "Landing page",
       template_id:String(current.templateId || "product-launch").slice(0,80),
-      content:safeContent,
+      draft_content:safeContent,
       status:isPublished ? "published" : "draft",
       published_at:isPublished ? (current.publishedAt || null) : null,
       updated_at:now,
@@ -5466,7 +5476,9 @@ function initLandingPageWorkspace() {
         name:String(current.name || "Landing page").trim().slice(0,160),
         template_id:String(current.templateId || "product-launch").slice(0,80),
         content:publishData,
+        draft_content:publishData,
         html_snapshot:htmlSnapshot,
+        publication_revision:crypto.randomUUID(),
         status:"published",
         published_at:publishData.publishedAt,
         updated_at:now,
@@ -9802,9 +9814,11 @@ async function runSeoWebsiteAudit() {
   }
 
   try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session?.access_token) throw new Error("Sign in again to run an audit.");
     const response = await fetch("/api/seo-audit", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${sessionData.session.access_token}` },
       body: JSON.stringify({
         url: rawUrl,
         service,
@@ -10072,6 +10086,7 @@ function formatDashboardDate(value) {
 }
 
 function scoreLeadFromMessages(messages = []) {
+  messages = visitorMessages(messages);
   const text = messages.map((m) => m.content || "").join(" ").toLowerCase();
   let score = 10;
   const strong = ["buy", "purchase", "book", "booking", "demo", "quote", "price", "pricing", "cost", "call me", "contact me", "ready", "today", "this week"];
@@ -10091,6 +10106,7 @@ function leadMeta(score) {
 }
 
 function summarizeLead(messages = []) {
+  messages = visitorMessages(messages);
   if (!messages.length) return "No visitor message captured yet.";
   const last = messages[messages.length - 1]?.content || "";
   const text = messages.map((m) => m.content || "").join(" ").toLowerCase();
@@ -10105,6 +10121,7 @@ function summarizeLead(messages = []) {
 }
 
 function extractLeadContact(conversation, messages = []) {
+  messages = visitorMessages(messages);
   const joined = messages.map((m) => m.content || "").join(" ");
   const emailMatch = joined.match(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/i);
   const phoneMatch = joined.match(/(?:\+?\d[\d\s().-]{7,}\d)/);
