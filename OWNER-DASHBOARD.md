@@ -1,6 +1,6 @@
 # Owner workspace
 
-Route: `/dashboard/owner` on the application domain. The owner page is read-only.
+Host: `admin.youyouapp.com`, with its own sign-in screen at `/`. Customer domains never mount the owner module; old `/dashboard/owner` links return to the merchant overview. The owner API returns 404 on all other hosts (including Vercel preview URLs). The owner page is read-only.
 
 ## Access setup
 
@@ -9,7 +9,7 @@ Route: `/dashboard/owner` on the application domain. The owner page is read-only
 3. In Vercel project server environment variables, set `OWNER_USER_IDS` to that exact UUID. For multiple administrators use comma-separated UUIDs. Do not use an email, company ID, profile role, or a `VITE_` variable.
 4. Existing Supabase public and service credentials are used server-side. No new database migration or RLS change is required.
 5. Set this for the environment being tested (Preview first, then Production) and deploy the relevant commit.
-6. Sign in through YOUYOU and open `/dashboard/owner`. Check that a normal merchant account gets denied.
+6. Add `admin.youyouapp.com` to this Vercel project and configure the exact DNS record Vercel supplies. For pre-merge testing, assign it to the owner branch. Sign in directly on this host; test both owner and normal merchant accounts. Host separation is not an authorization boundary: server UUID authorization remains mandatory. After verification and merge, assign the domain to Production. No customer-domain or Stripe DNS/settings changes are required.
 
 The API validates the bearer token with Supabase Auth, then checks the verified user UUID against the server allowlist before accessing any cross-company data. Missing owner configuration fails closed. GET only; no delete, update, impersonation, payment or refund operations. All responses are private/no-store. Profiles and companies supplied by the client never authorize access.
 

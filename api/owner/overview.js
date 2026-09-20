@@ -11,6 +11,8 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'private, no-store');
   res.setHeader('Vary', 'Authorization');
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  // Host separation supplements token authorization; it never replaces it.
+  if (req.headers?.host !== 'admin.youyouapp.com') return res.status(404).json({ error: 'not_found' });
   if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ error: 'method_not_allowed' }); }
   const token = bearerToken(req);
   if (!token) return res.status(401).json({ error: 'sign_in_required' });

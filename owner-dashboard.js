@@ -6,7 +6,7 @@ const number = value => Number.isFinite(value) ? new Intl.NumberFormat('en-US').
 
 export async function renderOwnerDashboard(client, root = document.querySelector('#app')) {
   document.title = 'Owner workspace — YOUYOU';
-  let resource = 'users', page = 1, request = 0;
+  let resource = 'users', page = 1, request = 0, activeUser = null;
   root.innerHTML = `<div class="owner-app">
     <aside class="owner-sidebar" aria-label="Owner navigation">
       <a class="owner-brand" href="/">YOU<span>YOU</span><i></i></a>
@@ -14,12 +14,18 @@ export async function renderOwnerDashboard(client, root = document.querySelector
       <a href="#owner-overview" class="owner-nav-active">Overview <span>↗</span></a>
       <a href="#owner-directory">Accounts & workspaces</a>
       <a href="#owner-billing">Subscriptions</a>
-      <div class="owner-sidebar-bottom"><span class="owner-owner-badge">OWNER ACCESS</span><a href="/dashboard/overview">← Merchant workspace</a><a href="/">View website ↗</a></div>
+      <div class="owner-sidebar-bottom"><span class="owner-owner-badge">OWNER ACCESS</span><a href="https://www.youyouapp.com/">View website ↗</a><button id="owner-signout" type="button">Sign out</button></div>
     </aside>
     <main class="owner-main" id="owner-overview">
       <header class="owner-top"><span>YOUYOU <span class="owner-divider">/</span> Owner workspace</span><span class="owner-private">Private workspace</span></header>
       <section class="owner-heading"><div><span class="owner-eyebrow">YOUR PLATFORM, AT A GLANCE</span><h1>A clearer view of YOUYOU.</h1><p>Keep track of the people and workspaces building with you.</p></div><button id="owner-refresh" class="owner-primary" type="button">Refresh data ↻</button></section>
       <div id="owner-feedback" role="status" aria-live="polite"></div>
+      <form id="owner-login" class="owner-login" hidden>
+        <h2>Sign in to your control panel</h2>
+        <label for="owner-email">Email</label><input id="owner-email" type="email" autocomplete="username" required>
+        <label for="owner-password">Password</label><input id="owner-password" type="password" autocomplete="current-password" required>
+        <button class="owner-primary" type="submit">Sign in</button>
+      </form>
       <div id="owner-content" hidden>
         <section class="owner-metrics" aria-label="Platform totals">
           <article><span>WORKSPACES</span><strong id="owner-company-count">—</strong><small>Companies on your platform</small><i>▦</i></article>
@@ -42,11 +48,12 @@ export async function renderOwnerDashboard(client, root = document.querySelector
   function controls(disabled) { root.querySelectorAll('button').forEach(b => b.disabled = disabled); }
   async function load() {
     const run = ++request;
-    controls(true); $('#owner-content').hidden = true;
+    controls(true); $('#owner-content').hidden = true; $('#owner-login').hidden = true;
     feedback.textContent = 'Loading your platform overview…'; feedback.className = 'owner-feedback';
     try {
       const { data, error } = client ? await client.auth.getSession() : { data: null };
       if (error || !data?.session) throw new Error('sign_in_required');
+      activeUser = data.session.user.id;
       const response = await fetch(`/api/owner/overview?resource=${resource}&page=${page}`, { headers: { Authorization: `Bearer ${data.session.access_token}` }, cache:'no-store', signal:AbortSignal.timeout(15000) });
       const body = await response.json();
       if (run !== request) return;
@@ -67,10 +74,27 @@ export async function renderOwnerDashboard(client, root = document.querySelector
       feedback.textContent = messages[error.message] || messages.owner_data_unavailable;
       feedback.className = 'owner-feedback owner-error';
       $('#owner-records').replaceChildren();
-      if (error.message === 'sign_in_required') { const a = document.createElement('a'); a.href='/'; a.textContent='Go to sign in →'; feedback.append(a); }
-      $('#owner-refresh').disabled = false;
+      if (error.message === 'sign_in_required') $('#owner-login').hidden = false;
+      controls(false);
     }
   }
+  $('#owner-login').onsubmit = async event => {
+    event.preventDefault();
+    const email = $('#owner-email').value.trim(), password = $('#owner-password').value;
+    controls(true); feedback.textContent = 'Signing in…';
+    try {
+      const { error } = await client.auth.signInWithPassword({email,password});
+      $('#owner-password').value = '';
+      if (error) throw error;
+      await load();
+    } catch (_) { feedback.textContent = 'Unable to sign in. Check your email and password and try again.'; controls(false); }
+  };
+  $('#owner-signout').onclick = async () => {
+    request++; $('#owner-content').hidden=true; $('#owner-records').replaceChildren();
+    const {error} = await client.auth.signOut();
+    if (error) { feedback.textContent='Unable to sign out. Please try again.'; return; }
+    activeUser=null; $('#owner-login').hidden=false; controls(false);
+  };
   $('#owner-refresh').onclick = load;
   $('#owner-prev').onclick = () => { page=Math.max(1,page-1); load(); };
   $('#owner-next').onclick = () => { page++; load(); };
@@ -80,6 +104,11 @@ export async function renderOwnerDashboard(client, root = document.querySelector
     load();
   });
   // Clear sensitive owner data immediately when the session ends.
-  client?.auth.onAuthStateChange(event=>{ if(event==='SIGNED_OUT') { request++; $('#owner-content').hidden=true; $('#owner-records').replaceChildren(); feedback.textContent='You have signed out.'; } });
+  client?.auth.onAuthStateChange((event, session)=>{
+    if(event==='SIGNED_OUT' || (activeUser && session?.user?.id !== activeUser)) {
+      request++; activeUser=null; $('#owner-content').hidden=true; $('#owner-records').replaceChildren();
+      $('#owner-login').hidden=false; feedback.textContent='Sign in to your YOUYOU owner account to continue.'; controls(false);
+    }
+  });
   await load();
 }

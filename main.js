@@ -11250,8 +11250,10 @@ window.addEventListener("popstate", () => {
   renderDashboard();
 });
 
-if (window.location.pathname.replace(/\/$/, '') === '/dashboard/owner') {
+if (window.location.hostname === 'admin.youyouapp.com') {
   import('./owner-dashboard.js').then(({ renderOwnerDashboard }) => renderOwnerDashboard(supabase, app));
+} else if (/^\/dashboard\/owner(?:\/|$)/.test(window.location.pathname)) {
+  window.location.replace('/dashboard/overview');
 } else {
   boot();
 }
