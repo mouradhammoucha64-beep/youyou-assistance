@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import "./style.css";
+import "./workspace-theme.css";
+import { initWorkspaceNavigation } from "./workspace-navigation.js";
 import { orderMoney, orderRevenue, orderMatchesPaymentFilter } from "./shared/order-money.js";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -1583,9 +1585,9 @@ function dashboardShell(content) {
     "there";
 
   app.innerHTML = `
-    <div class="dashboard">
-
-      <aside class="sidebar">
+    <div class="dashboard workspace-light">
+      <div class="workspace-mobile-bar"><span class="workspace-mobile-brand">YOU<span>YOU</span></span><button id="workspace-menu" type="button" aria-expanded="false" aria-controls="workspace-sidebar">Menu <span aria-hidden="true">☰</span></button></div>
+      <aside class="sidebar" id="workspace-sidebar" aria-label="Workspace navigation">
 
         <div>
           <div class="side-logo">
@@ -1656,6 +1658,7 @@ function dashboardShell(content) {
     </div>
   `;
 
+  initWorkspaceNavigation(app.querySelector(".workspace-light"));
   const sidebarNav = document.querySelector(".dashboard-nav");
 
   if (sidebarNav) {
