@@ -1,118 +1,6 @@
-import dns from "node:dns/promises";
-import net from "node:net";
-
-const MAX_BYTES = 2_000_000;
-const TIMEOUT_MS = 9000;
-const MAX_REDIRECTS = 3;
-
-function normalizeUrl(value = "") {
-  let raw = String(value || "").trim();
-  if (!raw) throw new Error("Website URL is required.");
-  if (!/^https?:\/\//i.test(raw)) raw = `https://${raw}`;
-
-  const url = new URL(raw);
-  if (!["http:", "https:"].includes(url.protocol)) {
-    throw new Error("Only public http/https websites can be audited.");
-  }
-  if (url.username || url.password) {
-    throw new Error("URLs with embedded credentials are not supported.");
-  }
-  return url;
-}
-
-function isPrivateIp(ip) {
-  if (!ip) return true;
-
-  if (net.isIPv4(ip)) {
-    const parts = ip.split(".").map(Number);
-    if (parts[0] === 10 || parts[0] === 127 || parts[0] === 0) return true;
-    if (parts[0] === 169 && parts[1] === 254) return true;
-    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
-    if (parts[0] === 192 && parts[1] === 168) return true;
-    if (parts[0] === 100 && parts[1] >= 64 && parts[1] <= 127) return true;
-    if (parts[0] >= 224) return true;
-    return false;
-  }
-
-  const low = ip.toLowerCase();
-  return (
-    low === "::1" ||
-    low === "::" ||
-    low.startsWith("fc") ||
-    low.startsWith("fd") ||
-    low.startsWith("fe80:")
-  );
-}
-
-async function assertPublicHost(hostname) {
-  const lowered = hostname.toLowerCase();
-  if (
-    lowered === "localhost" ||
-    lowered.endsWith(".localhost") ||
-    lowered.endsWith(".local")
-  ) {
-    throw new Error("Private/local network addresses cannot be audited.");
-  }
-
-  if (net.isIP(hostname)) {
-    if (isPrivateIp(hostname)) throw new Error("Private/local network addresses cannot be audited.");
-    return;
-  }
-
-  const records = await dns.lookup(hostname, { all: true, verbatim: true });
-  if (!records.length || records.some((record) => isPrivateIp(record.address))) {
-    throw new Error("This hostname resolves to a private/local network address.");
-  }
-}
-
-async function fetchPublicUrl(initialUrl, { method = "GET", maxBytes = MAX_BYTES } = {}) {
-  let current = normalizeUrl(initialUrl);
-
-  for (let redirect = 0; redirect <= MAX_REDIRECTS; redirect += 1) {
-    await assertPublicHost(current.hostname);
-
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    let response;
-    try {
-      response = await fetch(current, {
-        method,
-        redirect: "manual",
-        signal: controller.signal,
-        headers: {
-          "User-Agent": "YOUYOU-SEO-Audit/1.0 (+https://youyouapp.com)",
-          "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        },
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-
-    if ([301, 302, 303, 307, 308].includes(response.status)) {
-      const location = response.headers.get("location");
-      if (!location) throw new Error("Website redirect did not include a destination.");
-      current = new URL(location, current);
-      continue;
-    }
-
-    const contentType = response.headers.get("content-type") || "";
-    const contentLength = Number(response.headers.get("content-length") || 0);
-    if (contentLength > maxBytes) throw new Error("Page is too large for this lightweight audit.");
-
-    const buffer = Buffer.from(await response.arrayBuffer());
-    if (buffer.length > maxBytes) throw new Error("Page is too large for this lightweight audit.");
-
-    return {
-      response,
-      body: buffer.toString("utf8"),
-      finalUrl: current.toString(),
-      contentType,
-    };
-  }
-
-  throw new Error("Too many redirects.");
-}
+import { fetchPublicUrl, normalizeUrl } from '../server/seo-fetch.js';
+import { authenticate, limit, db, parseBody, sendError } from '../server/seo-shared.js';
+export const config = { maxDuration: 60 };
 
 function cleanText(value = "") {
   return String(value || "")
@@ -130,15 +18,15 @@ function cleanText(value = "") {
 function attrFromTag(tag = "", attr = "") {
   const escaped = attr.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const quoted = tag.match(new RegExp(`${escaped}\\s*=\\s*(["'])(.*?)\\1`, "i"));
-  if (quoted) return quoted[2].trim();
+  if (quoted) return quoted[2].trim().slice(0, 2000);
 
   const unquoted = tag.match(new RegExp(`${escaped}\\s*=\\s*([^\\s>]+)`, "i"));
-  return unquoted ? unquoted[1].trim() : "";
+  return unquoted ? unquoted[1].trim().slice(0, 2000) : "";
 }
 
 function firstTagContent(html, tag) {
   const match = html.match(new RegExp(`<${tag}\\b[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i"));
-  return match ? cleanText(match[1]) : "";
+  return match ? cleanText(match[1]).slice(0, 2000) : "";
 }
 
 function allTags(html, tag) {
@@ -225,22 +113,27 @@ function safeSuggestedMeta(service, city, companyName) {
 }
 
 export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Use POST for website audits." });
   }
 
   try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
-    const service = cleanText(body.service);
-    const city = cleanText(body.city);
-    const companyName = cleanText(body.companyName);
+    const auth = await authenticate(req);
+    await limit(auth.companyId, "audit-minute", 3);
+    await limit(auth.companyId, "audit-day", 30, 86400);
+    const body = parseBody(req);
+    const service = cleanText(body.service).slice(0, 120);
+    const city = cleanText(body.city).slice(0, 120);
+    const companyName = cleanText(body.companyName).slice(0, 120);
 
     const startedAt = Date.now();
     const targetUrl = normalizeUrl(body.url);
     const { response, body: html, finalUrl, contentType } = await fetchPublicUrl(targetUrl);
     const elapsedMs = Date.now() - startedAt;
 
+    if (!response.ok) throw new Error(`Website returned HTTP ${response.status}. Check access before auditing.`);
     if (!contentType.toLowerCase().includes("html")) {
       return res.status(400).json({ error: "The URL did not return an HTML webpage." });
     }
@@ -248,21 +141,22 @@ export default async function handler(req, res) {
     const final = new URL(finalUrl);
     const title = firstTagContent(html, "title");
     const metaDescription = metaContent(html, "description");
-    const metaRobots = metaContent(html, "robots");
+    const metaRobots = [metaContent(html, "robots"), metaContent(html, "googlebot"), response.headers.get("x-robots-tag") || ""].filter(Boolean).join(", ");
     const canonicalRaw = linkHrefByRel(html, "canonical");
-    const canonical = canonicalRaw ? new URL(canonicalRaw, final).toString() : "";
+    let canonical = "";
+    try { canonical = canonicalRaw ? new URL(canonicalRaw, final).toString() : ""; } catch { /* Invalid canonical is reported as missing. */ }
     const viewport = metaContent(html, "viewport");
     const htmlTag = (html.match(/<html\b[^>]*>/i) || [""])[0];
     const htmlLang = attrFromTag(htmlTag, "lang");
 
     const h1Matches = [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/gi)];
     const h2Matches = [...html.matchAll(/<h2\b[^>]*>([\s\S]*?)<\/h2>/gi)];
-    const h1 = h1Matches.length ? cleanText(h1Matches[0][1]) : "";
+    const h1 = h1Matches.length ? cleanText(h1Matches[0][1]).slice(0, 2000) : "";
 
     const imageTags = allTags(html, "img");
     const imagesMissingAlt = imageTags.filter((tag) => {
-      const alt = attrFromTag(tag, "alt");
-      return !alt;
+      // Empty alt text is valid for decorative images; flag absent attributes only.
+      return !/\s+alt\s*=/i.test(tag);
     }).length;
 
     const anchorTags = allTags(html, "a");
@@ -289,7 +183,7 @@ export default async function handler(req, res) {
 
     const visibleText = getVisibleText(html);
     const wordCount = visibleText ? visibleText.split(/\s+/).filter(Boolean).length : 0;
-    const noindex = /(^|[\s,])noindex([\s,]|$)/i.test(metaRobots);
+    const noindex = /(^|[\s,])(noindex|none)([\s,]|$)/i.test(metaRobots);
 
     const [robotsCheck, sitemapCheck] = await Promise.allSettled([
       fetchPublicUrl(new URL("/robots.txt", final), { maxBytes: 300_000 }),
@@ -555,7 +449,8 @@ export default async function handler(req, res) {
 
     score = Math.max(0, Math.min(100, Math.round(score)));
 
-    return res.status(200).json({
+    const result = {
+      auditedAt: new Date().toISOString(),
       url: targetUrl.toString(),
       finalUrl,
       status: response.status,
@@ -608,8 +503,18 @@ export default async function handler(req, res) {
       },
       findings: findings.slice(0, 16),
       scope: "single-page-live-audit",
-    });
+    };
+    // The result is generated here, never accepted as a client-provided score.
+    let saved = false;
+    try {
+      await db('seo_audits', {method:'POST', body:{company_id:auth.companyId,url:result.finalUrl,result}, prefer:'return=minimal'});
+      saved = true;
+      const recent = await db(`seo_audits?company_id=eq.${auth.companyId}&select=created_at&order=created_at.desc&offset=19&limit=1`);
+      if (recent?.[0]) await db(`seo_audits?company_id=eq.${auth.companyId}&created_at=lt.${encodeURIComponent(recent[0].created_at)}`,{method:'DELETE'});
+    } catch { /* Return the completed audit with an explicit persistence warning. */ }
+    return res.status(200).json({...result,saved,saveWarning:saved ? null : 'Audit completed but could not be saved. Try again after storage is restored.'});
   } catch (error) {
+    if (error.status) return sendError(res,error);
     const message =
       error?.name === "AbortError"
         ? "The website took too long to respond."
