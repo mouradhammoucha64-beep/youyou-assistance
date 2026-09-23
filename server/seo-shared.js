@@ -53,11 +53,22 @@ export function decryptToken(value, companyId, env=process.env) {
   decipher.setAAD(Buffer.from(companyId)); decipher.setAuthTag(Buffer.from(tag,'base64url'));
   return Buffer.concat([decipher.update(Buffer.from(bytes,'base64url')),decipher.final()]).toString('utf8');
 }
+export function googleSetupIssues(env=process.env) {
+  const issues=[];
+  try {
+    const url=new URL(env.APP_ORIGIN);
+    if(url.protocol!=='https:' || url.username || url.password) throw new Error();
+  } catch { issues.push('APP_ORIGIN must contain the HTTPS address of this app.'); }
+  for(const name of ['GOOGLE_SEARCH_CONSOLE_CLIENT_ID','GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET']) {
+    if(!String(env[name] || '').trim()) issues.push(`${name} is missing in this deployment.`);
+  }
+  try { encryptionKey(env); } catch { issues.push('SEO_TOKEN_ENCRYPTION_KEY must be a Base64 value decoding to exactly 32 bytes.'); }
+  return issues;
+}
 export function googleConfig(env=process.env) {
-  let origin;
-  try { origin = new URL(env.APP_ORIGIN).origin; } catch { throw fail('Google connection is not configured yet.',503); }
-  if (!origin.startsWith('https://') || !env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID || !env.GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET) throw fail('Google connection is not configured yet.',503);
-  encryptionKey(env);
-  return {origin, redirect:`${origin}/api/seo`, clientId:env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID,clientSecret:env.GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET};
+  const issues=googleSetupIssues(env);
+  if(issues.length) throw fail(`Google setup: ${issues.join(' ')}`,503);
+  const origin=new URL(env.APP_ORIGIN).origin;
+  return {origin, redirect:`${origin}/api/seo`, clientId:env.GOOGLE_SEARCH_CONSOLE_CLIENT_ID.trim(),clientSecret:env.GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET.trim()};
 }
 export function sendError(res,error) { return res.status(error.status || 500).json({error:error.status ? error.message : 'SEO could not complete this request. Please try again.'}); }

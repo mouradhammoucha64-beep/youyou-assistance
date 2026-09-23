@@ -3,12 +3,26 @@ import assert from 'node:assert/strict';
 import handler from '../api/seo.js';
 import auditHandler from '../api/seo-audit.js';
 import { normalizeSettings, setupChecks, strategy, propertyMatchesWebsite, tabFromUrl, tabUrl } from '../shared/seo-model.js';
-import { encryptToken, decryptToken, hash } from '../server/seo-shared.js';
+import { encryptToken, decryptToken, hash, googleSetupIssues, googleConfig } from '../server/seo-shared.js';
 import { googleCallback, startGoogle, reportDates, performance, SCOPE } from '../server/seo-google.js';
 import { publicAddress, normalizeUrl, fetchPublicUrl } from '../server/seo-fetch.js';
 const company='11111111-1111-4111-8111-111111111111', other='22222222-2222-4222-8222-222222222222';
 const env={SUPABASE_URL:'https://storage.test',SUPABASE_SECRET_KEY:'service-test',APP_ORIGIN:'https://www.youyouapp.com',GOOGLE_SEARCH_CONSOLE_CLIENT_ID:'client-test',GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET:'secret-test',SEO_TOKEN_ENCRYPTION_KEY:Buffer.alloc(32,7).toString('base64')};
 const response=data=>new Response(JSON.stringify(data));
+test('Google setup identifies every missing setting without exposing values',()=>{
+  assert.deepEqual(googleSetupIssues(env),[]);
+  assert.equal(googleSetupIssues({}).length,4);
+  for(const name of ['APP_ORIGIN','GOOGLE_SEARCH_CONSOLE_CLIENT_ID','GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET','SEO_TOKEN_ENCRYPTION_KEY']) {
+    const issues=googleSetupIssues({...env,[name]:''});
+    assert.equal(issues.length,1);assert.ok(issues[0].includes(name));
+  }
+  for(const origin of ['http://example.com','https://user:private@example.com','invalid-private-value']) {
+    const issues=googleSetupIssues({...env,APP_ORIGIN:origin});
+    assert.equal(issues.length,1);assert.ok(!JSON.stringify(issues).includes(origin));
+  }
+  assert.equal(googleSetupIssues({...env,SEO_TOKEN_ENCRYPTION_KEY:Buffer.alloc(31).toString('base64')}).length,1);
+  assert.equal(googleConfig({...env,GOOGLE_SEARCH_CONSOLE_CLIENT_SECRET:' secret-test \n'}).clientSecret,'secret-test');
+});
 function res(){return {statusCode:200,headers:{},setHeader(k,v){this.headers[k]=v;},status(n){this.statusCode=n;return this;},json(data){this.body=data;return this;},end(){return this;}};}
 function mock(t,fetch){const oldFetch=globalThis.fetch;const old={...process.env};Object.assign(process.env,env);globalThis.fetch=fetch;t.after(()=>{globalThis.fetch=oldFetch;for(const k of Object.keys(env)){if(old[k]===undefined)delete process.env[k];else process.env[k]=old[k];}});}
 const request=(action,body={})=>({method:'POST',url:'/api/seo',headers:{authorization:'Bearer user-token',origin:env.APP_ORIGIN},body:{action,...body}});

@@ -1,4 +1,4 @@
-import { authenticate, db, limit, parseBody, googleConfig, sendError, fail } from '../server/seo-shared.js';
+import { authenticate, db, limit, parseBody, googleSetupIssues, sendError, fail } from '../server/seo-shared.js';
 import { startGoogle, googleCallback, connection, accessToken, sites, performance } from '../server/seo-google.js';
 import { normalizeSettings, normalizeDraft, propertyMatchesWebsite } from '../shared/seo-model.js';
 export default async function handler(req,res) {
@@ -19,8 +19,8 @@ export default async function handler(req,res) {
         db(`seo_audits?${filter}&select=id,url,result,created_at&order=created_at.desc&limit=20`),
         db(`seo_drafts?${filter}&select=draft,updated_at&order=updated_at.desc&limit=30`),connection(auth.companyId),
       ]);
-      let configured = true; try {googleConfig();} catch {configured=false;}
-      return res.status(200).json({settings:workspaces?.[0]?.settings || null,drafts:drafts || [],audits:audits || [],google:{configured,connected:Boolean(conn),property:conn?.property || null}});
+      const setupIssues=googleSetupIssues();
+      return res.status(200).json({settings:workspaces?.[0]?.settings || null,drafts:drafts || [],audits:audits || [],google:{configured:setupIssues.length===0,setupIssues,connected:Boolean(conn),property:conn?.property || null}});
     }
     if (action === 'save-settings') {
       const settings = normalizeSettings(body.settings);
