@@ -7218,19 +7218,19 @@ else if (state.section === "seo") {
           <div>
             <div class="seo-audit-title-row">
               <span class="seo-kicker">REAL WEBSITE AUDIT</span>
-              <span class="seo-live-pill">LIVE PAGE CHECK</span>
+              <span class="seo-live-pill">LIVE SITE CRAWL</span>
             </div>
-            <h2>Analyze the real website, then turn problems into actions.</h2>
+            <h2>Crawl the real website, find the issues, then fix them in priority order.</h2>
             <p>
-              Enter a public website URL. YOUYOU checks the live page from the server,
-              then connects the findings to your SEO service, city and workspace strategy.
+              Enter a public website URL. YOUYOU securely crawls up to 12 same-domain HTML pages,
+              checks technical and on-page SEO, and turns the findings into a prioritized action plan.
             </p>
           </div>
         </div>
 
         <div class="seo-audit-source-note">
           <span>1</span>
-          <p>Use the website URL above or paste another public page here. YOUYOU audits the real live page — not a demo score.</p>
+          <p>Use the website URL above or paste another public page here. YOUYOU crawls the live site — not a demo score or fabricated search data.</p>
         </div>
 
         <div class="seo-audit-runner">
@@ -7245,7 +7245,7 @@ else if (state.section === "seo") {
           </label>
 
           <button id="seo-run-website-audit" class="primary" type="button">
-            Run real website audit →
+            Run full website audit →
           </button>
 
           <span id="seo-audit-status" class="seo-audit-status">
@@ -7258,13 +7258,21 @@ else if (state.section === "seo") {
           <div>
             <strong>Paste a public website and run the audit.</strong>
             <p>
-              YOUYOU will check on-page SEO, crawl signals, content structure,
-              images, links, robots/sitemap basics and target-topic usage.
+              YOUYOU will check multiple live pages, titles, descriptions, H1s, canonicals,
+              indexability, duplicate metadata, thin content, images, links, robots.txt and sitemap.xml.
             </p>
           </div>
         </div>
 
         <div id="seo-audit-results" class="seo-audit-results" hidden>
+          <div class="seo-site-health-grid">
+            <article><small>SITE HEALTH</small><strong id="seo-site-score">—</strong><span id="seo-site-score-label">—</span></article>
+            <article><small>PAGES CRAWLED</small><strong id="seo-site-pages">—</strong><span>same-domain HTML pages</span></article>
+            <article><small>INDEXABLE</small><strong id="seo-site-indexable">—</strong><span>crawled pages</span></article>
+            <article><small>CRITICAL ISSUES</small><strong id="seo-site-critical">—</strong><span>high-priority actions</span></article>
+            <article><small>DUPLICATES</small><strong id="seo-site-duplicates">—</strong><span>title / description groups</span></article>
+          </div>
+
           <div class="seo-audit-overview">
             <div class="seo-audit-score-card">
               <div class="seo-audit-score-ring" id="seo-audit-score-ring">
@@ -7319,6 +7327,19 @@ else if (state.section === "seo") {
             </article>
           </div>
 
+          <div class="seo-crawl-pages-card">
+            <div class="seo-audit-action-head seo-crawl-head">
+              <div><small>CRAWLED PAGES</small><h3>Page-by-page technical snapshot.</h3></div>
+              <span id="seo-crawl-pages-count">—</span>
+            </div>
+            <div class="seo-crawl-table-wrap">
+              <table class="seo-crawl-table">
+                <thead><tr><th>Page</th><th>Status</th><th>Score</th><th>Title</th><th>Words</th><th>Issues</th></tr></thead>
+                <tbody id="seo-crawl-pages-body"></tbody>
+              </table>
+            </div>
+          </div>
+
           <div class="seo-audit-target-check dashboard-card">
             <div>
               <small>WORKSPACE ↔ WEBSITE MATCH</small>
@@ -7350,8 +7371,8 @@ else if (state.section === "seo") {
           </div>
 
           <p class="seo-audit-disclaimer">
-            This is a live single-page audit of the URL you entered. It is not yet a full-site crawler
-            and it does not claim live Google rankings or keyword search volume.
+            This is a live multi-page crawler capped at 12 same-domain HTML pages per run for safe, fast diagnostics.
+            Google rankings, queries, clicks, impressions and average position are shown only after a real Search Console OAuth/API connection.
           </p>
         </div>
       </section>
@@ -7627,7 +7648,7 @@ else if (state.section === "seo") {
           </div>
 
           <p>
-            Connect real queries, clicks, impressions and page performance later.
+            Your website can already be verified in Google Search Console. YOUYOU does not invent performance metrics: queries, clicks, impressions and positions require an OAuth/API connection inside the app.
           </p>
 
           <div class="seo-console-points">
@@ -7638,7 +7659,7 @@ else if (state.section === "seo") {
 
           <div class="seo-console-status-row">
             <span>Free Google tool</span>
-            <strong>Connection coming later</strong>
+            <strong>Verified site ≠ API data connection</strong>
           </div>
         </article>
 
@@ -9684,6 +9705,14 @@ function seoAuditRender(result) {
   const tech = result.technical || {};
   const links = result.links || {};
   const target = result.target || {};
+  const site = result.site || {};
+
+  seoAuditSetText("#seo-site-score", Number.isFinite(site.score) ? `${site.score}/100` : `${result.score ?? "—"}/100`);
+  seoAuditSetText("#seo-site-score-label", site.scoreLabel || result.scoreLabel || "Live audit");
+  seoAuditSetText("#seo-site-pages", site.pagesCrawled ?? 1);
+  seoAuditSetText("#seo-site-indexable", site.indexablePages ?? (tech.noindex ? 0 : 1));
+  seoAuditSetText("#seo-site-critical", site.issues?.high ?? (result.findings || []).filter((item) => item.severity === "high").length);
+  seoAuditSetText("#seo-site-duplicates", `${site.duplicateTitles ?? 0} / ${site.duplicateDescriptions ?? 0}`);
 
   seoAuditSetText("#seo-audit-title-kpi", page.title ? `${page.titleLength}/60` : "MISSING");
   seoAuditSetText("#seo-audit-title-note", page.title || "No <title> found");
@@ -9713,6 +9742,31 @@ function seoAuditRender(result) {
   seoAuditSetText("#seo-audit-words", page.wordCount ?? 0);
   seoAuditSetText("#seo-audit-links", `${links.internal ?? 0} / ${links.external ?? 0}`);
   seoAuditSetText("#seo-audit-links-note", "internal / external");
+
+  const crawlPages = Array.isArray(result.pages) ? result.pages : [];
+  seoAuditSetText("#seo-crawl-pages-count", `${crawlPages.length} page${crawlPages.length === 1 ? "" : "s"}`);
+  const crawlBody = document.querySelector("#seo-crawl-pages-body");
+  if (crawlBody) {
+    crawlBody.innerHTML = crawlPages.length
+      ? crawlPages.map((item) => {
+          let pathLabel = item.url || "—";
+          try {
+            const parsed = new URL(item.url);
+            pathLabel = `${parsed.pathname || "/"}${parsed.search || ""}`;
+          } catch {}
+          const title = item.title || "Missing title";
+          return `
+            <tr>
+              <td><span class="seo-crawl-path" title="${escapeHtml(item.url || "")}">${escapeHtml(pathLabel)}</span></td>
+              <td><span class="seo-crawl-status ${Number(item.status) >= 400 ? "is-bad" : "is-good"}">${escapeHtml(String(item.status ?? "—"))}</span></td>
+              <td><strong>${escapeHtml(String(item.score ?? "—"))}</strong></td>
+              <td><span class="seo-crawl-title" title="${escapeHtml(title)}">${escapeHtml(title)}</span></td>
+              <td>${escapeHtml(String(item.wordCount ?? 0))}</td>
+              <td>${escapeHtml(String(item.issues ?? 0))}</td>
+            </tr>`;
+        }).join("")
+      : `<tr><td colspan="6">No crawl data returned.</td></tr>`;
+  }
 
   const targetSignals = document.querySelector("#seo-audit-target-signals");
   if (targetSignals) {
@@ -9794,10 +9848,10 @@ async function runSeoWebsiteAudit() {
 
   if (button) {
     button.disabled = true;
-    button.textContent = "Auditing live page...";
+    button.textContent = "Crawling website...";
   }
   if (status) {
-    status.textContent = "Fetching the live website securely...";
+    status.textContent = "Crawling same-domain pages securely...";
     status.className = "seo-audit-status is-loading";
   }
 
@@ -9822,7 +9876,7 @@ async function runSeoWebsiteAudit() {
     seoAuditRender(payload);
 
     if (status) {
-      status.textContent = `Live audit complete · ${payload.findings?.length || 0} actions found`;
+      status.textContent = `Site audit complete · ${payload.site?.pagesCrawled || 1} pages · ${payload.findings?.length || 0} prioritized actions`;
       status.className = "seo-audit-status is-success";
     }
   } catch (error) {
@@ -9834,7 +9888,7 @@ async function runSeoWebsiteAudit() {
   } finally {
     if (button) {
       button.disabled = false;
-      button.textContent = "Run real website audit →";
+      button.textContent = "Run full website audit →";
     }
   }
 }
@@ -9886,8 +9940,11 @@ function initSeoWebsiteAudit() {
     if (!result) return;
 
     const lines = [
-      `YOUYOU Website Audit — ${result.finalUrl || result.url || ""}`,
-      `Score: ${result.score}/100 — ${result.scoreLabel}`,
+      `YOUYOU Site Audit — ${result.finalUrl || result.url || ""}`,
+      `Site health: ${result.site?.score ?? result.score}/100 — ${result.site?.scoreLabel || result.scoreLabel}`,
+      `Pages crawled: ${result.site?.pagesCrawled ?? 1}`,
+      `Indexable pages: ${result.site?.indexablePages ?? (result.technical?.noindex ? 0 : 1)}`,
+      `Issues: ${result.site?.issues?.high ?? 0} high · ${result.site?.issues?.medium ?? 0} medium · ${result.site?.issues?.low ?? 0} low`,
       "",
       ...(result.findings || []).flatMap((item, index) => [
         `${index + 1}. ${item.problem}`,

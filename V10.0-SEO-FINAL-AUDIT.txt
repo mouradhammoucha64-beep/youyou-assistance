@@ -1,0 +1,40 @@
+YOUYOU V10.0 — SEO FINAL REBUILD
+Date: 2026-10-03
+
+Scope
+- Rebuilt the live Website Audit from a single-page checker into a bounded multi-page site crawler.
+- Crawl is limited to 12 same-host HTML pages per run for predictable serverless execution.
+- Retained SSRF/private-network protections, redirect limits, response-size limits and fetch timeouts.
+
+Live checks
+- HTTP status and indexability
+- Titles and meta descriptions
+- H1 / heading presence
+- Canonical URLs
+- HTML lang and viewport
+- Word count / thin content
+- Image alt coverage
+- Internal/external links
+- robots.txt and sitemap.xml
+- JSON-LD presence
+- Target service/city alignment
+- Duplicate title groups
+- Duplicate meta-description groups
+
+UI
+- Site Health score
+- Pages crawled / indexable pages
+- High-priority issue count
+- Duplicate metadata groups
+- Page-by-page crawl table
+- Prioritized action plan with WHERE / FIX / WHY / suggested text where useful
+
+Google Search Console
+- Search Console verification and Search Console API access are intentionally treated as different things.
+- YOUYOU does not fabricate clicks, impressions, queries, positions, search volume or ranking difficulty.
+- Live Search Console performance metrics still require a real Google OAuth/API connection inside YOUYOU.
+
+Validation
+- node --check passed for main.js, api/seo-audit.js and seo-audit.js.
+- SEO contract tests pass.
+- Existing project suite: 18 tests pass; 3 Stripe tests cannot run in the supplied archive environment because the dependency installation is incomplete (stripe package missing from node_modules). This is unrelated to the SEO code.
