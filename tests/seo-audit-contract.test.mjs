@@ -18,6 +18,7 @@ test('SEO UI surfaces real site-health and crawl results without fabricated Goog
   assert.match(ui, /LIVE SITE CRAWL/);
   assert.match(ui, /seo-site-score/);
   assert.match(ui, /seo-crawl-pages-body/);
-  assert.match(ui, /Verified site ≠ API data connection/);
-  assert.match(ui, /does not invent performance metrics/);
+  assert.match(ui, /mountGoogleConsole/);
+  const panel = fs.readFileSync(new URL('../seo-google-panel.js', import.meta.url), 'utf8');
+  assert.match(panel, /No search data available/);
 });

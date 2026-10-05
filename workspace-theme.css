@@ -178,3 +178,24 @@
 .workspace-light .seo-page-idea button[aria-pressed="true"]{background:#6843ce!important;color:#fff!important}
 
 .workspace-light .seo-data-warning{padding:14px 18px;background:#fff5df;color:#76520b;border:1px solid #ead39b;border-radius:12px}
+
+/* V12: Google Search Console and checklist layout */
+.seo-growth-page .seo-checklist-progress { white-space: nowrap; flex-shrink: 0; min-width: 3.5rem; }
+.seo-growth-page .seo-checklist-head-actions { flex-shrink: 0; }
+.seo-growth-page[data-active-seo-tab="google"] .seo-bottom-grid { grid-template-columns: minmax(0, 1fr); }
+#seo-google-panel { min-width: 0; overflow: hidden; }
+#seo-google-panel > * { position: relative; }
+#seo-google-panel p { overflow-wrap: anywhere; line-height: 1.6; }
+#seo-google-panel form, #seo-google-panel .gsc-actions { display:flex; align-items:end; flex-wrap:wrap; gap:12px; margin:16px 0; }
+#seo-google-panel label { display:grid; gap:8px; flex:1 1 240px; min-width:0; }
+#seo-google-panel input, #seo-google-panel select { width:100%; min-width:0; padding:12px; border:1px solid #d8d4e6; border-radius:10px; background:#fff; color:#251b40; }
+#seo-google-panel button { padding:12px 16px; border:1px solid #ddd5f0; border-radius:10px; background:#6d28d9; color:white; cursor:pointer; }
+#seo-google-panel button:disabled { opacity:.55; cursor:wait; }
+#seo-google-panel .gsc-error { color:#a51d32; }
+#seo-google-panel .gsc-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; }
+#seo-google-panel .gsc-stats div { padding:16px; background:#f5f1ff; border-radius:12px; display:grid; gap:8px; color:#31204b; }
+#seo-google-panel .gsc-stats strong { font-size:24px; }
+#seo-google-panel .gsc-table-wrap { overflow-x:auto; max-width:100%; }
+#seo-google-panel table { width:100%; border-collapse:collapse; font-size:14px; }
+#seo-google-panel th, #seo-google-panel td { text-align:left; padding:12px; border-bottom:1px solid #e5deee; }
+#seo-google-panel tbody th { overflow-wrap:anywhere; min-width:180px; font-weight:500; }

@@ -1,3 +1,4 @@
+import { mountGoogleConsole } from "./seo-google-panel.js";
 import { createClient } from "@supabase/supabase-js";
 import "./style.css";
 import "./workspace-theme.css";
@@ -1868,7 +1869,8 @@ function initSeoProTabs() {
     onpage: [".seo-onpage-card", ".seo-opportunity-card", ".seo-search-preview"],
     content: [".seo-page-ideas-card", ".seo-brief-card"],
     local: [".seo-local-pack"],
-    technical: [".seo-checklist-card", ".seo-console-card"],
+    technical: [".seo-checklist-card"],
+    google: [".seo-console-card"],
   };
 
   Object.entries(map).forEach(([key, selectors]) => {
@@ -1877,7 +1879,13 @@ function initSeoProTabs() {
     }));
   });
 
-  const setTab = (key, targetSelector = "") => {
+  const setTab = (key, targetSelector = "", updateUrl = true) => {
+    if (!map[key]) key = "overview";
+    if (updateUrl) {
+      const url = new URL(location.href);
+      url.searchParams.set("tab", key);
+      history.replaceState({}, "", url);
+    }
     root.dataset.activeSeoTab = key;
 
     root.querySelectorAll("[data-seo-tab]").forEach((btn) => {
@@ -1911,7 +1919,7 @@ function initSeoProTabs() {
     btn.addEventListener("click", () => navigateDashboard(btn.dataset.dashboardGo));
   });
 
-  setTab("overview");
+  setTab(new URL(location.href).searchParams.get("tab") || "overview", "", false);
 }
 
 
@@ -7139,6 +7147,7 @@ else if (state.section === "seo") {
         <button class="seo-pro-tab" type="button" data-seo-tab="content">Content</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="local">Local</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="technical">Technical</button>
+        <button class="seo-pro-tab" type="button" data-seo-tab="google">Google Performance</button>
       </div>
 
       <div class="seo-overview-panel" data-seo-panel="overview">
@@ -7639,31 +7648,8 @@ else if (state.section === "seo") {
         </article>
 
 
-        <article class="seo-console-card seo-console-card-compact dashboard-card">
-          <div class="seo-console-orbit"></div>
-
-          <div class="seo-console-compact-top">
-            <div class="seo-console-icon">G</div>
-            <div>
-              <small>SEARCH PERFORMANCE</small>
-              <h2>Google Search Console</h2>
-            </div>
-          </div>
-
-          <p>
-            Your website can already be verified in Google Search Console. YOUYOU does not invent performance metrics: queries, clicks, impressions and positions require an OAuth/API connection inside the app.
-          </p>
-
-          <div class="seo-console-points">
-            <span>Real queries</span>
-            <span>Real clicks</span>
-            <span>Real impressions</span>
-          </div>
-
-          <div class="seo-console-status-row">
-            <span>Free Google tool</span>
-            <strong>Verified site ≠ API data connection</strong>
-          </div>
+        <article class="seo-console-card dashboard-card" id="seo-google-panel" aria-label="Google Search Console">
+          <h2>Google Search Console</h2><p>Loading connection…</p>
         </article>
 
       </div>
@@ -8539,6 +8525,7 @@ if (state.section === "pages" || state.section === "my-pages") {
 
 if (state.section === "seo") {
   initSeoProTabs();
+  mountGoogleConsole({ supabase, company: state.company });
   initSeoWebsiteAudit();
   initSeoGrowthCenter();
 }
