@@ -163,3 +163,18 @@
 }
 .workspace-light .lead-card-side{background:#f8f9fd!important;border-color:#e2e6f0!important}
 @media(max-width:760px){.workspace-light .lead-card{grid-template-columns:minmax(0,1fr)!important}.workspace-light .lead-card-side{border-left:0;border-top:1px solid #e2e6f0}}
+
+/* V11: persistent SEO selection, readable chips, compact cards. */
+.workspace-light .seo-growth-page .seo-pro-tab.is-active{background:#6843ce!important;color:#fff!important;border-color:#6843ce!important;box-shadow:0 2px 8px #6843ce33!important}
+.workspace-light .seo-pro-tab.is-active .seo-tab-live{color:#fff!important;background:#ffffff22!important}
+.workspace-light .seo-growth-page :is(.seo-keyword-chips span,.seo-related-theme-chips span,.seo-priority,.seo-live-badge,.seo-keyword-badge,.seo-strategy-badge){color:#563498!important;background:#f0eaff!important}
+.workspace-light .seo-main-grid,.workspace-light .seo-secondary-grid{align-items:start!important}
+.workspace-light .seo-search-preview{height:auto!important;min-height:0!important;align-self:start}
+.workspace-light .seo-quickwin-item{padding:18px 0!important;margin:0!important}
+.workspace-light .seo-action-grid{gap:12px!important}
+.workspace-light .seo-growth-page small{font-size:11px!important;color:#536078!important;letter-spacing:.04em}
+.workspace-light .seo-score-ring strong{color:#fff!important}
+.workspace-light .seo-page-idea button{flex-shrink:0}
+.workspace-light .seo-page-idea button[aria-pressed="true"]{background:#6843ce!important;color:#fff!important}
+
+.workspace-light .seo-data-warning{padding:14px 18px;background:#fff5df;color:#76520b;border:1px solid #ead39b;border-radius:12px}

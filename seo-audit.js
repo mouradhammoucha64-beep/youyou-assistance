@@ -203,7 +203,7 @@ function sitemapUrls(xml, baseUrl, host) {
   return out;
 }
 
-function analyzePage({ html, finalUrl, response, responseMs, service, city, companyName }) {
+export function analyzePage({ html, finalUrl, response, responseMs, service, city, companyName }) {
   const final = new URL(finalUrl);
   const title = firstTagContent(html, "title");
   const metaDescription = metaContent(html, "description");
@@ -218,7 +218,7 @@ function analyzePage({ html, finalUrl, response, responseMs, service, city, comp
   const h2Matches = [...html.matchAll(/<h2\b[^>]*>([\s\S]*?)<\/h2>/gi)];
   const h1 = h1Matches.length ? cleanText(h1Matches[0][1]) : "";
   const imageTags = allTags(html, "img");
-  const imagesMissingAlt = imageTags.filter((tag) => !attrFromTag(tag, "alt")).length;
+  const imagesMissingAlt = imageTags.filter((tag) => ! /\balt\s*=/i.test(tag)).length;
   const anchorTags = allTags(html, "a");
   let internal = 0, external = 0, emptyHref = 0;
   for (const tag of anchorTags) {
@@ -229,38 +229,40 @@ function analyzePage({ html, finalUrl, response, responseMs, service, city, comp
   }
   const visibleText = getVisibleText(html);
   const wordCount = visibleText ? visibleText.split(/\s+/).filter(Boolean).length : 0;
+  const renderingLimited = wordCount < 30 && /<script\b[^>]*(?:src=|type=[\"\']module)/i.test(html);
   const noindex = /(^|[\s,])noindex([\s,]|$)/i.test(metaRobots);
   const serviceInTitle = includesNeedle(title, service);
-  const serviceInH1 = includesNeedle(h1, service);
-  const serviceInBody = includesNeedle(visibleText, service);
+  const serviceInH1 = renderingLimited ? null : includesNeedle(h1, service);
+  const serviceInBody = renderingLimited ? null : includesNeedle(visibleText, service);
   const cityInTitle = includesNeedle(title, city);
-  const cityInH1 = includesNeedle(h1, city);
-  const cityInBody = includesNeedle(visibleText, city);
+  const cityInH1 = renderingLimited ? null : includesNeedle(h1, city);
+  const cityInBody = renderingLimited ? null : includesNeedle(visibleText, city);
   const findings = [];
   let score = 100;
+  if (renderingLimited) addFinding(findings,{severity:"medium",category:"RENDERING",problem:"JavaScript app shell detected; rendered content is unverified",where:finalUrl,fix:"Verify the rendered page in a browser. This crawler only reads response HTML; headings, words and body relevance are not graded for this page.",why:"Missing content in fetched HTML does not prove it is missing for visitors."});
 
   if (!response.ok) { score -= 25; addFinding(findings,{severity:"high",category:"TECHNICAL",problem:`Page returned HTTP ${response.status}`,where:finalUrl,fix:"Make the page return HTTP 200 for normal visitors and crawlers.",why:"Search engines need a reliable successful response."}); }
-  if (!title) { score -= 14; addFinding(findings,{severity:"high",category:"ON-PAGE",problem:"SEO title is missing",where:finalUrl,fix:"Add one descriptive <title>.",suggested:safeSuggestedTitle(service,city,companyName),why:"The title is a primary search-result and relevance signal."}); }
-  else if (title.length < 25 || title.length > 65) { score -= 6; addFinding(findings,{severity:"medium",category:"ON-PAGE",problem:`SEO title length is ${title.length} characters`,where:finalUrl,fix:"Keep the title concise and descriptive, usually around 30–60 characters.",suggested:safeSuggestedTitle(service,city,companyName),why:"Clear titles are easier to understand and less likely to be truncated."}); }
-  if (!metaDescription) { score -= 10; addFinding(findings,{severity:"medium",category:"ON-PAGE",problem:"Meta description is missing",where:finalUrl,fix:"Add a useful description that explains the page and next step.",suggested:safeSuggestedMeta(service,city,companyName),why:"A useful description can improve how the result is presented and understood."}); }
-  else if (metaDescription.length < 70 || metaDescription.length > 170) { score -= 4; addFinding(findings,{severity:"low",category:"ON-PAGE",problem:`Meta description length is ${metaDescription.length} characters`,where:finalUrl,fix:"Tighten the description so it clearly communicates value.",suggested:safeSuggestedMeta(service,city,companyName),why:"Focused snippets are easier to scan."}); }
-  if (!h1Matches.length) { score -= 12; addFinding(findings,{severity:"high",category:"CONTENT",problem:"No H1 heading was found",where:finalUrl,fix:"Add one clear main heading.",suggested:safeSuggestedH1(service,city),why:"The main heading clarifies the page topic."}); }
+  if (!title) { score -= 14; addFinding(findings,{severity:"high",category:"ON-PAGE",problem:"SEO title is missing",where:finalUrl,fix:"Add one descriptive <title>.",suggested:final.pathname === "/" ? safeSuggestedTitle(service,city,companyName) : "",why:"The title is a primary search-result and relevance signal."}); }
+  else if (title.length < 25 || title.length > 65) { score -= 6; addFinding(findings,{severity:"medium",category:"ON-PAGE",problem:`SEO title length is ${title.length} characters`,where:finalUrl,fix:"Keep the title concise and descriptive, usually around 30–60 characters.",suggested:final.pathname === "/" ? safeSuggestedTitle(service,city,companyName) : "",why:"Clear titles are easier to understand and less likely to be truncated."}); }
+  if (!metaDescription) { score -= 10; addFinding(findings,{severity:"medium",category:"ON-PAGE",problem:"Meta description is missing",where:finalUrl,fix:"Add a useful description that explains the page and next step.",suggested:final.pathname === "/" ? safeSuggestedMeta(service,city,companyName) : "",why:"A useful description can improve how the result is presented and understood."}); }
+  else if (metaDescription.length < 70 || metaDescription.length > 170) { score -= 4; addFinding(findings,{severity:"low",category:"ON-PAGE",problem:`Meta description length is ${metaDescription.length} characters`,where:finalUrl,fix:"Tighten the description so it clearly communicates value.",suggested:final.pathname === "/" ? safeSuggestedMeta(service,city,companyName) : "",why:"Focused snippets are easier to scan."}); }
+  if (!renderingLimited && !h1Matches.length) { score -= 12; addFinding(findings,{severity:"high",category:"CONTENT",problem:"No H1 heading was found",where:finalUrl,fix:"Add one clear main heading.",suggested:final.pathname === "/" ? safeSuggestedH1(service,city) : "",why:"The main heading clarifies the page topic."}); }
   else if (h1Matches.length > 1) { score -= 4; addFinding(findings,{severity:"low",category:"CONTENT",problem:`${h1Matches.length} H1 headings were found`,where:finalUrl,fix:"Keep one obvious primary page heading.",why:"A simple hierarchy is easier to scan."}); }
   if (!canonical) { score -= 5; addFinding(findings,{severity:"low",category:"TECHNICAL",problem:"Canonical URL was not found",where:finalUrl,fix:"Add a self-referencing canonical on indexable pages.",suggested:finalUrl,why:"Canonical signals clarify the preferred URL."}); }
   if (noindex) { score -= 25; addFinding(findings,{severity:"high",category:"INDEXING",problem:"The page contains a noindex directive",where:finalUrl,fix:"Remove noindex if this page should appear in search.",why:"Noindex asks search engines not to index the page."}); }
   if (!viewport) { score -= 5; addFinding(findings,{severity:"medium",category:"MOBILE",problem:"Viewport meta tag was not found",where:finalUrl,fix:'Add width=device-width, initial-scale=1.',why:"Responsive rendering matters on mobile devices."}); }
   if (!htmlLang) { score -= 2; addFinding(findings,{severity:"low",category:"ACCESSIBILITY",problem:"HTML language attribute is missing",where:finalUrl,fix:"Declare the primary page language.",why:"Language metadata helps browsers and assistive technologies."}); }
   if (imageTags.length && imagesMissingAlt > 0) { const ratio = imagesMissingAlt/imageTags.length; score -= ratio > .5 ? 7 : 4; addFinding(findings,{severity:ratio>.5?"medium":"low",category:"IMAGES",problem:`${imagesMissingAlt} of ${imageTags.length} images are missing alt text`,where:finalUrl,fix:"Add meaningful alt text to informative images; keep decorative alts empty.",why:"Alt text improves accessibility and image context."}); }
-  if (wordCount < 200) { score -= 5; addFinding(findings,{severity:"medium",category:"CONTENT",problem:`The page has about ${wordCount} visible words`,where:finalUrl,fix:"Make sure the page fully answers the visitor’s decision-making questions without filler.",why:"Very thin pages may not satisfy the intent behind a search."}); }
-  if (service && serviceInTitle === false) { score -= 5; addFinding(findings,{severity:"medium",category:"TARGET TOPIC",problem:`Target service “${service}” is not clear in the title`,where:finalUrl,fix:"Make the title reflect the target service when it matches page intent.",suggested:safeSuggestedTitle(service,city,companyName),why:"The title should clearly communicate the page topic."}); }
-  if (service && serviceInH1 === false) { score -= 5; addFinding(findings,{severity:"medium",category:"TARGET TOPIC",problem:`Target service “${service}” is not clear in the H1`,where:finalUrl,fix:"Use a natural main heading that reflects the service.",suggested:safeSuggestedH1(service,city),why:"The main heading should match visitor expectations."}); }
-  if (city && cityInBody === false) { score -= 3; addFinding(findings,{severity:"low",category:"LOCAL SEO",problem:`Target city “${city}” is not clearly present in page text`,where:finalUrl,fix:"If the page genuinely serves that location, add real local context naturally.",why:"Location context helps local customers understand coverage."}); }
-  if (internal < 2) { score -= 3; addFinding(findings,{severity:"low",category:"INTERNAL LINKS",problem:"Very few internal links were found",where:finalUrl,fix:"Link to relevant service, FAQ, contact or related pages using descriptive anchors.",why:"Internal links support discovery and navigation."}); }
+  if (!renderingLimited && wordCount < 200) { score -= 5; addFinding(findings,{severity:"medium",category:"CONTENT",problem:`The page has about ${wordCount} visible words`,where:finalUrl,fix:"Make sure the page fully answers the visitor’s decision-making questions without filler.",why:"Very thin pages may not satisfy the intent behind a search."}); }
+  if (final.pathname === "/" && service && serviceInTitle === false) { score -= 5; addFinding(findings,{severity:"medium",category:"TARGET TOPIC",problem:`Target service “${service}” is not clear in the title`,where:finalUrl,fix:"Make the title reflect the target service when it matches page intent.",suggested:final.pathname === "/" ? safeSuggestedTitle(service,city,companyName) : "",why:"The title should clearly communicate the page topic."}); }
+  if (final.pathname === "/" && service && serviceInH1 === false) { score -= 5; addFinding(findings,{severity:"medium",category:"TARGET TOPIC",problem:`Target service “${service}” is not clear in the H1`,where:finalUrl,fix:"Use a natural main heading that reflects the service.",suggested:final.pathname === "/" ? safeSuggestedH1(service,city) : "",why:"The main heading should match visitor expectations."}); }
+  if (final.pathname === "/" && city && cityInBody === false) { score -= 3; addFinding(findings,{severity:"low",category:"LOCAL SEO",problem:`Target city “${city}” is not clearly present in page text`,where:finalUrl,fix:"If the page genuinely serves that location, add real local context naturally.",why:"Location context helps local customers understand coverage."}); }
+  if (!renderingLimited && internal < 2) { score -= 3; addFinding(findings,{severity:"low",category:"INTERNAL LINKS",problem:"Very few internal links were found",where:finalUrl,fix:"Link to relevant service, FAQ, contact or related pages using descriptive anchors.",why:"Internal links support discovery and navigation."}); }
 
   score = Math.max(0, Math.min(100, Math.round(score)));
   return {
     url: finalUrl, status: response.status, responseMs, score, scoreLabel: scoreLabel(score),
-    page:{title,titleLength:title.length,metaDescription,metaDescriptionLength:metaDescription.length,h1,h1Count:h1Matches.length,h2Count:h2Matches.length,wordCount,imagesCount:imageTags.length,imagesMissingAlt,htmlLang,viewport:Boolean(viewport),structuredDataCount:countStructuredData(html),openGraph:{title:Boolean(metaContent(html,"og:title")),description:Boolean(metaContent(html,"og:description")),image:Boolean(metaContent(html,"og:image"))}},
+    page:{renderingLimited,title,titleLength:title.length,metaDescription,metaDescriptionLength:metaDescription.length,h1,h1Count:h1Matches.length,h2Count:h2Matches.length,wordCount,imagesCount:imageTags.length,imagesMissingAlt,htmlLang,viewport:Boolean(viewport),structuredDataCount:countStructuredData(html),openGraph:{title:Boolean(metaContent(html,"og:title")),description:Boolean(metaContent(html,"og:description")),image:Boolean(metaContent(html,"og:image"))}},
     technical:{canonical,metaRobots,noindex}, links:{internal,external,empty:emptyHref},
     target:{service,city,serviceInTitle,serviceInH1,serviceInBody,cityInTitle,cityInH1,cityInBody}, findings,
     discoveredLinks: discoverLinks(html, finalUrl, final.hostname),
@@ -324,7 +326,7 @@ export default async function handler(req, res) {
 
     const duplicateTitles = duplicateGroups(pages, (p) => p.page.title);
     const duplicateDescriptions = duplicateGroups(pages, (p) => p.page.metaDescription);
-    for (const group of duplicateTitles.slice(0,3)) addFinding(siteFindings,{severity:"high",category:"DUPLICATION",problem:`Duplicate title used on ${group.urls.length} crawled pages`,where:group.urls.join(" · "),fix:"Give each indexable page a unique title that matches its own intent.",suggested:group.value,why:"Duplicate titles make it harder to distinguish pages and their purpose."});
+    for (const group of duplicateTitles.slice(0,3)) addFinding(siteFindings,{severity:"high",category:"DUPLICATION",problem:`Duplicate title used on ${group.urls.length} crawled pages`,where:group.urls.join(" · "),fix:"Give each indexable page a unique title that matches its own intent.",why:"Duplicate titles make it harder to distinguish pages and their purpose."});
     for (const group of duplicateDescriptions.slice(0,3)) addFinding(siteFindings,{severity:"medium",category:"DUPLICATION",problem:`Duplicate meta description used on ${group.urls.length} crawled pages`,where:group.urls.join(" · "),fix:"Write unique descriptions for pages with different intent.",why:"Unique descriptions improve clarity across search results."});
 
     const allFindings = [...siteFindings, ...pages.flatMap((p) => p.findings)].sort((a,b) => severityWeight(b.severity)-severityWeight(a.severity));
@@ -340,12 +342,12 @@ export default async function handler(req, res) {
     return res.status(200).json({
       ...primary,
       site:{
-        score:avgScore, scoreLabel:scoreLabel(avgScore), pagesCrawled:pages.length, pageLimit:MAX_PAGES,
+        renderingLimited:pages.some(p=>p.page.renderingLimited), score:avgScore, scoreLabel:scoreLabel(avgScore), pagesCrawled:pages.length, pageLimit:MAX_PAGES,
         indexablePages:indexable, issues:{high,medium,low,total:allFindings.length},
         duplicateTitles:duplicateTitles.length, duplicateDescriptions:duplicateDescriptions.length,
         robotsFound,sitemapFound, crawlMs:Date.now()-startedAt,
       },
-      pages:pages.map((p)=>({url:p.url,status:p.status,score:p.score,title:p.page.title,description:p.page.metaDescription,h1:p.page.h1,wordCount:p.page.wordCount,noindex:p.technical.noindex,canonical:p.technical.canonical,issues:p.findings.length})),
+      pages:pages.map((p)=>({renderingLimited:p.page.renderingLimited,url:p.url,status:p.status,score:p.score,title:p.page.title,description:p.page.metaDescription,h1:p.page.h1,wordCount:p.page.wordCount,noindex:p.technical.noindex,canonical:p.technical.canonical,issues:p.findings.length})),
       findings:allFindings.slice(0,24),
       scope:"multi-page-live-site-audit",
       notes:[`Crawls up to ${MAX_PAGES} same-host HTML pages per run.`,`Search Console clicks, impressions, queries and positions require a Google OAuth/API connection and are never fabricated.`],

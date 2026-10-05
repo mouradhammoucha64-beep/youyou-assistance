@@ -1883,7 +1883,8 @@ function initSeoProTabs() {
     root.querySelectorAll("[data-seo-tab]").forEach((btn) => {
       const active = btn.dataset.seoTab === key;
       btn.classList.toggle("is-active", active);
-      btn.setAttribute("aria-selected", active ? "true" : "false");
+      btn.setAttribute("aria-pressed", String(active));
+      btn.setAttribute("aria-pressed", active ? "true" : "false");
     });
 
     root.querySelectorAll("[data-seo-panel]").forEach((panel) => {
@@ -7067,7 +7068,7 @@ else if (state.section === "seo") {
           </div>
 
           <div>
-            <small>SEO READINESS</small>
+            <small>WORKSPACE SETUP</small>
             <strong id="seo-score-label">Analyzing...</strong>
             <span id="seo-score-subtext">
               Based on your workspace setup, not Google ranking data.
@@ -7129,7 +7130,8 @@ else if (state.section === "seo") {
         <p>Workspace-based recommendations. Live rankings, clicks and impressions appear after real search integrations are connected.</p>
       </div>
 
-      <div class="seo-pro-tabs dashboard-card" role="tablist" aria-label="SEO workspace">
+      <p id="seo-data-warning" class="seo-data-warning" role="status" hidden></p>
+      <div class="seo-pro-tabs dashboard-card" role="group" aria-label="SEO workspace">
         <button class="seo-pro-tab is-active" type="button" data-seo-tab="overview">Overview</button>
         <button class="seo-pro-tab" type="button" data-seo-tab="audit">Website Audit <span class="seo-tab-live">LIVE</span></button>
         <button class="seo-pro-tab" type="button" data-seo-tab="keywords">Keywords</button>
@@ -7268,7 +7270,7 @@ else if (state.section === "seo") {
           <div class="seo-site-health-grid">
             <article><small>SITE HEALTH</small><strong id="seo-site-score">—</strong><span id="seo-site-score-label">—</span></article>
             <article><small>PAGES CRAWLED</small><strong id="seo-site-pages">—</strong><span>same-domain HTML pages</span></article>
-            <article><small>INDEXABLE</small><strong id="seo-site-indexable">—</strong><span>crawled pages</span></article>
+            <article><small>NO NOINDEX</small><strong id="seo-site-indexable">—</strong><span>crawled pages</span></article>
             <article><small>CRITICAL ISSUES</small><strong id="seo-site-critical">—</strong><span>high-priority actions</span></article>
             <article><small>DUPLICATES</small><strong id="seo-site-duplicates">—</strong><span>title / description groups</span></article>
           </div>
@@ -7318,7 +7320,7 @@ else if (state.section === "seo") {
             <article>
               <small>WORDS</small>
               <strong id="seo-audit-words">—</strong>
-              <span>Visible page text</span>
+              <span>Text in fetched HTML</span>
             </article>
             <article>
               <small>LINKS</small>
@@ -7371,7 +7373,7 @@ else if (state.section === "seo") {
           </div>
 
           <p class="seo-audit-disclaimer">
-            This is a live multi-page crawler capped at 12 same-domain HTML pages per run for safe, fast diagnostics.
+            This live HTML crawler checks up to 12 same-domain pages. It does not execute JavaScript. Content checks on app shells need rendered-page verification; this diagnostic score is not a Google ranking score.
             Google rankings, queries, clicks, impressions and average position are shown only after a real Search Console OAuth/API connection.
           </p>
         </div>
@@ -7504,6 +7506,7 @@ else if (state.section === "seo") {
             </div>
           </div>
 
+          <p id="seo-local-setup-details" role="status"></p>
           <div id="seo-local-plan" class="seo-local-plan">
             <div class="seo-loading-row">Preparing local recommendations...</div>
           </div>
@@ -7621,7 +7624,7 @@ else if (state.section === "seo") {
             <div>
               <small>SEO FOUNDATION</small>
               <h2>Optimization checklist</h2>
-              <p>Build the foundation before chasing rankings.</p>
+              <p>Workspace setup completeness only — not a technical site-health score. Run Website Audit for HTML checks.</p>
             </div>
 
             <div class="seo-checklist-head-actions">
@@ -8950,7 +8953,7 @@ function seoProfileSignals(company = {}, knowledge = []) {
     {
       id: "city",
       label: "Primary city added",
-      done: Boolean(seoCleanText(company.city)),
+      done: Boolean(seoCleanText(company.city)) && !/^(test|demo|example|xxx)$/i.test(seoCleanText(company.city)),
       why: "Add a city to unlock stronger local SEO page ideas.",
     },
     {
@@ -9158,7 +9161,7 @@ function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
     .slice(0, 5)
     .map((item, index) => ({
       priority: index < 2 ? "HIGH" : index < 4 ? "MEDIUM" : "FOUNDATION",
-      title: item.label,
+      title: item.id === "description" ? "Complete your business description" : `Complete setup: ${item.label.replace(/ added$/, "")}`,
       text: item.why,
     }));
 
@@ -9268,6 +9271,8 @@ function buildSeoWorkspaceAnalysis(company = {}, knowledge = [], focus = {}) {
   };
 
   const keywordEngine = buildSeoKeywordEngine(company, knowledge, focus);
+  keywordEngine.title = title;
+  keywordEngine.description = description;
 
   let scoreLabel = "Needs foundation";
   if (score >= 85) scoreLabel = "Strong foundation";
@@ -9486,7 +9491,7 @@ function renderSeoAnalysis(analysis) {
                 <span class="seo-priority seo-priority-${item.priority.toLowerCase()}">${escapeHtml(item.priority)}</span>
               </div>
               <div class="seo-action-grid">
-                <div><small>PROBLEM</small><p>${escapeHtml(item.title)}</p></div>
+                <div><small>OPPORTUNITY</small><p>${escapeHtml(item.title)}</p></div>
                 <div><small>WHERE</small><p>${escapeHtml(
                   item.priority === "LOCAL" ? "Location / local business signals" :
                   item.priority === "FAQ" ? "FAQ / customer questions" :
@@ -9527,19 +9532,36 @@ function renderSeoAnalysis(analysis) {
     pageIdeas.innerHTML = analysis.pageIdeas
       .slice(0, 5)
       .map(
-        (idea) => `
+        (idea, index) => `
           <div class="seo-page-idea">
             <div>
               <span>${escapeHtml(idea.type)}</span>
               <strong>${escapeHtml(idea.title)}</strong>
               <p>${escapeHtml(idea.reason)}</p>
             </div>
-            <div class="seo-page-arrow" aria-hidden="true">IDEA</div>
+            <button type="button" class="seo-mini-btn" data-seo-idea="${index}" aria-pressed="${(analysis.selectedIdea || 0) === index}">${(analysis.selectedIdea || 0) === index ? "Selected" : "Use this idea"}</button>
           </div>
         `
       )
       .join("");
   }
+
+  pageIdeas?.querySelectorAll("[data-seo-idea]").forEach(button => {
+    button.addEventListener("click", () => {
+      const index = Number(button.dataset.seoIdea);
+      const idea = analysis.pageIdeas[index];
+      const outlines = {
+        "LOCAL PAGE": ["Service area and coverage", "Services available in this location", "Real local examples and customer proof", "Address, contact details and hours", "Local questions", "Contact the team"],
+        "FAQ PAGE": ["Who the service is for", "What is included", "Pricing questions", "Process and timing", "Limitations and policies", "Ask another question"],
+        "TRUST PAGE": ["Who we are", "Experience and qualifications", "How we work", "Verified customer examples", "Policies and commitments", "Talk to the team"],
+        "KNOWLEDGE IDEA": ["The customer question", "A direct answer", "Practical steps and examples", "Related questions", "Next step"]
+      };
+      analysis.serviceBrief ||= analysis.brief;
+      analysis.selectedIdea = index;
+      analysis.brief = {title: idea.title, intent: idea.reason, sections: outlines[idea.type] || analysis.serviceBrief.sections};
+      renderSeoAnalysis(analysis);
+    });
+  });
 
   const brief = document.querySelector("#seo-content-brief");
   if (brief) {
@@ -9592,6 +9614,14 @@ function renderSeoAnalysis(analysis) {
       .join("");
   }
 
+  const warning = document.querySelector("#seo-data-warning");
+  if (warning) {
+    const placeholder = [analysis.city, analysis.service, analysis.companyName].some(value => /^(test|demo|example|xxx|your business)$/i.test(seoCleanText(value)));
+    warning.hidden = !placeholder;
+    warning.textContent = "Sample business details detected. Update the service/city above and your Business Settings before using these suggestions. Refresh strategy previews changes; save permanent business details in Settings.";
+  }
+  const localSetupStatus = document.querySelector("#seo-local-setup-details");
+  if (localSetupStatus) localSetupStatus.textContent = analysis.checks.filter(item => ["city", "address", "contact", "hours"].includes(item.id)).map(item => `${item.done ? "Provided" : "Needs setup"}: ${item.label.replace(/ added$/, "")}`).join(" · ") + ". Workspace data only; listings have not been verified.";
   const status = document.querySelector("#seo-analysis-status");
   if (status) {
     const totalKeywordIdeas =
@@ -9662,8 +9692,13 @@ async function analyzeSeoWorkspace() {
 function seoCopyText(text, successMessage) {
   if (!text) return;
 
+  if (!navigator.clipboard) {
+    const status = document.querySelector("#seo-analysis-status");
+    if (status) status.textContent = "Clipboard unavailable. Select and copy the text manually.";
+    return;
+  }
   navigator.clipboard
-    ?.writeText(text)
+    .writeText(text)
     .then(() => {
       const status = document.querySelector("#seo-analysis-status");
       if (status) {
@@ -9671,7 +9706,7 @@ function seoCopyText(text, successMessage) {
         status.classList.add("is-ready");
       }
     })
-    .catch(() => {});
+    .catch(() => { const status = document.querySelector("#seo-analysis-status"); if (status) status.textContent = "Copy failed. Select and copy the text manually."; });
 }
 
 
@@ -9695,7 +9730,7 @@ function seoAuditRender(result) {
   if (results) results.hidden = false;
 
   seoAuditSetText("#seo-audit-score", result.score);
-  seoAuditSetText("#seo-audit-label", result.scoreLabel);
+  seoAuditSetText("#seo-audit-label", result.page?.renderingLimited ? "Partial HTML audit · JavaScript not rendered" : result.scoreLabel);
   seoAuditSetText("#seo-audit-url-result", result.finalUrl || result.url || "—");
 
   const ring = document.querySelector("#seo-audit-score-ring");
@@ -9708,7 +9743,7 @@ function seoAuditRender(result) {
   const site = result.site || {};
 
   seoAuditSetText("#seo-site-score", Number.isFinite(site.score) ? `${site.score}/100` : `${result.score ?? "—"}/100`);
-  seoAuditSetText("#seo-site-score-label", site.scoreLabel || result.scoreLabel || "Live audit");
+  seoAuditSetText("#seo-site-score-label", site.renderingLimited ? "Partial HTML checks · rendering required" : (site.scoreLabel || result.scoreLabel || "Live audit"));
   seoAuditSetText("#seo-site-pages", site.pagesCrawled ?? 1);
   seoAuditSetText("#seo-site-indexable", site.indexablePages ?? (tech.noindex ? 0 : 1));
   seoAuditSetText("#seo-site-critical", site.issues?.high ?? (result.findings || []).filter((item) => item.severity === "high").length);
@@ -9720,14 +9755,14 @@ function seoAuditRender(result) {
   seoAuditSetText("#seo-audit-meta-kpi", page.metaDescription ? `${page.metaDescriptionLength}/155` : "MISSING");
   seoAuditSetText("#seo-audit-meta-note", page.metaDescription || "No meta description found");
 
-  seoAuditSetText("#seo-audit-h1-kpi", `${page.h1Count ?? 0}`);
-  seoAuditSetText("#seo-audit-h1-note", page.h1 || "No H1 found");
+  seoAuditSetText("#seo-audit-h1-kpi", page.renderingLimited ? "UNVERIFIED" : `${page.h1Count ?? 0}`);
+  seoAuditSetText("#seo-audit-h1-note", page.renderingLimited ? "JavaScript content was not rendered" : (page.h1 || "No H1 in fetched HTML"));
 
   const missingAlt = page.imagesMissingAlt ?? 0;
   seoAuditSetText("#seo-audit-images-kpi", `${missingAlt}/${page.imagesCount ?? 0}`);
   seoAuditSetText("#seo-audit-images-note", missingAlt ? "images missing alt text" : "missing alt text");
 
-  seoAuditSetText("#seo-audit-indexing", tech.noindex ? "NOINDEX" : "INDEXABLE");
+  seoAuditSetText("#seo-audit-indexing", tech.noindex ? "NOINDEX" : "NO NOINDEX FOUND");
   seoAuditSetText("#seo-audit-indexing-note", tech.metaRobots || "No noindex directive detected");
 
   seoAuditSetText("#seo-audit-canonical", tech.canonical ? "FOUND" : "MISSING");
@@ -9739,7 +9774,7 @@ function seoAuditRender(result) {
   seoAuditSetText("#seo-audit-sitemap", tech.sitemapFound ? "FOUND" : "NOT FOUND");
   seoAuditSetText("#seo-audit-sitemap-note", tech.sitemapStatus ? `HTTP ${tech.sitemapStatus}` : "Could not confirm /sitemap.xml");
 
-  seoAuditSetText("#seo-audit-words", page.wordCount ?? 0);
+  seoAuditSetText("#seo-audit-words", page.renderingLimited ? "UNVERIFIED" : (page.wordCount ?? 0));
   seoAuditSetText("#seo-audit-links", `${links.internal ?? 0} / ${links.external ?? 0}`);
   seoAuditSetText("#seo-audit-links-note", "internal / external");
 
@@ -9761,7 +9796,7 @@ function seoAuditRender(result) {
               <td><span class="seo-crawl-status ${Number(item.status) >= 400 ? "is-bad" : "is-good"}">${escapeHtml(String(item.status ?? "—"))}</span></td>
               <td><strong>${escapeHtml(String(item.score ?? "—"))}</strong></td>
               <td><span class="seo-crawl-title" title="${escapeHtml(title)}">${escapeHtml(title)}</span></td>
-              <td>${escapeHtml(String(item.wordCount ?? 0))}</td>
+              <td>${escapeHtml(String(item.renderingLimited ? "Unverified" : (item.wordCount ?? 0)))}</td>
               <td>${escapeHtml(String(item.issues ?? 0))}</td>
             </tr>`;
         }).join("")
